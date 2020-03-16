@@ -103,6 +103,11 @@
       display: flex;
       width: 100%;
       margin-left: 15px;
+
+      .main-content {
+        padding: 24px;
+        width: 100%;
+      }
     }
 
   }
@@ -130,6 +135,20 @@
   //bottom: 26px;
 }
 
+.document-type-container {
+  margin: 0 15px 15px 15px;
+}
 
+.document-type-selected {
+  margin-top: 15px;
+}
+
+.modal-footer-center {
+  justify-content: center !important;
+}
+
+.button-wide {
+  width: 150px;
+}
 
 

@@ -1,5 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import Dropzone from 'react-dropzone';
+import './FileUploader.scss';
 
 interface FileUploaderState {
   files: File[];
@@ -81,7 +82,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
               <input {...getInputProps()} />
               <p>Drag 'n' drop file here, or click to select file</p>
             </div>
-            <aside>
+            <aside className="file-list">
               <h4>File</h4>
               <ul>{this.renderFiles(files)}</ul>
             </aside>

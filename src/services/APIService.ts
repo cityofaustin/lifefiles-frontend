@@ -1,4 +1,5 @@
 import AuthService from './AuthService';
+import StringUtil from '../util/StringUtil';
 
 const MYPASS_API = process.env.MYPASS_API;
 
@@ -44,19 +45,16 @@ class APIService {
     return response;
   }
 
-  static async postDocument(file: File) {
+  static async postDocument(file: File, documentType: string) {
     const path = '/documents';
     const input = `${MYPASS_API}${path}`;
-    // const headers = await this.getHeaders(true);
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`
-      // 'Content-Type': 'multipart/form-data'
     };
     const formdata = new FormData();
     formdata.append('img', file, file.name);
-    // TODO pass in variables for this
-    formdata.append('payload.id', '5e66c791a055d78324d059e5');
-    formdata.append('body.type', 'Driver\'s License');
+    formdata.append('id', StringUtil.getUuidv4());
+    formdata.append('type', documentType);
     const init = {
       method: 'POST',
       headers,

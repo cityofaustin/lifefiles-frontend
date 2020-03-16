@@ -6,4 +6,10 @@ describe('StringUtil', () => {
     const result = StringUtil.getFirstUppercase(input);
     expect(result).toBe('S');
   });
+
+  it('should create a valid uuid', () => {
+    const result = StringUtil.getUuidv4();
+    console.log(result);
+    expect(result).toBeTruthy();
+  });
 });

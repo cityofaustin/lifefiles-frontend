@@ -26,15 +26,20 @@ import DocumentService from '../../services/DocumentService';
 import ProgressIndicator from '../common/ProgressIndicator';
 import Folder from '../common/Folder';
 import deleteSvg from '../../img/delete.svg';
+import DocumentType from '../../models/DocumentType';
+import DocumentTypeService from '../../services/DocumentTypeService';
 
 interface HomePageState {
+  documentTypes: DocumentType[];
   documents: Document[];
   searchedDocuments: Document[];
+  documentTypeSelected?: string;
   documentSelected?: Document;
   isAccount: boolean;
   sortAsc: boolean;
   showModal: boolean;
   isAccountMenuOpen: boolean;
+  isDocumentTypeDropdownOpen: boolean;
   newFile?: File;
   isLoading: boolean;
 }
@@ -50,13 +55,16 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     super(props);
 
     this.state = {
+      documentTypes: [],
       documents: [],
       searchedDocuments: [],
+      documentTypeSelected: undefined,
       documentSelected: undefined,
       isAccount: false,
       sortAsc: true,
       showModal: false,
       isAccountMenuOpen: false,
+      isDocumentTypeDropdownOpen: false,
       newFile: undefined,
       isLoading: false
     };
@@ -65,8 +73,20 @@ class HomePage extends Component<HomePageProps, HomePageState> {
   async componentDidMount() {
     const {account} = {...this.props};
     const {sortAsc} = {...this.state};
+    let {documentTypes} = {...this.state};
     const documents: Document[] = account.documents;
-    this.setState({documents, searchedDocuments: this.sortDocuments(documents, sortAsc)});
+    this.setState({isLoading: true});
+    try {
+      documentTypes = (await DocumentTypeService.get()).documentTypes;
+    } catch (err) {
+      console.error('failed to fetch document types');
+    }
+    this.setState({
+      documentTypes,
+      documents,
+      searchedDocuments: this.sortDocuments(documents, sortAsc),
+      isLoading: false
+    });
   }
 
   handleSearchDocuments = (query: string) => {
@@ -127,16 +147,21 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     this.setState({isAccountMenuOpen: !isAccountMenuOpen});
   };
 
+  toggleDocumentTypeDropdown = () => {
+    const {isDocumentTypeDropdownOpen} = {...this.state};
+    this.setState({isDocumentTypeDropdownOpen: !isDocumentTypeDropdownOpen});
+  };
+
   setFile = (newFile: File) => {
     this.setState({newFile});
   };
 
   handleAddNewDocument = async () => {
-    const {newFile, documents, searchedDocuments} = {...this.state};
+    const {newFile, documents, searchedDocuments, documentTypeSelected} = {...this.state};
     this.setState({isLoading: true});
     try {
       if (newFile) {
-        const response = await DocumentService.addDocument(newFile);
+        const response = await DocumentService.addDocument(newFile, documentTypeSelected!);
         const newDocument: Document = {
           url: response.file,
           notarized: false,
@@ -144,11 +169,12 @@ class HomePage extends Component<HomePageProps, HomePageState> {
           hash: '',
           vcJwt: '',
           vpJwt: '',
-          type: 'Driver\'s License',
+          type: documentTypeSelected!,
           sharedWithAccountIds: []
         };
-        searchedDocuments.push(newDocument);
         documents.push(newDocument);
+        const newSearchDocument = {...newDocument};
+        searchedDocuments.push(newSearchDocument);
       }
     } catch (err) {
       console.error('failed to upload file');
@@ -176,19 +202,47 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     this.setState({documents, searchedDocuments, isLoading: false});
   };
 
-  renderModal() {
-    const {showModal} = {...this.state};
+  handleDocumentType = (documentTypeName: string) => {
+    this.setState({documentTypeSelected: documentTypeName});
+  };
 
+  renderNewDocumentModal() {
+    const {
+      newFile, showModal, isDocumentTypeDropdownOpen,
+      documentTypes, documentTypeSelected, documents
+    } = {...this.state};
     return (
       <Fragment>
         <Modal isOpen={showModal} toggle={this.toggleModal}>
           <ModalHeader toggle={this.toggleModal}>Upload Document</ModalHeader>
           <ModalBody>
+            <div className="document-type-container">
+              <Dropdown isOpen={isDocumentTypeDropdownOpen} toggle={this.toggleDocumentTypeDropdown}>
+                <DropdownToggle caret>
+                  Document Type
+                </DropdownToggle>
+                <DropdownMenu>
+                  {/* TODO need other input text */}
+                  {documentTypes.map(documentType => (
+                    <DropdownItem
+                      key={documentType.name}
+                      onClick={() => this.handleDocumentType(documentType.name)}
+                      disabled={DocumentTypeService.findDocumentTypeMatchInDocuments(documentType.name, documents)}
+                    >
+                      {documentType.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+              { documentTypeSelected &&
+                <div className="document-type-selected">Document Type: {documentTypeSelected}</div>
+              }
+            </div>
             <FileUploader setFile={this.setFile}/>
           </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={this.handleAddNewDocument}>Confirm</Button>{' '}
-            <Button color="secondary" onClick={this.toggleModal}>Cancel</Button>
+          <ModalFooter className="modal-footer-center">
+            <Button color="primary button-wide" disabled={(!newFile || !documentTypeSelected)} onClick={this.handleAddNewDocument}>Save</Button>
+            {/*<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>*/}
           </ModalFooter>
         </Modal>
       </Fragment>
@@ -329,7 +383,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
         <ProgressIndicator isFullscreen/>
         }
         <div id="home-container">
-          {this.renderModal()}
+          {this.renderNewDocumentModal()}
           {this.renderTopBar()}
           <div className="home-content">
             <div className="home-side"/>

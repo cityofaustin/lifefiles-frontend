@@ -14,8 +14,8 @@ class DocumentService extends AgentService {
       `${PATH}/${filename}/${AuthService.getAccessToken()}`;
   }
 
-  static async addDocument(newFile: File): Promise<any> {
-    return await super.postDocument(newFile);
+  static async addDocument(newFile: File, documentType: string): Promise<any> {
+    return await super.postDocument(newFile, documentType);
   }
 
   static async deleteDocument(filename: string) {
