@@ -1,0 +1,33 @@
+{
+  "globals": {
+    "ts-jest": {
+      "tsConfig": "tsconfig.json"
+    }
+  },
+  "moduleFileExtensions": [
+    "ts",
+    "tsx",
+    "js",
+    "jsx",
+    "json",
+    "node",
+    "png",
+    "svg"
+  ],
+  "moduleNameMapper": {
+    "\\.(css|scss|svg|png)$": "identity-obj-proxy"
+  },
+  "transform": {
+    "^.+\\.(ts|tsx)$": "ts-jest"
+  },
+  "testMatch": [
+    "**/*.test.(ts|tsx|js|jsx)"
+  ],
+  "testEnvironment": "node",
+  "testPathIgnorePatterns": [
+    "/dist/"
+  ],
+  "setupFiles": [
+    "./src/setupTests.ts"
+  ]
+}

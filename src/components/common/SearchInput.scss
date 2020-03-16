@@ -1,0 +1,30 @@
+
+.searchbar {
+  //border-color: #bbc0c4;
+  background-color: #EEF2F6;
+  //box-shadow: none;
+  color: #3c4146;
+  padding-left: 42px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  outline: none;
+  border-top-style: hidden;
+  border-right-style: hidden;
+  border-left-style: hidden;
+  border-bottom-style: hidden;
+  margin-right: 18px;
+}
+
+.searchbar::-webkit-search-cancel-button{
+  position:relative;
+  right:20px;
+}
+
+.icon-search {
+  right: auto;
+  left: 2em;
+  position: absolute;
+  top: 25%;
+  fill: #bbc0c4;
+}

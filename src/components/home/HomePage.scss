@@ -1,0 +1,135 @@
+@import '../../colors.scss';
+
+@media only screen and (min-width: 600px)  {
+  .logo {
+    width: 95px;
+    height: 95px;
+    object-fit: contain;
+  }
+
+  .account-profile-image {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+}
+
+@media only screen and (max-width: 600px)  {
+  .account-profile-image {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  .logo {
+    display: none;
+  }
+
+  .search {
+    width: 100px;
+  }
+}
+
+#home-container {
+  margin: 10px 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  #home-top-bar {
+
+    display: table;
+    width: 100%;
+    padding-left: 10px;
+
+    #home-logo {
+      display: table-cell;
+      width: 95px;
+      padding: 20px 10px 20px 10px;
+    }
+
+    #home-search {
+      margin-left: 18px;
+      margin-right: 18px;
+    }
+
+    @media only screen and (max-width: 470px) {
+      #home-search {
+        display: none;
+      }
+    }
+
+    #home-profile {
+      display: table-cell;
+      width: 90px;
+      cursor: pointer;
+      text-align: right;
+      padding: 10px;
+    }
+  }
+
+  #home-search-sm {
+    display: none;
+  }
+
+  @media only screen and (max-width: 470px) {
+    #home-search-sm {
+      display: block;
+      margin: 20px;
+    }
+  }
+
+  .home-content {
+    display: flex;
+    flex-grow: 1;
+    // ios bug
+    // https://stackoverflow.com/a/43683067
+    flex-shrink: 0;
+
+    @media only screen and (min-width: 600px) {
+      .home-side {
+        margin-top: 44px;
+        border-top-right-radius: 74px;
+        display: flex;
+        width: 134px;
+        //height: 100%;
+        background: $blue;
+      }
+    }
+
+    .home-main {
+      display: flex;
+      width: 100%;
+      margin-left: 15px;
+    }
+
+  }
+}
+
+.search {
+  flex-grow: 1;
+}
+
+.account-circle {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  display: inline-block;
+  background-color: $blue;
+  border-radius: 50%;
+  border: 1px solid white;
+  font-size: 28px;
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 60px;
+  //position:relative;
+  //left:-20px;
+  //bottom: 26px;
+}
+
+
+
+

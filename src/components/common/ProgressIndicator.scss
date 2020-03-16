@@ -1,0 +1,55 @@
+@import './../../colors';
+
+$width: 48px;
+
+.circular {
+  animation: rotate 2s linear infinite;
+  height: $width;
+  position: relative;
+  width: $width;
+}
+
+.path {
+  stroke-dasharray: 0.95, 190;
+  stroke-dashoffset: 0;
+  animation: dash 1.5s ease-in-out infinite;
+  stroke: $blue;
+}
+
+.progress-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1051;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.7);
+
+  //position: 'absolute', display: 'flex', alignItems: 'center',
+  //justifyContent: 'center', background: 'rgba(255,255,255,0.7)', width: '100%', height: '100vh',
+  //zIndex:1051
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 0.95, 190;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 84.55, 190;
+    stroke-dashoffset: -33.25;
+  }
+  100% {
+    stroke-dasharray: 84.55, 190;
+    stroke-dashoffset: -117.8;
+  }
+}

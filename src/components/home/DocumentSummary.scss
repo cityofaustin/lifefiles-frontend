@@ -1,0 +1,70 @@
+@import '../../colors.scss';
+
+.document-summary-container {
+  text-align: center;
+  padding: 24px;
+}
+
+.document-summary-image {
+  max-width: 100%;
+  min-width: 250px;
+  height: 300px;
+  object-fit: contain;
+  border: 2px solid #ccc;
+}
+
+.shared-with-container {
+  height: 60px;
+  margin: 2px;
+}
+
+.shared-with-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  bottom: 26px;
+}
+
+.shared-with-other {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  display: inline-block;
+  background-color: $blue;
+  border-radius: 50%;
+  border: 1px solid white;
+  font-size: 28px;
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 60px;
+  position:relative;
+  left:-20px;
+  bottom: 26px;
+}
+
+.separator {
+  display: inline-block;
+  width: 1px;
+  height: 60px;
+  background-color: #ccc;
+}
+
+.document-idx {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  background: url(../../img/folder.png) no-repeat;
+  background-size: 60px 60px;
+  position: relative;
+  bottom: 26px;
+  font-size: 28px;
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 60px;
+  margin-left: 24px;
+}
