@@ -25,6 +25,7 @@
   "homepage": "https://github.com/acarnagey/mypass-frontend#readme",
   "dependencies": {
     "bootstrap": "^4.4.1",
+    "classnames": "^2.2.6",
     "material-components-web": "^5.1.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
@@ -33,6 +34,7 @@
     "reactstrap": "latest"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.10",
     "@types/dotenv-webpack": "^1.7.0",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",

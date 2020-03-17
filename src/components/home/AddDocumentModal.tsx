@@ -13,9 +13,8 @@ import DocumentTypeService from '../../services/DocumentTypeService';
 import FileUploader from '../common/FileUploader';
 import DocumentType from '../../models/DocumentType';
 import Document from '../../models/Document';
-import {LoginState} from '../auth/LoginPage';
 
-interface NewDocumentModalProps {
+interface AddDocumentModalProps {
   showModal: boolean;
   toggleModal: () => void;
   documentTypes: DocumentType[];
@@ -23,7 +22,7 @@ interface NewDocumentModalProps {
   handleAddNewDocument: (newFile: File, documentTypeSelected: string) => Promise<void>;
 }
 
-interface NewDocumentModalState {
+interface AddDocumentModalState {
   isDocumentTypeDropdownOpen: boolean;
   documentTypeSelected?: string;
   newFile?: File;
@@ -31,8 +30,8 @@ interface NewDocumentModalState {
   errorMessage?: string;
 }
 
-class NewDocumentModal extends Component<NewDocumentModalProps, NewDocumentModalState> {
-  constructor(props: Readonly<NewDocumentModalProps>) {
+class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModalState> {
+  constructor(props: Readonly<AddDocumentModalProps>) {
     super(props);
 
     this.state = {
@@ -144,4 +143,4 @@ class NewDocumentModal extends Component<NewDocumentModalProps, NewDocumentModal
   }
 }
 
-export default NewDocumentModal;
+export default AddDocumentModal;

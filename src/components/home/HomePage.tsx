@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import DocumentSummary from './DocumentSummary';
-import DocumentDetail from './DocumentDetail';
+// import DocumentDetail from './DocumentDetail';
 import {
   Col,
   Dropdown, DropdownItem,
@@ -22,7 +22,8 @@ import Folder from '../common/Folder';
 import deleteSvg from '../../img/delete.svg';
 import DocumentType from '../../models/DocumentType';
 import DocumentTypeService from '../../services/DocumentTypeService';
-import NewDocumentModal from './NewDocumentModal';
+import AddDocumentModal from './AddDocumentModal';
+import UpdateDocumentModal from './UpdateDocumentModal';
 
 interface HomePageState {
   documentTypes: DocumentType[];
@@ -182,13 +183,13 @@ class HomePage extends Component<HomePageProps, HomePageState> {
       return (documentItem as Document).url !== document.url;
     });
 
-    this.setState({documents, searchedDocuments, isLoading: false});
+    this.setState({documents, searchedDocuments, isLoading: false, documentSelected: undefined});
   };
 
-  renderNewDocumentModal() {
+  renderAddDocumentModal() {
     const {showModal, documentTypes, documents} = {...this.state};
     return (
-      <NewDocumentModal
+      <AddDocumentModal
         showModal={showModal}
         toggleModal={this.toggleModal}
         documentTypes={documentTypes}
@@ -255,9 +256,9 @@ class HomePage extends Component<HomePageProps, HomePageState> {
   }
 
   renderMyDocuments() {
-    const {searchedDocuments, documentSelected, isAccount, sortAsc} = {...this.state};
+    const {searchedDocuments, isAccount, sortAsc} = {...this.state};
 
-    if (!documentSelected && !isAccount) {
+    if (!isAccount) {
       return (
         <div className="main-content">
           <div className="big-title">My Documents</div>
@@ -281,17 +282,6 @@ class HomePage extends Component<HomePageProps, HomePageState> {
                   key={idx}
                   className="document-summary-container"
                 >
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end'
-                  }}>
-                    <img
-                      style={{cursor: 'pointer'}}
-                      src={deleteSvg}
-                      alt="delete"
-                      onClick={() => this.handleDeleteDocument(document!)}
-                    />
-                  </div>
                   <div
                     style={{cursor: 'pointer'}}
                     onClick={() => this.handleSelectDocument(document)}>
@@ -310,18 +300,22 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     return <Fragment/>;
   }
 
-  // TODO need to make this a modal with tabs instead.
-  renderDocumentDetail() {
+  renderUpdateDocumentModal() {
     const {documentSelected} = {...this.state};
 
     if (documentSelected) {
       return (
-        <DocumentDetail document={documentSelected} goBack={this.goBack}/>
+        <UpdateDocumentModal
+          handleDeleteDocument={this.handleDeleteDocument}
+          document={documentSelected!}
+          showModal={!!documentSelected}
+          toggleModal={() => this.setState({documentSelected: undefined})}
+        />
       );
     }
 
     return (
-      <Fragment/>
+      <Fragment />
     );
   }
 
@@ -333,14 +327,14 @@ class HomePage extends Component<HomePageProps, HomePageState> {
         <ProgressIndicator isFullscreen/>
         }
         <div id="home-container">
-          {this.renderNewDocumentModal()}
+          {this.renderAddDocumentModal()}
+          {this.renderUpdateDocumentModal()}
           {this.renderTopBar()}
           <div className="home-content">
             <div className="home-side"/>
             <div className="home-main">
               {this.renderAccount()}
               {this.renderMyDocuments()}
-              {this.renderDocumentDetail()}
             </div>
           </div>
         </div>
