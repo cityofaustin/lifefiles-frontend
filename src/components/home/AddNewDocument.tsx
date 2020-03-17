@@ -1,6 +1,7 @@
 import React, {Component, FormEvent} from 'react';
-import folderImage from '../../img/add-new.png';
 import {Button} from 'reactstrap';
+// import folderImage from '../../img/add-new.png';
+import newDocumentImg from '../../img/new-document.svg';
 
 interface AddNewDocumentProps {
   handleAddNew: () => void;
@@ -22,7 +23,8 @@ class AddNewDocument extends Component<AddNewDocumentProps> {
     return (
       <form onSubmit={this.handleSubmit}>
         <img style={{width: '165px', height: '205px', display: 'block', margin: 'auto'}}
-             src={`${window.location.origin}/${folderImage}`} alt="Add New"/>
+             src={`${window.location.origin}/${newDocumentImg}`} alt="Add New"/>
+        {/*{ newDocumentImg }*/}
         <div className="document-title padding-top-12">Add New</div>
         <div className="subtitle padding-bottom-12">NOT UPLOADED</div>
         <Button color="secondary" type="submit">Upload</Button>

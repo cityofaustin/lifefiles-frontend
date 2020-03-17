@@ -75,8 +75,8 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
           <div className="shared-with-container padding-top-12">
             {this.renderFirstShare(document.sharedWithAccountIds)}
             {this.renderOtherShare(document.sharedWithAccountIds)}
-            <div className="separator"/>
-            <div className="document-idx">{documentIdx + 1}</div>
+            {/*<div className="separator"/>*/}
+            {/*<div className="document-idx">{documentIdx + 1}</div>*/}
           </div>
         </Fragment>
         }

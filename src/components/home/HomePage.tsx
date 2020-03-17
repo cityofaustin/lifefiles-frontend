@@ -2,15 +2,10 @@ import React, {Component, Fragment} from 'react';
 import DocumentSummary from './DocumentSummary';
 import DocumentDetail from './DocumentDetail';
 import {
-  Button,
   Col,
   Dropdown, DropdownItem,
   DropdownMenu,
   DropdownToggle,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
   Row
 } from 'reactstrap';
 import './HomePage.scss';
@@ -21,27 +16,25 @@ import AddNewDocument from './AddNewDocument';
 import Account from '../../models/Account';
 import Document from '../../models/Document';
 import StringUtil from '../../util/StringUtil';
-import FileUploader from '../common/FileUploader';
 import DocumentService from '../../services/DocumentService';
 import ProgressIndicator from '../common/ProgressIndicator';
 import Folder from '../common/Folder';
 import deleteSvg from '../../img/delete.svg';
 import DocumentType from '../../models/DocumentType';
 import DocumentTypeService from '../../services/DocumentTypeService';
+import NewDocumentModal from './NewDocumentModal';
 
 interface HomePageState {
   documentTypes: DocumentType[];
   documents: Document[];
   searchedDocuments: Document[];
-  documentTypeSelected?: string;
   documentSelected?: Document;
   isAccount: boolean;
   sortAsc: boolean;
   showModal: boolean;
   isAccountMenuOpen: boolean;
-  isDocumentTypeDropdownOpen: boolean;
-  newFile?: File;
   isLoading: boolean;
+  documentQuery: string;
 }
 
 interface HomePageProps {
@@ -58,15 +51,13 @@ class HomePage extends Component<HomePageProps, HomePageState> {
       documentTypes: [],
       documents: [],
       searchedDocuments: [],
-      documentTypeSelected: undefined,
       documentSelected: undefined,
       isAccount: false,
       sortAsc: true,
       showModal: false,
       isAccountMenuOpen: false,
-      isDocumentTypeDropdownOpen: false,
-      newFile: undefined,
-      isLoading: false
+      isLoading: false,
+      documentQuery: ''
     };
   }
 
@@ -99,7 +90,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
       searchedDocuments = documents;
     }
     searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
-    this.setState({searchedDocuments});
+    this.setState({searchedDocuments, documentQuery: query});
   };
 
   toggleSort = () => {
@@ -147,17 +138,8 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     this.setState({isAccountMenuOpen: !isAccountMenuOpen});
   };
 
-  toggleDocumentTypeDropdown = () => {
-    const {isDocumentTypeDropdownOpen} = {...this.state};
-    this.setState({isDocumentTypeDropdownOpen: !isDocumentTypeDropdownOpen});
-  };
-
-  setFile = (newFile: File) => {
-    this.setState({newFile});
-  };
-
-  handleAddNewDocument = async () => {
-    const {newFile, documents, searchedDocuments, documentTypeSelected} = {...this.state};
+  handleAddNewDocument = async (newFile: File, documentTypeSelected: string) => {
+    const {documents, searchedDocuments, documentQuery} = {...this.state};
     this.setState({isLoading: true});
     try {
       if (newFile) {
@@ -173,13 +155,14 @@ class HomePage extends Component<HomePageProps, HomePageState> {
           sharedWithAccountIds: []
         };
         documents.push(newDocument);
-        const newSearchDocument = {...newDocument};
-        searchedDocuments.push(newSearchDocument);
       }
     } catch (err) {
       console.error('failed to upload file');
     }
-    this.setState({documents, searchedDocuments, showModal: false, isLoading: false});
+    this.setState({documents, searchedDocuments, showModal: false, isLoading: false},
+      () => {
+      this.handleSearchDocuments(documentQuery);
+    });
   };
 
   handleDeleteDocument = async (document: Document) => {
@@ -202,50 +185,16 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     this.setState({documents, searchedDocuments, isLoading: false});
   };
 
-  handleDocumentType = (documentTypeName: string) => {
-    this.setState({documentTypeSelected: documentTypeName});
-  };
-
   renderNewDocumentModal() {
-    const {
-      newFile, showModal, isDocumentTypeDropdownOpen,
-      documentTypes, documentTypeSelected, documents
-    } = {...this.state};
+    const {showModal, documentTypes, documents} = {...this.state};
     return (
-      <Fragment>
-        <Modal isOpen={showModal} toggle={this.toggleModal}>
-          <ModalHeader toggle={this.toggleModal}>Upload Document</ModalHeader>
-          <ModalBody>
-            <div className="document-type-container">
-              <Dropdown isOpen={isDocumentTypeDropdownOpen} toggle={this.toggleDocumentTypeDropdown}>
-                <DropdownToggle caret>
-                  Document Type
-                </DropdownToggle>
-                <DropdownMenu>
-                  {/* TODO need other input text */}
-                  {documentTypes.map(documentType => (
-                    <DropdownItem
-                      key={documentType.name}
-                      onClick={() => this.handleDocumentType(documentType.name)}
-                      disabled={DocumentTypeService.findDocumentTypeMatchInDocuments(documentType.name, documents)}
-                    >
-                      {documentType.name}
-                    </DropdownItem>
-                  ))}
-                </DropdownMenu>
-              </Dropdown>
-              { documentTypeSelected &&
-                <div className="document-type-selected">Document Type: {documentTypeSelected}</div>
-              }
-            </div>
-            <FileUploader setFile={this.setFile}/>
-          </ModalBody>
-          <ModalFooter className="modal-footer-center">
-            <Button color="primary button-wide" disabled={(!newFile || !documentTypeSelected)} onClick={this.handleAddNewDocument}>Save</Button>
-            {/*<Button color="secondary" onClick={this.toggleModal}>Cancel</Button>*/}
-          </ModalFooter>
-        </Modal>
-      </Fragment>
+      <NewDocumentModal
+        showModal={showModal}
+        toggleModal={this.toggleModal}
+        documentTypes={documentTypes}
+        documents={documents}
+        handleAddNewDocument={this.handleAddNewDocument}
+      />
     );
   }
 
@@ -361,6 +310,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     return <Fragment/>;
   }
 
+  // TODO need to make this a modal with tabs instead.
   renderDocumentDetail() {
     const {documentSelected} = {...this.state};
 
