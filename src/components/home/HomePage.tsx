@@ -162,8 +162,8 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     }
     this.setState({documents, searchedDocuments, showModal: false, isLoading: false},
       () => {
-      this.handleSearchDocuments(documentQuery);
-    });
+        this.handleSearchDocuments(documentQuery);
+      });
   };
 
   handleDeleteDocument = async (document: Document) => {
@@ -195,6 +195,19 @@ class HomePage extends Component<HomePageProps, HomePageState> {
         documentTypes={documentTypes}
         documents={documents}
         handleAddNewDocument={this.handleAddNewDocument}
+      />
+    );
+  }
+
+  renderUpdateDocumentModal() {
+    const {documentSelected} = {...this.state};
+
+    return (
+      <UpdateDocumentModal
+        showModal={!!documentSelected}
+        toggleModal={() => this.setState({documentSelected: undefined})}
+        document={documentSelected}
+        handleDeleteDocument={this.handleDeleteDocument}
       />
     );
   }
@@ -298,25 +311,6 @@ class HomePage extends Component<HomePageProps, HomePageState> {
       );
     }
     return <Fragment/>;
-  }
-
-  renderUpdateDocumentModal() {
-    const {documentSelected} = {...this.state};
-
-    if (documentSelected) {
-      return (
-        <UpdateDocumentModal
-          handleDeleteDocument={this.handleDeleteDocument}
-          document={documentSelected!}
-          showModal={!!documentSelected}
-          toggleModal={() => this.setState({documentSelected: undefined})}
-        />
-      );
-    }
-
-    return (
-      <Fragment />
-    );
   }
 
   render() {

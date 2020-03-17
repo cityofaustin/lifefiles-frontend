@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import {
   Button,
   Card, CardText, CardTitle,
@@ -13,11 +13,12 @@ import documentImg from '../../img/document.svg';
 import './UpdateDocumentModal.scss';
 import DocumentService from '../../services/DocumentService';
 import deleteSvg from '../../img/delete.svg';
+import crossImg from '../../img/cross.svg';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
   toggleModal: () => void;
-  document: Document;
+  document?: Document;
   handleDeleteDocument: (document: Document) => Promise<void>;
 }
 
@@ -47,11 +48,12 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
   render() {
     const {showModal, toggleModal, document} = {...this.props};
     const {activeTab} = {...this.state};
+    const closeBtn = (<button className="close" onClick={toggleModal}><img src={`${window.location.origin}/${crossImg}`} alt="close"/></button>);
     return (
-      <Modal isOpen={showModal} toggle={toggleModal}>
-        <ModalHeader toggle={toggleModal}>
+      <Modal isOpen={showModal} toggle={toggleModal} backdrop={'static'}>
+        <ModalHeader toggle={toggleModal} close={closeBtn}>
           <img src={`${window.location.origin}/${documentImg}`} alt="Add New"/>
-          <span className="update-doc-modal-title">{document.type}</span>
+          <span className="update-doc-modal-title">{document?.type}</span>
         </ModalHeader>
         <ModalBody>
           <div className="upload-doc-delete-container">
@@ -99,10 +101,12 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               <Row>
                 <Col sm="12">
                   {/*<h4>Tab 1 Contents</h4>*/}
+                  { document &&
                   <img className="document-summary-image"
-                       src={DocumentService.getDocumentURL(document.url)}
+                       src={DocumentService.getDocumentURL(document!.url)}
                        alt="doc missing"
                   />
+                  }
                 </Col>
               </Row>
             </TabPane>
@@ -112,12 +116,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                   <Col sm="6">
                     <Card body>
                       <CardTitle>Share Requests</CardTitle>
+                      { document &&
                       <div>
-                        {document.sharedWithAccountIds.length < 1 && (
+                        {document!.sharedWithAccountIds.length < 1 && (
                           <div>No documents are being shared.</div>
                         )}
                         <ListGroup>
-                          {document.sharedWithAccountIds.map((sharedWithAccountId, idx) => {
+                          {document!.sharedWithAccountIds.map((sharedWithAccountId, idx) => {
                             return (
                               <ListGroupItem key={idx} className="justify-content-between">
                                 {/*<img className="shared-with-image-single"*/}
@@ -132,14 +137,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                           })}
                         </ListGroup>
                       </div>
-                      {/*<Button>Go somewhere</Button>*/}
+                      }
                     </Card>
                   </Col>
                   <Col sm="6">
                     <Card body>
                       <CardTitle>Approved Share Requests</CardTitle>
-                      <CardText>With supporting text below as a natural lead-in to additional content.</CardText>
-                      {/*<Button>Go somewhere</Button>*/}
+                      <CardText>Approved Share Requests Feature Coming Soon...</CardText>
                     </Card>
                   </Col>
                 </Row>

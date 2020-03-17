@@ -13,6 +13,7 @@ import DocumentTypeService from '../../services/DocumentTypeService';
 import FileUploader from '../common/FileUploader';
 import DocumentType from '../../models/DocumentType';
 import Document from '../../models/Document';
+import crossImg from '../../img/cross.svg';
 
 interface AddDocumentModalProps {
   showModal: boolean;
@@ -83,9 +84,10 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
   render() {
     const {showModal, toggleModal, documentTypes, documents} = {...this.props};
     const {isDocumentTypeDropdownOpen, documentTypeSelected, newFile, isOther, errorMessage} = {...this.state};
+    const closeBtn = (<button className="close" onClick={toggleModal}><img src={`${window.location.origin}/${crossImg}`} alt="close"/></button>);
     return (
-      <Modal isOpen={showModal} toggle={toggleModal}>
-        <ModalHeader toggle={toggleModal}>Upload Document</ModalHeader>
+      <Modal isOpen={showModal} toggle={toggleModal} backdrop={'static'}>
+        <ModalHeader toggle={toggleModal} close={closeBtn}>Add Document</ModalHeader>
         <ModalBody>
           <div className="document-type-container">
             <Dropdown isOpen={isDocumentTypeDropdownOpen} toggle={this.toggleDocumentTypeDropdown}>
