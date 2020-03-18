@@ -1,35 +1,27 @@
 version: 2.1
 orbs:
-  node: circleci/node@1.1.6
-  slack: circleci/slack@x.y.z/*
+  slack: circleci/slack@3.4.2
 jobs:
-  build-and-test:
-    executor:
-      name: node/default
+  build:
+    docker:
+      - image: circleci/node:latest
     steps:
       - checkout
-      - node/with-cache:
-        steps:
-          - run: npm install
-          - run: npm test
-          - run: sudo apt-get update && sudo apt-get install -y python-dev
-          - run: sudo curl -O https://bootstrap.pypa.io/get-pip.py
-          - run: sudo python get-pip.py
-          - run: sudo pip install awscli --upgrade
-          - run: aws --version
-          - run: aws s3 ls
-          - run: cp .env.prod .env
-          - run: ls -a
-          - run: npm run deploy
-          - slack/status:
-              webhook: ${SLACK_WEBHOOK}
-              success_message: 🎉 A $CIRCLE_JOB job has succeeded!
-              failure_message: 🔴 A $CIRCLE_JOB job has failed!
-              only_for_branches: master
-              channel: deploy
-              color: '#42e2f4'
-              message: This is a custom message notification
+      - run: npm install
+      - run: npm test
+      - run: sudo apt-get update && sudo apt-get install -y python-dev
+      - run: sudo curl -O https://bootstrap.pypa.io/get-pip.py
+      - run: sudo python get-pip.py
+      - run: sudo pip install awscli --upgrade
+      - run: aws --version
+      - run: aws s3 ls
+      - run: cp .env.prod .env
+      - run: ls -a
+      - run: npm run deploy
+      - slack/notify:
+          color: '#42e2f4'
 workflows:
   build-and-test:
     jobs:
-      - build-and-test
+      - build
+  version: 2.1
