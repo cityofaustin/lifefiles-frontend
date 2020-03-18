@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
-  slack: circleci/slack@x.y.z
+  slack: circleci/slack@x.y.z/*
 jobs:
   build-and-test:
     executor:
@@ -21,8 +21,7 @@ jobs:
           - run: cp .env.prod .env
           - run: ls -a
           - run: npm run deploy
-          #  https://circleci.com/orbs/registry/orb/circleci/slack
-          - slack/notify:
+          - slack/status:
               webhook: ${SLACK_WEBHOOK}
               success_message: 🎉 A $CIRCLE_JOB job has succeeded!
               failure_message: 🔴 A $CIRCLE_JOB job has failed!
