@@ -23,7 +23,6 @@ jobs:
           success_message: 🎉 A $CIRCLE_JOB job has succeeded!
           failure_message: 🔴 A $CIRCLE_JOB job has failed!
           only_for_branches: master
-          color: '#42e2f4'
 workflows:
   build-and-test:
     jobs:
