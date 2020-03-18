@@ -201,12 +201,20 @@ class HomePage extends Component<HomePageProps, HomePageState> {
 
   renderUpdateDocumentModal() {
     const {documentSelected} = {...this.state};
-
+    const {account} = {...this.props};
+    const pendingShareRequests: string[] = account.shareRequests
+      .filter(sharedRequest => {
+      if(sharedRequest.documentType === documentSelected?.type && !sharedRequest.approved) {
+        return sharedRequest;
+      }
+      })
+      .map(sharedRequest => sharedRequest.shareWithAccountId);
     return (
       <UpdateDocumentModal
         showModal={!!documentSelected}
         toggleModal={() => this.setState({documentSelected: undefined})}
         document={documentSelected}
+        pendingShareRequests={pendingShareRequests}
         handleDeleteDocument={this.handleDeleteDocument}
       />
     );
@@ -314,7 +322,8 @@ class HomePage extends Component<HomePageProps, HomePageState> {
   }
 
   render() {
-    const {isLoading} = {...this.state};
+    const {account} = {...this.props};
+    const {isLoading, isAccount} = {...this.state};
     return (
       <Fragment>
         {isLoading &&
@@ -328,7 +337,12 @@ class HomePage extends Component<HomePageProps, HomePageState> {
             <div className="home-side"/>
             <div className="home-main">
               {this.renderAccount()}
-              {this.renderMyDocuments()}
+              { account.role === 'owner' && this.renderMyDocuments() }
+              { (!isAccount && account.role === 'notary') &&
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1}}>
+                  <h4>Notary Coming Soon...</h4>
+                </div>
+              }
             </div>
           </div>
         </div>

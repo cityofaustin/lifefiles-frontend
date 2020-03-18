@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import {
   Button,
   Card, CardText, CardTitle,
@@ -20,6 +20,7 @@ interface UpdateDocumentModalProps {
   toggleModal: () => void;
   document?: Document;
   handleDeleteDocument: (document: Document) => Promise<void>;
+  pendingShareRequests: string[];
 }
 
 interface UpdateDocumentModalState {
@@ -46,9 +47,11 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
   };
 
   render() {
-    const {showModal, toggleModal, document} = {...this.props};
+    const {showModal, toggleModal, document, pendingShareRequests} = {...this.props};
     const {activeTab} = {...this.state};
-    const closeBtn = (<button className="close" onClick={toggleModal}><img src={`${window.location.origin}/${crossImg}`} alt="close"/></button>);
+    const closeBtn = (
+      <button className="close" onClick={toggleModal}><img src={`${window.location.origin}/${crossImg}`} alt="close"/>
+      </button>);
     return (
       <Modal isOpen={showModal} toggle={toggleModal} backdrop={'static'}>
         <ModalHeader toggle={toggleModal} close={closeBtn}>
@@ -101,7 +104,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               <Row>
                 <Col sm="12">
                   {/*<h4>Tab 1 Contents</h4>*/}
-                  { document &&
+                  {document &&
                   <img className="document-summary-image"
                        src={DocumentService.getDocumentURL(document!.url)}
                        alt="doc missing"
@@ -115,12 +118,30 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                 <Row>
                   <Col sm="6">
                     <Card body>
-                      <CardTitle>Share Requests</CardTitle>
-                      { document &&
+                      <CardTitle>Pending Share Requests</CardTitle>
                       <div>
-                        {document!.sharedWithAccountIds.length < 1 && (
+                        {pendingShareRequests.length < 1 && (
                           <div>No documents are being shared.</div>
                         )}
+                        <ListGroup>
+                          {pendingShareRequests!.map((pendingShareRequest, idx) => {
+                            return (
+                              <ListGroupItem key={idx} className="justify-content-between">
+                                <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
+                                  {`Account ID: ${pendingShareRequest}`}
+                                </div>
+                              </ListGroupItem>
+                            );
+                          })}
+                        </ListGroup>
+                      </div>
+                    </Card>
+                  </Col>
+                  <Col sm="6">
+                    <Card body>
+                      <CardTitle>Approved Share Requests</CardTitle>
+                      {document &&
+                      <div>
                         <ListGroup>
                           {document!.sharedWithAccountIds.map((sharedWithAccountId, idx) => {
                             return (
@@ -129,7 +150,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                                 {/*     src={sharedWithItem.profileimgUrl}*/}
                                 {/*     alt={`sharedWithItem${idx}`}*/}
                                 {/*/>*/}
-                                <div style={{display: 'inline-block'}}>
+                                <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
                                   {`Account ID: ${sharedWithAccountId}`}
                                 </div>
                               </ListGroupItem>
@@ -138,12 +159,6 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                         </ListGroup>
                       </div>
                       }
-                    </Card>
-                  </Col>
-                  <Col sm="6">
-                    <Card body>
-                      <CardTitle>Approved Share Requests</CardTitle>
-                      <CardText>Approved Share Requests Feature Coming Soon...</CardText>
                     </Card>
                   </Col>
                 </Row>
