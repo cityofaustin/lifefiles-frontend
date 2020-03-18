@@ -4,6 +4,7 @@ import Document from '../../models/Document';
 import DocumentService from '../../services/DocumentService';
 import deleteSvg from '../../img/delete.svg';
 import StringUtil from '../../util/StringUtil';
+import ImageWithStatus from '../common/ImageWithStatus';
 
 interface DocumentSummaryProps {
   document?: Document;
@@ -66,9 +67,8 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
       <div>
         {document &&
         <Fragment>
-          <img className="document-summary-image"
-               src={DocumentService.getDocumentURL(document.url)}
-               alt="doc missing"
+          <ImageWithStatus
+               imageUrl={DocumentService.getDocumentURL(document.url)}
           />
           <div className="title padding-top-12">{document.type}</div>
           <div className="subtitle">SHARED WITH</div>

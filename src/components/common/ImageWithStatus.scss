@@ -1,0 +1,27 @@
+.document-summary-image {
+  max-width: 100%;
+  min-width: 250px;
+  height: 300px;
+  object-fit: contain;
+}
+.document-summary-image-loading {
+  opacity: 0.5;
+}
+//.document-image {
+//  outline: dotted blue 1px;
+//  //background: blue;
+//}
+//.document-image-loading {
+//  //outline: 2px solid #ccc;
+//}
+.loading-outter {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+}
+
+.loading-inner {
+  position: relative;
+  left: -50%;
+  z-index: 2;
+}

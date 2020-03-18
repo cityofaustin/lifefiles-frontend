@@ -7,7 +7,7 @@ import {
   ModalBody, ModalFooter,
   ModalHeader, Nav, NavItem, NavLink, Row, TabContent, TabPane
 } from 'reactstrap';
-import classnames from 'classnames';
+import classNames from 'classnames';
 import Document from '../../models/Document';
 import documentImg from '../../img/document.svg';
 import './UpdateDocumentModal.scss';
@@ -67,7 +67,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
           <Nav tabs>
             <NavItem>
               <NavLink
-                className={classnames({active: activeTab === '1'})}
+                className={classNames({active: activeTab === '1'})}
                 onClick={() => {
                   this.toggleTab('1');
                 }}
@@ -77,7 +77,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             </NavItem>
             <NavItem>
               <NavLink
-                className={classnames({active: activeTab === '2'})}
+                className={classNames({active: activeTab === '2'})}
                 onClick={() => {
                   this.toggleTab('2');
                 }}
@@ -87,7 +87,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             </NavItem>
             <NavItem>
               <NavLink
-                className={classnames({active: activeTab === '3'})}
+                className={classNames({active: activeTab === '3'})}
                 onClick={() => {
                   this.toggleTab('3');
                 }}
