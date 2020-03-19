@@ -1,4 +1,4 @@
-@import '../../colors.scss';
+@import '../variables';
 
 .document-summary-container {
   text-align: center;
@@ -25,7 +25,6 @@
   height: 60px;
   object-fit: contain;
   display: inline-block;
-  background-color: $blue;
   border-radius: 50%;
   border: 1px solid white;
   font-size: 28px;
@@ -36,6 +35,9 @@
   position:relative;
   //left:-20px;
   //bottom: 26px;
+  @include themify($themes) {
+    background-color: themed('colorPrimary');
+  }
 }
 
 .separator {

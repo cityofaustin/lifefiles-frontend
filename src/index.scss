@@ -5,7 +5,7 @@
 //////@import 'dropzone.scss';
 //@import '~@material/menu/mdc-menu';
 @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
-@import 'colors.scss';
+@import './components/variables';
 
 html { height:100%; }
 
@@ -23,9 +23,16 @@ body {
   width: 100%;
 }
 
-#root .btn-primary {
-  background-color: $blue;
-  border-color: $blue;
+.btn {
+  border-radius: 17px;
+  height: 44px;
+}
+
+.btn-primary {
+  @include themify($themes) {
+    background-color: themed('colorPrimary');
+    border-color: themed('colorPrimary');
+  }
 }
 
 .error {
@@ -54,8 +61,10 @@ body {
 
 .big-title {
   font-size: 28px;
-  color: $blue;
   font-weight: bolder;
+  @include themify($themes) {
+    color: themed('colorPrimary');
+  }
 }
 
 .title {

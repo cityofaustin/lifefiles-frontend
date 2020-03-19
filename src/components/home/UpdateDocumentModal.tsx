@@ -116,12 +116,12 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             <TabPane tabId="2">
               <div className="update-doc-tab-spacing">
                 <Row>
-                  <Col sm="6">
+                  <Col sm="12">
                     <Card body>
                       <CardTitle>Pending Share Requests</CardTitle>
                       <div>
                         {pendingShareRequests.length < 1 && (
-                          <div>No documents are being shared.</div>
+                          <div>No pending shares.</div>
                         )}
                         <ListGroup>
                           {pendingShareRequests!.map((pendingShareRequest, idx) => {
@@ -130,6 +130,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                                 <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
                                   {`Account ID: ${pendingShareRequest}`}
                                 </div>
+                                <Button color="success" onClick={()=>{}}>Approve</Button>
+                                <Button close />
                               </ListGroupItem>
                             );
                           })}
@@ -137,11 +139,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                       </div>
                     </Card>
                   </Col>
-                  <Col sm="6">
+                  <Col sm="12">
                     <Card body>
-                      <CardTitle>Approved Share Requests</CardTitle>
+                      <CardTitle>Approved Shares</CardTitle>
                       {document &&
                       <div>
+                        {document!.sharedWithAccountIds.length < 1 && (
+                          <div>No approved shares.</div>
+                        )}
                         <ListGroup>
                           {document!.sharedWithAccountIds.map((sharedWithAccountId, idx) => {
                             return (
@@ -153,6 +158,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                                 <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
                                   {`Account ID: ${sharedWithAccountId}`}
                                 </div>
+                                <Button close />
                               </ListGroupItem>
                             );
                           })}

@@ -20,8 +20,8 @@ jobs:
       - run: npm run deploy
       - slack/status:
           webhook: ${SLACK_WEBHOOK}
-          success_message: 🎉 A $CIRCLE_JOB job has succeeded!
-          failure_message: 🔴 A $CIRCLE_JOB job has failed!
+          success_message: 🎉 mypass frontend has deployed!
+          failure_message: 🔴 mypass frontend deploy has failed!
           only_for_branches: master
 workflows:
   build-and-test:

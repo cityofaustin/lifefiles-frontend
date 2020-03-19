@@ -7,10 +7,12 @@ import LoginResponse from '../models/auth/LoginResponse';
 import AccountService from '../services/AccountService';
 import ProgressIndicator from './common/ProgressIndicator';
 import './App.scss';
+import Role from '../models/Role';
 
-export interface AppState {
+interface AppState {
   account?: Account;
   isLoading: boolean;
+  theme: string;
 }
 
 class App extends Component<{}, AppState> {
@@ -19,31 +21,34 @@ class App extends Component<{}, AppState> {
 
     this.state = {
       account: undefined,
-      isLoading: false
+      isLoading: false,
+      theme: Role.owner
     };
   }
 
   async componentDidMount(): Promise<void> {
-    let {account} = {...this.state};
+    let {account, theme} = {...this.state};
     this.setState({isLoading: true});
     if (AuthService.isLoggedIn()) {
       const loginResponse = await AccountService.getMyAccount();
       ({account} = {...loginResponse});
+      theme = account?.role;
     }
-    this.setState({account, isLoading: false});
+    this.setState({account, theme, isLoading: false});
   }
 
   handleLogin = async (response: any): Promise<void> => {
-    let {account} = {...this.state};
+    let {account, theme} = {...this.state};
     this.setState({isLoading: true});
     try {
       const loginResponse: LoginResponse = response as LoginResponse;
       ({account} = {...loginResponse});
+      theme = account?.role;
       AuthService.logIn(account?.token);
     } catch (err) {
       console.error('failed to login.');
     }
-    this.setState({account, isLoading: false});
+    this.setState({account, theme, isLoading: false});
   };
 
   handleLogout = () => {
@@ -52,9 +57,9 @@ class App extends Component<{}, AppState> {
   };
 
   render() {
-    const {account, isLoading} = {...this.state};
+    const {account, isLoading, theme} = {...this.state};
     return (
-      <div className="app-container">
+      <div className={`app-container theme-${theme}`}>
         {isLoading &&
         <ProgressIndicator isFullscreen/>
         }

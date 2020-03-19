@@ -1,4 +1,4 @@
-@import './../../colors';
+@import './../variables';
 
 $width: 48px;
 
@@ -13,7 +13,9 @@ $width: 48px;
   stroke-dasharray: 0.95, 190;
   stroke-dashoffset: 0;
   animation: dash 1.5s ease-in-out infinite;
-  stroke: $blue;
+  @include themify($themes) {
+    stroke: themed('colorPrimary');
+  }
 }
 
 .progress-fullscreen {

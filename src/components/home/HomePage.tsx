@@ -24,6 +24,7 @@ import DocumentType from '../../models/DocumentType';
 import DocumentTypeService from '../../services/DocumentTypeService';
 import AddDocumentModal from './AddDocumentModal';
 import UpdateDocumentModal from './UpdateDocumentModal';
+import AccountService from '../../services/AccountService';
 
 interface HomePageState {
   documentTypes: DocumentType[];
@@ -36,6 +37,7 @@ interface HomePageState {
   isAccountMenuOpen: boolean;
   isLoading: boolean;
   documentQuery: string;
+  otherOwnerAccounts: Account[];
 }
 
 interface HomePageProps {
@@ -58,26 +60,35 @@ class HomePage extends Component<HomePageProps, HomePageState> {
       showModal: false,
       isAccountMenuOpen: false,
       isLoading: false,
-      documentQuery: ''
+      documentQuery: '',
+      otherOwnerAccounts: []
     };
   }
 
   async componentDidMount() {
     const {account} = {...this.props};
     const {sortAsc} = {...this.state};
-    let {documentTypes} = {...this.state};
+    let {documentTypes, otherOwnerAccounts} = {...this.state};
     const documents: Document[] = account.documents;
     this.setState({isLoading: true});
     try {
       documentTypes = (await DocumentTypeService.get()).documentTypes;
+      if(account.role === 'notary') {
+        otherOwnerAccounts = (await AccountService.getAccounts()).filter(accountItem => {
+          if(accountItem.role === 'owner' && accountItem.id !== account.id) {
+            return accountItem;
+          }
+        });
+      }
     } catch (err) {
-      console.error('failed to fetch document types');
+      console.error('failed to fetch home data');
     }
     this.setState({
       documentTypes,
       documents,
       searchedDocuments: this.sortDocuments(documents, sortAsc),
-      isLoading: false
+      isLoading: false,
+      otherOwnerAccounts
     });
   }
 

@@ -1,0 +1,7 @@
+@import './../variables';
+
+.folder-logo {
+  @include themify($themes) {
+    fill: themed('colorPrimary');
+  }
+}
