@@ -102,7 +102,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
           <TabContent activeTab={activeTab}>
             <TabPane tabId="1">
               <Row>
-                <Col sm="12">
+                <Col sm="12" className="update-doc-img-container">
                   {/*<h4>Tab 1 Contents</h4>*/}
                   {document &&
                   <img className="document-summary-image"

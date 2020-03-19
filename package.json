@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx webpack-dev-server --mode=development --colors",
     "build": "npm run clean-dist && npx webpack --mode production",
-    "deploy": "npm run build && aws s3 sync dist/ s3://mypass-frontend --delete --acl public-read",
+    "deploy": "npm run build && aws s3 sync dist/ s3://mypass-atx --delete --acl public-read",
     "test": "npx jest --config=jest.config.json",
     "ts-build": "npx tsc",
     "lint": "npx tslint -c tslint.json -p tsconfig.json",
