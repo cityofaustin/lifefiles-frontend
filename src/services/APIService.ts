@@ -1,5 +1,8 @@
 import AuthService from './AuthService';
 import StringUtil from '../util/StringUtil';
+import fetch from '../util/fetchWithTimeout';
+import APIError from './APIError';
+import HttpStatusCode from '../models/HttpStatusCode';
 
 const MYPASS_API = process.env.MYPASS_API;
 
@@ -10,6 +13,20 @@ class APIService {
         headers.Authorization = `Bearer ${AuthService.getAccessToken()}`;
       }
       return headers;
+  }
+
+  static handleErrorStatusCodes(responseStatus: number, responseJson: any) {
+    const errorStatusCodes = [
+      // 4xx Client errors
+      HttpStatusCode.UNAUTHORIZED,
+      HttpStatusCode.FORBIDDEN,
+      HttpStatusCode.UNPROCESSABLE_ENTITY,
+      // 5xx Server errors
+      HttpStatusCode.INTERNAL_SERVER_ERROR
+    ];
+    if (errorStatusCodes.includes(responseStatus)) {
+      throw new APIError(responseStatus+'', responseJson);
+    }
   }
 
   static getAPIEndpoint() {
@@ -23,14 +40,19 @@ class APIService {
       method: 'GET',
       headers
     };
-    const response = await fetch(input, init);
-    if (response.status === 403) {
-      throw new Error('Access Forbidden');
+    try {
+      const response = await fetch(input, init);
+      const responseJson = await response.json();
+      this.handleErrorStatusCodes(response.status, responseJson);
+      return responseJson;
+    } catch (err) {
+      console.error(err.message);
+      AuthService.logOut();
+      location.reload();
     }
-    return response.json();
   }
 
-  static async post(path: any, entity: any, json = true) {
+  static async post(path: any, entity: any) {
     const input = `${MYPASS_API}${path}`;
     const headers = await this.getHeaders();
     const init = {
@@ -38,11 +60,14 @@ class APIService {
       headers,
       body: JSON.stringify(entity)
     };
-    const response = await fetch(input, init);
-    if (json) {
-      return response.json();
+    try {
+      const response = await fetch(input, init);
+      const responseJson = await response.json();
+      this.handleErrorStatusCodes(response.status, responseJson);
+      return responseJson;
+    } catch (err) {
+      console.error(err.message);
     }
-    return response;
   }
 
   static async postDocument(file: File, documentType: string) {
@@ -60,8 +85,11 @@ class APIService {
       headers,
       body: formdata
     };
-    const response = await fetch(input, init);
-    return response.json();
+    // NOTE: putting a longer timeout over here since uploading files can take longer.
+    const response = await fetch(input, init, 20000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
   }
 
   static async put(path: any, entity: any) {
@@ -73,7 +101,9 @@ class APIService {
       body: JSON.stringify(entity)
     };
     const response = await fetch(input, init);
-    return response.json();
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
   }
 
   static async delete(path: any) {
@@ -84,7 +114,9 @@ class APIService {
       headers
     };
     const response = await fetch(input, init);
-    return response.json();
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
   }
 }
 

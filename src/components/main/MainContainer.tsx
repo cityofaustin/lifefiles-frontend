@@ -1,18 +1,19 @@
 import React, {Component, Fragment} from 'react';
-import DocumentSummary from './DocumentSummary';
+import DocumentSummary from './document/DocumentSummary';
 // import DocumentDetail from './DocumentDetail';
 import {
+  Button,
   Col,
   Dropdown, DropdownItem,
   DropdownMenu,
-  DropdownToggle,
+  DropdownToggle, ListGroup, ListGroupItem,
   Row
 } from 'reactstrap';
-import './HomePage.scss';
-import AccountPage from './AccountPage';
+import './MainContainer.scss';
+import AccountPage from './account/AccountPage';
 import SearchInput from '../common/SearchInput';
 import Chevron from '../common/Chevron';
-import AddNewDocument from './AddNewDocument';
+import AddNewDocument from './document/AddNewDocument';
 import Account from '../../models/Account';
 import Document from '../../models/Document';
 import StringUtil from '../../util/StringUtil';
@@ -22,11 +23,15 @@ import Folder from '../common/Folder';
 import deleteSvg from '../../img/delete.svg';
 import DocumentType from '../../models/DocumentType';
 import DocumentTypeService from '../../services/DocumentTypeService';
-import AddDocumentModal from './AddDocumentModal';
-import UpdateDocumentModal from './UpdateDocumentModal';
+import AddDocumentModal from './document/AddDocumentModal';
+import UpdateDocumentModal from './document/UpdateDocumentModal';
 import AccountService from '../../services/AccountService';
+import DocumentPage from './document/DocumentPage';
+import ClientPage from './account/ClientPage';
 
-interface HomePageState {
+// TODO use react router dom and make this more of a app container
+
+interface MainContainerState {
   documentTypes: DocumentType[];
   documents: Document[];
   searchedDocuments: Document[];
@@ -40,14 +45,14 @@ interface HomePageState {
   otherOwnerAccounts: Account[];
 }
 
-interface HomePageProps {
+interface MainContainerProps {
   account: Account;
   handleLogout: () => void;
 }
 
-class HomePage extends Component<HomePageProps, HomePageState> {
+class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
-  constructor(props: Readonly<HomePageProps>) {
+  constructor(props: Readonly<MainContainerProps>) {
     super(props);
 
     this.state = {
@@ -81,7 +86,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
         });
       }
     } catch (err) {
-      console.error('failed to fetch home data');
+      console.error('failed to fetch main data');
     }
     this.setState({
       documentTypes,
@@ -287,47 +292,34 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     );
   }
 
+  renderMyClients() {
+    const {searchedDocuments, otherOwnerAccounts, isAccount, sortAsc} = {...this.state};
+
+    if (!isAccount) {
+      return (
+        <ClientPage
+          otherOwnerAccounts={otherOwnerAccounts}
+          handleAddNew={this.handleAddNew}
+          handleSelectDocument={this.handleSelectDocument}
+          searchedDocuments={searchedDocuments}
+          sortAsc={sortAsc}
+          toggleSort={this.toggleSort}
+        />
+      );
+    }
+  }
+
   renderMyDocuments() {
     const {searchedDocuments, isAccount, sortAsc} = {...this.state};
 
     if (!isAccount) {
-      return (
-        <div className="main-content">
-          <div className="big-title">My Documents</div>
-          <div className="subtitle">Sort by <span style={{cursor: 'pointer'}} onClick={this.toggleSort}>NAME <Chevron
-            isAscending={sortAsc}/></span></div>
-          <Row>
-            <Col
-              sm="12"
-              md="6"
-              lg="4"
-              className="document-add-new"
-            >
-              <AddNewDocument handleAddNew={this.handleAddNew}/>
-            </Col>
-            {searchedDocuments.map((document, idx) => {
-              return (
-                <Col
-                  sm="12"
-                  md="6"
-                  lg="4"
-                  key={idx}
-                  className="document-summary-container"
-                >
-                  <div
-                    style={{cursor: 'pointer'}}
-                    onClick={() => this.handleSelectDocument(document)}>
-                    <DocumentSummary
-                      document={document}
-                      documentIdx={idx++}
-                    />
-                  </div>
-                </Col>
-              );
-            })}
-          </Row>
-        </div>
-      );
+      return <DocumentPage
+        sortAsc={sortAsc}
+        toggleSort={this.toggleSort}
+        handleAddNew={this.handleAddNew}
+        searchedDocuments={searchedDocuments}
+        handleSelectDocument={this.handleSelectDocument}
+      />;
     }
     return <Fragment/>;
   }
@@ -349,11 +341,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
             <div className="home-main">
               {this.renderAccount()}
               { account.role === 'owner' && this.renderMyDocuments() }
-              { (!isAccount && account.role === 'notary') &&
-                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1}}>
-                  <h4>Notary Coming Soon...</h4>
-                </div>
-              }
+              { (!isAccount && account.role === 'notary') && this.renderMyClients() }
             </div>
           </div>
         </div>
@@ -362,4 +350,4 @@ class HomePage extends Component<HomePageProps, HomePageState> {
   }
 }
 
-export default HomePage;
+export default MainContainer;

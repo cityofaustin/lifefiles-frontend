@@ -9,11 +9,11 @@ import {
   ModalFooter,
   ModalHeader
 } from 'reactstrap';
-import DocumentTypeService from '../../services/DocumentTypeService';
-import FileUploader from '../common/FileUploader';
-import DocumentType from '../../models/DocumentType';
-import Document from '../../models/Document';
-import crossImg from '../../img/cross.svg';
+import DocumentTypeService from '../../../services/DocumentTypeService';
+import FileUploader from '../../common/FileUploader';
+import DocumentType from '../../../models/DocumentType';
+import Document from '../../../models/Document';
+import crossImg from '../../../img/cross.svg';
 
 interface AddDocumentModalProps {
   showModal: boolean;

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {Breadcrumb, BreadcrumbItem, ListGroup, ListGroupItem} from 'reactstrap';
-import Account from '../../models/Account';
-import StringUtil from '../../util/StringUtil';
+import Account from '../../../models/Account';
+import StringUtil from '../../../util/StringUtil';
 
 interface AccountPageProps {
     account: Account;

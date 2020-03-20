@@ -1,19 +1,19 @@
 import React, {Component} from 'react';
 import {
   Button,
-  Card, CardText, CardTitle,
+  Card, CardTitle,
   Col, ListGroup, ListGroupItem,
   Modal,
   ModalBody, ModalFooter,
   ModalHeader, Nav, NavItem, NavLink, Row, TabContent, TabPane
 } from 'reactstrap';
 import classNames from 'classnames';
-import Document from '../../models/Document';
-import documentImg from '../../img/document.svg';
+import Document from '../../../models/Document';
+import documentImg from '../../../img/document.svg';
 import './UpdateDocumentModal.scss';
-import DocumentService from '../../services/DocumentService';
-import deleteSvg from '../../img/delete.svg';
-import crossImg from '../../img/cross.svg';
+import DocumentService from '../../../services/DocumentService';
+import deleteSvg from '../../../img/delete.svg';
+import crossImg from '../../../img/cross.svg';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;

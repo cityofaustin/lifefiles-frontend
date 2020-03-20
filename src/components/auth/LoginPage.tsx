@@ -11,6 +11,8 @@ import {
 import folderImage from '../../img/folder.png';
 import AccountService from '../../services/AccountService';
 import './LoginPage.scss';
+import APIError from '../../services/APIError';
+import HttpStatusCode from '../../models/HttpStatusCode';
 
 export interface LoginProps {
   handleLogin: (loginResponse: any) => Promise<void>;
@@ -55,8 +57,9 @@ class LoginPage extends Component<LoginProps, LoginState> {
       await handleLogin(loginResponse);
       return;
     } catch (err) {
-      if (err && err.error && err.error.message) {
-        errorMessage = err.error.message;
+      if (err &&
+        [HttpStatusCode.UNPROCESSABLE_ENTITY, HttpStatusCode.INTERNAL_SERVER_ERROR].includes(Number(err.message))) {
+        errorMessage = 'Unable to log in with provided credentials.';
       } else {
         errorMessage = 'Oops, something went wrong. Please try again in a few minutes.';
       }

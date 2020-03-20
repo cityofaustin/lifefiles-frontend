@@ -2,7 +2,7 @@ class AuthService {
   private static ACCESS_TOKEN: string = 'accessToken';
 
   static isLoggedIn(): boolean {
-    return !!localStorage.getItem(this.ACCESS_TOKEN);
+    return (!!localStorage.getItem(this.ACCESS_TOKEN) && localStorage.getItem(this.ACCESS_TOKEN) !== 'undefined');
   }
 
   static getAccessToken(): string {

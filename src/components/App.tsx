@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import LoginPage from './auth/LoginPage';
-import HomePage from './home/HomePage';
+import MainContainer from './main/MainContainer';
 import Account from '../models/Account';
 import AuthService from '../services/AuthService';
 import LoginResponse from '../models/auth/LoginResponse';
@@ -65,7 +65,7 @@ class App extends Component<{}, AppState> {
         }
         {!isLoading &&
         <div className="page-container">
-          {account && <HomePage account={account} handleLogout={this.handleLogout}/>}
+          {account && <MainContainer account={account} handleLogout={this.handleLogout}/>}
           {!account && <LoginPage handleLogin={this.handleLogin}/>}
         </div>
         }

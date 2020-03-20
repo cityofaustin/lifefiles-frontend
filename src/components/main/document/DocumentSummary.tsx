@@ -1,10 +1,9 @@
 import React, {Component, Fragment} from 'react';
 import './DocumentSummary.scss';
-import Document from '../../models/Document';
-import DocumentService from '../../services/DocumentService';
-import deleteSvg from '../../img/delete.svg';
-import StringUtil from '../../util/StringUtil';
-import ImageWithStatus from '../common/ImageWithStatus';
+import Document from '../../../models/Document';
+import DocumentService from '../../../services/DocumentService';
+import StringUtil from '../../../util/StringUtil';
+import ImageWithStatus from '../../common/ImageWithStatus';
 
 interface DocumentSummaryProps {
   document?: Document;

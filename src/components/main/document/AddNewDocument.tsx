@@ -1,7 +1,7 @@
 import React, {Component, FormEvent} from 'react';
 import {Button} from 'reactstrap';
 // import folderImage from '../../img/add-new.png';
-import newDocumentImg from '../../img/new-document.svg';
+import newDocumentImg from '../../../img/new-document.svg';
 
 interface AddNewDocumentProps {
   handleAddNew: () => void;

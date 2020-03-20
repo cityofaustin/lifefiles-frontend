@@ -4,16 +4,24 @@
   background-color: #EEF2F6;
   //box-shadow: none;
   color: #3c4146;
-  padding-left: 42px;
+  padding-left: 80px;
+  padding-top: 13px;
+  padding-bottom: 13px;
   -webkit-border-radius: 20px;
   -moz-border-radius: 20px;
-  border-radius: 20px;
+  border-radius: 28px;
   outline: none;
   border-top-style: hidden;
   border-right-style: hidden;
   border-left-style: hidden;
   border-bottom-style: hidden;
-  margin-right: 18px;
+  margin-right: 25px;
+  font-size: 20px;
+  font-weight: 500;
+  &::placeholder {
+    color: #b6b8b9;
+    opacity: 0.5;
+  }
 }
 
 .searchbar::-webkit-search-cancel-button{
@@ -23,8 +31,13 @@
 
 .icon-search {
   right: auto;
-  left: 2em;
+  left: 42.3px;
   position: absolute;
-  top: 25%;
-  fill: #bbc0c4;
+  top: 13px;
+}
+
+.search-btn {
+  font-size: 22px !important;
+  padding: 10px 28px !important;
+  border-radius: 28px !important;
 }

@@ -33,7 +33,7 @@
 }
 
 #home-container {
-  margin: 10px 10px 0 0;
+  margin: 10px 107px 0 0;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -51,8 +51,10 @@
     }
 
     #home-search {
-      margin-left: 18px;
-      margin-right: 18px;
+      margin-left: 80px;
+      margin-right: 127px;
+      position: relative;
+      top: 4px;
     }
 
     @media only screen and (max-width: 470px) {
@@ -66,7 +68,6 @@
       width: 90px;
       cursor: pointer;
       text-align: right;
-      padding: 10px;
     }
   }
 
@@ -90,10 +91,10 @@
 
     @media only screen and (min-width: 600px) {
       .home-side {
-        margin-top: 44px;
+        margin-top: 44.6px;
         border-top-right-radius: 74px;
         display: flex;
-        width: 134px;
+        min-width: 134px;
         //height: 100%;
         @include themify($themes) {
           background: themed('colorPrimary');
@@ -107,11 +108,10 @@
       margin-left: 15px;
 
       .main-content {
-        padding: 24px;
+        padding: 14px 0 24px 66px;
         width: 100%;
       }
     }
-
   }
 }
 
@@ -120,17 +120,17 @@
 }
 
 .account-circle {
-  width: 60px;
-  height: 60px;
+  width: 89px;
+  height: 89px;
   object-fit: contain;
   display: inline-block;
   border-radius: 50%;
   border: 1px solid white;
-  font-size: 28px;
+  font-size: 42px;
   color: white;
   text-align: center;
   vertical-align: middle;
-  line-height: 60px;
+  line-height: 89px;
   //position:relative;
   //left:-20px;
   //bottom: 26px;
@@ -159,5 +159,16 @@
   justify-content: center;
   align-items: center;
   display: flex;
+}
+
+// carrier
+.other-owner-list {
+  margin-top: 18px;
+}
+.other-owner-listitem {
+  cursor: pointer;
+  &:hover {
+    background: #eee;
+  }
 }
 
