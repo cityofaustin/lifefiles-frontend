@@ -33,7 +33,21 @@
 }
 
 .subtitle {
+  font-size: 20px;
+  font-weight: bold;
   margin-top: 27px;
-  color: #ccc;
-  font-weight: bolder;
+  color: $subtitle-color;
+}
+
+.sort-section {
+  display: flex;
+}
+
+.subtitle-key {
+  margin-left: 11px;
+  margin-right: 8.5px;
+  cursor: pointer;
+  @include themify($themes) {
+    color: themed('colorDisabled');
+  }
 }

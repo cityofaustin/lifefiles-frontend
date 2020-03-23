@@ -63,20 +63,25 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
   render() {
     const {document, documentIdx} = {...this.props};
     return (
-      <div>
+      <div className="document-item">
         {document &&
         <Fragment>
           <ImageWithStatus
                imageUrl={DocumentService.getDocumentURL(document.url)}
           />
-          <div className="title padding-top-12">{document.type}</div>
-          <div className="subtitle">SHARED WITH</div>
-          <div className="shared-with-container padding-top-12">
-            {this.renderFirstShare(document.sharedWithAccountIds)}
-            {this.renderOtherShare(document.sharedWithAccountIds)}
-            {/*<div className="separator"/>*/}
-            {/*<div className="document-idx">{documentIdx + 1}</div>*/}
-          </div>
+          <div className="title">{document.type}</div>
+          { document.sharedWithAccountIds.length > 0 && (
+            <Fragment>
+              <div className="subtitle">SHARED WITH</div>
+              <div className="shared-with-container padding-top-12">
+                {this.renderFirstShare(document.sharedWithAccountIds)}
+                {this.renderOtherShare(document.sharedWithAccountIds)}
+                {/*<div className="separator"/>*/}
+                {/*<div className="document-idx">{documentIdx + 1}</div>*/}
+              </div>
+            </Fragment>
+          )}
+
         </Fragment>
         }
       </div>

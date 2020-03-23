@@ -14,6 +14,7 @@ interface Account {
   token: string;
   documents: Document[];
   shareRequests: ShareRequest[];
+  profileImageUrl?: string;
 }
 
 export default Account;

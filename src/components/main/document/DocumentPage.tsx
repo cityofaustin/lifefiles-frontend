@@ -42,14 +42,18 @@ class DocumentPage extends Component<DocumentPageProps> {
             </div>
           </div>
         }
-        <div className="subtitle">Sort by <span style={{cursor: 'pointer'}} onClick={toggleSort}>NAME <Chevron
-          isAscending={sortAsc}/></span></div>
-        <Row style={{marginRight: '-107px'}}>
+        <div className="sort-section">
+          <div className="subtitle">Sort by</div>
+          <div className="subtitle subtitle-key" onClick={toggleSort}>NAME </div>
+          <Chevron isAscending={sortAsc} />
+        </div>
+        <Row style={{marginRight: '-107px', minHeight: '480px'}}>
           <Col
             sm="12"
             md="6"
             lg="4"
-            className="document-add-new"
+            className="document-add-new document-item"
+            onClick={handleAddNew}
           >
             <AddNewDocument handleAddNew={handleAddNew}/>
           </Col>

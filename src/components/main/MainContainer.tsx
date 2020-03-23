@@ -259,7 +259,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 data-toggle="dropdown"
                 aria-expanded={isAccountMenuOpen}
               >
-                <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>
+                { account.profileImageUrl && (
+                  <img src={`${process.env.MYPASS_API + '/profile-image/' + account.profileImageUrl }`} alt="" />
+                ) }
+                { !account.profileImageUrl && (
+                  <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>
+                )}
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem onClick={this.goToAccount}>My Account</DropdownItem>

@@ -15,28 +15,24 @@ class Chevron extends Component<ChevronProps> {
   render() {
     const {isAscending} = {...this.props};
     return (
-      <Fragment>
+      <div style={{display: 'flex', marginTop: '27px', alignItems: 'center'}}>
         {isAscending && (
-          <svg x="0px" y="0px" viewBox="0 0 256 256"
-               style={{position: 'relative', bottom: '2px', height: '10px', width: '10px'}}>
-            <g>
-              <g>
-                <polygon points="128,48.907 0,176.907 30.187,207.093 128,109.28 225.813,207.093 256,176.907"/>
-              </g>
+          <svg width="18.753" height="11.498" viewBox="0 0 18.753 11.498" style={{transform: 'rotate(180deg)'}}>
+            <g transform="translate(-372.379 -234.379) ">
+              <line x1="7.255" y2="7.255" transform="translate(381.755 236.5)" fill="none" stroke="#90afe2" strokeLinecap="round" strokeWidth="3"/>
+              <line x2="7.255" y2="7.255" transform="translate(374.5 236.5)" fill="none" stroke="#90afe2" strokeLinecap="round" strokeWidth="3"/>
             </g>
           </svg>
         )}
         {!isAscending && (
-          <svg x="0px" y="0px" viewBox="0 0 256 256"
-               style={{position: 'relative', bottom: '2px', height: '10px', width: '10px'}}>
-            <g>
-              <g>
-                <polygon points="225.813,48.907 128,146.72 30.187,48.907 0,79.093 128,207.093 256,79.093"/>
-              </g>
+          <svg width="18.753" height="11.498" viewBox="0 0 18.753 11.498">
+            <g transform="translate(-372.379 -234.379)">
+              <line x1="7.255" y2="7.255" transform="translate(381.755 236.5)" fill="none" stroke="#90afe2" strokeLinecap="round" strokeWidth="3"/>
+              <line x2="7.255" y2="7.255" transform="translate(374.5 236.5)" fill="none" stroke="#90afe2" strokeLinecap="round" strokeWidth="3"/>
             </g>
           </svg>
         )}
-      </Fragment>
+      </div>
     );
   }
 }

@@ -3,6 +3,8 @@
 .document-summary-container {
   text-align: center;
   padding: 24px;
+  align-items: center;
+  display: flex;
 }
 
 .shared-with-container {
@@ -61,4 +63,16 @@
   vertical-align: middle;
   line-height: 60px;
   margin-left: 24px;
+}
+
+.document-item:hover {
+  background: $hover-color;
+  cursor: pointer;
+}
+
+.document-item {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }

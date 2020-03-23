@@ -11,7 +11,7 @@ html { height:100%; }
 
 body {
   position:absolute; top:0; bottom:0; right:0; left:0;
-  background-color: #FCFCFC;
+  background-color: $background-color;
   font-family: Montserrat, Arial, sans-serif;
   //padding: 15px;
   display: flex;
@@ -60,12 +60,17 @@ body {
 }
 
 .title {
-  color: #666;
-  font-weight: bolder;
+  color: $grey;
+  font-size: 25px;
+  font-weight: bold;
 }
 
 .padding-top-12 {
   padding-top: 12px;
+}
+
+.padding-top-44 {
+  padding-top: 44px;
 }
 
 .padding-bottom-12 {
