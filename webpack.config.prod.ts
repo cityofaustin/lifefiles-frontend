@@ -5,6 +5,7 @@ import * as path from 'path';
 //  import CompressionPlugin from 'compression-webpack-plugin';
 // import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import HtmlWebPackPlugin from 'html-webpack-plugin';
 
 const GLOBALS = {
   'process.env.NODE_ENV': JSON.stringify('production')
@@ -26,11 +27,11 @@ const config: webpack.Configuration = {
     extensions: ['.ts', '.tsx', '.js', '.jsx']
   },
   plugins: [
-    // new HtmlWebpackPlugin({
-    //   template: 'src/index.html',
-    //   filename: './index.html',
-    //   favicon: './public/favicon.ico'
-    // }),
+    new HtmlWebPackPlugin({
+      template: './src/index.html',
+      filename: './index.html',
+      favicon: 'public/favicon.ico'
+    }),
     new webpack.optimize.OccurrenceOrderPlugin(true),
     new webpack.DefinePlugin(GLOBALS),
     new Dotenv({
