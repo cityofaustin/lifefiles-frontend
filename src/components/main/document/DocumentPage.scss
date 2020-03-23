@@ -1,0 +1,39 @@
+@import '../../variables';
+
+.document-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.document-toolbar {
+  display: flex;
+  justify-content: space-between;
+  width: 136px;
+}
+
+.document-tabs {
+  display: flex;
+}
+
+.document-tab {
+  font-size: 35px;
+  font-weight: bold;
+  width: max-content;
+  margin-right: 30px;
+  @include themify($themes) {
+    color: themed('colorDisabled');
+  }
+}
+
+.tab-active {
+  @include themify($themes) {
+    color: themed('colorPrimary');
+    border-bottom: 4px solid themed('colorPrimary');
+  }
+}
+
+.subtitle {
+  margin-top: 27px;
+  color: #ccc;
+  font-weight: bolder;
+}

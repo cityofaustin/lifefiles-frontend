@@ -20,7 +20,10 @@ const config: webpack.Configuration = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     // publicPath: '/',
-    filename: 'bundle.js'
+    filename: '[name].js'
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
   },
   plugins: [
     // new HtmlWebpackPlugin({
@@ -60,22 +63,6 @@ const config: webpack.Configuration = {
           }
         ]
       },
-      // {
-      //   test: /\.(gif|png|jpe?g|svg)$/i,
-      //   use: [{
-      //     loader: 'url-loader',
-      //     options: {
-      //       limit: 8000,
-      //       name: 'images/[hash]-[name].[ext]'
-      //     }
-      //   }]
-      // },
-      {
-        test: /\.(png|svg|jpg|gif)$/,
-        use: [
-          'file-loader'
-        ]
-      },
       {
         test: /\.(css|scss)$/,
         use: [
@@ -84,9 +71,47 @@ const config: webpack.Configuration = {
           'css-loader',
           'sass-loader'
         ]
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        loader: 'file-loader',
+        options: { name: 'static/[name].[ext]' }
+      },
+      {
+        test: /\.svg$/,
+        use: [
+          '@svgr/webpack', {
+            loader: 'file-loader',
+            options: {
+              name: 'static/[name].[ext]'
+            }
+          }]
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/'
+            }
+          }
+        ]
       }
     ]
   }
 };
+
+// {
+//   test: /\.(gif|png|jpe?g|svg)$/i,
+//   use: [{
+//     loader: 'url-loader',
+//     options: {
+//       limit: 8000,
+//       name: 'images/[hash]-[name].[ext]'
+//     }
+//   }]
+// },
 
 export default config;

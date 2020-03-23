@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx webpack-dev-server --mode=development --colors",
-    "build": "npm run clean-dist && npx webpack --mode production",
+    "start": "npx webpack-dev-server --mode=development --colors --config webpack.config.dev.ts",
+    "build": "npm run clean-dist && npx webpack --mode production --config webpack.config.prod.ts",
     "deploy": "npm run build && aws s3 sync dist/ s3://mypass-atx --delete --acl public-read",
     "test": "npx jest --config=jest.config.json",
     "ts-build": "npx tsc",
@@ -34,6 +34,7 @@
     "reactstrap": "latest"
   },
   "devDependencies": {
+    "@svgr/webpack": "^5.3.0",
     "@types/classnames": "^2.2.10",
     "@types/dotenv-webpack": "^1.7.0",
     "@types/enzyme": "^3.10.5",

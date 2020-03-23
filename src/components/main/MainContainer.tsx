@@ -241,18 +241,18 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const {isAccountMenuOpen} = {...this.state};
 
     return (
-      <Fragment>
-        <div id="home-top-bar">
-          <div id="home-logo">
+      <div>
+        <div id="main-top-bar">
+          <div id="main-logo">
             <Folder/>
             {/*<img className="logo" src={`${window.location.origin}/${folderImage}`} alt="Logo"/>*/}
           </div>
-          <Row id="home-search">
+          <Row id="main-search">
             <Col style={{display: 'flex'}}>
               <SearchInput handleSearch={this.handleSearchDocuments}/>
             </Col>
           </Row>
-          <div id="home-profile">
+          <div id="main-profile">
             <Dropdown isOpen={isAccountMenuOpen} toggle={this.toggleAccountMenu}>
               <DropdownToggle
                 tag="span"
@@ -269,12 +269,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             {/*<img className="account-profile-image" src={account.profileimgUrl} />*/}
           </div>
         </div>
-        <Row id="home-search-sm">
+        <Row id="main-search-sm">
           <Col style={{display: 'flex'}}>
             <SearchInput handleSearch={this.handleSearchDocuments}/>
           </Col>
         </Row>
-      </Fragment>
+      </div>
     );
   }
 
@@ -332,13 +332,13 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         {isLoading &&
         <ProgressIndicator isFullscreen/>
         }
-        <div id="home-container">
+        <div id="main-container">
           {this.renderAddDocumentModal()}
           {this.renderUpdateDocumentModal()}
           {this.renderTopBar()}
-          <div className="home-content">
-            <div className="home-side"/>
-            <div className="home-main">
+          <div className="main-page">
+            <div className="main-side"/>
+            <div className="main-section">
               {this.renderAccount()}
               { account.role === 'owner' && this.renderMyDocuments() }
               { (!isAccount && account.role === 'notary') && this.renderMyClients() }

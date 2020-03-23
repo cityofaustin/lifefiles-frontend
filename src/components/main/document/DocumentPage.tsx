@@ -5,7 +5,8 @@ import AddNewDocument from './AddNewDocument';
 import DocumentSummary from './DocumentSummary';
 import Document from '../../../models/Document';
 import Account from '../../../models/Account';
-import SvgButton from '../../common/SvgButton';
+import SvgButton, {SvgButtonTypes} from '../../common/SvgButton';
+import './DocumentPage.scss';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -30,14 +31,20 @@ class DocumentPage extends Component<DocumentPageProps> {
         </Breadcrumb>
         }
         { !referencedAccount &&
-          <div style={{display: 'flex', justifyContent: 'space-between'}}>
-            <div className="big-title">My Documents</div>
-            <SvgButton />
+          <div className="document-header">
+            <div className="document-tabs">
+              <div className="document-tab tab-active">My Documents</div>
+              <div className="document-tab">My Network</div>
+            </div>
+            <div className="document-toolbar">
+              <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID} />
+              <SvgButton buttonType={SvgButtonTypes.INFO} />
+            </div>
           </div>
         }
         <div className="subtitle">Sort by <span style={{cursor: 'pointer'}} onClick={toggleSort}>NAME <Chevron
           isAscending={sortAsc}/></span></div>
-        <Row>
+        <Row style={{marginRight: '-107px'}}>
           <Col
             sm="12"
             md="6"
@@ -68,7 +75,7 @@ class DocumentPage extends Component<DocumentPageProps> {
                 className="document-summary-container"
               >
                 <div
-                  style={{cursor: 'pointer'}}
+                  style={{cursor: 'pointer', marginRight: '115px'}}
                   onClick={() => handleSelectDocument(document)}>
                   <DocumentSummary
                     document={document}

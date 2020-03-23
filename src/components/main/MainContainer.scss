@@ -32,25 +32,25 @@
   }
 }
 
-#home-container {
+#main-container {
   margin: 10px 107px 0 0;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 
-  #home-top-bar {
-
+  #main-top-bar {
+    // TODO: fix Windows Edge
     display: table;
     width: 100%;
     padding-left: 10px;
 
-    #home-logo {
+    #main-logo {
       display: table-cell;
       width: 95px;
       padding: 20px 10px 20px 10px;
     }
 
-    #home-search {
+    #main-search {
       margin-left: 80px;
       margin-right: 127px;
       position: relative;
@@ -58,12 +58,12 @@
     }
 
     @media only screen and (max-width: 470px) {
-      #home-search {
+      #main-search {
         display: none;
       }
     }
 
-    #home-profile {
+    #main-profile {
       display: table-cell;
       width: 90px;
       cursor: pointer;
@@ -71,18 +71,18 @@
     }
   }
 
-  #home-search-sm {
+  #main-search-sm {
     display: none;
   }
 
   @media only screen and (max-width: 470px) {
-    #home-search-sm {
+    #main-search-sm {
       display: block;
       margin: 20px;
     }
   }
 
-  .home-content {
+  .main-page {
     display: flex;
     flex-grow: 1;
     // ios bug
@@ -90,7 +90,7 @@
     flex-shrink: 0;
 
     @media only screen and (min-width: 600px) {
-      .home-side {
+      .main-side {
         margin-top: 44.6px;
         border-top-right-radius: 74px;
         display: flex;
@@ -102,10 +102,11 @@
       }
     }
 
-    .home-main {
+    .main-section {
       display: flex;
       width: 100%;
       margin-left: 15px;
+      margin-bottom: 92px;
 
       .main-content {
         padding: 14px 0 24px 66px;

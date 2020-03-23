@@ -62,16 +62,34 @@ const config: webpack.Configuration = {
         use: ['style-loader', 'css-loader', 'sass-loader']
       },
       {
-        test: /\.(png|svg|jpg|gif)$/,
+          test: /\.(png|jpg|gif)$/,
+          loader: 'file-loader',
+          options: {
+            name: 'static/[name].[ext]'
+          }
+      },
+      {
+        test: /\.svg$/,
         use: [
-          'file-loader'
+          '@svgr/webpack', {
+            loader: 'file-loader',
+            options: {
+              name: 'static/[name].[ext]'
+            }
+          }]
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/'
+            }
+          }
         ]
       }
-      // {
-      //     test: /\.(png|svg|jpg|gif)$/,
-      //     loader: "file-loader",
-      //     options: { name: '/static/[name].[ext]' }
-      // }
     ]
   }
   // When importing a module whose path matches one of the following, just
