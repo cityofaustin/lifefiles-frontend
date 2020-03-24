@@ -260,7 +260,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 aria-expanded={isAccountMenuOpen}
               >
                 { account.profileImageUrl && (
-                  <img src={`${process.env.MYPASS_API + '/profile-image/' + account.profileImageUrl }`} alt="" />
+                  <img src={AccountService.getProfileURL(account.profileImageUrl)} alt="Profile" />
                 ) }
                 { !account.profileImageUrl && (
                   <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>

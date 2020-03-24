@@ -47,7 +47,7 @@ class DocumentPage extends Component<DocumentPageProps> {
           <div className="subtitle subtitle-key" onClick={toggleSort}>NAME </div>
           <Chevron isAscending={sortAsc} />
         </div>
-        <Row style={{marginRight: '-107px', minHeight: '480px'}}>
+        <Row style={{marginRight: '0', minHeight: '480px'}}>
           <Col
             sm="12"
             md="6"
@@ -79,7 +79,7 @@ class DocumentPage extends Component<DocumentPageProps> {
                 className="document-summary-container"
               >
                 <div
-                  style={{cursor: 'pointer', marginRight: '115px'}}
+                  style={{cursor: 'pointer', marginRight: '0'}}
                   onClick={() => handleSelectDocument(document)}>
                   <DocumentSummary
                     document={document}

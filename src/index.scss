@@ -23,18 +23,6 @@ body {
   width: 100%;
 }
 
-.btn {
-  border-radius: 17px;
-  //height: 44px;
-}
-
-.btn-primary {
-  @include themify($themes) {
-    background-color: themed('colorPrimary');
-    border-color: themed('colorPrimary');
-  }
-}
-
 .error {
   color: red;
 }
@@ -82,6 +70,89 @@ body {
   padding: 24px;
 }
 
+// bootstrap button
+
+.btn {
+  font-size: 30px;
+  font-weight: 500;
+  border-radius: 17px;
+  //height: 44px;
+  height: 59px;
+  min-width: 209px;
+  border-width: 3px;
+  padding: 4px 10px;
+}
+
+.btn-primary {
+  background-color: #2362c7;
+  border-color: #2362c7;
+  @include themify($themes) {
+    background-color: themed('colorPrimary');
+    border-color: themed('colorPrimary');
+  }
+}
+
+// end bootstrap button
+
+// bootstrap modal
+
+.modal-dialog {
+  .modal-content {
+    padding: 0;
+    background-color: #f6f6f6;
+    border-radius: 17px;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16); //32.6 54.6
+    .modal-header {
+      background: $blue;
+      padding: 19px 44px 19px 44px;
+      border-top-left-radius: calc(17px - 1px);
+      border-top-right-radius: calc(17px - 1px);
+      .modal-title {
+        font-size: 35px;
+        color: #f8f8f8;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.modal-close {
+  cursor: pointer;
+  padding: 13px;
+  background: $blue;
+  border-radius: 50%;
+}
+
+.modal-close:hover {
+  background: white;
+  svg g {
+    stroke: $blue;
+  }
+}
+
+.modal-footer {
+  border-top: 0;
+  padding: 42px;
+}
+
+// end bootstrap modal
+
+// bootstrap form control
+
+.form-control {
+  font-size: 25px;
+  //color: blue;
+  color: #3b3b3b;
+  padding: 12.4px 29.5px 12.4px 29.5px;
+  &::placeholder {
+    color: #818181;
+    opacity: 0.31;
+  }
+}
+
+// end bootstrap form control
+
+
 .dropzone {
   flex: 1;
   display: flex;
@@ -97,3 +168,4 @@ body {
   outline: none;
   transition: border .24s ease-in-out;
 }
+

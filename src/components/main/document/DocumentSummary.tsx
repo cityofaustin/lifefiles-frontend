@@ -69,7 +69,7 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
           <ImageWithStatus
                imageUrl={DocumentService.getDocumentURL(document.url)}
           />
-          <div className="title">{document.type}</div>
+          <div className="title padding-top-12">{document.type}</div>
           { document.sharedWithAccountIds.length > 0 && (
             <Fragment>
               <div className="subtitle">SHARED WITH</div>

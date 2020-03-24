@@ -2,6 +2,7 @@ import AgentService from './APIService';
 import LoginRequest from '../models/auth/LoginRequest';
 import LoginResponse from '../models/auth/LoginResponse';
 import Account from '../models/Account';
+import AuthService from './AuthService';
 
 const PATH = '/accounts';
 
@@ -17,6 +18,11 @@ class AccountService extends AgentService {
 
   static async getAccounts(): Promise<Account[]> {
     return await super.get(PATH);
+  }
+
+  static getProfileURL(filename: string) {
+    return super.getAPIEndpoint() +
+      `/profile-image/${filename}/${AuthService.getAccessToken()}`;
   }
 
 }

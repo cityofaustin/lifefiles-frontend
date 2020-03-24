@@ -18,9 +18,9 @@ class AddNewDocument extends Component<AddNewDocumentProps> {
     // const {handleAddNew} = {...this.props};
     return (
       <div>
-        <img style={{width: '165px', height: '205px', display: 'block', margin: 'auto'}}
+        <img style={{width: '80.5%', height: '100%', display: 'block', margin: 'auto'}}
              src={newDocumentSvg} alt="Add New"/>
-        <div className="title padding-top-44">Add New</div>
+        <div className="title padding-top-12">Add New</div>
       </div>
     );
   }
