@@ -1,4 +1,48 @@
 
-.file-list {
-  margin-top: 24px;
+.file-preview {
+  //margin-top: 24px;
+  display: flex;
+  flex: 1;
+  flex-direction: row;
 }
+
+.file-image {
+  //flex-grow: 1;
+  //background: red;
+}
+
+.file-info {
+  margin: 13.9px 13.9px 13.9px 83px;
+  flex-grow: 1;
+  display: flex;
+  //background: rgba(0,255,0,0.5);
+  font-size: 20px;
+  color: #484848;
+  .file-info-items {
+    //background: blue;
+    flex-grow: 1;
+    .file-info-item:not(:first-child) {
+      margin-top: 26.9px;
+      //background: yellow;
+    }
+    .file-info-item {
+      //background: orange;
+      .file-info-title {
+        font-weight: 500;
+        color: #747474;
+      }
+    }
+  }
+  .file-reupload {
+    //background: purple;
+    flex-grow: 1;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    color: #484848;
+    font-size: 13px;
+    opacity: 0.6;
+  }
+}
+
+

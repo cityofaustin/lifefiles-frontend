@@ -28,8 +28,8 @@ body {
 }
 
 .shared-with-image-single {
-  width: 60px;
-  height: 60px;
+  width: 89px;
+  height: 89px;
   object-fit: contain;
   border-radius: 50%;
   display: inline-block;
@@ -156,16 +156,48 @@ body {
 .dropzone {
   flex: 1;
   display: flex;
+  justify-content: flex-start;
+  height: 479.4px;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  border-width: 2px;
-  border-radius: 2px;
-  border-color: #eeeeee;
-  border-style: dashed;
-  background-color: #fafafa;
+  //align-items: center;
+  padding: 22px 30px;
+  //border-width: 2px;
+  //border-radius: 2px;
+  //border-color: #707070;
+  //border-style: dashed;
+
+  //background-image: linear-gradient(#a8a8a8 40%, rgba(255,255,255,0) 0%);
+  //background-position: right;
+  //background-size: 25px 2px;
+  //background-repeat: repeat-y;
+
+  background-color: #f6f6f6;
   color: #bdbdbd;
   outline: none;
   transition: border .24s ease-in-out;
+  p {
+    font-size: 25px;
+  }
 }
+
+.dropzone-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 41px;
+}
+
+.dropzone-bottom {
+  background-image: linear-gradient(to right, #a8a8a8 40%, rgba(255,255,255,0) 0%);
+  background-position: bottom;
+  background-size: 25px 2px;
+  background-repeat: repeat-x;
+}
+
+.dropzone-left {
+  background-image: linear-gradient(#a8a8a8 40%, rgba(255,255,255,0) 0%);
+  background-position: left;
+  background-size: 2px 25px;
+  background-repeat: repeat-y;
+}
+
 

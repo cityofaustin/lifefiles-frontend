@@ -55,7 +55,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
 
   handleDocumentType = (documentTypeOption: OptionTypeBase) => {
     const isOther = (documentTypeOption.value === 'Other');
-    const documentType = (documentTypeOption.value === 'Other') ? undefined : documentTypeOption.value;
+    const documentType = (documentTypeOption.value === 'Other') ? '' : documentTypeOption.value;
     this.setState({documentType, isOther, documentTypeOption});
   };
 
@@ -202,7 +202,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
     const {isDocumentTypeDropdownOpen, documentType, newFile, isOther, errorMessage} = {...this.state};
     return (
       <section>
-        <FileUploader setFile={this.setFile}/>
+        <FileUploader setFile={this.setFile} documentType={documentType}/>
       </section>
     );
   }

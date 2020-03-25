@@ -260,7 +260,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 aria-expanded={isAccountMenuOpen}
               >
                 { account.profileImageUrl && (
-                  <img src={AccountService.getProfileURL(account.profileImageUrl)} alt="Profile" />
+                  <img className="shared-with-image-single" src={AccountService.getProfileURL(account.profileImageUrl)} alt="Profile" />
                 ) }
                 { !account.profileImageUrl && (
                   <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>

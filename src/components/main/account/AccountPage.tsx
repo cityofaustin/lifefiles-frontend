@@ -25,13 +25,17 @@ class AccountPage extends Component<AccountPageProps> {
         </Breadcrumb>
         <ListGroup>
           <ListGroupItem className="justify-content-between">
+            {/*<img className="shared-with-image-single"*/}
+            {/*     src={account.profileimgUrl}*/}
+            {/*     alt="profile"*/}
+            {/*/>*/}
             {account.profileImageUrl && (
-              <img src={AccountService.getProfileURL(account.profileImageUrl)} alt="Profile"/>
+              <img className="shared-with-image-single" src={AccountService.getProfileURL(account.profileImageUrl)}
+                   alt="Profile"/>
             )}
             {!account.profileImageUrl && (
               <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>
             )}
-            <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>
             <div style={{marginLeft: '24px', display: 'inline-block'}}>
               {/*{`${account.firstName} ${account.lastName}`}*/}
               {account.username}
