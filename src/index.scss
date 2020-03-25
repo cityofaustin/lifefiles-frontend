@@ -92,6 +92,11 @@ body {
   }
 }
 
+.btn-danger {
+  background-color: $danger;
+  border-color: $danger;
+}
+
 // end bootstrap button
 
 // bootstrap modal
@@ -151,6 +156,46 @@ body {
 }
 
 // end bootstrap form control
+
+// bootstrap tabs
+
+.nav-tabs .nav-link {
+  border: 0 solid transparent;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  font-size: 20px;
+  font-weight: 500;
+  width: 187px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.nav-tabs {
+  //border-bottom: 1px solid #dee2e6;
+  border-bottom: 0 solid transparent;
+}
+
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+  color: #495057;
+  background-color: inherit;
+  border-color: transparent;
+  border-bottom: 4px solid $blue;
+}
+
+.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+  //border-color: #e9ecef #e9ecef #dee2e6;
+  border-color: transparent;
+}
+
+.nav-link.active:hover, .nav-link.active:focus {
+  border-color: $blue;
+}
+
+.tab-content {
+  margin-top: 24.1px;
+}
+
+// end bootstrap tabs
 
 
 .dropzone {

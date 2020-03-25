@@ -1,10 +1,7 @@
 import React, {ChangeEvent, Component, Fragment} from 'react';
 import {
   Button,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle, Form, FormGroup, Input, Label, Modal,
+  FormGroup, Input, Label, Modal,
   ModalBody,
   ModalFooter,
   ModalHeader
@@ -13,7 +10,6 @@ import DocumentTypeService from '../../../services/DocumentTypeService';
 import FileUploader from '../../common/FileUploader';
 import DocumentType from '../../../models/DocumentType';
 import Document from '../../../models/Document';
-// import crossImg from '../../../img/cross.svg';
 import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
 import {ReactComponent as NewDocSvg} from '../../../img/new-doc-2.svg';
 import Select, {OptionTypeBase} from 'react-select';
@@ -28,7 +24,6 @@ interface AddDocumentModalProps {
 }
 
 interface AddDocumentModalState {
-  isDocumentTypeDropdownOpen: boolean;
   documentType: string;
   newFile?: File;
   isOther: boolean;
@@ -44,8 +39,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
     this.state = {
       uploadingStep: false,
       documentType: '',
-      isOther: false,
-      isDocumentTypeDropdownOpen: false
+      isOther: false
     };
   }
 
@@ -82,7 +76,13 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
         errorMessage = 'Oops, something went wrong. Please try again in a few minutes.';
       }
     }
-    this.setState({isOther, documentType, newFile, errorMessage});
+    this.setState({
+      uploadingStep: false,
+      documentTypeOption: undefined,
+      isOther,
+      documentType,
+      newFile,
+      errorMessage});
   };
 
   toggleModal = () => {
@@ -92,7 +92,6 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
       uploadingStep: false,
       documentType: '',
       isOther: false,
-      isDocumentTypeDropdownOpen: false,
       documentTypeOption: undefined
     });
     toggleModal();
@@ -100,7 +99,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
 
   renderDocumentTypeSection() {
     const {documentTypes, documents} = {...this.props};
-    const {isDocumentTypeDropdownOpen, documentType, newFile, isOther, errorMessage, documentTypeOption} = {...this.state};
+    const {documentType, isOther, errorMessage, documentTypeOption} = {...this.state};
 
     const options: OptionTypeBase[] = documentTypes.map(documentTypeItem => ({
       value: documentTypeItem.name,
@@ -198,8 +197,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
   }
 
   renderDocumentFileSection() {
-    const {documentTypes, documents} = {...this.props};
-    const {isDocumentTypeDropdownOpen, documentType, newFile, isOther, errorMessage} = {...this.state};
+    const {documentType} = {...this.state};
     return (
       <section>
         <FileUploader setFile={this.setFile} documentType={documentType}/>
@@ -208,8 +206,8 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
   }
 
   render() {
-    const {showModal, documentTypes, documents} = {...this.props};
-    const {isDocumentTypeDropdownOpen, documentType, newFile, isOther, errorMessage, uploadingStep} = {...this.state};
+    const {showModal} = {...this.props};
+    const {documentType, newFile, uploadingStep} = {...this.state};
     const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
     return (
       <Modal

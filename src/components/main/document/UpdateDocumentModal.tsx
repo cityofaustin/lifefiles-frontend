@@ -13,7 +13,11 @@ import documentImg from '../../../img/document.svg';
 import './UpdateDocumentModal.scss';
 import DocumentService from '../../../services/DocumentService';
 import deleteSvg from '../../../img/delete.svg';
-import crossImg from '../../../img/cross.svg';
+// import crossImg from '../../../img/cross.svg';
+import {ReactComponent as EditDocSvg} from '../../../img/edit-doc.svg';
+import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
+
+
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -25,6 +29,7 @@ interface UpdateDocumentModalProps {
 
 interface UpdateDocumentModalState {
   activeTab: string;
+  confirmDelete: boolean;
 }
 
 class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocumentModalState> {
@@ -32,13 +37,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     super(props);
 
     this.state = {
-      activeTab: '1'
+      activeTab: '1',
+      confirmDelete: false
     };
   }
 
   toggleTab = (tab: string) => {
     const {activeTab} = {...this.state};
-    if (activeTab !== tab) this.setState({activeTab: tab});
+    if (activeTab !== tab) this.setState({activeTab: tab, confirmDelete: false});
   };
 
   handleDeleteDocument = async (document: Document) => {
@@ -46,25 +52,47 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     await handleDeleteDocument(document);
   };
 
+  confirmDelete = () => {
+    this.setState({activeTab: '0', confirmDelete: true});
+  };
+
+  toggleModal = () => {
+    // clear state
+    const {toggleModal} = {...this.props};
+    this.setState({
+      activeTab: '1',
+      confirmDelete: false
+    });
+    toggleModal();
+  };
+
   render() {
-    const {showModal, toggleModal, document, pendingShareRequests} = {...this.props};
-    const {activeTab} = {...this.state};
-    const closeBtn = (
-      <button className="close" onClick={toggleModal}><img src={`${window.location.origin}/${crossImg}`} alt="close"/>
-      </button>);
+    const {showModal, document, pendingShareRequests} = {...this.props};
+    const {activeTab, confirmDelete} = {...this.state};
+    const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
     return (
-      <Modal isOpen={showModal} toggle={toggleModal} backdrop={'static'}>
-        <ModalHeader toggle={toggleModal} close={closeBtn}>
-          <img src={`${window.location.origin}/${documentImg}`} alt="Add New"/>
-          <span className="update-doc-modal-title">{document?.type}</span>
+      <Modal
+        isOpen={showModal}
+        toggle={this.toggleModal}
+        backdrop={'static'}
+        size={'xl'}
+        className="update-doc-modal"
+      >
+        <ModalHeader toggle={this.toggleModal} close={closeBtn}>
+          <EditDocSvg style={{marginLeft: '10.6px', marginRight: '30.9px'}}/>
+          {document?.type}
         </ModalHeader>
-        <ModalBody>
+        {/*<ModalHeader toggle={toggleModal} close={closeBtn}>*/}
+        {/*  <img src={`${window.location.origin}/${documentImg}`} alt="Add New"/>*/}
+        {/*  <span className="update-doc-modal-title">{document?.type}</span>*/}
+        {/*</ModalHeader>*/}
+        <ModalBody className="update-doc-container">
           <div className="upload-doc-delete-container">
             <img
               style={{cursor: 'pointer'}}
               src={deleteSvg}
               alt="delete"
-              onClick={() => this.handleDeleteDocument(document!)}
+              onClick={() => this.confirmDelete()}
             />
           </div>
           <Nav tabs>
@@ -85,7 +113,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                   this.toggleTab('2');
                 }}
               >
-                Share
+                Replace
               </NavLink>
             </NavItem>
             <NavItem>
@@ -95,7 +123,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                   this.toggleTab('3');
                 }}
               >
-                Replace
+                Share
               </NavLink>
             </NavItem>
           </Nav>
@@ -114,6 +142,15 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               </Row>
             </TabPane>
             <TabPane tabId="2">
+              <div className="update-doc-tab-spacing">
+                <Row>
+                  <Col sm="12">
+                    <h4>Replace Feature Coming Soon...</h4>
+                  </Col>
+                </Row>
+              </div>
+            </TabPane>
+            <TabPane tabId="3">
               <div className="update-doc-tab-spacing">
                 <Row>
                   <Col sm="12">
@@ -170,20 +207,19 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                 </Row>
               </div>
             </TabPane>
-            <TabPane tabId="3">
-              <div className="update-doc-tab-spacing">
-                <Row>
-                  <Col sm="12">
-                    <h4>Replace Feature Coming Soon...</h4>
-                  </Col>
-                </Row>
-              </div>
-            </TabPane>
           </TabContent>
+          { confirmDelete && (
+            <div className="confirm-delete-container">
+              <div>Are you sure you want to permanently delete this file?</div>
+              <Button color="danger" onClick={() => this.handleDeleteDocument(document!)}>Delete</Button>
+            </div>
+          )}
         </ModalBody>
-        <ModalFooter>
-          <Button color="primary" onClick={toggleModal} disabled>Save</Button>
-        </ModalFooter>
+        { !confirmDelete && (
+          <ModalFooter>
+            <Button color="primary" onClick={this.toggleModal} disabled>Save</Button>
+          </ModalFooter>
+        )}
       </Modal>
     );
   }
