@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="207.441" height="45.278" viewBox="0 0 207.441 45.278">
+  <g id="Group_1377" data-name="Group 1377" transform="translate(-1120.019 -389.087)">
+    <g id="Group_1381" data-name="Group 1381" transform="translate(1120.019 389.087)">
+      <rect id="Rectangle_928" data-name="Rectangle 928" width="207.441" height="45.278" rx="22" fill="#95a3b9"/>
+    </g>
+    <g id="Group_1383" data-name="Group 1383" transform="translate(-101 86)">
+      <g id="noun_Exit_329929" transform="translate(1242 310)">
+        <path id="Path_1273" data-name="Path 1273" d="M4.608,0C1.9,0,0,2.229,0,5.075V28.58c0,2.846,1.9,5.075,4.608,5.075H15.826a.954.954,0,0,0,.551-.184c.009-.007.024-.009.033-.017a.77.77,0,0,0,.284-.217l1.87-2.387,6.778-8.213c.117-.144.3-.316.3-.5V5.075C25.642,2.324,22.985,0,20.1,0Zm0,1.6H20.1c1.981,0,3.94,1.622,3.94,3.472V21.852l-.05.067c-.027,0-.056-.017-.083-.017H18.146c-1.7,0-2.654,1.677-2.654,3.189v6.895l-.05.067H4.608c-1.839,0-3-1.493-3-3.472V5.075C1.6,3.1,2.769,1.6,4.608,1.6Zm13.539,21.9H22.27l-3,4.007L17.095,30.1V25.091C17.095,24.37,17.433,23.505,18.146,23.505Z" fill="#fff" stroke="#fff" stroke-width="1" fill-rule="evenodd"/>
+      </g>
+      <g id="Group_1380" data-name="Group 1380" transform="translate(1248.428 320.15)">
+        <g id="Group_1379" data-name="Group 1379" transform="translate(0 0)">
+          <path id="Path_1275" data-name="Path 1275" d="M16.363,5.2,13.218,2.262A1.037,1.037,0,0,0,12.484,2a1.008,1.008,0,0,0-1.048,1,.845.845,0,0,0,.315.681l1.363,1.258H7.766A5.58,5.58,0,0,0,2,10.335v5.4a1.042,1.042,0,0,0,1.048,1,1.008,1.008,0,0,0,1.048-1v-5.4A3.531,3.531,0,0,1,7.766,6.927h5.347L11.75,8.185a.845.845,0,0,0-.315.681,1.08,1.08,0,0,0,1.782.734l3.145-2.935a1.133,1.133,0,0,0,.315-.734A1.035,1.035,0,0,0,16.363,5.2Z" transform="translate(-2 -2)" fill="#fff" fill-rule="evenodd"/>
+        </g>
+      </g>
+    </g>
+    <text id="Flip_Document" data-name="Flip Document" transform="translate(1179 419)" fill="#fff" font-size="17" font-family="Montserrat-Regular, Montserrat"><tspan x="0" y="0">Flip Document</tspan></text>
+  </g>
+</svg>

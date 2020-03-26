@@ -6,6 +6,7 @@
 //@import '~@material/menu/mdc-menu';
 @import './components/variables';
 @import 'fonts';
+@import '~react-image-lightbox/style.css';
 
 html { height:100%; }
 
@@ -169,6 +170,8 @@ body {
   width: 187px;
   text-transform: uppercase;
   text-align: center;
+  opacity: 0.7;
+  cursor: pointer;
 }
 
 .nav-tabs {
@@ -181,6 +184,7 @@ body {
   background-color: inherit;
   border-color: transparent;
   border-bottom: 4px solid $blue;
+  opacity: 1;
 }
 
 .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
@@ -246,4 +250,10 @@ body {
   background-repeat: repeat-y;
 }
 
+.pointer {
+  cursor: pointer;
+}
 
+.ReactModal__Overlay {
+  z-index: 1060 !important;
+}
