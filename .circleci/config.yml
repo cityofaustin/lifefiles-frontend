@@ -18,10 +18,16 @@ jobs:
       - run: cp .env.prod .env
       - run: ls -a
       - run: npm run deploy
+      - run: echo "export COMMIT_MESSAGE=\"$(git log --format=oneline -n 1 $CIRCLE_SHA1)\"" >> ~/.bashrc
+      - run: echo $COMMIT_MESSAGE
       - slack/status:
           webhook: ${SLACK_WEBHOOK}
-          success_message: 🎉 mypass frontend has deployed!
-          failure_message: 🔴 mypass frontend deploy has failed!
+          success_message: >
+            🎉 mypass frontend has deployed!
+            commit: $COMMIT_MESSAGE
+          failure_message: >
+            🔴 mypass frontend deploy has failed!
+            commit: $COMMIT_MESSAGE
           only_for_branches: master
 workflows:
   build-and-test:

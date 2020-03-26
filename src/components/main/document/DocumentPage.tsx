@@ -45,7 +45,7 @@ class DocumentPage extends Component<DocumentPageProps> {
         <div className="sort-section">
           <div className="subtitle">Sort by</div>
           <div className="subtitle subtitle-key" onClick={toggleSort}>NAME </div>
-          <Chevron isAscending={sortAsc} />
+          <Chevron isAscending={sortAsc} onClick={toggleSort} />
         </div>
         <Row style={{marginRight: '0', minHeight: '480px'}}>
           <Col

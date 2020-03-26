@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
+import React, {ChangeEvent, Component, Fragment} from 'react';
 import {
   Button,
   Card, CardTitle,
-  Col, ListGroup, ListGroupItem,
+  Col, FormGroup, Input, Label, ListGroup, ListGroupItem,
   Modal,
   ModalBody, ModalFooter,
   ModalHeader, Nav, NavItem, NavLink, Row, TabContent, TabPane
@@ -12,11 +12,10 @@ import Document from '../../../models/Document';
 import documentImg from '../../../img/document.svg';
 import './UpdateDocumentModal.scss';
 import DocumentService from '../../../services/DocumentService';
-import deleteSvg from '../../../img/delete.svg';
+import {ReactComponent as DeleteSvg} from '../../../img/delete.svg';
 // import crossImg from '../../../img/cross.svg';
 import {ReactComponent as EditDocSvg} from '../../../img/edit-doc.svg';
 import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
-
 
 
 interface UpdateDocumentModalProps {
@@ -29,7 +28,9 @@ interface UpdateDocumentModalProps {
 
 interface UpdateDocumentModalState {
   activeTab: string;
-  confirmDelete: boolean;
+  showConfirmDeleteSection: boolean;
+  hasConfirmedDelete: boolean;
+  deleteConfirmInput: string;
 }
 
 class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocumentModalState> {
@@ -38,13 +39,15 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
 
     this.state = {
       activeTab: '1',
-      confirmDelete: false
+      showConfirmDeleteSection: false,
+      hasConfirmedDelete: false,
+      deleteConfirmInput: ''
     };
   }
 
   toggleTab = (tab: string) => {
     const {activeTab} = {...this.state};
-    if (activeTab !== tab) this.setState({activeTab: tab, confirmDelete: false});
+    if (activeTab !== tab) this.setState({activeTab: tab, showConfirmDeleteSection: false});
   };
 
   handleDeleteDocument = async (document: Document) => {
@@ -52,8 +55,17 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     await handleDeleteDocument(document);
   };
 
+  handleDeleteConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const {value} = e.target;
+    let hasConfirmedDelete = false;
+    if (value === 'DELETE') {
+      hasConfirmedDelete = true;
+    }
+    this.setState({deleteConfirmInput: value, hasConfirmedDelete});
+  };
+
   confirmDelete = () => {
-    this.setState({activeTab: '0', confirmDelete: true});
+    this.setState({activeTab: '0', showConfirmDeleteSection: true});
   };
 
   toggleModal = () => {
@@ -61,14 +73,16 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     const {toggleModal} = {...this.props};
     this.setState({
       activeTab: '1',
-      confirmDelete: false
+      showConfirmDeleteSection: false,
+      hasConfirmedDelete: false,
+      deleteConfirmInput: ''
     });
     toggleModal();
   };
 
   render() {
     const {showModal, document, pendingShareRequests} = {...this.props};
-    const {activeTab, confirmDelete} = {...this.state};
+    const {activeTab, showConfirmDeleteSection, hasConfirmedDelete, deleteConfirmInput} = {...this.state};
     const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
     return (
       <Modal
@@ -87,11 +101,10 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
         {/*  <span className="update-doc-modal-title">{document?.type}</span>*/}
         {/*</ModalHeader>*/}
         <ModalBody className="update-doc-container">
-          <div className="upload-doc-delete-container">
-            <img
-              style={{cursor: 'pointer'}}
-              src={deleteSvg}
-              alt="delete"
+          <div className={classNames({'upload-doc-delete-container': true, active: showConfirmDeleteSection})}>
+            <DeleteSvg
+              className="delete-svg"
+              style={{cursor: 'pointer', fill: 'white'}}
               onClick={() => this.confirmDelete()}
             />
           </div>
@@ -167,8 +180,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                                 <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
                                   {`Account ID: ${pendingShareRequest}`}
                                 </div>
-                                <Button color="success" onClick={()=>{}}>Approve</Button>
-                                <Button close />
+                                <Button color="success" onClick={() => {
+                                }}>Approve</Button>
+                                <Button close/>
                               </ListGroupItem>
                             );
                           })}
@@ -195,7 +209,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                                 <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
                                   {`Account ID: ${sharedWithAccountId}`}
                                 </div>
-                                <Button close />
+                                <Button close/>
                               </ListGroupItem>
                             );
                           })}
@@ -208,14 +222,48 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               </div>
             </TabPane>
           </TabContent>
-          { confirmDelete && (
+          {showConfirmDeleteSection && (
             <div className="confirm-delete-container">
-              <div>Are you sure you want to permanently delete this file?</div>
-              <Button color="danger" onClick={() => this.handleDeleteDocument(document!)}>Delete</Button>
+              <div className="delete-prompt">Are you sure you want to permanently delete this file?</div>
+              <div className="delete-section">
+                <div className="delete-image-container">
+                  {document &&
+                  <img className="delete-image"
+                       src={DocumentService.getDocumentURL(document!.url)}
+                       alt="doc missing"
+                  />
+                  }
+                </div>
+                <div className="delete-info">
+                  <div className="delete-info-prompt">
+                    <p>Deleting this file will <span className="delete-info-danger">permanently revoke access to all users.</span>
+                    </p>
+                    <p>Are you sure?</p>
+                  </div>
+                  <FormGroup>
+                    <Label for="documentDelete" className="other-prompt">Type DELETE to confirm</Label>
+                    <Input type="text" name="documentDelete" id="documentDelete" value={deleteConfirmInput}
+                           onChange={this.handleDeleteConfirmChange} placeholder="" autocomplete="off"
+                    />
+                    <span>Please enter the text exactly as displayed to confirm</span>
+                  </FormGroup>
+                </div>
+              </div>
+              <div className="delete-buttons">
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={this.toggleModal}>Cancel</Button>{' '}
+                <Button
+                  className="margin-wide"
+                  color="danger"
+                  onClick={() => this.handleDeleteDocument(document!)} disabled={!hasConfirmedDelete}>Delete</Button>
+              </div>
             </div>
           )}
         </ModalBody>
-        { !confirmDelete && (
+        {!showConfirmDeleteSection && (
           <ModalFooter>
             <Button color="primary" onClick={this.toggleModal} disabled>Save</Button>
           </ModalFooter>

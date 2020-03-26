@@ -1,11 +1,12 @@
 import React, {Component, Fragment} from 'react';
 
-interface ChevronProps { isAscending: boolean; }
+interface ChevronProps { isAscending: boolean; onClick: () => void; }
 
 class Chevron extends Component<ChevronProps> {
 
   static defaultProps = {
-    isAscending: true
+    isAscending: true,
+    onClick: () => {}
   };
 
   constructor(props: Readonly<ChevronProps>) {
@@ -13,9 +14,9 @@ class Chevron extends Component<ChevronProps> {
   }
 
   render() {
-    const {isAscending} = {...this.props};
+    const {isAscending, onClick} = {...this.props};
     return (
-      <div style={{display: 'flex', marginTop: '27px', alignItems: 'center'}}>
+      <div style={{display: 'flex', marginTop: '27px', alignItems: 'center', cursor: 'pointer'}} onClick={onClick}>
         {isAscending && (
           <svg width="18.753" height="11.498" viewBox="0 0 18.753 11.498" style={{transform: 'rotate(180deg)'}}>
             <g transform="translate(-372.379 -234.379) ">

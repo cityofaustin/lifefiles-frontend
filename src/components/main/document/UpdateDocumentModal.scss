@@ -1,3 +1,5 @@
+@import '../../variables';
+
 .update-doc-modal-title {
   margin-left: 18px;
 }
@@ -8,7 +10,21 @@
 
 .upload-doc-delete-container {
   position: absolute;
-  right: 87.3px;
+  right: 55.9px;
+  //top: 9px;
+  padding: 8px 34.5px;
+
+  &.active {
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    background: $danger;
+
+    .delete-svg {
+      g {
+        fill: white;
+      }
+    }
+  }
 }
 
 .update-doc-img-container {
@@ -25,6 +41,71 @@
 
 .confirm-delete-container {
   background-color: #f6f6f6;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  margin: 0 40px;
+  padding: 44px 34px 31px 44px;
+
+  .delete-prompt {
+    margin-bottom: 67px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #484848;
+    text-align: center;
+    opacity: 0.5;
+  }
+
+  .delete-section {
+    display: flex;
+    height: 352px;
+
+    .delete-image-container {
+      display: flex;
+      align-items: center;
+      //background: blue;
+
+      .delete-image {
+        width: 375px;
+        object-fit: contain;
+      }
+    }
+  }
+
+  .delete-info {
+    //background: orange;
+    margin-left: 25px;
+    color: #484848;
+
+    .delete-info-prompt {
+      font-size: 25px;
+
+      .delete-info-danger {
+        color: #d95868;
+      }
+    }
+
+    .form-group {
+      margin-top: 55px;
+      margin-right: 39.8px;
+
+      .other-prompt {
+        font-size: 25px;
+        font-weight: 500;
+      }
+
+      span {
+        color: #d95868;
+        font-size: 15px;
+      }
+    }
+  }
+}
+
+.delete-buttons {
+  //background: cadetblue;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .update-doc-modal .modal-content {
