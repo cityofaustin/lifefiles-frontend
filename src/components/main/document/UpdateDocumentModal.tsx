@@ -1,8 +1,7 @@
 import React, {ChangeEvent, Component, Fragment} from 'react';
 import {
   Button,
-  Card, CardTitle,
-  Col, FormGroup, Input, Label, ListGroup, ListGroupItem,
+  Col, FormGroup, Input, Label,
   Modal,
   ModalBody, ModalFooter,
   ModalHeader, Nav, NavItem, NavLink, Row, TabContent, TabPane
@@ -20,6 +19,9 @@ import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
 import {ReactComponent as PrintBtnSvg} from '../../../img/print-btn.svg';
 import {ReactComponent as ZoomBtnSvg} from '../../../img/zoom-btn.svg';
 import Lightbox from 'react-image-lightbox';
+import Select from 'react-select/base';
+import Account from '../../../models/Account';
+import AccountService from '../../../services/AccountService';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -27,6 +29,7 @@ interface UpdateDocumentModalProps {
   document?: Document;
   handleDeleteDocument: (document: Document) => Promise<void>;
   pendingShareRequests: string[];
+  accounts: Account[];
 }
 
 interface UpdateDocumentModalState {
@@ -35,6 +38,7 @@ interface UpdateDocumentModalState {
   hasConfirmedDelete: boolean;
   deleteConfirmInput: string;
   isZoomed: boolean;
+  selectedContact?: Account;
 }
 
 class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocumentModalState> {
@@ -81,12 +85,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
       deleteConfirmInput: '',
-      isZoomed: false
+      isZoomed: false,
+      selectedContact: undefined
     });
     toggleModal();
   };
 
-  setFile = () => {};
+  setFile = () => {
+  };
 
   printImg(url: string) {
     const win = window.open('');
@@ -95,8 +101,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
   }
 
   render() {
-    const {showModal, document, pendingShareRequests} = {...this.props};
-    const {activeTab, showConfirmDeleteSection, hasConfirmedDelete, deleteConfirmInput, isZoomed} = {...this.state};
+    const {showModal, document, pendingShareRequests, accounts} = {...this.props};
+    const {activeTab, showConfirmDeleteSection, hasConfirmedDelete, deleteConfirmInput, isZoomed, selectedContact} = {...this.state};
     const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
     return (
       <Modal
@@ -157,7 +163,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                 <Col sm="12" className="preview-container">
                   <div className="preview-img-container">
                     <div className="img-tools">
-                      <FlipDocBtnSvg className="pointer" />
+                      <FlipDocBtnSvg className="pointer"/>
                     </div>
                     <div className="img-container">
                       <img className="doc-image"
@@ -167,10 +173,11 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                     </div>
                     <div className="img-access">
                       <a href={DocumentService.getDocumentURL(document!.url)} download target="_blank">
-                        <DownloadBtnSvg className="pointer" />
+                        <DownloadBtnSvg className="pointer"/>
                       </a>
-                      <PrintBtnSvg className="pointer" onClick={() => this.printImg(DocumentService.getDocumentURL(document!.url))} />
-                      <ZoomBtnSvg className="pointer" onClick={() => this.setState({ isZoomed: true })} />
+                      <PrintBtnSvg className="pointer"
+                                   onClick={() => this.printImg(DocumentService.getDocumentURL(document!.url))}/>
+                      <ZoomBtnSvg className="pointer" onClick={() => this.setState({isZoomed: true})}/>
                     </div>
                   </div>
                   <div className="preview-info">
@@ -199,67 +206,99 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               <div className="update-doc-tab-spacing">
                 <Row>
                   <Col sm="12">
-                    <FileUploader setFile={this.setFile} />
+                    <FileUploader setFile={this.setFile}/>
                   </Col>
                 </Row>
               </div>
             </TabPane>
             <TabPane tabId="3">
-              <div className="update-doc-tab-spacing">
-                <Row>
-                  <Col sm="12">
-                    <Card body>
-                      <CardTitle>Pending Share Requests</CardTitle>
-                      <div>
-                        {pendingShareRequests.length < 1 && (
-                          <div>No pending shares.</div>
-                        )}
-                        <ListGroup>
-                          {pendingShareRequests!.map((pendingShareRequest, idx) => {
-                            return (
-                              <ListGroupItem key={idx} className="justify-content-between">
-                                <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
-                                  {`Account ID: ${pendingShareRequest}`}
-                                </div>
-                                <Button color="success" onClick={() => {
-                                }}>Approve</Button>
-                                <Button close/>
-                              </ListGroupItem>
-                            );
-                          })}
-                        </ListGroup>
+              <div>
+                <div className="share-container">
+                  <div className={classNames({'contact-details': true, active: selectedContact})}>
+                    {selectedContact && (
+                      <Fragment>
+                        <img className="contact-detail-image"
+                             src={AccountService.getProfileURL(selectedContact.profileImageUrl!)}
+                             alt="Profile"/>
+                        <div className="contact-detail-info">
+                          <div className="info-item">
+                            <div className="item-attr">Name</div>
+                            <div className="item-value">{selectedContact.username}</div>
+                          </div>
+                          <div className="info-item">
+                            <div className="item-attr">Organization</div>
+                            <div className="item-value">-</div>
+                          </div>
+                          <div className="info-item">
+                            <div className="item-attr">Role</div>
+                            <div className="item-value">{selectedContact.role}</div>
+                          </div>
+                          <div className="info-item">
+                            <div className="item-attr">Phone</div>
+                            <div className="item-value">-</div>
+                          </div>
+                          <div className="info-item">
+                            <div className="item-attr">E-mail</div>
+                            <div className="item-value">{selectedContact.email}</div>
+                          </div>
+                        </div>
+                        <div className="contact-detail-share-doc">
+                          <div className="prompt">
+                            Share Social Security Card?
+                          </div>
+                          <div className="share-check"/>
+                          <div className="share-status">
+                            This file is NOT currently shared with {selectedContact.username}
+                          </div>
+                        </div>
+                      </Fragment>
+                    )}
+                  </div>
+
+                  <div className="right-panel">
+                    <div className="contact-list">
+                      <div className="title">contacts</div>
+                      <div className="subtitle">Select a contact to share this document with</div>
+                      <div className="contact-grid">
+                        {accounts.map(account => (
+                          <div key={account.id}
+                               className={classNames({
+                                   contact: true,
+                                   active: (selectedContact && selectedContact.id === account.id)
+                                 }
+                               )}
+                               onClick={() => this.setState({selectedContact: account})}>
+                            <img className="contact-image"
+                                 src={AccountService.getProfileURL(account.profileImageUrl!)}
+                                 alt="Profile"/>
+                            <div className="contact-name">{account.username}</div>
+                          </div>
+                        ))}
                       </div>
-                    </Card>
-                  </Col>
-                  <Col sm="12">
-                    <Card body>
-                      <CardTitle>Approved Shares</CardTitle>
-                      {document &&
-                      <div>
-                        {document!.sharedWithAccountIds.length < 1 && (
-                          <div>No approved shares.</div>
-                        )}
-                        <ListGroup>
-                          {document!.sharedWithAccountIds.map((sharedWithAccountId, idx) => {
-                            return (
-                              <ListGroupItem key={idx} className="justify-content-between">
-                                {/*<img className="shared-with-image-single"*/}
-                                {/*     src={sharedWithItem.profileimgUrl}*/}
-                                {/*     alt={`sharedWithItem${idx}`}*/}
-                                {/*/>*/}
-                                <div style={{display: 'inline-block', wordBreak: 'break-all'}}>
-                                  {`Account ID: ${sharedWithAccountId}`}
-                                </div>
-                                <Button close/>
-                              </ListGroupItem>
-                            );
-                          })}
-                        </ListGroup>
+                    </div>
+                    <div className="share-time-limit">
+                      <div className="share-time-disabled-overlay"/>
+                      <div className="title">time limit</div>
+                      <div className="subtitle">Specify how long this document will be shared</div>
+                      <div className="share-for-container">
+                        <div className="share-for-form-group">
+                          <label>Share for...</label>
+                          <div style={{width: '224px'}}>
+                            <Select/>
+                          </div>
+                        </div>
+                        <div className="date-container">
+                          <div className="date-indicator">From</div>
+                          <div className="date-value">March 27, 2020</div>
+                        </div>
+                        <div className="date-container">
+                          <div className="date-indicator">To</div>
+                          <div className="date-value">April 27, 2020</div>
+                        </div>
                       </div>
-                      }
-                    </Card>
-                  </Col>
-                </Row>
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabPane>
           </TabContent>
@@ -307,7 +346,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             <Lightbox
               // reactModalStyle={{zIndex: '1060'}}
               mainSrc={DocumentService.getDocumentURL(document!.url)}
-              onCloseRequest={() => this.setState({ isZoomed: false })}
+              onCloseRequest={() => this.setState({isZoomed: false})}
             />
           )}
         </ModalBody>

@@ -42,7 +42,7 @@ interface MainContainerState {
   isAccountMenuOpen: boolean;
   isLoading: boolean;
   documentQuery: string;
-  otherOwnerAccounts: Account[];
+  accounts: Account[];
 }
 
 interface MainContainerProps {
@@ -66,25 +66,33 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       isAccountMenuOpen: false,
       isLoading: false,
       documentQuery: '',
-      otherOwnerAccounts: []
+      accounts: []
     };
   }
 
   async componentDidMount() {
     const {account} = {...this.props};
     const {sortAsc} = {...this.state};
-    let {documentTypes, otherOwnerAccounts} = {...this.state};
+    let {documentTypes, accounts} = {...this.state};
     const documents: Document[] = account.documents;
     this.setState({isLoading: true});
     try {
       documentTypes = (await DocumentTypeService.get()).documentTypes;
       if(account.role === 'notary') {
-        otherOwnerAccounts = (await AccountService.getAccounts()).filter(accountItem => {
+        accounts = (await AccountService.getAccounts()).filter(accountItem => {
           if(accountItem.role === 'owner' && accountItem.id !== account.id) {
             return accountItem;
           }
         });
+      } else {
+        accounts = (await AccountService.getAccounts()).filter(accountItem => {
+          if(accountItem.role === 'notary' && accountItem.id !== account.id) {
+            return accountItem;
+          }
+        });
       }
+      // NOTE: since not paging yet, preventing from getting too big for layout
+      accounts = accounts.length > 8 ? accounts.slice(0, 8) : accounts;
     } catch (err) {
       console.error('failed to fetch main data');
     }
@@ -93,7 +101,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       documents,
       searchedDocuments: this.sortDocuments(documents, sortAsc),
       isLoading: false,
-      otherOwnerAccounts
+      accounts
     });
   }
 
@@ -216,7 +224,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal() {
-    const {documentSelected} = {...this.state};
+    const {documentSelected, accounts} = {...this.state};
     const {account} = {...this.props};
     const pendingShareRequests: string[] = account.shareRequests
       .filter(sharedRequest => {
@@ -227,6 +235,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       .map(sharedRequest => sharedRequest.shareWithAccountId);
     return (
       <UpdateDocumentModal
+        accounts={accounts}
         showModal={!!documentSelected}
         toggleModal={() => this.setState({documentSelected: undefined})}
         document={documentSelected}
@@ -298,12 +307,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMyClients() {
-    const {searchedDocuments, otherOwnerAccounts, isAccount, sortAsc} = {...this.state};
+    const {searchedDocuments, accounts, isAccount, sortAsc} = {...this.state};
 
     if (!isAccount) {
       return (
         <ClientPage
-          otherOwnerAccounts={otherOwnerAccounts}
+          otherOwnerAccounts={accounts}
           handleAddNew={this.handleAddNew}
           handleSelectDocument={this.handleSelectDocument}
           searchedDocuments={searchedDocuments}
