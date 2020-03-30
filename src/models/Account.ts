@@ -15,6 +15,11 @@ interface Account {
   documents: Document[];
   shareRequests: ShareRequest[];
   profileImageUrl?: string;
+  phoneNumber?: string;
+  organization?: string;
+  firstName?: string;
+  lastName?: string;
+  randomValue?: string;
 }
 
 export default Account;

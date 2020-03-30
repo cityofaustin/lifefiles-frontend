@@ -1,20 +1,31 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
   "linterOptions": {
     "exclude": [
       "src/app/utilities/message-template-util.ts"
     ]
   },
   "jsRules": {},
-    "rules": {
-      "semicolon": [true, "always", "strict-bound-class-methods"],
-      "no-console": false,
-      "quotemark": [true, "single", "jsx-double"],
-      "object-literal-sort-keys": false,
-      "trailing-comma": [true, {
+  "rules": {
+    "no-trailing-whitespace": false,
+    "semicolon": [
+      true,
+      "always",
+      "strict-bound-class-methods"
+    ],
+    "no-console": false,
+    "quotemark": [
+      true,
+      "single",
+      "jsx-double"
+    ],
+    "object-literal-sort-keys": false,
+    "trailing-comma": [
+      true,
+      {
         "singleline": "never",
         "multiline": {
           "objects": "never",
@@ -22,9 +33,13 @@
           "functions": "never",
           "typeLiterals": "ignore"
         }
-      }],
-      "no-empty": [true, "allow-empty-functions"],
-      "interface-name": false
-    },
-    "rulesDirectory": []
+      }
+    ],
+    "no-empty": [
+      true,
+      "allow-empty-functions"
+    ],
+    "interface-name": false
+  },
+  "rulesDirectory": []
 }

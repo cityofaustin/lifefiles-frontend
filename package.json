@@ -11,7 +11,9 @@
     "ts-build": "npx tsc",
     "lint": "npx tslint -c tslint.json -p tsconfig.json",
     "clean-dist": "npm run remove-dist && mkdir dist",
-    "remove-dist": "npx rimraf ./dist"
+    "remove-dist": "npx rimraf ./dist",
+    "zep-connect": "npx zeplin connect",
+    "zep-react": "npx zeplin connect -p @zeplin/cli-connect-react-plugin"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,7 @@
   "dependencies": {
     "bootstrap": "^4.4.1",
     "classnames": "^2.2.6",
+    "date-fns": "^2.11.1",
     "material-components-web": "^5.1.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
@@ -51,6 +54,8 @@
     "@types/reactstrap": "^8.4.2",
     "@types/webpack": "^4.41.7",
     "@types/webpack-dev-server": "^3.10.0",
+    "@zeplin/cli": "^1.0.0",
+    "@zeplin/cli-connect-react-plugin": "^0.2.3",
     "autoprefixer": "^9.7.4",
     "css-loader": "^3.4.2",
     "dotenv": "^8.2.0",

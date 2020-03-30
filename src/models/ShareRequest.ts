@@ -1,5 +1,6 @@
 
 interface ShareRequest {
+  _id?: string;
   shareWithAccountId: string;
   documentType: string;
   approved: boolean;

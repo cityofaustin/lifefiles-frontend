@@ -1,6 +1,7 @@
 import Account from './Account';
 
 interface Document {
+  _id?: string;
   name?: string;
   url: string;
   notarized?: boolean;

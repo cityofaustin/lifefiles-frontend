@@ -1,0 +1,20 @@
+{
+    "plugins": [
+        {
+            "name": "@zeplin/cli-connect-react-plugin"
+        }
+    ],
+    "projects": [],
+    "styleguides": [
+        "5e823362a71d3871404a8d9b"
+    ],
+    "components": [
+        {
+            "path": "src/components/common/Checkbox.tsx",
+            "zeplinNames": [
+                "checkbox-unchecked",
+                "checkbox-checked"
+            ]
+        }
+    ]
+}

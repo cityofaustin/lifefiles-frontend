@@ -8,6 +8,7 @@ import AccountService from '../services/AccountService';
 import ProgressIndicator from './common/ProgressIndicator';
 import './App.scss';
 import Role from '../models/Role';
+import ShareRequest from '../models/ShareRequest';
 
 interface AppState {
   account?: Account;
@@ -56,6 +57,13 @@ class App extends Component<{}, AppState> {
     this.setState({ account: undefined });
   };
 
+  updateAccountShareRequests = (requests: ShareRequest[]) => {
+    const {account} = {...this.state};
+    account!.shareRequests = requests;
+    this.setState({account});
+  };
+
+
   render() {
     const {account, isLoading, theme} = {...this.state};
     return (
@@ -65,7 +73,13 @@ class App extends Component<{}, AppState> {
         }
         {!isLoading &&
         <div className="page-container">
-          {account && <MainContainer account={account} handleLogout={this.handleLogout}/>}
+          {account && (
+            <MainContainer
+              account={account}
+              handleLogout={this.handleLogout}
+              updateAccountShareRequests={this.updateAccountShareRequests}
+            />
+            )}
           {!account && <LoginPage handleLogin={this.handleLogin}/>}
         </div>
         }

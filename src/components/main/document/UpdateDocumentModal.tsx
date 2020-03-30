@@ -22,14 +22,23 @@ import Lightbox from 'react-image-lightbox';
 import Select from 'react-select/base';
 import Account from '../../../models/Account';
 import AccountService from '../../../services/AccountService';
+import AccountImpl from '../../../models/AccountImpl';
+import {roleDisplayMap} from '../../../models/Role';
+import {addMonths, format} from 'date-fns';
+import Checkbox from '../../common/Checkbox';
+import ShareRequest from '../../../models/ShareRequest';
+import ShareRequestService from '../../../services/ShareRequestService';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
   toggleModal: () => void;
   document?: Document;
   handleDeleteDocument: (document: Document) => Promise<void>;
-  pendingShareRequests: string[];
+  shareRequests: ShareRequest[];
   accounts: Account[];
+  addShareRequest: (request: ShareRequest) => void;
+  removeShareRequest: (request: ShareRequest) => void;
+  myAccount: Account;
 }
 
 interface UpdateDocumentModalState {
@@ -39,6 +48,7 @@ interface UpdateDocumentModalState {
   deleteConfirmInput: string;
   isZoomed: boolean;
   selectedContact?: Account;
+  showConfirmShare: boolean;
 }
 
 class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocumentModalState> {
@@ -50,9 +60,39 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
       deleteConfirmInput: '',
-      isZoomed: false
+      isZoomed: false,
+      showConfirmShare: false
     };
   }
+
+  handleShareDocWithContact = async () => {
+    const {document, addShareRequest, myAccount} = {...this.props};
+    const {selectedContact} = {...this.state};
+    // then add share and approve it api call
+    let newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, selectedContact?.id!);
+    newShareRequest = await ShareRequestService.approveShareRequest(newShareRequest._id);
+    addShareRequest(newShareRequest);
+    this.setState({selectedContact, showConfirmShare: false});
+  };
+
+  handleShareDocCheck = () => {
+    const {removeShareRequest} = {...this.props};
+    const {selectedContact} = {...this.state};
+    let showConfirmShare = false;
+    if(this.getDocumentSharedWithContact()) {
+      // TODO then just delete the share api call
+      removeShareRequest(this.getDocumentSharedWithContact()!);
+    } else {
+      // show prompt
+      showConfirmShare = true;
+    }
+    this.setState({selectedContact, showConfirmShare});
+  };
+
+  toggleConfirmShare = () => {
+    const {showConfirmShare} = {...this.state};
+    this.setState({showConfirmShare: !showConfirmShare});
+  };
 
   toggleTab = (tab: string) => {
     const {activeTab} = {...this.state};
@@ -86,12 +126,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
       hasConfirmedDelete: false,
       deleteConfirmInput: '',
       isZoomed: false,
-      selectedContact: undefined
+      selectedContact: undefined,
+      showConfirmShare: false
     });
     toggleModal();
   };
 
   setFile = () => {
+    // TODO
   };
 
   printImg(url: string) {
@@ -100,9 +142,20 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     win?.focus();
   }
 
+  getDocumentSharedWithContact = () => {
+    const {selectedContact} = {...this.state};
+    const {shareRequests} = {...this.props};
+    const shareRequestMatch = shareRequests.find(shareRequest => selectedContact?.id === shareRequest.shareWithAccountId);
+    if(shareRequestMatch) {
+      return shareRequestMatch;
+    }
+    return undefined;
+  };
+
   render() {
-    const {showModal, document, pendingShareRequests, accounts} = {...this.props};
-    const {activeTab, showConfirmDeleteSection, hasConfirmedDelete, deleteConfirmInput, isZoomed, selectedContact} = {...this.state};
+    const {showModal, document, accounts} = {...this.props};
+    const {activeTab, showConfirmDeleteSection, hasConfirmedDelete,
+      deleteConfirmInput, isZoomed, selectedContact, showConfirmShare} = {...this.state};
     const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
     return (
       <Modal
@@ -195,7 +248,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                     </div>
                     <div className="preview-info-item">
                       <div className="attr">Valid Until</div>
-                      <div className="attr-value">-</div>
+                      <div className="attr-value">N/A</div>
                     </div>
                   </div>
                 </Col>
@@ -223,19 +276,21 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                         <div className="contact-detail-info">
                           <div className="info-item">
                             <div className="item-attr">Name</div>
-                            <div className="item-value">{selectedContact.username}</div>
+                            <div className="item-value">
+                              {AccountImpl.getFullName(selectedContact?.firstName, selectedContact?.lastName)}
+                            </div>
                           </div>
                           <div className="info-item">
                             <div className="item-attr">Organization</div>
-                            <div className="item-value">-</div>
+                            <div className="item-value">{selectedContact?.organization || '-'}</div>
                           </div>
                           <div className="info-item">
                             <div className="item-attr">Role</div>
-                            <div className="item-value">{selectedContact.role}</div>
+                            <div className="item-value">{roleDisplayMap[selectedContact.role]}</div>
                           </div>
                           <div className="info-item">
                             <div className="item-attr">Phone</div>
-                            <div className="item-value">-</div>
+                            <div className="item-value">{selectedContact?.phoneNumber || '-'}</div>
                           </div>
                           <div className="info-item">
                             <div className="item-attr">E-mail</div>
@@ -246,7 +301,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                           <div className="prompt">
                             Share Social Security Card?
                           </div>
-                          <div className="share-check"/>
+                          <Checkbox isChecked={!!this.getDocumentSharedWithContact()} onClick={this.handleShareDocCheck}/>
                           <div className="share-status">
                             This file is NOT currently shared with {selectedContact.username}
                           </div>
@@ -289,11 +344,11 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                         </div>
                         <div className="date-container">
                           <div className="date-indicator">From</div>
-                          <div className="date-value">March 27, 2020</div>
+                          <div className="date-value">{format(new Date(), 'MMMM d, y')}</div>
                         </div>
                         <div className="date-container">
                           <div className="date-indicator">To</div>
-                          <div className="date-value">April 27, 2020</div>
+                          <div className="date-value">{format(addMonths(new Date(), 1), 'MMMM d, y')}</div>
                         </div>
                       </div>
                     </div>
@@ -349,6 +404,34 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               onCloseRequest={() => this.setState({isZoomed: false})}
             />
           )}
+          <Modal
+            toggle={this.toggleConfirmShare}
+            size={'lg'}
+            isOpen={showConfirmShare}
+          >
+            {/*<ModalHeader>Nested Modal title</ModalHeader>*/}
+            <ModalBody>
+              { document && (
+                <div className="confirm-share">
+                  <div className="confirm-share-prompt">
+                    You're about to share<br />{(document?.type)?.toUpperCase()} with{' '}
+                    {AccountImpl.getFullName(selectedContact?.firstName, selectedContact?.lastName).toUpperCase()}.
+                  </div>
+                  <img className="share-doc-img"
+                       src={DocumentService.getDocumentURL(document!.url)}
+                       alt="doc missing"
+                  />
+                  <div className="confirm-prompt">
+                    Are you sure you want to continue?
+                  </div>
+                  <div className="confirm-buttons">
+                    <Button outline color="secondary" onClick={this.toggleConfirmShare}>No, take me back</Button>
+                    <Button color="primary" onClick={this.handleShareDocWithContact}>Yes, share access</Button>
+                  </div>
+                </div>
+              )}
+            </ModalBody>
+          </Modal>
         </ModalBody>
         {activeTab === '2' && (
           <ModalFooter className="modal-footer-center">

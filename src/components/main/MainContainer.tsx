@@ -28,6 +28,7 @@ import UpdateDocumentModal from './document/UpdateDocumentModal';
 import AccountService from '../../services/AccountService';
 import DocumentPage from './document/DocumentPage';
 import ClientPage from './account/ClientPage';
+import ShareRequest from '../../models/ShareRequest';
 
 // TODO use react router dom and make this more of a app container
 
@@ -48,6 +49,7 @@ interface MainContainerState {
 interface MainContainerProps {
   account: Account;
   handleLogout: () => void;
+  updateAccountShareRequests: (requests: ShareRequest[]) => void;
 }
 
 class MainContainer extends Component<MainContainerProps, MainContainerState> {
@@ -210,6 +212,20 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({documents, searchedDocuments, isLoading: false, documentSelected: undefined});
   };
 
+  addShareRequest = (request: ShareRequest) => {
+    const {updateAccountShareRequests, account} = {...this.props};
+    const {shareRequests} = {...account};
+    shareRequests.push(request);
+    updateAccountShareRequests(shareRequests);
+  };
+
+  removeShareRequest = (request: ShareRequest) => {
+    const {updateAccountShareRequests, account} = {...this.props};
+    let {shareRequests} = {...account};
+    shareRequests = shareRequests.filter(shareRequest => shareRequest._id !== request._id);
+    updateAccountShareRequests(shareRequests);
+  };
+
   renderAddDocumentModal() {
     const {showModal, documentTypes, documents} = {...this.state};
     return (
@@ -225,22 +241,24 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
   renderUpdateDocumentModal() {
     const {documentSelected, accounts} = {...this.state};
-    const {account} = {...this.props};
-    const pendingShareRequests: string[] = account.shareRequests
+    const {account, updateAccountShareRequests} = {...this.props};
+    const shareRequests: ShareRequest[] = account.shareRequests
       .filter(sharedRequest => {
-      if(sharedRequest.documentType === documentSelected?.type && !sharedRequest.approved) {
+      if(sharedRequest.documentType === documentSelected?.type) {
         return sharedRequest;
       }
-      })
-      .map(sharedRequest => sharedRequest.shareWithAccountId);
+      });
     return (
       <UpdateDocumentModal
         accounts={accounts}
         showModal={!!documentSelected}
         toggleModal={() => this.setState({documentSelected: undefined})}
         document={documentSelected}
-        pendingShareRequests={pendingShareRequests}
+        shareRequests={shareRequests}
         handleDeleteDocument={this.handleDeleteDocument}
+        addShareRequest={this.addShareRequest}
+        removeShareRequest={this.removeShareRequest}
+        myAccount={account}
       />
     );
   }
