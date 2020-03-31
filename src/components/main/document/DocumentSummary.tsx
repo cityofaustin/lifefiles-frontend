@@ -36,7 +36,6 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
                alt="sharedWithItemFirst"
           />
         )}
-        {sharedAccounts.length === 1 && <span className="padding-right-24"/>}
       </Fragment>
     );
   }
@@ -81,11 +80,11 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
           <ImageWithStatus
                imageUrl={DocumentService.getDocumentURL(document.url)}
           />
-          <div className="title padding-top-12">{document.type}</div>
+          <div className="title" style={{lineHeight: '30px'}}>{document.type}</div>
           { sharedAccounts.length > 0 && (
             <Fragment>
-              <div className="subtitle">SHARED WITH</div>
-              <div className={classNames({'shared-with-container': true, 'padding-top-12': true, 'shared-multi': sharedAccounts.length > 1})}>
+              <div className="subtitle" style={{marginTop: 0}}>SHARED WITH</div>
+              <div className={classNames({'shared-with-container': true, 'shared-multi': sharedAccounts.length > 1})}>
                 {this.renderFirstShare(sharedAccounts)}
                 {this.renderOtherShare(sharedAccounts)}
                 {/*<div className="separator"/>*/}
