@@ -9,7 +9,7 @@ import {
 import DocumentTypeService from '../../../services/DocumentTypeService';
 import FileUploader from '../../common/FileUploader';
 import DocumentType from '../../../models/DocumentType';
-import Document from '../../../models/Document';
+import Document from '../../../models/document/Document';
 import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
 import {ReactComponent as NewDocSvg} from '../../../img/new-doc-2.svg';
 import Select, {OptionTypeBase} from 'react-select';
@@ -63,7 +63,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
     let {documentType, newFile, errorMessage, isOther} = {...this.state};
     // If document type exists show error message
     if (DocumentTypeService.findDocumentTypeMatchInDocuments(documentType!, documents)) {
-      errorMessage = 'Document type already exists.';
+      errorMessage = 'document type already exists.';
     } else {
       try {
         await handleAddNewDocument(newFile!, documentType!);

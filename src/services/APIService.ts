@@ -3,6 +3,8 @@ import StringUtil from '../util/StringUtil';
 import fetch from '../util/fetchWithTimeout';
 import APIError from './APIError';
 import HttpStatusCode from '../models/HttpStatusCode';
+import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
+import {format} from "date-fns";
 
 const MYPASS_API = process.env.MYPASS_API;
 
@@ -82,6 +84,31 @@ class APIService {
     formdata.append('type', documentType);
     const init = {
       method: 'POST',
+      headers,
+      body: formdata
+    };
+    // NOTE: putting a longer timeout over here since uploading files can take longer.
+    const response = await fetch(input, init, 20000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
+  static async updateDocument(request: UpdateDocumentRequest) {
+    const path = '/documents';
+    const input = `${MYPASS_API}${path}/${request.id}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`
+    };
+    const formdata = new FormData();
+    if(request.img) {
+      formdata.append('img', request.img, request.img.name);
+    }
+    if(request.validUntilDate) {
+      formdata.append('validuntildate', format(request.validUntilDate, 'yyyy/dd/MM'));
+    }
+    const init = {
+      method: 'PUT',
       headers,
       body: formdata
     };

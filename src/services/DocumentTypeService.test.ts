@@ -1,5 +1,5 @@
 import DocumentTypeService from './DocumentTypeService';
-import Document from '../models/Document';
+import Document from '../models/document/Document';
 import DocumentType from '../models/DocumentType';
 
 describe('DocumentTypeService', () => {

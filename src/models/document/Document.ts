@@ -1,4 +1,4 @@
-import Account from './Account';
+import Account from '../Account';
 
 interface Document {
   _id?: string;
@@ -13,6 +13,10 @@ interface Document {
   uploadedBy?: Account;
   belongsTo?: Account;
   sharedWithAccountIds: string[];
+  validateUntilDate?: Date;
+  permanentOrgFileArchiveNumber?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default Document;

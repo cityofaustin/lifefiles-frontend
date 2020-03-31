@@ -1,7 +1,7 @@
 import Account from './Account';
 import Role from './Role';
 import ShareRequest from './ShareRequest';
-import Document from './Document';
+import Document from './document/Document';
 
 class AccountImpl implements Account {
   firstName: string;

@@ -15,7 +15,7 @@ import SearchInput from '../common/SearchInput';
 import Chevron from '../common/Chevron';
 import AddNewDocument from './document/AddNewDocument';
 import Account from '../../models/Account';
-import Document from '../../models/Document';
+import Document from '../../models/document/Document';
 import StringUtil from '../../util/StringUtil';
 import DocumentService from '../../services/DocumentService';
 import ProgressIndicator from '../common/ProgressIndicator';
@@ -29,6 +29,7 @@ import AccountService from '../../services/AccountService';
 import DocumentPage from './document/DocumentPage';
 import ClientPage from './account/ClientPage';
 import ShareRequest from '../../models/ShareRequest';
+import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
 
 // TODO use react router dom and make this more of a app container
 
@@ -172,6 +173,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       if (newFile) {
         const response = await DocumentService.addDocument(newFile, documentTypeSelected!);
         const newDocument: Document = {
+          createdAt: new Date(), updatedAt: new Date(),
           url: response.file,
           notarized: false,
           did: '',
@@ -187,6 +189,22 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       console.error('failed to upload file');
     }
     this.setState({documents, searchedDocuments, showModal: false, isLoading: false},
+      () => {
+        this.handleSearchDocuments(documentQuery);
+      });
+  };
+
+  handleUpdateDocument = async (request: UpdateDocumentRequest) => {
+    let {documents} = {...this.state};
+    const {documentQuery} = {...this.state};
+    this.setState({isLoading: true});
+    try {
+      const updatedDoc = await DocumentService.updateDocument(request);
+      documents = documents.map(doc => (doc.type === updatedDoc.type) ? updatedDoc : doc );
+    } catch (err) {
+      console.error('failed to upload file');
+    }
+    this.setState({documents, showModal: false, isLoading: false, documentSelected: undefined},
       () => {
         this.handleSearchDocuments(documentQuery);
       });
@@ -255,6 +273,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         toggleModal={() => this.setState({documentSelected: undefined})}
         document={documentSelected}
         shareRequests={shareRequests}
+        handleUpdateDocument={this.handleUpdateDocument}
         handleDeleteDocument={this.handleDeleteDocument}
         addShareRequest={this.addShareRequest}
         removeShareRequest={this.removeShareRequest}

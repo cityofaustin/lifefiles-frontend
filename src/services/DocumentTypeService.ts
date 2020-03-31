@@ -1,5 +1,5 @@
 import AgentService from './APIService';
-import Document from '../models/Document';
+import Document from '../models/document/Document';
 
 const PATH = '/document-types';
 

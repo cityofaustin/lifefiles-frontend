@@ -7,7 +7,7 @@ import {
   ModalHeader, Nav, NavItem, NavLink, Row, TabContent, TabPane
 } from 'reactstrap';
 import classNames from 'classnames';
-import Document from '../../../models/Document';
+import Document from '../../../models/document/Document';
 import './UpdateDocumentModal.scss';
 import DocumentService from '../../../services/DocumentService';
 import {ReactComponent as DeleteSvg} from '../../../img/delete.svg';
@@ -28,6 +28,7 @@ import {addMonths, format} from 'date-fns';
 import Checkbox from '../../common/Checkbox';
 import ShareRequest from '../../../models/ShareRequest';
 import ShareRequestService from '../../../services/ShareRequestService';
+import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -39,6 +40,7 @@ interface UpdateDocumentModalProps {
   addShareRequest: (request: ShareRequest) => void;
   removeShareRequest: (request: ShareRequest) => void;
   myAccount: Account;
+  handleUpdateDocument: (request: UpdateDocumentRequest) => void;
 }
 
 interface UpdateDocumentModalState {
@@ -49,6 +51,7 @@ interface UpdateDocumentModalState {
   isZoomed: boolean;
   selectedContact?: Account;
   showConfirmShare: boolean;
+  newFile?: File;
 }
 
 class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocumentModalState> {
@@ -64,6 +67,41 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
       showConfirmShare: false
     };
   }
+
+  toggleModal = () => {
+    // clear state
+    const {toggleModal} = {...this.props};
+    this.setState({
+      activeTab: '1',
+      showConfirmDeleteSection: false,
+      hasConfirmedDelete: false,
+      deleteConfirmInput: '',
+      isZoomed: false,
+      selectedContact: undefined,
+      showConfirmShare: false
+    });
+    toggleModal();
+  };
+
+  handleUpdateDocument = () => {
+    const {newFile} = {...this.state};
+    // clear state
+    const {handleUpdateDocument, document} = {...this.props};
+    handleUpdateDocument({
+      id: document!._id!,
+      img: newFile,
+      validUntilDate: undefined // TODO add expired at form somewhere
+    });
+    this.setState({
+      activeTab: '1',
+      showConfirmDeleteSection: false,
+      hasConfirmedDelete: false,
+      deleteConfirmInput: '',
+      isZoomed: false,
+      selectedContact: undefined,
+      showConfirmShare: false
+    });
+  };
 
   handleShareDocWithContact = async () => {
     const {document, addShareRequest, myAccount} = {...this.props};
@@ -117,23 +155,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     this.setState({activeTab: '0', showConfirmDeleteSection: true});
   };
 
-  toggleModal = () => {
-    // clear state
-    const {toggleModal} = {...this.props};
-    this.setState({
-      activeTab: '1',
-      showConfirmDeleteSection: false,
-      hasConfirmedDelete: false,
-      deleteConfirmInput: '',
-      isZoomed: false,
-      selectedContact: undefined,
-      showConfirmShare: false
-    });
-    toggleModal();
-  };
-
-  setFile = () => {
-    // TODO
+  setFile = (newFile: File) => {
+    this.setState({newFile});
   };
 
   printImg(url: string) {
@@ -155,7 +178,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
   render() {
     const {showModal, document, accounts} = {...this.props};
     const {activeTab, showConfirmDeleteSection, hasConfirmedDelete,
-      deleteConfirmInput, isZoomed, selectedContact, showConfirmShare} = {...this.state};
+      deleteConfirmInput, isZoomed, selectedContact, showConfirmShare, newFile} = {...this.state};
     const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
     return (
       <Modal
@@ -435,8 +458,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
         </ModalBody>
         {activeTab === '2' && (
           <ModalFooter className="modal-footer-center">
-            <Button color="primary" onClick={this.toggleModal} disabled>Save</Button>
-            <span>(TBD)</span>
+            <Button color="primary" onClick={this.handleUpdateDocument} disabled={!newFile}>Save</Button>
           </ModalFooter>
         )}
       </Modal>

@@ -3,7 +3,7 @@ import {Component, Fragment} from 'react';
 import {ListGroup, ListGroupItem} from 'reactstrap';
 import Account from '../../../models/Account';
 import DocumentPage from '../document/DocumentPage';
-import Document from '../../../models/Document';
+import Document from '../../../models/document/Document';
 import ShareRequestService from '../../../services/ShareRequestService';
 
 interface ClientPageProps {

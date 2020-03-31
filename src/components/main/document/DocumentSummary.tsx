@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import './DocumentSummary.scss';
-import Document from '../../../models/Document';
+import Document from '../../../models/document/Document';
 import DocumentService from '../../../services/DocumentService';
 import StringUtil from '../../../util/StringUtil';
 import ImageWithStatus from '../../common/ImageWithStatus';

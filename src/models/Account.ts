@@ -1,5 +1,5 @@
 import ShareRequest from './ShareRequest';
-import Document from './Document';
+import Document from './document/Document';
 import Role from './Role';
 
 interface Account {

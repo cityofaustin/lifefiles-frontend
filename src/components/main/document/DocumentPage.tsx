@@ -3,7 +3,7 @@ import Chevron from '../../common/Chevron';
 import {Breadcrumb, BreadcrumbItem, Col, Row} from 'reactstrap';
 import AddNewDocument from './AddNewDocument';
 import DocumentSummary from './DocumentSummary';
-import Document from '../../../models/Document';
+import Document from '../../../models/document/Document';
 import Account from '../../../models/Account';
 import SvgButton, {SvgButtonTypes} from '../../common/SvgButton';
 import './DocumentPage.scss';
