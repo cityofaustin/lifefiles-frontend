@@ -9,13 +9,17 @@ describe('DocumentTypeService', () => {
         'sharedWithAccountIds': [],
         'url': '25f107ddbeea166a729f95fbc096e114.png',
         'type': 'Driver\'s License',
-        'hash': '966318d866dc4ba7b0a638e8483cd23f'
+        'hash': '966318d866dc4ba7b0a638e8483cd23f',
+        'createdAt': new Date(),
+        'updatedAt': new Date()
       },
       {
         'sharedWithAccountIds': [],
         'url': 'f3ade15eaa879572df44d39b89499ff7.png',
         'type': 'Social Security Card',
-        'hash': '658b57fa09be2a44b307a485afe78ab2'
+        'hash': '658b57fa09be2a44b307a485afe78ab2',
+        'createdAt': new Date(),
+        'updatedAt': new Date()
       }
     ];
     const documentTypeMatch: string = 'Driver\'s License';

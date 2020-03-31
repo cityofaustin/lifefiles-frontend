@@ -4,7 +4,7 @@ import fetch from '../util/fetchWithTimeout';
 import APIError from './APIError';
 import HttpStatusCode from '../models/HttpStatusCode';
 import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
-import {format} from "date-fns";
+import {format} from 'date-fns';
 
 const MYPASS_API = process.env.MYPASS_API;
 
