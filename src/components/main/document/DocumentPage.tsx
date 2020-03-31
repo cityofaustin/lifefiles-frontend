@@ -7,6 +7,7 @@ import Document from '../../../models/document/Document';
 import Account from '../../../models/Account';
 import SvgButton, {SvgButtonTypes} from '../../common/SvgButton';
 import './DocumentPage.scss';
+import ShareRequest from '../../../models/ShareRequest';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -16,12 +17,14 @@ interface DocumentPageProps {
   handleSelectDocument: (document: Document) => void;
   referencedAccount?: Account;
   goBack?: () => void;
+  shareRequests: ShareRequest[];
+  accounts: Account[];
 }
 
 class DocumentPage extends Component<DocumentPageProps> {
   render() {
     const {sortAsc, toggleSort, handleAddNew, searchedDocuments,
-      handleSelectDocument, referencedAccount, goBack} = {...this.props};
+      handleSelectDocument, referencedAccount, goBack, accounts, shareRequests} = {...this.props};
     return (
       <div className="main-content">
         { referencedAccount &&
@@ -70,6 +73,16 @@ class DocumentPage extends Component<DocumentPageProps> {
             </Col>
           )}
           {searchedDocuments.map((document, idx) => {
+            const sharedAccounts: Account[] = accounts.filter(sharedAccount => {
+              const matchedShareRequest = shareRequests.find(shareRequest => {
+                return shareRequest.shareWithAccountId === sharedAccount.id
+                  && shareRequest.documentType === document.type;
+              });
+              if(matchedShareRequest) {
+                return sharedAccount;
+              }
+            });
+            // debugger;
             return (
               <Col
                 sm="12"
@@ -84,6 +97,7 @@ class DocumentPage extends Component<DocumentPageProps> {
                   <DocumentSummary
                     document={document}
                     documentIdx={idx++}
+                    sharedAccounts={sharedAccounts}
                   />
                 </div>
               </Col>

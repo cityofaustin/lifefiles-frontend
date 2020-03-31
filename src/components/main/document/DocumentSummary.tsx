@@ -4,10 +4,14 @@ import Document from '../../../models/document/Document';
 import DocumentService from '../../../services/DocumentService';
 import StringUtil from '../../../util/StringUtil';
 import ImageWithStatus from '../../common/ImageWithStatus';
+import Account from '../../../models/Account';
+import classNames from 'classnames';
+import AccountService from '../../../services/AccountService';
 
 interface DocumentSummaryProps {
   document?: Document;
   documentIdx: number;
+  sharedAccounts: Account[];
 }
 
 class DocumentSummary extends Component<DocumentSummaryProps> {
@@ -16,43 +20,51 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
     super(props);
   }
 
-  renderFirstShare(sharedWithList: string | any[]) {
-    if (sharedWithList.length > 0) {
-      const sharedWithItem = sharedWithList[0];
-      return (
-        <Fragment>
-          <div className="shared-with-other">{StringUtil.getFirstUppercase(sharedWithItem)}</div>
-          {/*<img className="shared-with-image"*/}
-          {/*     src={sharedWithItem.profileimgUrl}*/}
-          {/*     alt="sharedWithItemFirst"*/}
-          {/*/>*/}
-          {sharedWithList.length === 1 && <span className="padding-right-24"/>}
-        </Fragment>
-
-      );
-    }
+  renderFirstShare(sharedAccounts: Account[]) {
+    const sharedAccount = sharedAccounts[0];
     return (
-      <div className="shared-with-other">-</div>
+      <Fragment>
+        { !sharedAccount.profileImageUrl && (
+        <div className={classNames({'shared-with-other': true, 'shared-with-small': sharedAccounts.length > 1})}>
+          {sharedAccount.firstName && StringUtil.getFirstUppercase(sharedAccount.firstName)}
+          {sharedAccount.lastName && StringUtil.getFirstUppercase(sharedAccount.lastName)}
+        </div>
+        ) }
+        { sharedAccount.profileImageUrl && (
+          <img className={classNames({'shared-with-other': true, 'shared-with-small': sharedAccounts.length > 1})}
+               src={AccountService.getProfileURL(sharedAccount.profileImageUrl)}
+               alt="sharedWithItemFirst"
+          />
+        )}
+        {sharedAccounts.length === 1 && <span className="padding-right-24"/>}
+      </Fragment>
     );
   }
 
-  renderOtherShare(sharedWithList: string[]) {
-    if (sharedWithList.length === 2) {
-      const sharedWithItem = sharedWithList[1];
+  renderOtherShare(sharedAccounts: Account[]) {
+    if (sharedAccounts.length === 2) {
+      const sharedAccount = sharedAccounts[1];
       return (
         <Fragment>
-          <div className="shared-with-other">{StringUtil.getFirstUppercase(sharedWithItem)}</div>
-          {/*<img className="shared-with-other"*/}
-          {/*     src={sharedWithItem.profileimgUrl}*/}
-          {/*     alt="sharedWithItemFirst"*/}
-          {/*/>*/}
+          { !sharedAccount.profileImageUrl && (
+            <div className="shared-with-other">
+              {sharedAccount.firstName && StringUtil.getFirstUppercase(sharedAccount.firstName)}
+              {sharedAccount.lastName && StringUtil.getFirstUppercase(sharedAccount.lastName)}
+            </div>
+          ) }
+          { sharedAccount.profileImageUrl && (
+            <img className="shared-with-other"
+                 src={AccountService.getProfileURL(sharedAccount.profileImageUrl)}
+                 alt="sharedWithItemFirst"
+            />
+          )}
         </Fragment>
 
       );
     }
-    if (sharedWithList.length > 2) {
+    if (sharedAccounts.length > 2) {
       return (
-        <div className="shared-with-other">+{sharedWithList.length - 1}</div>
+        <div className="shared-with-other">+{sharedAccounts.length - 1}</div>
       );
     }
     return (
@@ -61,7 +73,7 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
   }
 
   render() {
-    const {document, documentIdx} = {...this.props};
+    const {document, sharedAccounts} = {...this.props};
     return (
       <div className="document-item">
         {document &&
@@ -70,12 +82,12 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
                imageUrl={DocumentService.getDocumentURL(document.url)}
           />
           <div className="title padding-top-12">{document.type}</div>
-          { document.sharedWithAccountIds.length > 0 && (
+          { sharedAccounts.length > 0 && (
             <Fragment>
               <div className="subtitle">SHARED WITH</div>
-              <div className="shared-with-container padding-top-12">
-                {this.renderFirstShare(document.sharedWithAccountIds)}
-                {this.renderOtherShare(document.sharedWithAccountIds)}
+              <div className={classNames({'shared-with-container': true, 'padding-top-12': true, 'shared-multi': sharedAccounts.length > 1})}>
+                {this.renderFirstShare(sharedAccounts)}
+                {this.renderOtherShare(sharedAccounts)}
                 {/*<div className="separator"/>*/}
                 {/*<div className="document-idx">{documentIdx + 1}</div>*/}
               </div>

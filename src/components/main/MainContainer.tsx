@@ -211,6 +211,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   handleDeleteDocument = async (document: Document) => {
+    const {account} = {...this.props};
     let {documents, searchedDocuments} = {...this.state};
     this.setState({isLoading: true});
 
@@ -226,7 +227,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     documents = documents.filter(documentItem => {
       return (documentItem as Document).url !== document.url;
     });
-
+    // also remove share requests
+    const matchedShareRequests = account.shareRequests.filter(shareRequest => {
+      return shareRequest.documentType === document.type;
+    });
+    matchedShareRequests.forEach(matchedShareRequest => this.removeShareRequest(matchedShareRequest));
     this.setState({documents, searchedDocuments, isLoading: false, documentSelected: undefined});
   };
 
@@ -361,8 +366,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMyDocuments() {
-    const {searchedDocuments, isAccount, sortAsc} = {...this.state};
-
+    const {searchedDocuments, isAccount, sortAsc, accounts} = {...this.state};
+    const {account} = {...this.props};
     if (!isAccount) {
       return <DocumentPage
         sortAsc={sortAsc}
@@ -370,6 +375,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         handleAddNew={this.handleAddNew}
         searchedDocuments={searchedDocuments}
         handleSelectDocument={this.handleSelectDocument}
+        accounts={accounts}
+        shareRequests={account.shareRequests}
       />;
     }
     return <Fragment/>;

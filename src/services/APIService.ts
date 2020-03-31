@@ -5,6 +5,7 @@ import APIError from './APIError';
 import HttpStatusCode from '../models/HttpStatusCode';
 import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
 import {format} from 'date-fns';
+import UpdateDocumentResponse from '../models/document/UpdateDocumentResponse';
 
 const MYPASS_API = process.env.MYPASS_API;
 
@@ -94,7 +95,7 @@ class APIService {
     return responseJson;
   }
 
-  static async updateDocument(request: UpdateDocumentRequest) {
+  static async updateDocument(request: UpdateDocumentRequest): Promise<any> {
     const path = '/documents';
     const input = `${MYPASS_API}${path}/${request.id}`;
     const headers = {

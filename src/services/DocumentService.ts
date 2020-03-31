@@ -21,7 +21,7 @@ class DocumentService extends AgentService {
   }
 
   static async updateDocument(request: UpdateDocumentRequest): Promise<Document> {
-    return await super.updateDocument(request);
+    return (await super.updateDocument(request)).updatedDocument;
   }
 
   static async deleteDocument(filename: string) {

@@ -71,7 +71,7 @@ class ClientPage extends Component<ClientPageProps, ClientPageState> {
         { accountSelected && (
           <DocumentPage sortAsc={sortAsc} toggleSort={toggleSort} handleAddNew={handleAddNew}
                         referencedAccount={accountSelected} searchedDocuments={searchedDocuments}
-                        handleSelectDocument={handleSelectDocument} goBack={this.goBack}
+                        handleSelectDocument={handleSelectDocument} goBack={this.goBack} accounts={[]} shareRequests={[]}
           />
         )}
       </div>
