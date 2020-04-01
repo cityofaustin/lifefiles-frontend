@@ -1,0 +1,47 @@
+@import '../../variables';
+
+.network-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 34px auto 0 auto;
+  max-width: 389px;
+  .img-container {
+    margin-bottom: 20px;
+  }
+  .title {
+    font-size: 25px;
+    font-weight: bold;
+    color: #645857;
+    text-align: center;
+    margin-bottom: 9px;
+  }
+  .contact-info {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 41px;
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      .item-attr {
+        font-weight: 500;
+        color: #0e232c;
+      }
+      .item-value {
+        color: rgba(70, 70, 70, 0.78);
+      }
+    }
+  }
+  .subtitle {
+    margin-top: 14px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #d2d5d8;
+  }
+  .docs-shared {
+    margin-top: 13.7px;
+  }
+}

@@ -1,4 +1,4 @@
-@import '../../variables';
+@import '../variables';
 
 .document-header {
   display: flex;
@@ -51,3 +51,22 @@
     color: themed('colorDisabled');
   }
 }
+
+// network
+
+.network-row {
+  margin-right: 0;
+  min-height: 480px;
+  .network-container {
+    //outline: 5px solid #919191;
+  }
+  .no-network {
+    font-size: 30px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-grow: 1;
+  }
+}
+
+// end network

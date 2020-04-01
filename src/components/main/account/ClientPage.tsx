@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Component, Fragment} from 'react';
 import {ListGroup, ListGroupItem} from 'reactstrap';
 import Account from '../../../models/Account';
-import DocumentPage from '../document/DocumentPage';
+import MainPage from '../MainPage';
 import Document from '../../../models/document/Document';
 import ShareRequestService from '../../../services/ShareRequestService';
 
@@ -69,9 +69,9 @@ class ClientPage extends Component<ClientPageProps, ClientPageState> {
           </Fragment>
         )}
         { accountSelected && (
-          <DocumentPage sortAsc={sortAsc} toggleSort={toggleSort} handleAddNew={handleAddNew}
-                        referencedAccount={accountSelected} searchedDocuments={searchedDocuments}
-                        handleSelectDocument={handleSelectDocument} goBack={this.goBack} accounts={[]} shareRequests={[]}
+          <MainPage sortAsc={sortAsc} toggleSort={toggleSort} handleAddNew={handleAddNew}
+                    referencedAccount={accountSelected} searchedDocuments={searchedDocuments}
+                    handleSelectDocument={handleSelectDocument} goBack={this.goBack} accounts={[]} shareRequests={[]}
           />
         )}
       </div>

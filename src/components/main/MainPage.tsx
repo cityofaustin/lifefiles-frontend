@@ -1,16 +1,17 @@
 import React, {Component, Fragment} from 'react';
-import Chevron from '../../common/Chevron';
+import Chevron from '../common/Chevron';
 import {Breadcrumb, BreadcrumbItem, Col, ModalBody, Nav, NavItem, NavLink, Row, TabContent, TabPane} from 'reactstrap';
-import AddNewDocument from './AddNewDocument';
-import DocumentSummary from './DocumentSummary';
-import Document from '../../../models/document/Document';
-import Account from '../../../models/Account';
-import SvgButton, {SvgButtonTypes} from '../../common/SvgButton';
-import './DocumentPage.scss';
-import ShareRequest from '../../../models/ShareRequest';
+import AddNewDocument from './document/AddNewDocument';
+import DocumentSummary from './document/DocumentSummary';
+import Document from '../../models/document/Document';
+import Account from '../../models/Account';
+import SvgButton, {SvgButtonTypes} from '../common/SvgButton';
+import './MainPage.scss';
+import ShareRequest from '../../models/ShareRequest';
 import classNames from 'classnames';
+import AccountSummary from './account/AccountSummary';
 
-interface DocumentPageProps {
+interface MainPageProps {
   sortAsc: boolean;
   toggleSort: () => void;
   handleAddNew: () => void;
@@ -22,16 +23,16 @@ interface DocumentPageProps {
   accounts: Account[];
 }
 
-interface DocumentPageState {
+interface MainPageState {
   activeTab: string;
 }
 
-class DocumentPage extends Component<DocumentPageProps, DocumentPageState> {
+class MainPage extends Component<MainPageProps, MainPageState> {
 
-  constructor(props: Readonly<DocumentPageProps>) {
+  constructor(props: Readonly<MainPageProps>) {
     super(props);
     this.state = {
-      activeTab: '1'
+      activeTab: '2'
     };
   }
 
@@ -147,8 +148,32 @@ class DocumentPage extends Component<DocumentPageProps, DocumentPageState> {
               </Row>
             </TabPane>
             <TabPane tabId="2">
-              <Row>
-                network
+              <div className="sort-section">
+                <div className="subtitle">Sort by</div>
+                <div className="subtitle subtitle-key" onClick={toggleSort}>NAME</div>
+                <Chevron isAscending={sortAsc} onClick={toggleSort}/>
+              </div>
+              <Row className="network-row">
+                {accounts.length <= 0 && (
+                  <div className="no-network">There are no contacts.</div>
+                )}
+                {accounts.map(account => {
+                  const matchedShareRequests = shareRequests
+                    .filter(shareRequest => shareRequest.shareWithAccountId === account.id);
+                  return (
+                    <Col
+                      key={account.id}
+                      sm="12"
+                      md="12"
+                      lg="6"
+                      xl="4"
+                      className="network-container"
+                    >
+                      <AccountSummary account={account} shareRequests={matchedShareRequests}/>
+                    </Col>
+                  );
+                  }
+                )}
               </Row>
             </TabPane>
           </TabContent>
@@ -159,4 +184,4 @@ class DocumentPage extends Component<DocumentPageProps, DocumentPageState> {
   }
 }
 
-export default DocumentPage;
+export default MainPage;

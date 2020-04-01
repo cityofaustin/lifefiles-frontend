@@ -26,7 +26,7 @@ import DocumentTypeService from '../../services/DocumentTypeService';
 import AddDocumentModal from './document/AddDocumentModal';
 import UpdateDocumentModal from './document/UpdateDocumentModal';
 import AccountService from '../../services/AccountService';
-import DocumentPage from './document/DocumentPage';
+import MainPage from './MainPage';
 import ClientPage from './account/ClientPage';
 import ShareRequest from '../../models/ShareRequest';
 import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
@@ -369,7 +369,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const {searchedDocuments, isAccount, sortAsc, accounts} = {...this.state};
     const {account} = {...this.props};
     if (!isAccount) {
-      return <DocumentPage
+      return <MainPage
         sortAsc={sortAsc}
         toggleSort={this.toggleSort}
         handleAddNew={this.handleAddNew}

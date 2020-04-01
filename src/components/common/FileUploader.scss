@@ -4,12 +4,19 @@
   display: flex;
   flex: 1;
   flex-direction: row;
+  .file-image {
+    //flex-grow: 1;
+    //background: red;
+    .document-summary-image {
+      max-width: 100%;
+      min-width: 250px;
+      height: 287px;
+      object-fit: contain;
+    }
+  }
 }
 
-.file-image {
-  //flex-grow: 1;
-  //background: red;
-}
+
 
 .file-info {
   margin: 13.9px 13.9px 13.9px 83px;

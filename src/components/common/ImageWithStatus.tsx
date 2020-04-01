@@ -5,6 +5,7 @@ import ProgressIndicator from './ProgressIndicator';
 
 interface ImageWithStatusProps {
   imageUrl: string;
+  isCircle?: boolean;
 }
 
 interface ImageWithStatusState {
@@ -34,12 +35,13 @@ class ImageWithStatus extends Component<ImageWithStatusProps, ImageWithStatusSta
   };
 
   render() {
-    const {imageUrl} = {...this.props};
+    const {imageUrl, isCircle} = {...this.props};
     const {imageStatus} = {...this.state};
     return (
-      <div className="document-image">
+      <div className="image-with-status">
         { (imageStatus === 'loading') &&
-        <div className="loading-outter">
+        <div className={classNames({'loading-outter': true,
+          'outter-doc': !isCircle, 'outter-circle': isCircle})}>
           <div className="loading-inner">
             <ProgressIndicator />
           </div>
@@ -47,8 +49,8 @@ class ImageWithStatus extends Component<ImageWithStatusProps, ImageWithStatusSta
         }
         <img
           className={classNames({
-            'document-summary-image-loading': imageStatus === 'loading',
-            'document-summary-image': true})}
+            'loading': imageStatus === 'loading',
+            'image-doc': !isCircle, 'img-circle': isCircle})}
           src={imageUrl}
           onLoad={this.handleImageLoaded}
           onError={this.handleImageErrored}
