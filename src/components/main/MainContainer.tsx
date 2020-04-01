@@ -1,26 +1,20 @@
 import React, {Component, Fragment} from 'react';
-import DocumentSummary from './document/DocumentSummary';
-// import DocumentDetail from './DocumentDetail';
 import {
-  Button,
   Col,
   Dropdown, DropdownItem,
   DropdownMenu,
-  DropdownToggle, ListGroup, ListGroupItem,
+  DropdownToggle,
   Row
 } from 'reactstrap';
 import './MainContainer.scss';
 import AccountPage from './account/AccountPage';
 import SearchInput from '../common/SearchInput';
-import Chevron from '../common/Chevron';
-import AddNewDocument from './document/AddNewDocument';
 import Account from '../../models/Account';
 import Document from '../../models/document/Document';
 import StringUtil from '../../util/StringUtil';
 import DocumentService from '../../services/DocumentService';
 import ProgressIndicator from '../common/ProgressIndicator';
 import Folder from '../common/Folder';
-import deleteSvg from '../../img/delete.svg';
 import DocumentType from '../../models/DocumentType';
 import DocumentTypeService from '../../services/DocumentTypeService';
 import AddDocumentModal from './document/AddDocumentModal';
@@ -30,6 +24,7 @@ import MainPage from './MainPage';
 import ClientPage from './account/ClientPage';
 import ShareRequest from '../../models/ShareRequest';
 import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
+import AccountImpl from '../../models/AccountImpl';
 
 // TODO use react router dom and make this more of a app container
 
@@ -45,6 +40,7 @@ interface MainContainerState {
   isLoading: boolean;
   documentQuery: string;
   accounts: Account[];
+  searchedAccounts: Account[];
 }
 
 interface MainContainerProps {
@@ -69,7 +65,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       isAccountMenuOpen: false,
       isLoading: false,
       documentQuery: '',
-      accounts: []
+      accounts: [],
+      searchedAccounts: []
     };
   }
 
@@ -104,28 +101,37 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       documents,
       searchedDocuments: this.sortDocuments(documents, sortAsc),
       isLoading: false,
-      accounts
+      accounts,
+      searchedAccounts: this.sortAccounts(accounts, sortAsc)
     });
   }
 
-  handleSearchDocuments = (query: string) => {
-    const {documents, sortAsc} = {...this.state};
+  handleSearch = (query: string) => {
+    const {documents, accounts, sortAsc} = {...this.state};
     let searchedDocuments = documents
       .filter(document => {
         return document.type && document.type.toLowerCase().indexOf(query.toLowerCase()) !== -1;
       });
+    let searchedAccounts = accounts
+      .filter(account => {
+        return AccountImpl.getFullName(account?.firstName, account?.lastName) &&
+          AccountImpl.getFullName(account?.firstName, account?.lastName).toLowerCase().indexOf(query.toLowerCase()) !== -1;
+      });
     if (query.length === 0) {
       searchedDocuments = documents;
+      searchedAccounts = accounts;
     }
     searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
-    this.setState({searchedDocuments, documentQuery: query});
+    searchedAccounts = this.sortAccounts(searchedAccounts, sortAsc);
+    this.setState({searchedDocuments, searchedAccounts, documentQuery: query});
   };
 
   toggleSort = () => {
-    let {sortAsc, searchedDocuments} = {...this.state};
+    let {sortAsc, searchedDocuments, searchedAccounts} = {...this.state};
     sortAsc = !sortAsc;
     searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
-    this.setState({sortAsc, searchedDocuments});
+    searchedAccounts = this.sortAccounts(searchedAccounts, sortAsc);
+    this.setState({sortAsc, searchedDocuments, searchedAccounts});
   };
 
   sortDocuments(documents: Document[], sortAsc: boolean) {
@@ -134,6 +140,18 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         return sortAsc ? -1 : 1;
       }
       if (docA.type > docB.type) {
+        return sortAsc ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  sortAccounts(accounts: Account[], sortAsc: boolean) {
+    return accounts.sort((acctA: Account, acctB: Account) => {
+      if (acctA.firstName! < acctB.firstName!) {
+        return sortAsc ? -1 : 1;
+      }
+      if (acctA.firstName! > acctB.firstName!) {
         return sortAsc ? 1 : -1;
       }
       return 0;
@@ -172,17 +190,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     try {
       if (newFile) {
         const response = await DocumentService.addDocument(newFile, documentTypeSelected!);
-        const newDocument: Document = {
-          createdAt: new Date(), updatedAt: new Date(),
-          url: response.file,
-          notarized: false,
-          did: '',
-          hash: '',
-          vcJwt: '',
-          vpJwt: '',
-          type: documentTypeSelected!,
-          sharedWithAccountIds: []
-        };
+        const newDocument = response.document;
         documents.push(newDocument);
       }
     } catch (err) {
@@ -190,7 +198,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     }
     this.setState({documents, searchedDocuments, showModal: false, isLoading: false},
       () => {
-        this.handleSearchDocuments(documentQuery);
+        this.handleSearch(documentQuery);
       });
   };
 
@@ -206,7 +214,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     }
     this.setState({documents, showModal: false, isLoading: false, documentSelected: undefined},
       () => {
-        this.handleSearchDocuments(documentQuery);
+        this.handleSearch(documentQuery);
       });
   };
 
@@ -300,7 +308,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           </div>
           <Row id="main-search">
             <Col style={{display: 'flex'}}>
-              <SearchInput handleSearch={this.handleSearchDocuments}/>
+              <SearchInput handleSearch={this.handleSearch}/>
             </Col>
           </Row>
           <div id="main-profile">
@@ -327,7 +335,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         </div>
         <Row id="main-search-sm">
           <Col style={{display: 'flex'}}>
-            <SearchInput handleSearch={this.handleSearchDocuments}/>
+            <SearchInput handleSearch={this.handleSearch}/>
           </Col>
         </Row>
       </div>
@@ -365,8 +373,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     }
   }
 
-  renderMyDocuments() {
-    const {searchedDocuments, isAccount, sortAsc, accounts} = {...this.state};
+  renderMainPage() {
+    const {searchedDocuments, isAccount, sortAsc, searchedAccounts} = {...this.state};
     const {account} = {...this.props};
     if (!isAccount) {
       return <MainPage
@@ -375,7 +383,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         handleAddNew={this.handleAddNew}
         searchedDocuments={searchedDocuments}
         handleSelectDocument={this.handleSelectDocument}
-        accounts={accounts}
+        searchedAccounts={searchedAccounts}
         shareRequests={account.shareRequests}
       />;
     }
@@ -398,7 +406,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             <div className="main-side"/>
             <div className="main-section">
               {this.renderAccount()}
-              { account.role === 'owner' && this.renderMyDocuments() }
+              { account.role === 'owner' && this.renderMainPage() }
               { (!isAccount && account.role === 'notary') && this.renderMyClients() }
             </div>
           </div>

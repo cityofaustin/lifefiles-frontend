@@ -5,8 +5,13 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin: 34px auto 0 auto;
+  margin: 0 auto;
+  padding: 34px 0;
   max-width: 389px;
+  &:hover {
+    background: $hover-color;
+    cursor: pointer;
+  }
   .img-container {
     margin-bottom: 20px;
   }

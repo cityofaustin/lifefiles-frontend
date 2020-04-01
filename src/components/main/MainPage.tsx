@@ -20,7 +20,7 @@ interface MainPageProps {
   referencedAccount?: Account;
   goBack?: () => void;
   shareRequests: ShareRequest[];
-  accounts: Account[];
+  searchedAccounts: Account[];
 }
 
 interface MainPageState {
@@ -32,7 +32,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   constructor(props: Readonly<MainPageProps>) {
     super(props);
     this.state = {
-      activeTab: '2'
+      activeTab: '1'
     };
   }
 
@@ -44,7 +44,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   render() {
     const {
       sortAsc, toggleSort, handleAddNew, searchedDocuments,
-      handleSelectDocument, referencedAccount, goBack, accounts, shareRequests
+      handleSelectDocument, referencedAccount, goBack, searchedAccounts, shareRequests
     } = {...this.props};
     const {activeTab} = {...this.state};
     return (
@@ -94,9 +94,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
               </div>
               <Row style={{marginRight: '0', minHeight: '480px'}}>
                 <Col
-                  sm="12"
-                  md="6"
-                  lg="4"
+                  sm="12" md="6" lg="4"
                   className="document-add-new document-item"
                   onClick={handleAddNew}
                 >
@@ -104,9 +102,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                 </Col>
                 {searchedDocuments.length <= 0 && (
                   <Col
-                    sm="12"
-                    md="6"
-                    lg="4"
+                    sm="12" md="6" lg="4"
                     className="document-summary-container"
                   >
                     <div style={{display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
@@ -115,7 +111,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                   </Col>
                 )}
                 {searchedDocuments.map((document, idx) => {
-                  const sharedAccounts: Account[] = accounts.filter(sharedAccount => {
+                  const sharedAccounts: Account[] = searchedAccounts.filter(sharedAccount => {
                     const matchedShareRequest = shareRequests.find(shareRequest => {
                       return shareRequest.shareWithAccountId === sharedAccount.id
                         && shareRequest.documentType === document.type;
@@ -124,13 +120,10 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                       return sharedAccount;
                     }
                   });
-                  // debugger;
                   return (
                     <Col
-                      sm="12"
-                      md="6"
-                      lg="4"
                       key={idx}
+                      sm="12" md="6" lg="4"
                       className="document-summary-container"
                     >
                       <div
@@ -154,19 +147,16 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                 <Chevron isAscending={sortAsc} onClick={toggleSort}/>
               </div>
               <Row className="network-row">
-                {accounts.length <= 0 && (
+                {searchedAccounts.length <= 0 && (
                   <div className="no-network">There are no contacts.</div>
                 )}
-                {accounts.map(account => {
+                {searchedAccounts.map(account => {
                   const matchedShareRequests = shareRequests
                     .filter(shareRequest => shareRequest.shareWithAccountId === account.id);
                   return (
                     <Col
                       key={account.id}
-                      sm="12"
-                      md="12"
-                      lg="6"
-                      xl="4"
+                      sm="12" md="12" lg="6" xl="4"
                       className="network-container"
                     >
                       <AccountSummary account={account} shareRequests={matchedShareRequests}/>

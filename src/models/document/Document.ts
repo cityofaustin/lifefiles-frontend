@@ -15,8 +15,8 @@ interface Document {
   sharedWithAccountIds: string[];
   validateUntilDate?: Date;
   permanentOrgFileArchiveNumber?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export default Document;

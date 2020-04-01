@@ -107,18 +107,20 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     const {document, addShareRequest, myAccount} = {...this.props};
     const {selectedContact} = {...this.state};
     // then add share and approve it api call
-    let newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, selectedContact?.id!);
-    newShareRequest = await ShareRequestService.approveShareRequest(newShareRequest._id);
+    const newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, selectedContact?.id!);
+    // Note: you don't need to approve anymore since your the owner
+    // newShareRequest = await ShareRequestService.approveShareRequest(newShareRequest._id);
     addShareRequest(newShareRequest);
     this.setState({selectedContact, showConfirmShare: false});
   };
 
-  handleShareDocCheck = () => {
+  handleShareDocCheck = async () => {
     const {removeShareRequest} = {...this.props};
     const {selectedContact} = {...this.state};
     let showConfirmShare = false;
     if(this.getDocumentSharedWithContact()) {
       // TODO then just delete the share api call
+      await ShareRequestService.deleteShareRequest(this.getDocumentSharedWithContact()!._id!);
       removeShareRequest(this.getDocumentSharedWithContact()!);
     } else {
       // show prompt

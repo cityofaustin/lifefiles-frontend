@@ -7,18 +7,37 @@ import AccountService from '../../../services/AccountService';
 import ImageWithStatus from '../../common/ImageWithStatus';
 import DocShared from '../document/DocShared';
 import ShareRequest from '../../../models/ShareRequest';
+import AccountShareModal from './AccountShareModal';
 
 interface AccountSummaryProps {
   account: Account;
   shareRequests: ShareRequest[];
 }
 
-class AccountSummary extends Component<AccountSummaryProps> {
+interface AccountSummaryState {
+  showAccountShareModal: boolean;
+}
+
+class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState> {
+  constructor(props: Readonly<AccountSummaryProps>) {
+    super(props);
+
+    this.state = {
+      showAccountShareModal: false
+    };
+  }
+
   render() {
     const {account, shareRequests} = {...this.props};
+    const {showAccountShareModal} = {...this.state};
     const numberOfShares = (account && account.shareRequests) ? account.shareRequests.length : 0;
     return (
-      <div className="network-item">
+      <div className="network-item" onClick={() => this.setState({showAccountShareModal: true})}>
+        <AccountShareModal
+          showModal={showAccountShareModal}
+          toggleModal={() => this.setState({showAccountShareModal: !showAccountShareModal})}
+          account={account}
+        />
         <div className="img-container">
           <ImageWithStatus
             isCircle
