@@ -5,11 +5,12 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin: 0 auto;
-  padding: 34px 0;
+  margin: 14px auto 14px auto;
+  padding: 20px 0 34px 0;
   max-width: 389px;
   &:hover {
-    background: $hover-color;
+    background: #e9f8ff;
+    border-radius: 30px;
     cursor: pointer;
   }
   .img-container {

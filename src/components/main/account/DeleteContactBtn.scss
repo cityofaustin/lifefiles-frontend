@@ -1,0 +1,45 @@
+.delete-btn {
+  display: flex;
+  align-items: center;
+  background-color: #d95868;
+  padding: 9px 18px;
+  border-radius: 27px;
+  width: 71px;
+  height: 54px;
+  transition: width 0.3s;
+  cursor: pointer;
+
+  &:hover {
+    width: 239px;
+  }
+
+  &:hover span {
+    opacity: 1;
+  }
+
+  svg [class="contact-fill"] {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover svg [class="contact-fill"] {
+    opacity: 1;
+  }
+
+  //&:hover span:after {
+  //  content: '';
+  //}
+  //span:after {
+  //  content: 'Delete Contacc';
+  //}
+  //position: relative;
+  span {
+    padding-left: 42px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+}

@@ -10,6 +10,8 @@ import './MainPage.scss';
 import ShareRequest from '../../models/ShareRequest';
 import classNames from 'classnames';
 import AccountSummary from './account/AccountSummary';
+import DeleteContactBtn from './account/DeleteContactBtn';
+import Toggle from '../common/Toggle';
 
 interface MainPageProps {
   sortAsc: boolean;
@@ -159,7 +161,11 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                       sm="12" md="12" lg="6" xl="4"
                       className="network-container"
                     >
-                      <AccountSummary account={account} shareRequests={matchedShareRequests}/>
+                      <AccountSummary
+                        account={account}
+                        shareRequests={matchedShareRequests}
+                        searchedDocuments={searchedDocuments}
+                      />
                     </Col>
                   );
                   }

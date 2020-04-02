@@ -191,6 +191,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       if (newFile) {
         const response = await DocumentService.addDocument(newFile, documentTypeSelected!);
         const newDocument = response.document;
+        newDocument._id = newDocument.id;
         documents.push(newDocument);
       }
     } catch (err) {

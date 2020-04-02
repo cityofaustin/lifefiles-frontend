@@ -8,10 +8,12 @@ import ImageWithStatus from '../../common/ImageWithStatus';
 import DocShared from '../document/DocShared';
 import ShareRequest from '../../../models/ShareRequest';
 import AccountShareModal from './AccountShareModal';
+import Document from '../../../models/document/Document';
 
 interface AccountSummaryProps {
   account: Account;
   shareRequests: ShareRequest[];
+  searchedDocuments: Document[];
 }
 
 interface AccountSummaryState {
@@ -28,7 +30,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
   }
 
   render() {
-    const {account, shareRequests} = {...this.props};
+    const {account, shareRequests, searchedDocuments} = {...this.props};
     const {showAccountShareModal} = {...this.state};
     const numberOfShares = (account && account.shareRequests) ? account.shareRequests.length : 0;
     return (
@@ -37,6 +39,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
           showModal={showAccountShareModal}
           toggleModal={() => this.setState({showAccountShareModal: !showAccountShareModal})}
           account={account}
+          searchedDocuments={searchedDocuments}
         />
         <div className="img-container">
           <ImageWithStatus

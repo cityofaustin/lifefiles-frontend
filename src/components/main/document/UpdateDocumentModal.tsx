@@ -326,9 +326,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                           <div className="prompt">
                             Share Social Security Card?
                           </div>
-                          <Checkbox isChecked={!!this.getDocumentSharedWithContact()} onClick={this.handleShareDocCheck}/>
+                          <Checkbox isLarge isChecked={!!this.getDocumentSharedWithContact()} onClick={this.handleShareDocCheck}/>
                           <div className="share-status">
-                            This file is NOT currently shared with {selectedContact.username}
+                            This file is {!!this.getDocumentSharedWithContact() ? '' : 'NOT '}currently shared with {selectedContact.username}
                           </div>
                         </div>
                       </Fragment>
