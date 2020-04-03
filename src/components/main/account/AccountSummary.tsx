@@ -14,6 +14,9 @@ interface AccountSummaryProps {
   account: Account;
   shareRequests: ShareRequest[];
   searchedDocuments: Document[];
+  myAccount: Account;
+  addShareRequest: (request: ShareRequest) => void;
+  removeShareRequest: (request: ShareRequest) => void;
 }
 
 interface AccountSummaryState {
@@ -30,9 +33,10 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
   }
 
   render() {
-    const {account, shareRequests, searchedDocuments} = {...this.props};
+    const {account, shareRequests, searchedDocuments, myAccount, addShareRequest,
+      removeShareRequest} = {...this.props};
     const {showAccountShareModal} = {...this.state};
-    const numberOfShares = (account && account.shareRequests) ? account.shareRequests.length : 0;
+    const numberOfShares = (shareRequests) ? shareRequests.length : 0;
     return (
       <div className="network-item" onClick={() => this.setState({showAccountShareModal: true})}>
         <AccountShareModal
@@ -40,6 +44,10 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
           toggleModal={() => this.setState({showAccountShareModal: !showAccountShareModal})}
           account={account}
           searchedDocuments={searchedDocuments}
+          myAccount={myAccount}
+          shareRequests={shareRequests}
+          addShareRequest={addShareRequest}
+          removeShareRequest={removeShareRequest}
         />
         <div className="img-container">
           <ImageWithStatus
@@ -70,7 +78,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
           </div>
         </div>
         <div className="subtitle">SHARED</div>
-        <div className="docs-shared"><DocShared numberOfShares={shareRequests.length} /></div>
+        <div className="docs-shared"><DocShared numberOfShares={numberOfShares} /></div>
       </div>
     );
   }

@@ -31,9 +31,13 @@ class App extends Component<{}, AppState> {
     let {account, theme} = {...this.state};
     this.setState({isLoading: true});
     if (AuthService.isLoggedIn()) {
-      const loginResponse = await AccountService.getMyAccount();
-      ({account} = {...loginResponse});
-      theme = account?.role;
+      try {
+        const loginResponse = await AccountService.getMyAccount();
+        ({account} = {...loginResponse});
+        theme = account?.role;
+      } catch (err) {
+        console.error(err.message);
+      }
     }
     this.setState({account, theme, isLoading: false});
   }

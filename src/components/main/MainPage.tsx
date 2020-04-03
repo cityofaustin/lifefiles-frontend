@@ -25,6 +25,9 @@ interface MainPageProps {
   searchedAccounts: Account[];
   activeTab: string;
   setActiveTab: (activeTab: string) => void;
+  myAccount: Account;
+  addShareRequest: (request: ShareRequest) => void;
+  removeShareRequest: (request: ShareRequest) => void;
 }
 
 class MainPage extends Component<MainPageProps> {
@@ -40,8 +43,9 @@ class MainPage extends Component<MainPageProps> {
 
   render() {
     const {
-      sortAsc, toggleSort, handleAddNew, searchedDocuments, activeTab,
-      handleSelectDocument, referencedAccount, goBack, searchedAccounts, shareRequests
+      sortAsc, toggleSort, handleAddNew, searchedDocuments, activeTab, myAccount,
+      handleSelectDocument, referencedAccount, goBack, searchedAccounts, shareRequests,
+      addShareRequest, removeShareRequest
     } = {...this.props};
     return (
       <div className="main-content">
@@ -159,6 +163,9 @@ class MainPage extends Component<MainPageProps> {
                         account={account}
                         shareRequests={matchedShareRequests}
                         searchedDocuments={searchedDocuments}
+                        myAccount={myAccount}
+                        addShareRequest={addShareRequest}
+                        removeShareRequest={removeShareRequest}
                       />
                     </Col>
                   );

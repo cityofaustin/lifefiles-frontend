@@ -5,6 +5,7 @@ import Account from '../../../models/Account';
 import MainPage from '../MainPage';
 import Document from '../../../models/document/Document';
 import ShareRequestService from '../../../services/ShareRequestService';
+import ShareRequest from '../../../models/ShareRequest';
 
 interface ClientPageProps {
   otherOwnerAccounts: Account[];
@@ -13,6 +14,9 @@ interface ClientPageProps {
   handleAddNew: () => void;
   searchedDocuments: Document[];
   handleSelectDocument: (document: Document) => void;
+  myAccount: Account;
+  addShareRequest: (request: ShareRequest) => void;
+  removeShareRequest: (request: ShareRequest) => void;
 }
 
 interface ClientPageState {
@@ -32,13 +36,17 @@ class ClientPage extends Component<ClientPageProps, ClientPageState> {
   };
 
   handleSelectAccount = async (otherOwnerAccount: Account) => {
-    await ShareRequestService.get(otherOwnerAccount.id);
+    try {
+      await ShareRequestService.get(otherOwnerAccount.id);
+    } catch (err) {
+      console.error(err.message);
+    }
     this.setState({accountSelected: otherOwnerAccount});
   };
 
   render() {
     const {sortAsc, toggleSort, handleAddNew, searchedDocuments,
-      handleSelectDocument, otherOwnerAccounts} = {...this.props};
+      handleSelectDocument, otherOwnerAccounts, myAccount, addShareRequest, removeShareRequest} = {...this.props};
     const {accountSelected} = {...this.state};
     return (
       <div className="main-content">
@@ -71,7 +79,9 @@ class ClientPage extends Component<ClientPageProps, ClientPageState> {
         { accountSelected && (
           <MainPage sortAsc={sortAsc} toggleSort={toggleSort} handleAddNew={handleAddNew}
                     referencedAccount={accountSelected} searchedDocuments={searchedDocuments}
-                    handleSelectDocument={handleSelectDocument} goBack={this.goBack} searchedAccounts={[]} shareRequests={[]}
+                    handleSelectDocument={handleSelectDocument} goBack={this.goBack}
+                    searchedAccounts={[]} shareRequests={[]} myAccount={myAccount}
+                    addShareRequest={addShareRequest} removeShareRequest={removeShareRequest}
            activeTab={'1'} setActiveTab={() => {}}/>
         )}
       </div>

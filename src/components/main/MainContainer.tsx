@@ -191,10 +191,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({isLoading: true});
     try {
       if (newFile) {
-        const response = await DocumentService.addDocument(newFile, documentTypeSelected!);
-        const newDocument = response.document;
-        newDocument._id = newDocument.id;
-        documents.push(newDocument);
+        try {
+          const response = await DocumentService.addDocument(newFile, documentTypeSelected!);
+          const newDocument = response.document;
+          newDocument._id = newDocument.id;
+          documents.push(newDocument);
+        } catch (err) {
+          console.error(err.message);
+        }
       }
     } catch (err) {
       console.error('failed to upload file');
@@ -369,6 +373,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
   renderMyClients() {
     const {searchedDocuments, accounts, isAccount, sortAsc} = {...this.state};
+    const {account} = {...this.props};
 
     if (!isAccount) {
       return (
@@ -379,6 +384,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           searchedDocuments={searchedDocuments}
           sortAsc={sortAsc}
           toggleSort={this.toggleSort}
+          myAccount={account}
+          addShareRequest={this.addShareRequest}
+          removeShareRequest={this.removeShareRequest}
         />
       );
     }
@@ -398,6 +406,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         shareRequests={account.shareRequests}
         activeTab={activeTab}
         setActiveTab={this.setActiveTab}
+        myAccount={account}
+        addShareRequest={this.addShareRequest}
+        removeShareRequest={this.removeShareRequest}
       />;
     }
     return <Fragment/>;

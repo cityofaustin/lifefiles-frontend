@@ -107,10 +107,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     const {document, addShareRequest, myAccount} = {...this.props};
     const {selectedContact} = {...this.state};
     // then add share and approve it api call
-    const newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, selectedContact?.id!);
+    try {
+      const newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, selectedContact?.id!);
+      addShareRequest(newShareRequest);
+    } catch (err) {
+      console.error(err.message);
+    }
     // Note: you don't need to approve anymore since your the owner
     // newShareRequest = await ShareRequestService.approveShareRequest(newShareRequest._id);
-    addShareRequest(newShareRequest);
     this.setState({selectedContact, showConfirmShare: false});
   };
 
@@ -119,9 +123,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     const {selectedContact} = {...this.state};
     let showConfirmShare = false;
     if(this.getDocumentSharedWithContact()) {
-      // TODO then just delete the share api call
-      await ShareRequestService.deleteShareRequest(this.getDocumentSharedWithContact()!._id!);
-      removeShareRequest(this.getDocumentSharedWithContact()!);
+      try {
+        await ShareRequestService.deleteShareRequest(this.getDocumentSharedWithContact()!._id!);
+        removeShareRequest(this.getDocumentSharedWithContact()!);
+      } catch (err) {
+        console.error(err.message);
+      }
+
     } else {
       // show prompt
       showConfirmShare = true;
@@ -141,7 +149,11 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
 
   handleDeleteDocument = async (document: Document) => {
     const {handleDeleteDocument} = {...this.props};
-    await handleDeleteDocument(document);
+    try {
+      await handleDeleteDocument(document);
+    } catch (err) {
+      console.error(err.message);
+    }
   };
 
   handleDeleteConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {

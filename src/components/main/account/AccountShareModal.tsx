@@ -16,12 +16,17 @@ import Document from '../../../models/document/Document';
 import DocumentService from '../../../services/DocumentService';
 import Checkbox from '../../common/Checkbox';
 import ShareRequestService from '../../../services/ShareRequestService';
+import ShareRequest from '../../../models/ShareRequest';
 
 interface AccountShareModalProps {
   showModal: boolean;
   toggleModal: () => void;
   account: Account;
   searchedDocuments: Document[];
+  myAccount: Account;
+  shareRequests: ShareRequest[];
+  addShareRequest: (request: ShareRequest) => void;
+  removeShareRequest: (request: ShareRequest) => void;
 }
 
 // NOTE: temporarily until get share api hooked up.
@@ -42,24 +47,28 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
     };
   }
 
-  handleShareDocWithContact = async () => {
-    // TODO
-    // const {document, addShareRequest, myAccount} = {...this.props};
-    // const {selectedContact} = {...this.state};
-    // then add share and approve it api call
-    // const newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, selectedContact?.id!);
-    // Note: you don't need to approve anymore since your the owner
-    // addShareRequest(newShareRequest);
-    // this.setState({selectedContact, showConfirmShare: false});
+  handleShareDocWithContact = async (document: Document): Promise<void> => {
+    const {myAccount, account, removeShareRequest, addShareRequest} = {...this.props};
+    try {
+      if(this.getDocumentSharedWithContact(document)) {
+        await ShareRequestService.deleteShareRequest(this.getDocumentSharedWithContact(document)!._id!);
+        removeShareRequest(this.getDocumentSharedWithContact(document)!);
+      } else {
+        const newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, account?.id!);
+        addShareRequest(newShareRequest);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
   };
 
   getDocumentSharedWithContact = (document: Document) => {
-    // TODO
-    const {account} = {...this.props};
-    // const shareRequestMatch = shareRequests.find(shareRequest => selectedContact?.id === shareRequest.shareWithAccountId);
-    // if(shareRequestMatch) {
-    //   return shareRequestMatch;
-    // }
+    const {account, shareRequests} = {...this.props};
+    const shareRequestMatch = shareRequests
+      .find(shareRequest => (account?.id === shareRequest.shareWithAccountId && shareRequest.documentType === document.type));
+    if(shareRequestMatch) {
+      return shareRequestMatch;
+    }
     return undefined;
   };
 
@@ -156,7 +165,7 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
                     </div>
                     <div className="doc-share">
                       <div className="share-subtitle">shared</div>
-                      <Checkbox onClick={() => this.toggleDocShare(searchedDocument.type)} isChecked={docShare[searchedDocument.type]} />
+                      <Checkbox onClick={() => this.handleShareDocWithContact(searchedDocument)} isChecked={!!this.getDocumentSharedWithContact(searchedDocument)} />
                     </div>
                   </div>
                 ))}
