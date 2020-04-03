@@ -1,0 +1,57 @@
+@import '../variables';
+
+.svg-button {
+  cursor: pointer;
+}
+
+.layout-grid {
+  .button-square {
+    fill: #e8ecf1;
+    transition: fill 0.3s;
+  }
+  .grid-lines {
+    opacity: 1;
+    transition: opacity 0.3s 0.1s;
+  }
+  .list-lines {
+    opacity: 0;
+    transition: opacity 0.3s 0.1s;
+  }
+  &:hover {
+    .button-square {
+      fill: $blue;
+    }
+    .grid-lines {
+      opacity: 0;
+    }
+    .list-lines {
+      opacity: 1;
+    }
+  }
+}
+
+.layout-list {
+  .button-square {
+    fill: #e8ecf1;
+    transition: fill 0.3s;
+  }
+  .list-lines {
+    opacity: 1;
+    transition: opacity 0.3s 0.1s;
+  }
+  .grid-lines {
+    opacity: 0;
+    transition: opacity 0.3s 0.1s;
+  }
+  &:hover {
+    .button-square {
+      fill: $blue;
+    }
+    .list-lines {
+      opacity: 0;
+    }
+    .grid-lines {
+      opacity: 1;
+    }
+  }
+}
