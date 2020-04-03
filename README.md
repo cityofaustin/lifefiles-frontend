@@ -4,9 +4,7 @@ This is a react front end application for the mypass digital identity project.
 
 It uses https://github.com/cityofaustin/mypass as the backend end application.
 
-The current production URL is at http://mypass-atx.s3-website.us-east-2.amazonaws.com/
-
-##Dev local setup
+## Dev local setup
 
 To get started, install node and npm
 

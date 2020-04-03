@@ -241,7 +241,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                 <Col sm="12" className="preview-container">
                   <div className="preview-img-container">
                     <div className="img-tools">
-                      <FlipDocBtnSvg className="pointer"/>
+                      {/* NOTE: leaving out for now until we have functionality server side */}
+                      {/*<FlipDocBtnSvg className="pointer"/>*/}
                     </div>
                     <div className="img-container">
                       <img className="doc-image"

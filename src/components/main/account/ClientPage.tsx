@@ -72,7 +72,7 @@ class ClientPage extends Component<ClientPageProps, ClientPageState> {
           <MainPage sortAsc={sortAsc} toggleSort={toggleSort} handleAddNew={handleAddNew}
                     referencedAccount={accountSelected} searchedDocuments={searchedDocuments}
                     handleSelectDocument={handleSelectDocument} goBack={this.goBack} searchedAccounts={[]} shareRequests={[]}
-          />
+           activeTab={'1'} setActiveTab={() => {}}/>
         )}
       </div>
     );

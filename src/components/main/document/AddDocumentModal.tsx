@@ -227,13 +227,15 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
           </div>
         </ModalBody>
         <ModalFooter>
-          <Fragment>
-            <Button
-              className="margin-wide"
-              outline
-              color="secondary"
-              onClick={this.toggleModal}>Cancel</Button>{' '}
-          </Fragment>
+          { !uploadingStep && (
+            <Fragment>
+              <Button
+                className="margin-wide"
+                outline
+                color="secondary"
+                onClick={this.toggleModal}>Cancel</Button>{' '}
+            </Fragment>
+          )}
           { !uploadingStep && (
             <Button
               className="margin-wide"
@@ -243,6 +245,15 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
             >
               Next
             </Button>
+          )}
+          { uploadingStep && (
+            <Fragment>
+              <Button
+                className="margin-wide"
+                outline
+                color="secondary"
+                onClick={() => this.setState({uploadingStep: false})}>Go Back</Button>{' '}
+            </Fragment>
           )}
           { uploadingStep && (
             <Button

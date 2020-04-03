@@ -41,6 +41,7 @@ interface MainContainerState {
   documentQuery: string;
   accounts: Account[];
   searchedAccounts: Account[];
+  activeTab: string;
 }
 
 interface MainContainerProps {
@@ -66,7 +67,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       isLoading: false,
       documentQuery: '',
       accounts: [],
-      searchedAccounts: []
+      searchedAccounts: [],
+      activeTab: '1'
     };
   }
 
@@ -244,6 +246,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({documents, searchedDocuments, isLoading: false, documentSelected: undefined});
   };
 
+  handleLogoClick = () => {
+
+  };
+
   addShareRequest = (request: ShareRequest) => {
     const {updateAccountShareRequests, account} = {...this.props};
     const {shareRequests} = {...account};
@@ -256,6 +262,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     let {shareRequests} = {...account};
     shareRequests = shareRequests.filter(shareRequest => shareRequest._id !== request._id);
     updateAccountShareRequests(shareRequests);
+  };
+
+  setActiveTab = (tab: string) => {
+    this.setState({activeTab: tab});
   };
 
   renderAddDocumentModal() {
@@ -303,7 +313,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     return (
       <div>
         <div id="main-top-bar">
-          <div id="main-logo">
+          <div id="main-logo" onClick={() => this.setActiveTab('1')}>
             <Folder/>
             {/*<img className="logo" src={`${window.location.origin}/${folderImage}`} alt="Logo"/>*/}
           </div>
@@ -375,7 +385,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMainPage() {
-    const {searchedDocuments, isAccount, sortAsc, searchedAccounts} = {...this.state};
+    const {searchedDocuments, isAccount, sortAsc, searchedAccounts, activeTab} = {...this.state};
     const {account} = {...this.props};
     if (!isAccount) {
       return <MainPage
@@ -386,6 +396,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         handleSelectDocument={this.handleSelectDocument}
         searchedAccounts={searchedAccounts}
         shareRequests={account.shareRequests}
+        activeTab={activeTab}
+        setActiveTab={this.setActiveTab}
       />;
     }
     return <Fragment/>;

@@ -28,7 +28,6 @@
 }
 
 .update-doc-container {
-  // 49.1 52.3 16
   margin: 29px 33.1px;
 
   .preview-container {
@@ -36,16 +35,11 @@
     flex-direction: column;
     padding-right: 35px;
     padding-left: 35px;
-    //padding-bottom: 15px;
-    //align-items: center;
-    //justify-content: center;
     margin-top: 18px;
 
     .preview-img-container {
       display: flex;
-      //background: cadetblue;
       .img-tools {
-        //background: navajowhite;
         margin-right: 32px;
       }
 
@@ -54,7 +48,6 @@
         flex-grow: 1;
         align-items: center;
         justify-content: center;
-        //background: seagreen;
         height: 412px;
 
         .doc-image {
@@ -69,7 +62,6 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
-        //background: olivedrab;
         margin-left: 32px;
 
         svg {
@@ -81,7 +73,6 @@
 
     .preview-info {
       margin-top: 27.5px;
-      //background: peru;
       .preview-info-item {
         display: flex;
         justify-content: space-between;
@@ -90,27 +81,25 @@
         background-size: 16px 1px;
         background-repeat: repeat-x;
         font-size: 30px;
-
-        .attr {
-          //background: chocolate;
+        &:last-child {
+          background: none;
         }
+
+        .attr {}
 
         .attr-value {
           color: #919191;
-          //background: indianred;
         }
       }
     }
   }
 
   .share-container {
-    //background: darkturquoise;
     display: flex;
     margin: 36px 7.9px 12.2px 31.9px;
 
     .contact-details {
       background-color: #f8f8f8;
-      //background-color: salmon;
       width: 293px;
       height: 569px;
       border-radius: 20px;
@@ -165,14 +154,12 @@
     }
 
     .right-panel {
-      //background: darkorchid;
       flex-grow: 1;
       display: flex;
       flex-direction: column;
       max-width: 694px;
 
       .contact-list {
-        //background: oldlace;
         flex-grow: 1;
 
         .title {
@@ -193,7 +180,6 @@
         }
 
         .contact-grid {
-          //background: dimgrey;
           margin-top: 6px;
           display: flex;
           flex-wrap: wrap;
@@ -201,7 +187,6 @@
           .contact {
             width: 160px;
             height: 140px;
-            //background: steelblue;
             border: solid 1px #cecece;
             border-radius: 14px;
             margin-right: 18px;
@@ -233,7 +218,6 @@
 
       .share-time-limit {
         position: relative;
-        //background: lavender;
         height: 209px;
         border-radius: 12px;
 
@@ -330,7 +314,6 @@
     .delete-image-container {
       display: flex;
       align-items: center;
-      //background: blue;
 
       .delete-image {
         width: 375px;
@@ -340,7 +323,6 @@
   }
 
   .delete-info {
-    //background: orange;
     margin-left: 25px;
     color: #484848;
 
@@ -406,7 +388,6 @@
 
 
 .delete-buttons {
-  //background: cadetblue;
   display: flex;
   justify-content: flex-end;
 }

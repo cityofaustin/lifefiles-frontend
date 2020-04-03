@@ -23,32 +23,26 @@ interface MainPageProps {
   goBack?: () => void;
   shareRequests: ShareRequest[];
   searchedAccounts: Account[];
-}
-
-interface MainPageState {
   activeTab: string;
+  setActiveTab: (activeTab: string) => void;
 }
 
-class MainPage extends Component<MainPageProps, MainPageState> {
+class MainPage extends Component<MainPageProps> {
 
   constructor(props: Readonly<MainPageProps>) {
     super(props);
-    this.state = {
-      activeTab: '1'
-    };
   }
 
   toggleTab = (tab: string) => {
-    const {activeTab} = {...this.state};
-    if (activeTab !== tab) this.setState({activeTab: tab});
+    const {activeTab, setActiveTab} = {...this.props};
+    if (activeTab !== tab) setActiveTab(tab);
   };
 
   render() {
     const {
-      sortAsc, toggleSort, handleAddNew, searchedDocuments,
+      sortAsc, toggleSort, handleAddNew, searchedDocuments, activeTab,
       handleSelectDocument, referencedAccount, goBack, searchedAccounts, shareRequests
     } = {...this.props};
-    const {activeTab} = {...this.state};
     return (
       <div className="main-content">
         {referencedAccount &&
