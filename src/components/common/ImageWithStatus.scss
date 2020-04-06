@@ -3,12 +3,16 @@
 
   .loading-outter {
     position: absolute;
-    left: 50%;
     &.outter-doc {
       top: 34%;
+      left: 50%;
     }
     &.outter-circle {
       top: 23%;
+      left: 50%;
+    }
+    &.outter-list {
+      left: 15%;
     }
     .loading-inner {
       position: relative;
@@ -33,6 +37,9 @@
       border-radius: 50%;
       width: 234px;
       height: 234px;
+    }
+    &.list-img {
+      width: 98px;
     }
   }
 

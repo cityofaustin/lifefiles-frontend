@@ -1,6 +1,17 @@
 import React, {Component, Fragment} from 'react';
 import Chevron from '../common/Chevron';
-import {Breadcrumb, BreadcrumbItem, Col, ModalBody, Nav, NavItem, NavLink, Row, TabContent, TabPane} from 'reactstrap';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  Col,
+  DropdownToggle,
+  Nav,
+  NavItem,
+  NavLink,
+  Row,
+  TabContent,
+  TabPane
+} from 'reactstrap';
 import AddNewDocument from './document/AddNewDocument';
 import DocumentSummary from './document/DocumentSummary';
 import Document from '../../models/document/Document';
@@ -10,6 +21,16 @@ import './MainPage.scss';
 import ShareRequest from '../../models/ShareRequest';
 import classNames from 'classnames';
 import AccountSummary from './account/AccountSummary';
+import {ReactComponent as NewDocumentSmallSvg} from '../../img/new-document-small.svg';
+import SortArrow from '../common/SortArrow';
+import ImageWithStatus, {ImageViewTypes} from '../common/ImageWithStatus';
+import DocumentService from '../../services/DocumentService';
+import SharedWith from './document/SharedWith';
+import AccountService from '../../services/AccountService';
+import StringUtil from '../../util/StringUtil';
+import AccountImpl from '../../models/AccountImpl';
+import {format} from "date-fns";
+
 
 interface MainPageProps {
   sortAsc: boolean;
@@ -40,6 +61,21 @@ class MainPage extends Component<MainPageProps, MainPageState> {
       isLayoutGrid: true
     };
   }
+
+  getSharedAccounts = (
+    document: Document,
+    searchedAccounts: Account[],
+    shareRequests: ShareRequest[]): Account[] => {
+    return searchedAccounts.filter((sharedAccount: Account) => {
+      const matchedShareRequest = shareRequests.find(shareRequest => {
+        return shareRequest.shareWithAccountId === sharedAccount.id
+          && shareRequest.documentType === document.type;
+      });
+      if (matchedShareRequest) {
+        return sharedAccount;
+      }
+    });
+  };
 
   toggleLayout = () => {
     const {isLayoutGrid} = {...this.state};
@@ -82,15 +118,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
             </Col>
           )}
           {searchedDocuments.map((document, idx) => {
-            const sharedAccounts: Account[] = searchedAccounts.filter(sharedAccount => {
-              const matchedShareRequest = shareRequests.find(shareRequest => {
-                return shareRequest.shareWithAccountId === sharedAccount.id
-                  && shareRequest.documentType === document.type;
-              });
-              if (matchedShareRequest) {
-                return sharedAccount;
-              }
-            });
+            const sharedAccounts: Account[] = this.getSharedAccounts(document, searchedAccounts, shareRequests);
             return (
               <Col
                 key={idx}
@@ -117,28 +145,80 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   renderDocumentListView() {
     const {
       sortAsc, toggleSort, handleAddNew, searchedDocuments,
-      handleSelectDocument, searchedAccounts, shareRequests
+      handleSelectDocument, searchedAccounts, shareRequests, myAccount
     } = {...this.props};
     return (
       <div>
         <table className="doc-table">
           <thead>
           <tr>
-            <th>Name</th>
+            <th>
+              <div className="header-cell" onClick={toggleSort}>
+                <SortArrow isAscending={sortAsc}/>
+                <div>Name</div>
+              </div>
+            </th>
             <th>Shared With</th>
-            <th>Uploaded</th>
+            <th>Updated</th>
             <th>Valid Until</th>
             <th>Notarized</th>
           </tr>
           </thead>
           <tbody>
-          { searchedDocuments.map((document, idx) => {
+          <tr onClick={handleAddNew}>
+            <td>
+              <div className="add-new">
+                <div>
+                  <NewDocumentSmallSvg/>
+                </div>
+                <div>Add new</div>
+              </div>
+            </td>
+            <td/>
+            <td/>
+            <td/>
+            <td/>
+          </tr>
+          {searchedDocuments.map((document, idx) => {
+            const sharedAccounts: Account[] = this.getSharedAccounts(document, searchedAccounts, shareRequests);
+            const accountProfileURL = AccountImpl.getProfileURLByIdAndList(
+              [myAccount, ...searchedAccounts], document.uploadedBy);
+            const matchedAccount = AccountImpl.getAccountByIdAndList(
+              [myAccount, ...searchedAccounts], document.uploadedBy);
             return (
-              <tr key={document.type}>
-                <td>{document.type}</td>
-                <td>{document.sharedWithAccountIds.length}</td>
-                <td>{document.uploadedBy} {document.updatedAt}</td>
-                <td>{document.validateUntilDate}</td>
+              <tr key={document.type} onClick={() => handleSelectDocument(document)}>
+                <td>
+                  <div className="doc-name-cell">
+                    <ImageWithStatus
+                      imageViewType={ImageViewTypes.LIST_LAYOUT}
+                      imageUrl={DocumentService.getDocumentURL(document.url)}
+                    />
+                    <div>{document.type}</div>
+                  </div>
+                </td>
+                <td>
+                  <div className="doc-share-cell">
+                    <SharedWith sharedAccounts={sharedAccounts} />
+                  </div>
+                </td>
+                <td>
+                  <div className="doc-updated-cell">
+                    { accountProfileURL && (
+                      <img className="profile-image"
+                           src={accountProfileURL}
+                           alt="" />
+                    ) }
+                    { !accountProfileURL && (
+                      <div className="account-circle">{StringUtil.getFirstUppercase(matchedAccount!.username)}</div>
+                    )}
+                    <div>{format(new Date(document.updatedAt!), 'MMM d, y')}</div>
+                  </div>
+                </td>
+                <td>
+                  <div className="doc-valid-cell">
+                    {document.validateUntilDate ? format(new Date(document.validateUntilDate), 'MMM d, y') : 'N/A'}
+                  </div>
+                </td>
                 <td>{document.notarized}</td>
               </tr>
             );

@@ -10,7 +10,7 @@ interface Document {
   vcJwt?: string;
   vpJwt?: string;
   type: string;
-  uploadedBy?: Account;
+  uploadedBy?: Account | string;
   belongsTo?: Account;
   sharedWithAccountIds: string[];
   validateUntilDate?: Date;

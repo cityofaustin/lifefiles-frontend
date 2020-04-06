@@ -1,10 +1,10 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import Account from '../../../models/Account';
 import './AccountSummary.scss';
 import AccountImpl from '../../../models/AccountImpl';
 import {roleDisplayMap} from '../../../models/Role';
 import AccountService from '../../../services/AccountService';
-import ImageWithStatus from '../../common/ImageWithStatus';
+import ImageWithStatus, {ImageViewTypes} from '../../common/ImageWithStatus';
 import DocShared from '../document/DocShared';
 import ShareRequest from '../../../models/ShareRequest';
 import AccountShareModal from './AccountShareModal';
@@ -51,7 +51,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
         />
         <div className="img-container">
           <ImageWithStatus
-            isCircle
+            imageViewType={ImageViewTypes.GRID_CIRCLE_LAYOUT}
             imageUrl={AccountService.getProfileURL(account.profileImageUrl!)}
           />
           {/*<img className="image"*/}

@@ -52,19 +52,104 @@
   }
 }
 
+// list/table view
+
 .doc-table {
   margin-top: 25px;
   width: 100%;
+  font-size: 20px;
+
+  thead tr {
+    height: 51px;
+    font-weight: bold;
+    color: #90afe2;
+    text-transform: uppercase;
+
+    .header-cell {
+      display: flex;
+      cursor: pointer;
+
+      svg {
+        margin-right: 6.5px;
+      }
+    }
+  }
+
+  tbody tr {
+    font-weight: 500;
+    height: 128px;
+    border-bottom: solid 1px #e0e0e0;
+    cursor: pointer;
+    &:hover {
+      background-color: #f8f8f8;
+    }
+
+    .add-new {
+      display: flex;
+      align-items: center;
+      margin: 29.8px 0 35px 52.5px;
+
+      div:first-child {
+        margin-right: 59.8px;
+      }
+    }
+
+    td {
+
+      &:first-child {
+        border-top-left-radius: 26px;
+        border-bottom-left-radius: 26px;
+        .doc-name-cell {
+          display: flex;
+          margin-left: 23px;
+          align-items: center;
+          div:nth-child(2) {
+            margin-left: 40px;
+          }
+        }
+      }
+
+      &:last-child {
+        border-top-right-radius: 26px;
+        border-bottom-right-radius: 26px;
+      }
+
+      .doc-share-cell, .doc-valid-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .doc-updated-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        .profile-image {
+          width: 52px;
+          height: 52px;
+          object-fit: contain;
+          border-radius: 50%;
+          display: inline-block;
+          margin-bottom: 5px;
+        }
+      }
+    }
+  }
 }
+
+// end list/table view
 
 // network
 
 .network-row {
   margin-right: 0;
   min-height: 480px;
+
   .network-container {
     //outline: 5px solid #919191;
   }
+
   .no-network {
     font-size: 30px;
     align-items: center;

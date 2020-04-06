@@ -3,9 +3,15 @@ import classNames from 'classnames';
 import './ImageWithStatus.scss';
 import ProgressIndicator from './ProgressIndicator';
 
+export enum ImageViewTypes {
+  GRID_LAYOUT,
+  GRID_CIRCLE_LAYOUT,
+  LIST_LAYOUT
+}
+
 interface ImageWithStatusProps {
   imageUrl: string;
-  isCircle?: boolean;
+  imageViewType: ImageViewTypes;
 }
 
 interface ImageWithStatusState {
@@ -35,13 +41,18 @@ class ImageWithStatus extends Component<ImageWithStatusProps, ImageWithStatusSta
   };
 
   render() {
-    const {imageUrl, isCircle} = {...this.props};
+    const {imageUrl, imageViewType} = {...this.props};
     const {imageStatus} = {...this.state};
     return (
       <div className="image-with-status">
         { (imageStatus === 'loading') &&
-        <div className={classNames({'loading-outter': true,
-          'outter-doc': !isCircle, 'outter-circle': isCircle})}>
+        <div className={
+          classNames({'loading-outter': true,
+            'outter-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
+            'outter-circle': imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
+            'outter-list': imageViewType === ImageViewTypes.LIST_LAYOUT
+          })}
+        >
           <div className="loading-inner">
             <ProgressIndicator />
           </div>
@@ -50,7 +61,10 @@ class ImageWithStatus extends Component<ImageWithStatusProps, ImageWithStatusSta
         <img
           className={classNames({
             'loading': imageStatus === 'loading',
-            'image-doc': !isCircle, 'img-circle': isCircle})}
+            'image-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
+            'img-circle': imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
+            'list-img' : imageViewType === ImageViewTypes.LIST_LAYOUT
+          })}
           src={imageUrl}
           onLoad={this.handleImageLoaded}
           onError={this.handleImageErrored}
