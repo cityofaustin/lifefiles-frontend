@@ -348,11 +348,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             {/*<img className="account-profile-image" src={account.profileimgUrl} />*/}
           </div>
         </div>
-        <Row id="main-search-sm">
-          <Col style={{display: 'flex'}}>
-            <SearchInput handleSearch={this.handleSearch}/>
-          </Col>
-        </Row>
+        {/*<Row id="main-search-sm">*/}
+        {/*  <Col style={{display: 'flex'}}>*/}
+        {/*    <SearchInput handleSearch={this.handleSearch}/>*/}
+        {/*  </Col>*/}
+        {/*</Row>*/}
       </div>
     );
   }

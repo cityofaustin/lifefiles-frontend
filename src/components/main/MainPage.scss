@@ -1,9 +1,18 @@
 @import '../variables';
 
-.document-header {
-  display: flex;
-  justify-content: space-between;
+@media (max-width: 575.98px) {
+  .document-header {
+    display: none;
+  }
 }
+
+@media (min-width: 576px) {
+  .document-header {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
 
 .document-toolbar {
   display: flex;

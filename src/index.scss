@@ -66,10 +66,12 @@ body {
 .padding-bottom-12 {
   padding-bottom: 12px;
 }
+// bootstrap row
 
-.document-add-new {
-  text-align: center;
-  padding: 24px;
+@media (max-width: 575.98px) {
+  .row {
+    margin: 0;
+  }
 }
 
 // bootstrap button

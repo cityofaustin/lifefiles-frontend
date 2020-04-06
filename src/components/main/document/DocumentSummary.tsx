@@ -24,10 +24,13 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
       <div className="document-item">
         {document &&
         <Fragment>
-          <ImageWithStatus
-            imageViewType={ImageViewTypes.GRID_LAYOUT}
-            imageUrl={DocumentService.getDocumentURL(document.url)}
-          />
+          <div>
+            <ImageWithStatus
+              imageViewType={ImageViewTypes.GRID_LAYOUT}
+              imageUrl={DocumentService.getDocumentURL(document.url)}
+            />
+          </div>
+
           <div className="title">{document.type}</div>
           {sharedAccounts.length > 0 && (
             <div>

@@ -29,8 +29,7 @@ import SharedWith from './document/SharedWith';
 import AccountService from '../../services/AccountService';
 import StringUtil from '../../util/StringUtil';
 import AccountImpl from '../../models/AccountImpl';
-import {format} from "date-fns";
-
+import {format} from 'date-fns';
 
 interface MainPageProps {
   sortAsc: boolean;

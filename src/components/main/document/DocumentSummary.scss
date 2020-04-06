@@ -1,13 +1,26 @@
 @import '../../variables';
 
 .document-summary-container {
+  @media (max-width: 575.98px) {
+    padding: 0  !important;
+    margin: 0 51px;
+    .document-item {
+      padding: 24px 0;
+    }
+  }
+
+  @media (min-width: 576px) {
+    padding: 24px;
+
+  }
   text-align: center;
-  padding: 24px;
   align-items: center;
   display: flex;
   justify-content: center;
   .document-item {
-    min-height: 480px;
+    @media (min-width: 576px) {
+      min-height: 480px;
+    }
     display: flex;
     flex-direction: column;
     justify-content: center;

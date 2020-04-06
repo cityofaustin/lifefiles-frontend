@@ -33,44 +33,54 @@
 }
 
 #main-container {
-  margin: 10px 107px 0 0;
+
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 
-  #main-top-bar {
-    // TODO: fix Windows Edge
-    display: table;
-    width: 100%;
-    padding-left: 10px;
-
-    #main-logo {
-      cursor: pointer;
-      display: table-cell;
-      width: 95px;
-      padding: 20px 10px 20px 10px;
-    }
-
-    #main-search {
-      margin-left: 80px;
-      margin-right: 127px;
-      position: relative;
-      top: 4px;
-    }
-
-    @media only screen and (max-width: 470px) {
-      #main-search {
-        display: none;
-      }
-    }
-
-    #main-profile {
-      display: table-cell;
-      width: 90px;
-      cursor: pointer;
-      text-align: right;
+  @media (max-width: 575.98px) {
+    margin-bottom: 25px;
+    #main-top-bar {
+      display: none;
     }
   }
+
+  @media (min-width: 576px) {
+    margin: 10px 107px 0 0;
+    #main-top-bar {
+      display: table;
+      width: 100%;
+      padding-left: 10px;
+
+      #main-logo {
+        cursor: pointer;
+        display: table-cell;
+        width: 95px;
+        padding: 20px 10px 20px 10px;
+      }
+
+      #main-search {
+        margin-left: 80px;
+        margin-right: 127px;
+        position: relative;
+        top: 4px;
+      }
+
+      @media only screen and (max-width: 470px) {
+        #main-search {
+          display: none;
+        }
+      }
+
+      #main-profile {
+        display: table-cell;
+        width: 90px;
+        cursor: pointer;
+        text-align: right;
+      }
+    }
+  }
+
 
   #main-search-sm {
     display: none;
@@ -106,11 +116,15 @@
     .main-section {
       display: flex;
       width: 100%;
-      margin-left: 15px;
-      margin-bottom: 92px;
+      @media (min-width: 576px) {
+        margin-left: 15px;
+        margin-bottom: 92px;
+        .main-content {
+          padding: 14px 0 24px 66px;
+        }
+      }
 
       .main-content {
-        padding: 14px 0 24px 66px;
         width: 100%;
       }
     }
@@ -158,6 +172,11 @@
 }
 
 .document-add-new {
+  @media (max-width: 575.98px) {
+    display: none;
+  }
+  text-align: center;
+  padding: 24px;
   justify-content: center;
   align-items: center;
   display: flex;
