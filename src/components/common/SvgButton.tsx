@@ -5,7 +5,8 @@ import './SvgButton.scss';
 export enum SvgButtonTypes {
   LAYOUT_GRID,
   LAYOUT_LIST,
-  INFO
+  INFO,
+  LAYOUT_GRID_MOBILE
 }
 
 interface SvgButtonProps {
@@ -108,6 +109,31 @@ class SvgButton extends Component<SvgButtonProps> {
     );
   }
 
+  renderLayoutGridMobile() {
+    return (
+      <svg width="27.101" height="27.101" viewBox="0 0 27.101 27.101">
+        <g>
+          <g fill="none" stroke="#95a3b9" strokeWidth="2.5">
+            <rect width="12.239" height="12.239" rx="2" stroke="none"/>
+            <rect x="1.25" y="1.25" width="9.739" height="9.739" rx="0.75" fill="none"/>
+          </g>
+          <g transform="translate(0 14.862)" fill="#f3f3f3" stroke="#95a3b9" strokeWidth="2.5">
+            <rect width="12.239" height="12.239" rx="2" stroke="none"/>
+            <rect x="1.25" y="1.25" width="9.739" height="9.739" rx="0.75" fill="none"/>
+          </g>
+          <g transform="translate(14.862 14.862)" fill="none" stroke="#95a3b9" strokeWidth="2.5">
+            <rect width="12.239" height="12.239" rx="2" stroke="none"/>
+            <rect x="1.25" y="1.25" width="9.739" height="9.739" rx="0.75" fill="none"/>
+          </g>
+          <g transform="translate(14.862)" fill="none" stroke="#95a3b9" strokeWidth="2.5">
+            <rect width="12.239" height="12.239" rx="2" stroke="none"/>
+            <rect x="1.25" y="1.25" width="9.739" height="9.739" rx="0.75" fill="none"/>
+          </g>
+        </g>
+      </svg>
+    );
+  }
+
   render() {
     const {buttonType} = {...this.props};
     switch (buttonType) {
@@ -117,6 +143,8 @@ class SvgButton extends Component<SvgButtonProps> {
         return this.renderLayoutList();
       case SvgButtonTypes.INFO:
         return this.renderInfo();
+      case SvgButtonTypes.LAYOUT_GRID_MOBILE:
+        return this.renderLayoutGridMobile();
       default:
         return this.renderLayoutGrid();
     }

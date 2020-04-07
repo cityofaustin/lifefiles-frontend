@@ -33,7 +33,6 @@
 }
 
 #main-container {
-
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -43,10 +42,20 @@
     #main-top-bar {
       display: none;
     }
+    #main-top-bar-sm {
+      display: flex;
+      //outline: 1px solid red;
+      height: 70px;
+      margin: 21.3px 19.5px;
+      justify-content: space-between;
+    }
   }
 
   @media (min-width: 576px) {
     margin: 10px 107px 0 0;
+    #main-top-bar-sm {
+      display: none;
+    }
     #main-top-bar {
       display: table;
       width: 100%;

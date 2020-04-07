@@ -171,7 +171,27 @@ body {
   text-transform: uppercase;
 }
 
+.nav-tabs.small {
+  @media (min-width: 576px) {display: none;}
+  font-size: 22px;
+  font-weight: bold;
+  text-transform: capitalize;
+  margin: 10px 9px 0 9px;
+  .nav-item {
+    width: 50%;
+    .nav-link {
+      padding: 0;
+      margin: 0 0 6.5px 0;
+      color: #90afe2;
+    }
+    .nav-link.active {
+      color: $blue;
+    }
+  }
+}
+
 .nav-tabs.large {
+  @media (max-width: 575.98px) {display: none;}
   font-size: 35px;
   font-weight: bold;
   text-transform: none;
@@ -187,11 +207,12 @@ body {
 }
 
 .nav-tabs .nav-link {
+  @media (min-width: 576px) {min-width: 187px;}
+  //outline: 1px solid green;
   border: 0 solid transparent;
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
   margin-bottom: 7px;
-  min-width: 187px;
   text-align: center;
   opacity: 0.7;
   cursor: pointer;

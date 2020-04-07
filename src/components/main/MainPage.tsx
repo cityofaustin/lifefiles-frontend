@@ -1,17 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import Chevron from '../common/Chevron';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  Col,
-  DropdownToggle,
-  Nav,
-  NavItem,
-  NavLink,
-  Row,
-  TabContent,
-  TabPane
-} from 'reactstrap';
+import {Breadcrumb, BreadcrumbItem, Col, Nav, NavItem, NavLink, Row, TabContent, TabPane} from 'reactstrap';
 import AddNewDocument from './document/AddNewDocument';
 import DocumentSummary from './document/DocumentSummary';
 import Document from '../../models/document/Document';
@@ -26,10 +15,11 @@ import SortArrow from '../common/SortArrow';
 import ImageWithStatus, {ImageViewTypes} from '../common/ImageWithStatus';
 import DocumentService from '../../services/DocumentService';
 import SharedWith from './document/SharedWith';
-import AccountService from '../../services/AccountService';
 import StringUtil from '../../util/StringUtil';
 import AccountImpl from '../../models/AccountImpl';
 import {format} from 'date-fns';
+import {ReactComponent as FabAdd} from '../../img/fab-add.svg';
+
 
 interface MainPageProps {
   sortAsc: boolean;
@@ -86,10 +76,9 @@ class MainPage extends Component<MainPageProps, MainPageState> {
     if (activeTab !== tab) setActiveTab(tab);
   };
 
-  renderDocumentGridView() {
+  renderGridSort() {
     const {
-      sortAsc, toggleSort, handleAddNew, searchedDocuments,
-      handleSelectDocument, searchedAccounts, shareRequests
+      sortAsc, toggleSort
     } = {...this.props};
     return (
       <Fragment>
@@ -98,6 +87,25 @@ class MainPage extends Component<MainPageProps, MainPageState> {
           <div className="subtitle subtitle-key" onClick={toggleSort}>NAME</div>
           <Chevron isAscending={sortAsc} onClick={toggleSort}/>
         </div>
+        <div className="sort-section-sm">
+          <div className="sort-container" onClick={toggleSort}>
+            <SortArrow isAscending={sortAsc} />
+            <div className="subtitle subtitle-key">NAME</div>
+          </div>
+          <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID_MOBILE} />
+        </div>
+      </Fragment>
+    );
+  }
+
+  renderDocumentGridView() {
+    const {
+      handleAddNew, searchedDocuments,
+      handleSelectDocument, searchedAccounts, shareRequests
+    } = {...this.props};
+    return (
+      <Fragment>
+        {this.renderGridSort()}
         <Row style={{marginRight: '0', minHeight: '480px'}}>
           <Col
             sm="12" md="6" lg="4"
@@ -240,17 +248,13 @@ class MainPage extends Component<MainPageProps, MainPageState> {
 
   renderNetworkGridView() {
     const {
-      sortAsc, toggleSort, searchedDocuments,
+      searchedDocuments,
       searchedAccounts, shareRequests,
       myAccount, addShareRequest, removeShareRequest
     } = {...this.props};
     return (
       <Fragment>
-        <div className="sort-section">
-          <div className="subtitle">Sort by</div>
-          <div className="subtitle subtitle-key" onClick={toggleSort}>NAME</div>
-          <Chevron isAscending={sortAsc} onClick={toggleSort}/>
-        </div>
+        {this.renderGridSort()}
         <Row className="network-row">
           {searchedAccounts.length <= 0 && (
             <div className="no-network">There are no contacts.</div>
@@ -281,17 +285,64 @@ class MainPage extends Component<MainPageProps, MainPageState> {
     );
   }
 
-  renderNetworkListView() {
-    // TODO
-    return this.renderNetworkGridView();
+  renderNav() {
+    const {activeTab} = {...this.props};
+    return (
+      <Nav tabs className="large">
+        <NavItem>
+          <NavLink
+            className={classNames({active: activeTab === '1'})}
+            onClick={() => {
+              this.toggleTab('1');
+            }}
+          >
+            My Documents
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className={classNames({active: activeTab === '2'})}
+            onClick={() => {
+              this.toggleTab('2');
+            }}
+          >
+            My Network
+          </NavLink>
+        </NavItem>
+      </Nav>
+    );
+  }
+
+  renderNavSmall() {
+    const {activeTab} = {...this.props};
+    return (
+      <Nav tabs className="small">
+        <NavItem>
+          <NavLink
+            className={classNames({active: activeTab === '1'})}
+            onClick={() => {
+              this.toggleTab('1');
+            }}
+          >
+            My Documents
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className={classNames({active: activeTab === '2'})}
+            onClick={() => {
+              this.toggleTab('2');
+            }}
+          >
+            My Network
+          </NavLink>
+        </NavItem>
+      </Nav>
+    );
   }
 
   render() {
-    const {
-      sortAsc, toggleSort, searchedDocuments, activeTab, myAccount,
-      referencedAccount, goBack, searchedAccounts, shareRequests,
-      addShareRequest, removeShareRequest
-    } = {...this.props};
+    const {activeTab, referencedAccount, goBack} = {...this.props};
     const {isLayoutGrid} = {...this.state};
     return (
       <div className="main-content">
@@ -303,29 +354,9 @@ class MainPage extends Component<MainPageProps, MainPageState> {
         }
         {!referencedAccount &&
         <Fragment>
+          {this.renderNavSmall()}
           <div className="document-header">
-            <Nav tabs className="large">
-              <NavItem>
-                <NavLink
-                  className={classNames({active: activeTab === '1'})}
-                  onClick={() => {
-                    this.toggleTab('1');
-                  }}
-                >
-                  My Documents
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  className={classNames({active: activeTab === '2'})}
-                  onClick={() => {
-                    this.toggleTab('2');
-                  }}
-                >
-                  My Network
-                </NavLink>
-              </NavItem>
-            </Nav>
+            {this.renderNav()}
             <div className="document-toolbar">
               {isLayoutGrid && <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID} onClick={this.toggleLayout}/>}
               {!isLayoutGrid && <SvgButton buttonType={SvgButtonTypes.LAYOUT_LIST} onClick={this.toggleLayout}/>}
@@ -339,9 +370,9 @@ class MainPage extends Component<MainPageProps, MainPageState> {
             </TabPane>
             <TabPane tabId="2">
               {isLayoutGrid && this.renderNetworkGridView()}
-              {!isLayoutGrid && this.renderNetworkListView()}
             </TabPane>
           </TabContent>
+          <FabAdd className="fab-add" />
         </Fragment>
         }
       </div>

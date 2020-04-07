@@ -25,6 +25,9 @@ import ClientPage from './account/ClientPage';
 import ShareRequest from '../../models/ShareRequest';
 import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
 import AccountImpl from '../../models/AccountImpl';
+import {ReactComponent as LogoSm} from '../../img/logo-sm.svg';
+import {ReactComponent as MagnifyingGlass} from '../../img/magnifying-glass.svg';
+
 
 // TODO use react router dom and make this more of a app container
 
@@ -310,6 +313,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     );
   }
 
+  renderTopBarSmall() {
+    return (
+      <div id="main-top-bar-sm">
+        <LogoSm />
+        <MagnifyingGlass />
+      </div>
+    );
+  }
+
   renderTopBar() {
     const {account, handleLogout} = {...this.props};
     const {isAccountMenuOpen} = {...this.state};
@@ -426,6 +438,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           {this.renderAddDocumentModal()}
           {this.renderUpdateDocumentModal()}
           {this.renderTopBar()}
+          {this.renderTopBarSmall()}
           <div className="main-page">
             <div className="main-side"/>
             <div className="main-section">
