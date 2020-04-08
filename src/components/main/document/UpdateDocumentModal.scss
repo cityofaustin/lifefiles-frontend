@@ -1,4 +1,29 @@
+@import '~bootstrap/scss/bootstrap';
 @import '../../variables';
+
+.modal-header {
+  .modal-title {
+    svg.lg {
+      @include media-breakpoint-down(sm) {display: none; }
+      margin-left: 10.6px;
+      margin-right: 30.9px;
+    }
+    svg.sm {
+      @include media-breakpoint-up(sm) { display: none; }
+      margin-right: 16px;
+
+    }
+  }
+  .modal-close {
+    .sm {
+      @include media-breakpoint-up(sm) { display: none; }
+    }
+    .lg {
+      @include media-breakpoint-down(sm) {display: none; }
+    }
+  }
+}
+
 
 .update-doc-modal-title {
   margin-left: 18px;
@@ -9,6 +34,9 @@
 }
 
 .upload-doc-delete-container {
+  @include media-breakpoint-down(sm) {
+    display: none;
+  }
   position: absolute;
   right: 55.9px;
   //top: 9px;
@@ -20,6 +48,8 @@
     background: $danger;
 
     .delete-svg {
+      cursor: pointer;
+      fill: white;
       g {
         fill: white;
       }
@@ -28,17 +58,21 @@
 }
 
 .update-doc-container {
-  margin: 29px 33.1px;
+  @include media-breakpoint-up(sm) {margin: 29px 33.1px;}
+  @include media-breakpoint-down(sm) {padding: 14.3px 17px !important;}
 
   .preview-container {
+    @include media-breakpoint-up(sm) {
+      padding-right: 35px;
+      padding-left: 35px;
+      margin-top: 18px;
+    }
     display: flex;
     flex-direction: column;
-    padding-right: 35px;
-    padding-left: 35px;
-    margin-top: 18px;
 
     .preview-img-container {
       display: flex;
+      @include media-breakpoint-down(sm) { flex-direction: column }
       .img-tools {
         margin-right: 32px;
       }

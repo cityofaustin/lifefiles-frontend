@@ -12,7 +12,9 @@ import './UpdateDocumentModal.scss';
 import DocumentService from '../../../services/DocumentService';
 import {ReactComponent as DeleteSvg} from '../../../img/delete.svg';
 import {ReactComponent as EditDocSvg} from '../../../img/edit-doc.svg';
+import {ReactComponent as EditDocSmSvg} from '../../../img/edit-doc-sm.svg';
 import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
+import {ReactComponent as CrossSmSvg} from '../../../img/cross2-sm.svg';
 import FileUploader from '../../common/FileUploader';
 import {ReactComponent as DownloadBtnSvg} from '../../../img/download-btn.svg';
 import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
@@ -193,7 +195,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
     const {showModal, document, accounts} = {...this.props};
     const {activeTab, showConfirmDeleteSection, hasConfirmedDelete,
       deleteConfirmInput, isZoomed, selectedContact, showConfirmShare, newFile} = {...this.state};
-    const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
+    const closeBtn = (<div className="modal-close" onClick={this.toggleModal}>
+      <CrossSvg className="lg"/><CrossSmSvg className="sm"/>
+    </div>);
     return (
       <Modal
         isOpen={showModal}
@@ -203,14 +207,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
         className="update-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-          <EditDocSvg style={{marginLeft: '10.6px', marginRight: '30.9px'}}/>
+          <EditDocSvg className="lg" />
+          <EditDocSmSvg className="sm" />
           {document?.type}
         </ModalHeader>
         <ModalBody className="update-doc-container">
           <div className={classNames({'upload-doc-delete-container': true, active: showConfirmDeleteSection})}>
             <DeleteSvg
               className="delete-svg"
-              style={{cursor: 'pointer', fill: 'white'}}
               onClick={() => this.confirmDelete()}
             />
           </div>

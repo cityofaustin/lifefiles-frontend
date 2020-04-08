@@ -113,10 +113,15 @@ body {
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16); //32.6 54.6
     .modal-header {
       background: $blue;
-      padding: 19px 44px 19px 44px;
+      @include media-breakpoint-up(sm) {
+        padding: 19px 44px 19px 44px;
+      }
       border-top-left-radius: calc(17px - 1px);
       border-top-right-radius: calc(17px - 1px);
       .modal-title {
+        @include media-breakpoint-down(sm) {
+          font-size: 18px;
+        }
         font-size: 35px;
         color: #f8f8f8;
         font-weight: 500;
@@ -126,16 +131,17 @@ body {
 }
 
 .modal-close {
+  @include media-breakpoint-up(sm) {
+    padding: 13px;
+  }
   cursor: pointer;
-  padding: 13px;
   background: $blue;
   border-radius: 50%;
-}
-
-.modal-close:hover {
-  background: white;
-  svg g {
-    stroke: $blue;
+  &:hover {
+    background: white;
+    svg g {
+      stroke: $blue;
+    }
   }
 }
 
@@ -164,11 +170,23 @@ body {
 // bootstrap tabs
 
 .nav-tabs {
+  @include media-breakpoint-down(sm) {
+    font-size: 15px;
+    .nav-item {
+      width: calc(100%/3);
+    }
+  }
+  @include media-breakpoint-up(sm) {
+    font-size: 20px;
+  }
   //border-bottom: 1px solid #dee2e6;
   border-bottom: 0 solid transparent;
-  font-size: 20px;
   font-weight: 500;
   text-transform: uppercase;
+}
+
+.nav-tabs.xs {
+  font-size: 15px;
 }
 
 .nav-tabs.small {
