@@ -1,10 +1,11 @@
+@import '~bootstrap/scss/bootstrap';
 
 .image-with-status {
-
   .loading-outter {
     position: absolute;
     &.outter-doc {
-      top: 34%;
+      @include media-breakpoint-down(sm) { top: 30%; }
+      @include media-breakpoint-up(sm) { top: 34%; }
       left: 50%;
     }
     &.outter-circle {
@@ -24,6 +25,7 @@
   img {
     object-fit: contain;
     &.loading {
+      @include media-breakpoint-down(sm) { height: 250px; width: 250px; }
       opacity: 0.5;
       background-color: #ccc;
     }

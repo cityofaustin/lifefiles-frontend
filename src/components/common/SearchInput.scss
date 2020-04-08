@@ -1,46 +1,82 @@
+@import '../variables.scss';
 
-.searchbar {
-  //border-color: #bbc0c4;
-  background-color: #EEF2F6;
-  //box-shadow: none;
-  color: #3c4146;
-  padding-left: 80px;
-  padding-top: 13px;
-  padding-bottom: 13px;
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  border-radius: 28px;
-  outline: none;
-  border-top-style: hidden;
-  border-right-style: hidden;
-  border-left-style: hidden;
-  border-bottom-style: hidden;
-  margin-right: 25px;
-  font-size: 20px;
-  font-weight: 500;
-  &::placeholder {
-    color: #b6b8b9;
-    opacity: 0.5;
+form.search-container {
+  @media (max-width: 575.98px) { display: none; }
+  width: 100%;
+  display: flex;
+  input.search {
+    @media only screen and (max-width: 600px)  { width: 100px; }
+  }
+  input.searchbar {
+    //border-color: #bbc0c4;
+    background-color: $pale-grey;
+    //box-shadow: none;
+    color: #3c4146;
+    padding-left: 80px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 28px;
+    outline: none;
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+    margin-right: 25px;
+    font-size: 20px;
+    font-weight: 500;
+    &::placeholder {
+      color: $silver;
+      opacity: 0.5;
+    }
+    &::-webkit-search-cancel-button {
+      position:relative;
+      right:20px;
+    }
+  }
+  button.search-btn {
+    //width: 132px !important;
+    //height: 56px  !important;
+    font-size: 22px !important;
+    padding: 10px 28px !important;
+    border-radius: 28px !important;
+    font-weight: 500 !important;
+  }
+  svg.icon-search {
+    right: auto;
+    left: 42.3px;
+    position: absolute;
+    top: 13px;
   }
 }
 
-.searchbar::-webkit-search-cancel-button{
-  position:relative;
-  right:20px;
+form.search-container-sm {
+  display: flex;
+  flex: 1;
+  margin-left: 32.5px;
+  @media (min-width: 576px) {display: none;}
+  input.searchbar {
+    background-color: $pale-grey;
+    color: #3c4146;
+    padding: 0 13px;
+    border-radius: 13px;
+    outline: none;
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+    font-size: 15px;
+    font-weight: 500;
+    margin-right: 19.7px;
+    height: 26px;
+    &::placeholder {
+      color: $silver;
+      opacity: 0.5;
+    }
+  }
+  svg {
+    cursor: pointer;
+  }
 }
 
-.icon-search {
-  right: auto;
-  left: 42.3px;
-  position: absolute;
-  top: 13px;
-}
-
-.search-btn {
-  //width: 132px !important;
-  //height: 56px  !important;
-  font-size: 22px !important;
-  padding: 10px 28px !important;
-  border-radius: 28px !important;
-  font-weight: 500 !important;
-}

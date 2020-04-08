@@ -20,7 +20,6 @@ import AccountImpl from '../../models/AccountImpl';
 import {format} from 'date-fns';
 import {ReactComponent as FabAdd} from '../../img/fab-add.svg';
 
-
 interface MainPageProps {
   sortAsc: boolean;
   toggleSort: () => void;

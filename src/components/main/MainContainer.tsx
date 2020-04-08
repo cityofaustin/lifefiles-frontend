@@ -26,8 +26,6 @@ import ShareRequest from '../../models/ShareRequest';
 import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
 import AccountImpl from '../../models/AccountImpl';
 import {ReactComponent as LogoSm} from '../../img/logo-sm.svg';
-import {ReactComponent as MagnifyingGlass} from '../../img/magnifying-glass.svg';
-
 
 // TODO use react router dom and make this more of a app container
 
@@ -40,6 +38,7 @@ interface MainContainerState {
   sortAsc: boolean;
   showModal: boolean;
   isAccountMenuOpen: boolean;
+  isSmallMenuOpen: boolean;
   isLoading: boolean;
   documentQuery: string;
   accounts: Account[];
@@ -67,6 +66,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       sortAsc: true,
       showModal: false,
       isAccountMenuOpen: false,
+      isSmallMenuOpen: false,
       isLoading: false,
       documentQuery: '',
       accounts: [],
@@ -189,6 +189,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({isAccountMenuOpen: !isAccountMenuOpen});
   };
 
+  toggleSmallMenu = () => {
+    const {isSmallMenuOpen} = {...this.state};
+    this.setState({isSmallMenuOpen: !isSmallMenuOpen});
+  };
+
   handleAddNewDocument = async (newFile: File, documentTypeSelected: string) => {
     const {documents, searchedDocuments, documentQuery} = {...this.state};
     this.setState({isLoading: true});
@@ -253,10 +258,6 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({documents, searchedDocuments, isLoading: false, documentSelected: undefined});
   };
 
-  handleLogoClick = () => {
-
-  };
-
   addShareRequest = (request: ShareRequest) => {
     const {updateAccountShareRequests, account} = {...this.props};
     const {shareRequests} = {...account};
@@ -290,7 +291,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
   renderUpdateDocumentModal() {
     const {documentSelected, accounts} = {...this.state};
-    const {account, updateAccountShareRequests} = {...this.props};
+    const {account} = {...this.props};
     const shareRequests: ShareRequest[] = account.shareRequests
       .filter(sharedRequest => {
       if(sharedRequest.documentType === documentSelected?.type) {
@@ -314,10 +315,24 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderTopBarSmall() {
+    const {handleLogout} = {...this.props};
+    const {isSmallMenuOpen} = {...this.state};
     return (
       <div id="main-top-bar-sm">
-        <LogoSm />
-        <MagnifyingGlass />
+        <Dropdown isOpen={isSmallMenuOpen} toggle={this.toggleSmallMenu}>
+          <DropdownToggle
+            tag="span"
+            data-toggle="dropdown"
+            aria-expanded={isSmallMenuOpen}
+          >
+            <LogoSm />
+          </DropdownToggle>
+          <DropdownMenu>
+            <DropdownItem onClick={this.goToAccount}>My Account</DropdownItem>
+            <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+        <SearchInput handleSearch={this.handleSearch}/>
       </div>
     );
   }
@@ -331,7 +346,6 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         <div id="main-top-bar">
           <div id="main-logo" onClick={() => this.setActiveTab('1')}>
             <Folder/>
-            {/*<img className="logo" src={`${window.location.origin}/${folderImage}`} alt="Logo"/>*/}
           </div>
           <Row id="main-search">
             <Col style={{display: 'flex'}}>
@@ -357,14 +371,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
             </Dropdown>
-            {/*<img className="account-profile-image" src={account.profileimgUrl} />*/}
           </div>
         </div>
-        {/*<Row id="main-search-sm">*/}
-        {/*  <Col style={{display: 'flex'}}>*/}
-        {/*    <SearchInput handleSearch={this.handleSearch}/>*/}
-        {/*  </Col>*/}
-        {/*</Row>*/}
       </div>
     );
   }

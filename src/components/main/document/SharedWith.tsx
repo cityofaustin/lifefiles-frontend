@@ -13,7 +13,7 @@ class SharedWith extends Component<SharedWithProps> {
 
   renderFirstShare(sharedAccounts: Account[]) {
     const sharedAccount = sharedAccounts[0];
-    console.log(sharedAccount);
+    // console.log(sharedAccount);
     return (
       <Fragment>
         {!sharedAccount.profileImageUrl && (
