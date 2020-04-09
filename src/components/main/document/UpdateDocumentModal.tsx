@@ -1,7 +1,7 @@
 import React, {ChangeEvent, Component, Fragment} from 'react';
 import {
   Button,
-  Col, FormGroup, Input, Label,
+  Col, Form, FormGroup, Input, Label,
   Modal,
   ModalBody, ModalFooter,
   ModalHeader, Nav, NavItem, NavLink, Row, TabContent, TabPane
@@ -17,9 +17,10 @@ import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
 import {ReactComponent as CrossSmSvg} from '../../../img/cross2-sm.svg';
 import FileUploader from '../../common/FileUploader';
 import {ReactComponent as DownloadBtnSvg} from '../../../img/download-btn.svg';
-import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
+// import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
 import {ReactComponent as PrintBtnSvg} from '../../../img/print-btn.svg';
 import {ReactComponent as ZoomBtnSvg} from '../../../img/zoom-btn.svg';
+import {ReactComponent as ZoomBtnSmSvg} from '../../../img/zoom-btn-sm.svg';
 import Lightbox from 'react-image-lightbox';
 import Select from 'react-select/base';
 import Account from '../../../models/Account';
@@ -192,12 +193,17 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
   };
 
   render() {
-    const {showModal, document, accounts} = {...this.props};
+    const {showModal, document, accounts, myAccount} = {...this.props};
     const {activeTab, showConfirmDeleteSection, hasConfirmedDelete,
       deleteConfirmInput, isZoomed, selectedContact, showConfirmShare, newFile} = {...this.state};
     const closeBtn = (<div className="modal-close" onClick={this.toggleModal}>
       <CrossSvg className="lg"/><CrossSmSvg className="sm"/>
     </div>);
+    let uploadedBy = 'N/A';
+    if(document) {
+      const uploadedByAccount = AccountImpl.getAccountByIdAndList([...accounts, myAccount], document!.uploadedBy);
+      uploadedBy = AccountImpl.getFullName(uploadedByAccount?.firstName, uploadedByAccount?.lastName);
+    }
     return (
       <Modal
         isOpen={showModal}
@@ -209,7 +215,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
           <EditDocSvg className="lg" />
           <EditDocSmSvg className="sm" />
-          {document?.type}
+          <span>{document?.type}</span>
         </ModalHeader>
         <ModalBody className="update-doc-container">
           <div className={classNames({'upload-doc-delete-container': true, active: showConfirmDeleteSection})}>
@@ -265,14 +271,28 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                            src={DocumentService.getDocumentURL(document!.url)}
                            alt="doc missing"
                       />
+                      <ZoomBtnSmSvg onClick={() => this.setState({isZoomed: true})} />
+                    </div>
+                    <div className="img-access-sm">
+                      <button
+                        onClick={() => {window.location.href = DocumentService.getDocumentURL(document!.url);}}
+                        className="download-btn"
+                      >
+                        Download
+                      </button>
+                      <button
+                        onClick={() => this.printImg(DocumentService.getDocumentURL(document!.url))}
+                        className="print-btn"
+                      >
+                        Print
+                      </button>
                     </div>
                     <div className="img-access">
                       <a href={DocumentService.getDocumentURL(document!.url)} download target="_blank">
-                        <DownloadBtnSvg className="pointer"/>
+                        <DownloadBtnSvg />
                       </a>
-                      <PrintBtnSvg className="pointer"
-                                   onClick={() => this.printImg(DocumentService.getDocumentURL(document!.url))}/>
-                      <ZoomBtnSvg className="pointer" onClick={() => this.setState({isZoomed: true})}/>
+                      <PrintBtnSvg onClick={() => this.printImg(DocumentService.getDocumentURL(document!.url))}/>
+                      <ZoomBtnSvg onClick={() => this.setState({isZoomed: true})}/>
                     </div>
                   </div>
                   <div className="preview-info">
@@ -281,12 +301,12 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                       <div className="attr-value">{document!.type}</div>
                     </div>
                     <div className="preview-info-item">
-                      <div className="attr">Upload date</div>
-                      <div className="attr-value">-</div>
+                      <div className="attr">Update date</div>
+                      <div className="attr-value">{format(new Date(document?.updatedAt!), 'MM/dd/yyyy')}</div>
                     </div>
                     <div className="preview-info-item">
                       <div className="attr">Uploaded by</div>
-                      <div className="attr-value">{document!.uploadedBy}</div>
+                      <div className="attr-value">{uploadedBy}</div>
                     </div>
                     <div className="preview-info-item">
                       <div className="attr">Valid Until</div>
@@ -296,6 +316,37 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                 </Col>
                 }
               </Row>
+              <div className="delete-sm">
+                <button onClick={() => this.setState({showConfirmDeleteSection: true})}>
+                  {showConfirmDeleteSection && (<strong>Delete File</strong>)}
+                  {!showConfirmDeleteSection && 'Delete File'}
+                </button>
+                {showConfirmDeleteSection && (
+                <div className="confirm-delete-sm">
+                  <p>
+                    Deleting this file will <strong>
+                    permanently
+                  </strong> revoke access to all users you have shared this document with.
+                  </p>
+                  <p>Are you sure?</p>
+                  <FormGroup>
+                    <Label for="documentDelete">Type DELETE to confirm</Label>
+                    <Input type="text" name="documentDelete" id="documentDelete" value={deleteConfirmInput}
+                           onChange={this.handleDeleteConfirmChange} placeholder="" autoComplete="off"
+                    />
+                    <span className="delete-info">Please enter the text exactly as displayed to confirm</span>
+                  </FormGroup>
+                  <div className="delete-final">
+                    <Button
+                      color="danger"
+                      onClick={() => this.handleDeleteDocument(document!)} disabled={!hasConfirmedDelete}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+                )}
+              </div>
             </TabPane>
             <TabPane tabId="2">
               <div className="update-doc-tab-spacing">

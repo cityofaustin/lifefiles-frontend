@@ -106,25 +106,44 @@ body {
 // bootstrap modal
 
 .modal-dialog {
+  @include  media-breakpoint-down(sm) {
+    margin: 19px 21.5px 24px 21.5px;
+  }
   .modal-content {
     padding: 0;
     background-color: #f6f6f6;
+    @include media-breakpoint-down(sm) {
+      border-radius: 32px;
+    }
     border-radius: 17px;
-    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16); //32.6 54.6
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
     .modal-header {
       background: $blue;
       @include media-breakpoint-up(sm) {
         padding: 19px 44px 19px 44px;
+      }
+      @include media-breakpoint-down(sm) {
+        padding: 11.3px 30.3px;
+        border-top-left-radius: calc(32px - 1px);
+        border-top-right-radius: calc(32px - 1px);
       }
       border-top-left-radius: calc(17px - 1px);
       border-top-right-radius: calc(17px - 1px);
       .modal-title {
         @include media-breakpoint-down(sm) {
           font-size: 18px;
+          span {
+            vertical-align: text-top;
+          }
         }
         font-size: 35px;
         color: #f8f8f8;
         font-weight: 500;
+      }
+    }
+    .modal-body {
+      @include media-breakpoint-down(sm) {
+        margin-bottom: 32px;
       }
     }
   }
@@ -146,6 +165,10 @@ body {
 }
 
 .modal-footer {
+  @include media-breakpoint-down(sm) {
+    margin-top: -32px;
+    padding-top: 0;
+  }
   border-top: 0;
   padding: 42px;
 }
@@ -258,54 +281,6 @@ body {
 }
 
 // end bootstrap tabs
-
-
-.dropzone {
-  flex: 1;
-  display: flex;
-  justify-content: flex-start;
-  height: 479.4px;
-  flex-direction: column;
-  //align-items: center;
-  padding: 22px 30px;
-  //border-width: 2px;
-  //border-radius: 2px;
-  //border-color: #707070;
-  //border-style: dashed;
-
-  //background-image: linear-gradient(#a8a8a8 40%, rgba(255,255,255,0) 0%);
-  //background-position: right;
-  //background-size: 25px 2px;
-  //background-repeat: repeat-y;
-
-  background-color: #f6f6f6;
-  color: #bdbdbd;
-  outline: none;
-  transition: border .24s ease-in-out;
-  p {
-    font-size: 25px;
-  }
-}
-
-.dropzone-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 41px;
-}
-
-.dropzone-bottom {
-  background-image: linear-gradient(to right, #a8a8a8 40%, rgba(255,255,255,0) 0%);
-  background-position: bottom;
-  background-size: 25px 2px;
-  background-repeat: repeat-x;
-}
-
-.dropzone-left {
-  background-image: linear-gradient(#a8a8a8 40%, rgba(255,255,255,0) 0%);
-  background-position: left;
-  background-size: 2px 25px;
-  background-repeat: repeat-y;
-}
 
 .pointer {
   cursor: pointer;

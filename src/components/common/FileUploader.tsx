@@ -2,6 +2,7 @@ import React, {Component, Fragment} from 'react';
 import Dropzone from 'react-dropzone';
 import './FileUploader.scss';
 import {ReactComponent as ReuploadBtnSvg} from '../../img/reupload-btn.svg';
+import {ReactComponent as ReuploadSmSvg} from '../../img/reupload-sm.svg';
 
 interface FileUploaderState {
   files: File[];
@@ -91,7 +92,8 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
     return (
       <div {...getRootProps()}>
         <input {...getInputProps()} />
-        <svg width="997" height="327" viewBox="0 0 997 327">
+        <ReuploadSmSvg className="upload-sm" />
+        <svg className="upload" width="997" height="327" viewBox="0 0 997 327">
           <defs>
             <filter id="filter1" x="347" y="136" width="291" height="89" filterUnits="userSpaceOnUse">
               <feOffset dy="3"/>

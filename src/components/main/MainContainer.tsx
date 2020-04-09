@@ -223,6 +223,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({isLoading: true});
     try {
       const updatedDoc = await DocumentService.updateDocument(request);
+      // TODO get API call to return updatedAt
+      updatedDoc.updatedAt = new Date();
       documents = documents.map(doc => (doc.type === updatedDoc.type) ? updatedDoc : doc );
     } catch (err) {
       console.error('failed to upload file');

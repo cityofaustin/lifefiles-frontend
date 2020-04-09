@@ -157,8 +157,8 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
             <div className="right-pane">
               <div className="share-title">Shared Documents</div>
               <div className="document-grid">
-                {searchedDocuments.map(searchedDocument => (
-                  <div key={searchedDocument._id} className="document-item">
+                {searchedDocuments.map((searchedDocument, idx) => (
+                  <div key={idx} className="document-item">
                     <div className="doc-info">
                       <img src={DocumentService.getDocumentURL(searchedDocument.url)} alt={''} />
                       <div className="doc-type">{searchedDocument.type}</div>
