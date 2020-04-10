@@ -178,6 +178,9 @@ body {
 // bootstrap form control
 
 .form-control {
+  @include media-breakpoint-down(sm) {
+    font-size: 18px;
+  }
   font-size: 25px;
   //color: blue;
   color: #3b3b3b;

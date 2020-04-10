@@ -11,7 +11,9 @@ import FileUploader from '../../common/FileUploader';
 import DocumentType from '../../../models/DocumentType';
 import Document from '../../../models/document/Document';
 import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
+import {ReactComponent as CrossSmSvg} from '../../../img/cross2-sm.svg';
 import {ReactComponent as NewDocSvg} from '../../../img/new-doc-2.svg';
+import {ReactComponent as NewDocSmSvg} from '../../../img/new-doc-sm.svg';
 import Select, {OptionTypeBase} from 'react-select';
 import './AddDocumentModal.scss';
 
@@ -168,19 +170,71 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
         transition: 'opacity 300ms'
       })
     };
+    const customStylesSm = {
+      control: (provided: any) => ({
+        ...provided,
+        height: '54.8px'
+      }),
+      option: (provided: any, state: any) => {
+        const backgroundColor = (state.isSelected) ? '#2362C7' : provided.backgroundColor;
+        const color = (state.isSelected) ? 'white' : '#3b3b3b';
+        return {
+          ...provided,
+          backgroundColor,
+          fontFamily: 'Montserrat, Arial, sans-serif',
+          fontSize: '18px',
+          color,
+          paddingLeft: '27.5px',
+          paddingTop: '7px',
+          paddingBottom: '7px',
+          opacity: state.isDisabled ? 0.5 : 1
+        };
+      },
+      input: (provided: any) => ({
+        ...provided
+      }),
+      placeholder: (provided: any) => ({
+        ...provided,
+        fontFamily: 'Montserrat, Arial, sans-serif',
+        fontSize: '18px',
+        color: '#3b3b3b',
+        paddingLeft: '30px'
+      }),
+      singleValue: (provided: any, state: any) => ({
+        ...provided,
+        fontFamily: 'Montserrat, Arial, sans-serif',
+        fontSize: '18px',
+        color: '#3b3b3b',
+        paddingLeft: '30px',
+        opacity: state.isDisabled ? 0.5 : 1,
+        transition: 'opacity 300ms'
+      })
+    };
     return (
       <section className="type-section">
         <div className="type-prompt">
           First, what type of document is this?
         </div>
-        <Select
-          value={documentTypeOption}
-          onChange={this.handleDocumentType}
-          options={options}
-          isSearchable={false}
-          placeholder={'-Select document-'}
-          styles={customStyles}
-        />
+        <div className="select-md">
+          <Select
+            value={documentTypeOption}
+            onChange={this.handleDocumentType}
+            options={options}
+            isSearchable={false}
+            placeholder={'-Select document-'}
+            styles={customStyles}
+          />
+        </div>
+        <div className="select-sm">
+          <Select
+            value={documentTypeOption}
+            onChange={this.handleDocumentType}
+            options={options}
+            isSearchable={false}
+            placeholder={'-Select document-'}
+            styles={customStylesSm}
+          />
+        </div>
         {isOther &&
         <div className="document-type-selected">
           {errorMessage && <div className="error">{errorMessage}</div>}
@@ -188,7 +242,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
             <Label for="documentTypeSelected" className="other-prompt">Ok, what's the title of this document?</Label>
             <Input type="text" name="documentTypeSelected" id="documentTypeSelected" value={documentType}
                    onChange={this.handleDocumentTypeChange}
-                   placeholder="Document Type"/>
+                   placeholder="Document Title..."/>
           </FormGroup>
         </div>
         }
@@ -208,17 +262,21 @@ class AddDocumentModal extends Component<AddDocumentModalProps, AddDocumentModal
   render() {
     const {showModal} = {...this.props};
     const {documentType, newFile, uploadingStep} = {...this.state};
-    const closeBtn = (<div className="modal-close" onClick={this.toggleModal}><CrossSvg/></div>);
+    const closeBtn = (<div className="modal-close" onClick={this.toggleModal}>
+      <CrossSvg className="lg"/><CrossSmSvg className="sm"/>
+    </div>);
     return (
       <Modal
         isOpen={showModal}
         toggle={this.toggleModal}
         backdrop={'static'}
         size={'xl'}
+        className="add-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-          <NewDocSvg style={{marginLeft: '10.6px', marginRight: '30.9px'}}/>
-          Add New Document
+          <NewDocSvg />
+          <NewDocSmSvg />
+          <span>Add New Document</span>
         </ModalHeader>
         <ModalBody>
           <div className="document-type-container">

@@ -341,7 +341,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   }
 
   render() {
-    const {activeTab, referencedAccount, goBack} = {...this.props};
+    const {activeTab, referencedAccount, goBack, handleAddNew} = {...this.props};
     const {isLayoutGrid} = {...this.state};
     return (
       <div className="main-content">
@@ -371,7 +371,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
               {isLayoutGrid && this.renderNetworkGridView()}
             </TabPane>
           </TabContent>
-          <FabAdd className="fab-add" />
+          <FabAdd className="fab-add" onClick={handleAddNew} />
         </Fragment>
         }
       </div>
