@@ -32,6 +32,7 @@ import Checkbox from '../../common/Checkbox';
 import ShareRequest from '../../../models/ShareRequest';
 import ShareRequestService from '../../../services/ShareRequestService';
 import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
+import ShareDocWithContainer from './ShareDocWithContainer';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -190,6 +191,10 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
       return shareRequestMatch;
     }
     return undefined;
+  };
+
+  handleSelectContact = (selectedContact: Account) => {
+    this.setState({selectedContact});
   };
 
   render() {
@@ -359,94 +364,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             </TabPane>
             <TabPane tabId="3">
               <div>
-                <div className="share-container">
-                  <div className={classNames({'contact-details': true, active: selectedContact})}>
-                    {selectedContact && (
-                      <Fragment>
-                        <img className="contact-detail-image"
-                             src={AccountService.getProfileURL(selectedContact.profileImageUrl!)}
-                             alt="Profile"/>
-                        <div className="contact-detail-info">
-                          <div className="info-item">
-                            <div className="item-attr">Name</div>
-                            <div className="item-value">
-                              {AccountImpl.getFullName(selectedContact?.firstName, selectedContact?.lastName)}
-                            </div>
-                          </div>
-                          <div className="info-item">
-                            <div className="item-attr">Organization</div>
-                            <div className="item-value">{selectedContact?.organization || '-'}</div>
-                          </div>
-                          <div className="info-item">
-                            <div className="item-attr">Role</div>
-                            <div className="item-value">{roleDisplayMap[selectedContact.role]}</div>
-                          </div>
-                          <div className="info-item">
-                            <div className="item-attr">Phone</div>
-                            <div className="item-value">{selectedContact?.phoneNumber || '-'}</div>
-                          </div>
-                          <div className="info-item">
-                            <div className="item-attr">E-mail</div>
-                            <div className="item-value">{selectedContact.email}</div>
-                          </div>
-                        </div>
-                        <div className="contact-detail-share-doc">
-                          <div className="prompt">
-                            Share Social Security Card?
-                          </div>
-                          <Checkbox isLarge isChecked={!!this.getDocumentSharedWithContact()} onClick={this.handleShareDocCheck}/>
-                          <div className="share-status">
-                            This file is {!!this.getDocumentSharedWithContact() ? '' : 'NOT '}currently shared with {selectedContact.username}
-                          </div>
-                        </div>
-                      </Fragment>
-                    )}
-                  </div>
-
-                  <div className="right-panel">
-                    <div className="contact-list">
-                      <div className="title">contacts</div>
-                      <div className="subtitle">Select a contact to share this document with</div>
-                      <div className="contact-grid">
-                        {accounts.map(account => (
-                          <div key={account.id}
-                               className={classNames({
-                                   contact: true,
-                                   active: (selectedContact && selectedContact.id === account.id)
-                                 }
-                               )}
-                               onClick={() => this.setState({selectedContact: account})}>
-                            <img className="contact-image"
-                                 src={AccountService.getProfileURL(account.profileImageUrl!)}
-                                 alt="Profile"/>
-                            <div className="contact-name">{account.username}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="share-time-limit">
-                      <div className="share-time-disabled-overlay"/>
-                      <div className="title">time limit</div>
-                      <div className="subtitle">Specify how long this document will be shared</div>
-                      <div className="share-for-container">
-                        <div className="share-for-form-group">
-                          <label>Share for...</label>
-                          <div style={{width: '224px'}}>
-                            <Select/>
-                          </div>
-                        </div>
-                        <div className="date-container">
-                          <div className="date-indicator">From</div>
-                          <div className="date-value">{format(new Date(), 'MMMM d, y')}</div>
-                        </div>
-                        <div className="date-container">
-                          <div className="date-indicator">To</div>
-                          <div className="date-value">{format(addMonths(new Date(), 1), 'MMMM d, y')}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ShareDocWithContainer
+                  accounts={accounts}
+                  getDocumentSharedWithContact={this.getDocumentSharedWithContact}
+                  handleShareDocCheck={this.handleShareDocCheck}
+                  selectedContact={selectedContact}
+                  handleSelectContact={this.handleSelectContact}
+                  document={document}
+                />
               </div>
             </TabPane>
           </TabContent>
