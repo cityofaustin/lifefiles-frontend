@@ -77,7 +77,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
 
   renderGridSort() {
     const {
-      sortAsc, toggleSort
+      sortAsc, toggleSort, activeTab
     } = {...this.props};
     return (
       <Fragment>
@@ -88,10 +88,12 @@ class MainPage extends Component<MainPageProps, MainPageState> {
         </div>
         <div className="sort-section-sm">
           <div className="sort-container" onClick={toggleSort}>
-            <SortArrow isAscending={sortAsc} />
+            <SortArrow isAscending={sortAsc}/>
             <div className="subtitle subtitle-key">NAME</div>
           </div>
-          <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID_MOBILE} />
+          { activeTab === '1' && (
+            <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID_MOBILE}/>
+          )}
         </div>
       </Fragment>
     );
@@ -204,17 +206,17 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                 </td>
                 <td>
                   <div className="doc-share-cell">
-                    <SharedWith sharedAccounts={sharedAccounts} />
+                    <SharedWith sharedAccounts={sharedAccounts}/>
                   </div>
                 </td>
                 <td>
                   <div className="doc-updated-cell">
-                    { accountProfileURL && (
+                    {accountProfileURL && (
                       <img className="profile-image"
                            src={accountProfileURL}
-                           alt="" />
-                    ) }
-                    { !accountProfileURL && (
+                           alt=""/>
+                    )}
+                    {!accountProfileURL && (
                       <div className="account-circle">{StringUtil.getFirstUppercase(matchedAccount!.username)}</div>
                     )}
                     <div>{format(new Date(document.updatedAt!), 'MMM d, y')}</div>
@@ -357,8 +359,10 @@ class MainPage extends Component<MainPageProps, MainPageState> {
           <div className="document-header">
             {this.renderNav()}
             <div className="document-toolbar">
-              {isLayoutGrid && <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID} onClick={this.toggleLayout}/>}
-              {!isLayoutGrid && <SvgButton buttonType={SvgButtonTypes.LAYOUT_LIST} onClick={this.toggleLayout}/>}
+              {(activeTab === '1' && isLayoutGrid) &&
+              <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID} onClick={this.toggleLayout}/>}
+              {(activeTab === '1' && !isLayoutGrid) &&
+              <SvgButton buttonType={SvgButtonTypes.LAYOUT_LIST} onClick={this.toggleLayout}/>}
               <SvgButton buttonType={SvgButtonTypes.INFO}/>
             </div>
           </div>
@@ -371,7 +375,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
               {isLayoutGrid && this.renderNetworkGridView()}
             </TabPane>
           </TabContent>
-          <FabAdd className="fab-add" onClick={handleAddNew} />
+          <FabAdd className="fab-add" onClick={handleAddNew}/>
         </Fragment>
         }
       </div>

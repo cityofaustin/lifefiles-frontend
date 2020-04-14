@@ -54,9 +54,6 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
             imageViewType={ImageViewTypes.GRID_CIRCLE_LAYOUT}
             imageUrl={AccountService.getProfileURL(account.profileImageUrl!)}
           />
-          {/*<img className="image"*/}
-          {/*     src={AccountService.getProfileURL(account.profileImageUrl!)}*/}
-          {/*     alt="img"/>*/}
         </div>
         <div className="title">{AccountImpl.getFullName(account?.firstName, account?.lastName)}</div>
         <div className="contact-info">
@@ -72,6 +69,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
             <div className="item-attr">Phone</div>
             <div className="item-value">{account?.phoneNumber || '-'}</div>
           </div>
+          {/*TODO do screen overflow here*/}
           <div className="info-item">
             <div className="item-attr">E-mail</div>
             <div className="item-value">{account.email}</div>

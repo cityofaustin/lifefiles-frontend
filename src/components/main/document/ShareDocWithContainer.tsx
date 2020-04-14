@@ -109,12 +109,12 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
               <Carousel
                 responsive={{
                   mobile: {
-                    breakpoint: {max: 464, min: 0},
+                    breakpoint: {max: 576, min: 0},
                     items: 2
                   }
                 }}
-                infinite={true}
-
+                infinite={false}
+                // showDots={true}
               >
                 {accounts.map(account => (
                   <div key={account.id}
