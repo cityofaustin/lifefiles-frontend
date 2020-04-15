@@ -1,3 +1,5 @@
+import JSZip from 'jszip';
+
 class StringUtil {
   static getFirstUppercase(input: string): string {
     let result = '';
@@ -19,6 +21,17 @@ class StringUtil {
     // return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c: number) =>
     //   (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     // );
+  }
+
+  static async compressString(input: string): Promise<Blob> {
+    // TODO
+    const zip = new JSZip();
+    zip.file('encrypted.txt', input);
+    const content = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE'
+    });
+    return content;
   }
 }
 

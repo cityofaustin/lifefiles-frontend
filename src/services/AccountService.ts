@@ -25,6 +25,10 @@ class AccountService extends AgentService {
       `/profile-image/${filename}/${AuthService.getAccessToken()}`;
   }
 
+  static getEncryptionKey() {
+    return super.get('/get-encryption-key');
+  }
+
 }
 
 export default AccountService;

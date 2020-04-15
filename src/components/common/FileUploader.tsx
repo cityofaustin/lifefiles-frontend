@@ -3,6 +3,9 @@ import Dropzone from 'react-dropzone';
 import './FileUploader.scss';
 import {ReactComponent as ReuploadBtnSvg} from '../../img/reupload-btn.svg';
 import {ReactComponent as ReuploadSmSvg} from '../../img/reupload-sm.svg';
+import EthCrypto, {Encrypted} from 'eth-crypto';
+import StringUtil from '../../util/StringUtil';
+// import FileBase64 from 'react-file-base64';
 
 interface FileUploaderState {
   files: File[];
@@ -43,14 +46,64 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
     this.setState({files: []});
   };
 
-  handleOnDrop = (acceptedFiles: File[]) => {
+  handleOnDrop = async (acceptedFiles: File[]) => {
     const {setFile} = {...this.props};
     acceptedFiles = acceptedFiles.map(file => Object.assign(file, {
       preview: URL.createObjectURL(file)
     }));
     const [oneFile] = [...acceptedFiles];
     this.setState({files: acceptedFiles});
-    setFile(oneFile);
+    // TODO didPublicEncryptionKey in, /my-account
+    const encryptionPublicKey = EthCrypto.publicKeyByPrivateKey(
+      '0x' + 'd28678b5d893ea7accd58901274dc5df8eb00bc76671dbf57ab65ee44c848415');
+    console.log(encryptionPublicKey);
+    console.log(oneFile);
+    // const reader = new FileReader();
+    // reader.onloadend = () => {
+    //   const base64data = reader.result;
+    //   console.log(base64data);
+    // };
+    // reader.readAsDataURL((oneFile as any).preview);
+
+    const readFileAsync = (file: any) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+
+    const base64String = await readFileAsync(oneFile);
+    console.log(base64String);
+    // const base64String = btoa(String.fromCharCode(...new Uint8Array((contentBuffer as any))));
+    // const base64String = String.fromCharCode.apply(null, new Uint16Array((contentBuffer)));
+    // console.log(base64String);
+    // const blobURL = (oneFile as any).preview;
+    // const blobToBase64 = (blobURL1: string) => {
+    //   const reader = new FileReader();
+    //   reader.onload = () => {
+    //     const dataUrl = reader.result;
+    //     const base64 = (dataUrl as any).split(',')[1];
+    //     callback(base64);
+    //   };
+    //   reader.readAsDataURL(blob);
+    // };
+
+    // reader.
+    const base64OfImage = (oneFile as any).base64;
+    console.log(base64OfImage);
+    const encrypted: Encrypted = await EthCrypto.encryptWithPublicKey(
+      encryptionPublicKey,
+      base64String as string
+    );
+    const encryptedString =  EthCrypto.cipher.stringify(encrypted);
+    const blob = await StringUtil.compressString(encryptedString as any);
+    // const blob = new Blob([base64String as any], {type: 'text/plain'});
+    const newZippedFile = new File([blob], 'encrypted-image.zip', {type: 'application/zip', lastModified: Date.now()});
+    setFile(newZippedFile);
   };
 
   renderFiles(files: File[]) {

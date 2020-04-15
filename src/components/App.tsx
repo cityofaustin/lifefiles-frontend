@@ -9,11 +9,13 @@ import ProgressIndicator from './common/ProgressIndicator';
 import './App.scss';
 import Role from '../models/Role';
 import ShareRequest from '../models/ShareRequest';
+import EncryptionKeyResponse from '../models/EncryptionKeyResponse';
 
 interface AppState {
   account?: Account;
   isLoading: boolean;
   theme: string;
+  privateEncryptionKey?: string;
 }
 
 class App extends Component<{}, AppState> {
@@ -28,18 +30,20 @@ class App extends Component<{}, AppState> {
   }
 
   async componentDidMount(): Promise<void> {
-    let {account, theme} = {...this.state};
+    let {account, theme, privateEncryptionKey} = {...this.state};
     this.setState({isLoading: true});
     if (AuthService.isLoggedIn()) {
       try {
         const loginResponse = await AccountService.getMyAccount();
+        const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
+        privateEncryptionKey = encryptionKeyResponse.encryptionKey;
         ({account} = {...loginResponse});
         theme = account?.role;
       } catch (err) {
         console.error(err.message);
       }
     }
-    this.setState({account, theme, isLoading: false});
+    this.setState({account, theme, isLoading: false, privateEncryptionKey});
   }
 
   handleLogin = async (response: any): Promise<void> => {

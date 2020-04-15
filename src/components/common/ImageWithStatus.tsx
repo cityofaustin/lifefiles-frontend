@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import classNames from 'classnames';
 import './ImageWithStatus.scss';
 import ProgressIndicator from './ProgressIndicator';
+import DocumentService from '../../services/DocumentService';
+import APIService from '../../services/APIService';
 
 export enum ImageViewTypes {
   GRID_LAYOUT,
@@ -32,6 +34,11 @@ class ImageWithStatus extends Component<ImageWithStatusProps, ImageWithStatusSta
     };
   }
 
+  async componentDidMount(): Promise<void> {
+    const {imageUrl} = {...this.props};
+    await this.unzipAndDecrypt(imageUrl);
+  }
+
   handleImageLoaded = () => {
     this.setState({ imageStatus: ImageStatus.Loaded });
   };
@@ -39,6 +46,13 @@ class ImageWithStatus extends Component<ImageWithStatusProps, ImageWithStatusSta
   handleImageErrored = () => {
     this.setState({ imageStatus: ImageStatus.Failed });
   };
+
+  async unzipAndDecrypt(zipUrl: string) {
+    // const url = await DocumentService.getDocumentURL();
+    // debugger;
+    const zippedFileContents = await APIService.getText(zipUrl);
+    console.log(zippedFileContents);
+  }
 
   render() {
     const {imageUrl, imageViewType} = {...this.props};

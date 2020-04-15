@@ -55,6 +55,25 @@ class APIService {
     }
   }
 
+  static async getText(url: string) {
+    const input: RequestInfo = `${url}`;
+    const headers: HeadersInit = await this.getHeaders();
+    const init: RequestInit = {
+      method: 'GET',
+      headers
+    };
+    try {
+      const response = await fetch(input, init);
+      const responseText = await response.text();
+      // this.handleErrorStatusCodes(response.status, responseJson);
+      return responseText;
+    } catch (err) {
+      console.error(err.message);
+      AuthService.logOut();
+      location.reload();
+    }
+  }
+
   static async post(path: any, entity: any) {
     const input = `${MYPASS_API}${path}`;
     const headers = await this.getHeaders();
@@ -73,7 +92,7 @@ class APIService {
     }
   }
 
-  static async postDocument(file: File, documentType: string) {
+  static async postDocument(file: File, documentType: string, encryptionPubKey: string) {
     const path = '/documents';
     const input = `${MYPASS_API}${path}`;
     const headers = {
@@ -81,8 +100,9 @@ class APIService {
     };
     const formdata = new FormData();
     formdata.append('img', file, file.name);
-    formdata.append('id', StringUtil.getUuidv4());
+    // formdata.append('id', StringUtil.getUuidv4());
     formdata.append('type', documentType);
+    formdata.append('encryptionPubKey', encryptionPubKey);
     const init = {
       method: 'POST',
       headers,

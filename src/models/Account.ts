@@ -8,9 +8,7 @@ interface Account {
   email: string;
   role: Role;
   didAddress: string;
-  didPrivateKey?: string;
-  hash?: string;
-  salt?: string;
+  didPublicEncryptionKey?: string;
   token: string;
   documents: Document[];
   shareRequests: ShareRequest[];
@@ -19,7 +17,6 @@ interface Account {
   organization?: string;
   firstName?: string;
   lastName?: string;
-  randomValue?: string;
 }
 
 export default Account;

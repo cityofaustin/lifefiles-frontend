@@ -12,4 +12,11 @@ describe('StringUtil', () => {
     console.log(result);
     expect(result).toBeTruthy();
   });
+
+  it('should compress the string', async () => {
+    const input = 'test string';
+    const output = await StringUtil.compressString(input);
+    console.log(output);
+  });
 });
+
