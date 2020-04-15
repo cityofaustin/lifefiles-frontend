@@ -1,38 +1,49 @@
-import React, {ChangeEvent, Component, Fragment} from 'react';
+import React, { ChangeEvent, Component, Fragment } from "react";
 import {
   Button,
-  Col, Form, FormGroup, Input, Label,
+  Col,
+  Form,
+  FormGroup,
+  Input,
+  Label,
   Modal,
-  ModalBody, ModalFooter,
-  ModalHeader, Nav, NavItem, NavLink, Row, TabContent, TabPane
-} from 'reactstrap';
-import classNames from 'classnames';
-import Document from '../../../models/document/Document';
-import './UpdateDocumentModal.scss';
-import DocumentService from '../../../services/DocumentService';
-import {ReactComponent as DeleteSvg} from '../../../img/delete.svg';
-import {ReactComponent as EditDocSvg} from '../../../img/edit-doc.svg';
-import {ReactComponent as EditDocSmSvg} from '../../../img/edit-doc-sm.svg';
-import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
-import {ReactComponent as CrossSmSvg} from '../../../img/cross2-sm.svg';
-import FileUploader from '../../common/FileUploader';
-import {ReactComponent as DownloadBtnSvg} from '../../../img/download-btn.svg';
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Nav,
+  NavItem,
+  NavLink,
+  Row,
+  TabContent,
+  TabPane,
+} from "reactstrap";
+import classNames from "classnames";
+import Document from "../../../models/document/Document";
+import "./UpdateDocumentModal.scss";
+import DocumentService from "../../../services/DocumentService";
+import { ReactComponent as DeleteSvg } from "../../../img/delete.svg";
+import { ReactComponent as EditDocSvg } from "../../../img/edit-doc.svg";
+import { ReactComponent as EditDocSmSvg } from "../../../img/edit-doc-sm.svg";
+import { ReactComponent as CrossSvg } from "../../../img/cross2.svg";
+import { ReactComponent as CrossSmSvg } from "../../../img/cross2-sm.svg";
+import FileUploader from "../../common/FileUploader";
+import { ReactComponent as DownloadBtnSvg } from "../../../img/download-btn.svg";
 // import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
-import {ReactComponent as PrintBtnSvg} from '../../../img/print-btn.svg';
-import {ReactComponent as ZoomBtnSvg} from '../../../img/zoom-btn.svg';
-import {ReactComponent as ZoomBtnSmSvg} from '../../../img/zoom-btn-sm.svg';
-import Lightbox from 'react-image-lightbox';
-import Select from 'react-select/base';
-import Account from '../../../models/Account';
-import AccountService from '../../../services/AccountService';
-import AccountImpl from '../../../models/AccountImpl';
-import {roleDisplayMap} from '../../../models/Role';
-import {addMonths, format} from 'date-fns';
-import Checkbox from '../../common/Checkbox';
-import ShareRequest from '../../../models/ShareRequest';
-import ShareRequestService from '../../../services/ShareRequestService';
-import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
-import ShareDocWithContainer from './ShareDocWithContainer';
+import { ReactComponent as PrintBtnSvg } from "../../../img/print-btn.svg";
+import { ReactComponent as ZoomBtnSvg } from "../../../img/zoom-btn.svg";
+import { ReactComponent as ZoomBtnSmSvg } from "../../../img/zoom-btn-sm.svg";
+import Lightbox from "react-image-lightbox";
+import Select from "react-select/base";
+import Account from "../../../models/Account";
+import AccountService from "../../../services/AccountService";
+import AccountImpl from "../../../models/AccountImpl";
+import { roleDisplayMap } from "../../../models/Role";
+import { addMonths, format } from "date-fns";
+import Checkbox from "../../common/Checkbox";
+import ShareRequest from "../../../models/ShareRequest";
+import ShareRequestService from "../../../services/ShareRequestService";
+import UpdateDocumentRequest from "../../../models/document/UpdateDocumentRequest";
+import ShareDocWithContainer from "./ShareDocWithContainer";
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -45,6 +56,7 @@ interface UpdateDocumentModalProps {
   removeShareRequest: (request: ShareRequest) => void;
   myAccount: Account;
   handleUpdateDocument: (request: UpdateDocumentRequest) => void;
+  privateEncryptionKey?: string;
 }
 
 interface UpdateDocumentModalState {
@@ -58,101 +70,110 @@ interface UpdateDocumentModalState {
   newFile?: File;
 }
 
-class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocumentModalState> {
+class UpdateDocumentModal extends Component<
+  UpdateDocumentModalProps,
+  UpdateDocumentModalState
+> {
   constructor(props: Readonly<UpdateDocumentModalProps>) {
     super(props);
 
     this.state = {
-      activeTab: '1',
+      activeTab: "1",
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: '',
+      deleteConfirmInput: "",
       isZoomed: false,
-      showConfirmShare: false
+      showConfirmShare: false,
     };
   }
 
   toggleModal = () => {
     // clear state
-    const {toggleModal} = {...this.props};
+    const { toggleModal } = { ...this.props };
     this.setState({
-      activeTab: '1',
+      activeTab: "1",
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: '',
+      deleteConfirmInput: "",
       isZoomed: false,
       selectedContact: undefined,
-      showConfirmShare: false
+      showConfirmShare: false,
     });
     toggleModal();
   };
 
   handleUpdateDocument = () => {
-    const {newFile} = {...this.state};
+    const { newFile } = { ...this.state };
     // clear state
-    const {handleUpdateDocument, document} = {...this.props};
+    const { handleUpdateDocument, document } = { ...this.props };
     handleUpdateDocument({
       id: document!._id!,
       img: newFile,
-      validUntilDate: undefined // TODO add expired at form somewhere
+      validUntilDate: undefined, // TODO add expired at form somewhere
     });
     this.setState({
-      activeTab: '1',
+      activeTab: "1",
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: '',
+      deleteConfirmInput: "",
       isZoomed: false,
       selectedContact: undefined,
-      showConfirmShare: false
+      showConfirmShare: false,
     });
   };
 
   handleShareDocWithContact = async () => {
-    const {document, addShareRequest, myAccount} = {...this.props};
-    const {selectedContact} = {...this.state};
+    const { document, addShareRequest, myAccount } = { ...this.props };
+    const { selectedContact } = { ...this.state };
     // then add share and approve it api call
     try {
-      const newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, selectedContact?.id!);
+      const newShareRequest = await ShareRequestService.addShareRequest(
+        document?.type!,
+        myAccount.id,
+        selectedContact?.id!
+      );
       addShareRequest(newShareRequest);
     } catch (err) {
       console.error(err.message);
     }
     // Note: you don't need to approve anymore since your the owner
     // newShareRequest = await ShareRequestService.approveShareRequest(newShareRequest._id);
-    this.setState({selectedContact, showConfirmShare: false});
+    this.setState({ selectedContact, showConfirmShare: false });
   };
 
   handleShareDocCheck = async () => {
-    const {removeShareRequest} = {...this.props};
-    const {selectedContact} = {...this.state};
+    const { removeShareRequest } = { ...this.props };
+    const { selectedContact } = { ...this.state };
     let showConfirmShare = false;
-    if(this.getDocumentSharedWithContact()) {
+    if (this.getDocumentSharedWithContact()) {
       try {
-        await ShareRequestService.deleteShareRequest(this.getDocumentSharedWithContact()!._id!);
+        await ShareRequestService.deleteShareRequest(
+          this.getDocumentSharedWithContact()!._id!
+        );
         removeShareRequest(this.getDocumentSharedWithContact()!);
       } catch (err) {
         console.error(err.message);
       }
-
     } else {
       // show prompt
       showConfirmShare = true;
     }
-    this.setState({selectedContact, showConfirmShare});
+    this.setState({ selectedContact, showConfirmShare });
   };
 
   toggleConfirmShare = () => {
-    const {showConfirmShare} = {...this.state};
-    this.setState({showConfirmShare: !showConfirmShare});
+    const { showConfirmShare } = { ...this.state };
+    this.setState({ showConfirmShare: !showConfirmShare });
   };
 
   toggleTab = (tab: string) => {
-    const {activeTab} = {...this.state};
-    if (activeTab !== tab) this.setState({activeTab: tab, showConfirmDeleteSection: false});
+    const { activeTab } = { ...this.state };
+    if (activeTab !== tab)
+      this.setState({ activeTab: tab, showConfirmDeleteSection: false });
   };
 
   handleDeleteDocument = async (document: Document) => {
-    const {handleDeleteDocument} = {...this.props};
+    const { handleDeleteDocument } = { ...this.props };
     try {
       await handleDeleteDocument(document);
     } catch (err) {
@@ -161,60 +182,81 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
   };
 
   handleDeleteConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const {value} = e.target;
+    const { value } = e.target;
     let hasConfirmedDelete = false;
-    if (value === 'DELETE') {
+    if (value === "DELETE") {
       hasConfirmedDelete = true;
     }
-    this.setState({deleteConfirmInput: value, hasConfirmedDelete});
+    this.setState({ deleteConfirmInput: value, hasConfirmedDelete });
   };
 
   confirmDelete = () => {
-    this.setState({activeTab: '0', showConfirmDeleteSection: true});
+    this.setState({ activeTab: "0", showConfirmDeleteSection: true });
   };
 
   setFile = (newFile: File) => {
-    this.setState({newFile});
+    this.setState({ newFile });
   };
 
   printImg(url: string) {
-    const win = window.open('');
-    win?.document.write('<img src="' + url + '" onload="window.print();window.close()" />');
+    const win = window.open("");
+    win?.document.write(
+      '<img src="' + url + '" onload="window.print();window.close()" />'
+    );
     win?.focus();
   }
 
   getDocumentSharedWithContact = () => {
-    const {selectedContact} = {...this.state};
-    const {shareRequests} = {...this.props};
-    const shareRequestMatch = shareRequests.find(shareRequest => selectedContact?.id === shareRequest.shareWithAccountId);
-    if(shareRequestMatch) {
+    const { selectedContact } = { ...this.state };
+    const { shareRequests } = { ...this.props };
+    const shareRequestMatch = shareRequests.find(
+      (shareRequest) => selectedContact?.id === shareRequest.shareWithAccountId
+    );
+    if (shareRequestMatch) {
       return shareRequestMatch;
     }
     return undefined;
   };
 
   handleSelectContact = (selectedContact: Account) => {
-    this.setState({selectedContact});
+    this.setState({ selectedContact });
   };
 
   render() {
-    const {showModal, document, accounts, myAccount} = {...this.props};
-    const {activeTab, showConfirmDeleteSection, hasConfirmedDelete,
-      deleteConfirmInput, isZoomed, selectedContact, showConfirmShare, newFile} = {...this.state};
-    const closeBtn = (<div className="modal-close" onClick={this.toggleModal}>
-      <CrossSvg className="lg"/><CrossSmSvg className="sm"/>
-    </div>);
-    let uploadedBy = 'N/A';
-    if(document) {
-      const uploadedByAccount = AccountImpl.getAccountByIdAndList([...accounts, myAccount], document!.uploadedBy);
-      uploadedBy = AccountImpl.getFullName(uploadedByAccount?.firstName, uploadedByAccount?.lastName);
+    const { showModal, document, accounts, myAccount } = { ...this.props };
+    const {
+      activeTab,
+      showConfirmDeleteSection,
+      hasConfirmedDelete,
+      deleteConfirmInput,
+      isZoomed,
+      selectedContact,
+      showConfirmShare,
+      newFile,
+    } = { ...this.state };
+    const closeBtn = (
+      <div className="modal-close" onClick={this.toggleModal}>
+        <CrossSvg className="lg" />
+        <CrossSmSvg className="sm" />
+      </div>
+    );
+    let uploadedBy = "N/A";
+    if (document) {
+      const uploadedByAccount = AccountImpl.getAccountByIdAndList(
+        [...accounts, myAccount],
+        document!.uploadedBy
+      );
+      uploadedBy = AccountImpl.getFullName(
+        uploadedByAccount?.firstName,
+        uploadedByAccount?.lastName
+      );
     }
     return (
       <Modal
         isOpen={showModal}
         toggle={this.toggleModal}
-        backdrop={'static'}
-        size={'xl'}
+        backdrop={"static"}
+        size={"xl"}
         className="update-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
@@ -223,7 +265,12 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
           <span>{document?.type}</span>
         </ModalHeader>
         <ModalBody className="update-doc-container">
-          <div className={classNames({'upload-doc-delete-container': true, active: showConfirmDeleteSection})}>
+          <div
+            className={classNames({
+              "upload-doc-delete-container": true,
+              active: showConfirmDeleteSection,
+            })}
+          >
             <DeleteSvg
               className="delete-svg"
               onClick={() => this.confirmDelete()}
@@ -232,9 +279,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
           <Nav tabs>
             <NavItem>
               <NavLink
-                className={classNames({active: activeTab === '1'})}
+                className={classNames({ active: activeTab === "1" })}
                 onClick={() => {
-                  this.toggleTab('1');
+                  this.toggleTab("1");
                 }}
               >
                 Preview
@@ -242,9 +289,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             </NavItem>
             <NavItem>
               <NavLink
-                className={classNames({active: activeTab === '2'})}
+                className={classNames({ active: activeTab === "2" })}
                 onClick={() => {
-                  this.toggleTab('2');
+                  this.toggleTab("2");
                 }}
               >
                 Replace
@@ -252,9 +299,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             </NavItem>
             <NavItem>
               <NavLink
-                className={classNames({active: activeTab === '3'})}
+                className={classNames({ active: activeTab === "3" })}
                 onClick={() => {
-                  this.toggleTab('3');
+                  this.toggleTab("3");
                 }}
               >
                 Share
@@ -264,92 +311,130 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
           <TabContent activeTab={activeTab}>
             <TabPane tabId="1">
               <Row>
-                {document &&
-                <Col sm="12" className="preview-container">
-                  <div className="preview-img-container">
-                    <div className="img-tools">
-                      {/* NOTE: leaving out for now until we have functionality server side */}
-                      {/*<FlipDocBtnSvg className="pointer"/>*/}
+                {document && (
+                  <Col sm="12" className="preview-container">
+                    <div className="preview-img-container">
+                      <div className="img-tools">
+                        {/* NOTE: leaving out for now until we have functionality server side */}
+                        {/*<FlipDocBtnSvg className="pointer"/>*/}
+                      </div>
+                      <div className="img-container">
+                        <img
+                          className="doc-image"
+                          src={DocumentService.getDocumentURL(document!.url)}
+                          alt="doc missing"
+                        />
+                        <ZoomBtnSmSvg
+                          onClick={() => this.setState({ isZoomed: true })}
+                        />
+                      </div>
+                      <div className="img-access-sm">
+                        <button
+                          onClick={() => {
+                            window.location.href = DocumentService.getDocumentURL(
+                              document!.url
+                            );
+                          }}
+                          className="download-btn"
+                        >
+                          Download
+                        </button>
+                        <button
+                          onClick={() =>
+                            this.printImg(
+                              DocumentService.getDocumentURL(document!.url)
+                            )
+                          }
+                          className="print-btn"
+                        >
+                          Print
+                        </button>
+                      </div>
+                      <div className="img-access">
+                        <a
+                          href={DocumentService.getDocumentURL(document!.url)}
+                          download
+                          target="_blank"
+                        >
+                          <DownloadBtnSvg />
+                        </a>
+                        <PrintBtnSvg
+                          onClick={() =>
+                            this.printImg(
+                              DocumentService.getDocumentURL(document!.url)
+                            )
+                          }
+                        />
+                        <ZoomBtnSvg
+                          onClick={() => this.setState({ isZoomed: true })}
+                        />
+                      </div>
                     </div>
-                    <div className="img-container">
-                      <img className="doc-image"
-                           src={DocumentService.getDocumentURL(document!.url)}
-                           alt="doc missing"
-                      />
-                      <ZoomBtnSmSvg onClick={() => this.setState({isZoomed: true})} />
+                    <div className="preview-info">
+                      <div className="preview-info-item">
+                        <div className="attr">File</div>
+                        <div className="attr-value">{document!.type}</div>
+                      </div>
+                      <div className="preview-info-item">
+                        <div className="attr">Update date</div>
+                        <div className="attr-value">
+                          {format(new Date(document?.updatedAt!), "MM/dd/yyyy")}
+                        </div>
+                      </div>
+                      <div className="preview-info-item">
+                        <div className="attr">Uploaded by</div>
+                        <div className="attr-value">{uploadedBy}</div>
+                      </div>
+                      <div className="preview-info-item">
+                        <div className="attr">Valid Until</div>
+                        <div className="attr-value">N/A</div>
+                      </div>
                     </div>
-                    <div className="img-access-sm">
-                      <button
-                        onClick={() => {window.location.href = DocumentService.getDocumentURL(document!.url);}}
-                        className="download-btn"
-                      >
-                        Download
-                      </button>
-                      <button
-                        onClick={() => this.printImg(DocumentService.getDocumentURL(document!.url))}
-                        className="print-btn"
-                      >
-                        Print
-                      </button>
-                    </div>
-                    <div className="img-access">
-                      <a href={DocumentService.getDocumentURL(document!.url)} download target="_blank">
-                        <DownloadBtnSvg />
-                      </a>
-                      <PrintBtnSvg onClick={() => this.printImg(DocumentService.getDocumentURL(document!.url))}/>
-                      <ZoomBtnSvg onClick={() => this.setState({isZoomed: true})}/>
-                    </div>
-                  </div>
-                  <div className="preview-info">
-                    <div className="preview-info-item">
-                      <div className="attr">File</div>
-                      <div className="attr-value">{document!.type}</div>
-                    </div>
-                    <div className="preview-info-item">
-                      <div className="attr">Update date</div>
-                      <div className="attr-value">{format(new Date(document?.updatedAt!), 'MM/dd/yyyy')}</div>
-                    </div>
-                    <div className="preview-info-item">
-                      <div className="attr">Uploaded by</div>
-                      <div className="attr-value">{uploadedBy}</div>
-                    </div>
-                    <div className="preview-info-item">
-                      <div className="attr">Valid Until</div>
-                      <div className="attr-value">N/A</div>
-                    </div>
-                  </div>
-                </Col>
-                }
+                  </Col>
+                )}
               </Row>
               <div className="delete-sm">
-                <button onClick={() => this.setState({showConfirmDeleteSection: true})}>
-                  {showConfirmDeleteSection && (<strong>Delete File</strong>)}
-                  {!showConfirmDeleteSection && 'Delete File'}
+                <button
+                  onClick={() =>
+                    this.setState({ showConfirmDeleteSection: true })
+                  }
+                >
+                  {showConfirmDeleteSection && <strong>Delete File</strong>}
+                  {!showConfirmDeleteSection && "Delete File"}
                 </button>
                 {showConfirmDeleteSection && (
-                <div className="confirm-delete-sm">
-                  <p>
-                    Deleting this file will <strong>
-                    permanently
-                  </strong> revoke access to all users you have shared this document with.
-                  </p>
-                  <p>Are you sure?</p>
-                  <FormGroup>
-                    <Label for="documentDelete">Type DELETE to confirm</Label>
-                    <Input type="text" name="documentDelete" id="documentDelete" value={deleteConfirmInput}
-                           onChange={this.handleDeleteConfirmChange} placeholder="" autoComplete="off"
-                    />
-                    <span className="delete-info">Please enter the text exactly as displayed to confirm</span>
-                  </FormGroup>
-                  <div className="delete-final">
-                    <Button
-                      color="danger"
-                      onClick={() => this.handleDeleteDocument(document!)} disabled={!hasConfirmedDelete}
-                    >
-                      Delete
-                    </Button>
+                  <div className="confirm-delete-sm">
+                    <p>
+                      Deleting this file will <strong>permanently</strong>{" "}
+                      revoke access to all users you have shared this document
+                      with.
+                    </p>
+                    <p>Are you sure?</p>
+                    <FormGroup>
+                      <Label for="documentDelete">Type DELETE to confirm</Label>
+                      <Input
+                        type="text"
+                        name="documentDelete"
+                        id="documentDelete"
+                        value={deleteConfirmInput}
+                        onChange={this.handleDeleteConfirmChange}
+                        placeholder=""
+                        autoComplete="off"
+                      />
+                      <span className="delete-info">
+                        Please enter the text exactly as displayed to confirm
+                      </span>
+                    </FormGroup>
+                    <div className="delete-final">
+                      <Button
+                        color="danger"
+                        onClick={() => this.handleDeleteDocument(document!)}
+                        disabled={!hasConfirmedDelete}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                </div>
                 )}
               </div>
             </TabPane>
@@ -357,7 +442,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               <div className="update-doc-tab-spacing">
                 <Row>
                   <Col sm="12">
-                    <FileUploader setFile={this.setFile}/>
+                    <FileUploader setFile={this.setFile} />
                   </Col>
                 </Row>
               </div>
@@ -366,7 +451,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
               <div>
                 <ShareDocWithContainer
                   accounts={accounts}
-                  getDocumentSharedWithContact={this.getDocumentSharedWithContact}
+                  getDocumentSharedWithContact={
+                    this.getDocumentSharedWithContact
+                  }
                   handleShareDocCheck={this.handleShareDocCheck}
                   selectedContact={selectedContact}
                   handleSelectContact={this.handleSelectContact}
@@ -377,28 +464,45 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
           </TabContent>
           {showConfirmDeleteSection && (
             <div className="confirm-delete-container">
-              <div className="delete-prompt">Are you sure you want to permanently delete this file?</div>
+              <div className="delete-prompt">
+                Are you sure you want to permanently delete this file?
+              </div>
               <div className="delete-section">
                 <div className="delete-image-container">
-                  {document &&
-                  <img className="delete-image"
-                       src={DocumentService.getDocumentURL(document!.url)}
-                       alt="doc missing"
-                  />
-                  }
+                  {document && (
+                    <img
+                      className="delete-image"
+                      src={DocumentService.getDocumentURL(document!.url)}
+                      alt="doc missing"
+                    />
+                  )}
                 </div>
                 <div className="delete-info">
                   <div className="delete-info-prompt">
-                    <p>Deleting this file will <span className="delete-info-danger">permanently revoke access to all users.</span>
+                    <p>
+                      Deleting this file will{" "}
+                      <span className="delete-info-danger">
+                        permanently revoke access to all users.
+                      </span>
                     </p>
                     <p>Are you sure?</p>
                   </div>
                   <FormGroup>
-                    <Label for="documentDelete" className="other-prompt">Type DELETE to confirm</Label>
-                    <Input type="text" name="documentDelete" id="documentDelete" value={deleteConfirmInput}
-                           onChange={this.handleDeleteConfirmChange} placeholder="" autoComplete="off"
+                    <Label for="documentDelete" className="other-prompt">
+                      Type DELETE to confirm
+                    </Label>
+                    <Input
+                      type="text"
+                      name="documentDelete"
+                      id="documentDelete"
+                      value={deleteConfirmInput}
+                      onChange={this.handleDeleteConfirmChange}
+                      placeholder=""
+                      autoComplete="off"
                     />
-                    <span>Please enter the text exactly as displayed to confirm</span>
+                    <span>
+                      Please enter the text exactly as displayed to confirm
+                    </span>
                   </FormGroup>
                 </div>
               </div>
@@ -407,11 +511,18 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
                   className="margin-wide"
                   outline
                   color="secondary"
-                  onClick={this.toggleModal}>Cancel</Button>{' '}
+                  onClick={this.toggleModal}
+                >
+                  Cancel
+                </Button>{" "}
                 <Button
                   className="margin-wide"
                   color="danger"
-                  onClick={() => this.handleDeleteDocument(document!)} disabled={!hasConfirmedDelete}>Delete</Button>
+                  onClick={() => this.handleDeleteDocument(document!)}
+                  disabled={!hasConfirmedDelete}
+                >
+                  Delete
+                </Button>
               </div>
             </div>
           )}
@@ -419,41 +530,65 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps, UpdateDocu
             <Lightbox
               // reactModalStyle={{zIndex: '1060'}}
               mainSrc={DocumentService.getDocumentURL(document!.url)}
-              onCloseRequest={() => this.setState({isZoomed: false})}
+              onCloseRequest={() => this.setState({ isZoomed: false })}
             />
           )}
           <Modal
             toggle={this.toggleConfirmShare}
-            size={'lg'}
+            size={"lg"}
             isOpen={showConfirmShare}
           >
             {/*<ModalHeader>Nested Modal title</ModalHeader>*/}
             <ModalBody>
-              { document && (
+              {document && (
                 <div className="confirm-share">
                   <div className="confirm-share-prompt">
-                    You're about to share<br />{(document?.type)?.toUpperCase()} with{' '}
-                    {AccountImpl.getFullName(selectedContact?.firstName, selectedContact?.lastName).toUpperCase()}.
+                    You're about to share
+                    <br />
+                    {document?.type?.toUpperCase()} with{" "}
+                    {AccountImpl.getFullName(
+                      selectedContact?.firstName,
+                      selectedContact?.lastName
+                    ).toUpperCase()}
+                    .
                   </div>
-                  <img className="share-doc-img"
-                       src={DocumentService.getDocumentURL(document!.url)}
-                       alt="doc missing"
+                  <img
+                    className="share-doc-img"
+                    src={DocumentService.getDocumentURL(document!.url)}
+                    alt="doc missing"
                   />
                   <div className="confirm-prompt">
                     Are you sure you want to continue?
                   </div>
                   <div className="confirm-buttons">
-                    <Button outline color="secondary" onClick={this.toggleConfirmShare}>No, take me back</Button>
-                    <Button color="primary" onClick={this.handleShareDocWithContact}>Yes, share access</Button>
+                    <Button
+                      outline
+                      color="secondary"
+                      onClick={this.toggleConfirmShare}
+                    >
+                      No, take me back
+                    </Button>
+                    <Button
+                      color="primary"
+                      onClick={this.handleShareDocWithContact}
+                    >
+                      Yes, share access
+                    </Button>
                   </div>
                 </div>
               )}
             </ModalBody>
           </Modal>
         </ModalBody>
-        {activeTab === '2' && (
+        {activeTab === "2" && (
           <ModalFooter className="modal-footer-center">
-            <Button color="primary" onClick={this.handleUpdateDocument} disabled={!newFile}>Save</Button>
+            <Button
+              color="primary"
+              onClick={this.handleUpdateDocument}
+              disabled={!newFile}
+            >
+              Save
+            </Button>
           </ModalFooter>
         )}
       </Modal>

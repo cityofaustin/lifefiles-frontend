@@ -1,8 +1,10 @@
-import JSZip from 'jszip';
+import JSZip from "jszip";
+import EthCrypto, { Encrypted } from "eth-crypto";
+let JSZipUtils = require("jszip-utils");
 
 class StringUtil {
   static getFirstUppercase(input: string): string {
-    let result = '';
+    let result = "";
     if (input.length > 0) {
       result = input.substr(0, 1).toUpperCase();
     }
@@ -11,11 +13,11 @@ class StringUtil {
 
   // https://stackoverflow.com/a/2117523
   static getUuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
       // tslint:disable-next-line:no-bitwise
-      const r = Math.random() * 16 | 0;
+      const r = (Math.random() * 16) | 0;
       // tslint:disable-next-line:no-bitwise
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
     // return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c: number) =>
@@ -23,15 +25,63 @@ class StringUtil {
     // );
   }
 
-  static async compressString(input: string): Promise<Blob> {
-    // TODO
+  static async zipString(input: string): Promise<Blob> {
     const zip = new JSZip();
-    zip.file('encrypted.txt', input);
+    zip.file("encrypted.txt", input);
     const content = await zip.generateAsync({
-      type: 'blob',
-      compression: 'DEFLATE'
+      type: "blob",
+      compression: "DEFLATE",
     });
     return content;
+  }
+
+  static async unzipString(
+    inputUrl: string,
+    privateEncryptionKey?: string
+  ): Promise<string> {
+    const data: any = await new JSZip.external.Promise(function (
+      resolve,
+      reject
+    ) {
+      JSZipUtils.getBinaryContent(inputUrl, function (err: any, data: any) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+
+    let zip: any = await JSZip.loadAsync(data);
+    const unzipedFile = Object.keys(zip.files)[0];
+    const unzipedEncryptedString = await zip.files[unzipedFile].async("string");
+
+    const ethCrptoEncryptedObject = EthCrypto.cipher.parse(
+      unzipedEncryptedString
+    );
+
+    const decryptedImageBase64 = await EthCrypto.decryptWithPrivateKey(
+      privateEncryptionKey as string,
+      ethCrptoEncryptedObject
+    );
+
+    return decryptedImageBase64;
+  }
+
+  static async stringFromFile(input: Blob): Promise<string> {
+    const readFileAsync = (inputFile: any) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(inputFile);
+      });
+    };
+
+    const returnString = await readFileAsync(input);
+    return returnString as string;
   }
 }
 

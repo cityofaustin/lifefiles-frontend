@@ -1,15 +1,15 @@
-import React, {Component} from 'react';
-import LoginPage from './auth/LoginPage';
-import MainContainer from './main/MainContainer';
-import Account from '../models/Account';
-import AuthService from '../services/AuthService';
-import LoginResponse from '../models/auth/LoginResponse';
-import AccountService from '../services/AccountService';
-import ProgressIndicator from './common/ProgressIndicator';
-import './App.scss';
-import Role from '../models/Role';
-import ShareRequest from '../models/ShareRequest';
-import EncryptionKeyResponse from '../models/EncryptionKeyResponse';
+import React, { Component } from "react";
+import LoginPage from "./auth/LoginPage";
+import MainContainer from "./main/MainContainer";
+import Account from "../models/Account";
+import AuthService from "../services/AuthService";
+import LoginResponse from "../models/auth/LoginResponse";
+import AccountService from "../services/AccountService";
+import ProgressIndicator from "./common/ProgressIndicator";
+import "./App.scss";
+import Role from "../models/Role";
+import ShareRequest from "../models/ShareRequest";
+import EncryptionKeyResponse from "../models/EncryptionKeyResponse";
 
 interface AppState {
   account?: Account;
@@ -25,39 +25,39 @@ class App extends Component<{}, AppState> {
     this.state = {
       account: undefined,
       isLoading: false,
-      theme: Role.owner
+      theme: Role.owner,
     };
   }
 
   async componentDidMount(): Promise<void> {
-    let {account, theme, privateEncryptionKey} = {...this.state};
-    this.setState({isLoading: true});
+    let { account, theme, privateEncryptionKey } = { ...this.state };
+    this.setState({ isLoading: true });
     if (AuthService.isLoggedIn()) {
       try {
         const loginResponse = await AccountService.getMyAccount();
         const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
         privateEncryptionKey = encryptionKeyResponse.encryptionKey;
-        ({account} = {...loginResponse});
+        ({ account } = { ...loginResponse });
         theme = account?.role;
       } catch (err) {
         console.error(err.message);
       }
     }
-    this.setState({account, theme, isLoading: false, privateEncryptionKey});
+    this.setState({ account, theme, isLoading: false, privateEncryptionKey });
   }
 
   handleLogin = async (response: any): Promise<void> => {
-    let {account, theme} = {...this.state};
-    this.setState({isLoading: true});
+    let { account, theme } = { ...this.state };
+    this.setState({ isLoading: true });
     try {
       const loginResponse: LoginResponse = response as LoginResponse;
-      ({account} = {...loginResponse});
+      ({ account } = { ...loginResponse });
       theme = account?.role;
       AuthService.logIn(account?.token);
     } catch (err) {
-      console.error('failed to login.');
+      console.error("failed to login.");
     }
-    this.setState({account, theme, isLoading: false});
+    this.setState({ account, theme, isLoading: false });
   };
 
   handleLogout = () => {
@@ -66,31 +66,31 @@ class App extends Component<{}, AppState> {
   };
 
   updateAccountShareRequests = (requests: ShareRequest[]) => {
-    const {account} = {...this.state};
+    const { account } = { ...this.state };
     account!.shareRequests = requests;
-    this.setState({account});
+    this.setState({ account });
   };
 
-
   render() {
-    const {account, isLoading, theme} = {...this.state};
+    const { account, isLoading, theme, privateEncryptionKey } = {
+      ...this.state,
+    };
     return (
       <div className={`app-container theme-${theme}`}>
-        {isLoading &&
-        <ProgressIndicator isFullscreen/>
-        }
-        {!isLoading &&
-        <div className="page-container">
-          {account && (
-            <MainContainer
-              account={account}
-              handleLogout={this.handleLogout}
-              updateAccountShareRequests={this.updateAccountShareRequests}
-            />
+        {isLoading && <ProgressIndicator isFullscreen />}
+        {!isLoading && (
+          <div className="page-container">
+            {account && (
+              <MainContainer
+                account={account}
+                handleLogout={this.handleLogout}
+                updateAccountShareRequests={this.updateAccountShareRequests}
+                privateEncryptionKey={privateEncryptionKey}
+              />
             )}
-          {!account && <LoginPage handleLogin={this.handleLogin}/>}
-        </div>
-        }
+            {!account && <LoginPage handleLogin={this.handleLogin} />}
+          </div>
+        )}
       </div>
     );
   }
