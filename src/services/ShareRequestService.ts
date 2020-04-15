@@ -22,6 +22,10 @@ class ShareRequestService extends AgentService {
   static async addShareRequest(documentType: string, fromAccountId: string, toAccountId: string) {
     return await super.post('/share-requests', {shareRequest: {documentType, fromAccountId, toAccountId}});
   }
+
+  static async addShareRequestFile(file: File, documentType: string, fromAccountId: string, toAccountId: string) {
+    return await super.postShareRequestFile(file, documentType, fromAccountId, toAccountId);
+  }
 }
 
 export default ShareRequestService;

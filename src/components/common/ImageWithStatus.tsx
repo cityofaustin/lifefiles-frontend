@@ -1,10 +1,10 @@
-import React, { Component } from "react";
-import classNames from "classnames";
-import "./ImageWithStatus.scss";
-import ProgressIndicator from "./ProgressIndicator";
-import DocumentService from "../../services/DocumentService";
-import APIService from "../../services/APIService";
-import StringUtil from "../../util/StringUtil";
+import React, {Component} from 'react';
+import classNames from 'classnames';
+import './ImageWithStatus.scss';
+import ProgressIndicator from './ProgressIndicator';
+import DocumentService from '../../services/DocumentService';
+import APIService from '../../services/APIService';
+import StringUtil from '../../util/StringUtil';
 
 export enum ImageViewTypes {
   GRID_LAYOUT,
@@ -21,19 +21,17 @@ interface ImageWithStatusProps {
 
 interface ImageWithStatusState {
   imageStatus: ImageStatus;
-  base64Image?: String;
+  base64Image?: string;
 }
 
 enum ImageStatus {
-  Loading = "loading",
-  Failed = "failed to load",
-  Loaded = "loaded",
+  Loading = 'loading',
+  Failed = 'failed to load',
+  Loaded = 'loaded',
 }
 
-class ImageWithStatus extends Component<
-  ImageWithStatusProps,
-  ImageWithStatusState
-> {
+class ImageWithStatus extends Component<ImageWithStatusProps,
+  ImageWithStatusState> {
   constructor(props: Readonly<ImageWithStatusProps>) {
     super(props);
     this.state = {
@@ -42,19 +40,19 @@ class ImageWithStatus extends Component<
   }
 
   async componentDidMount(): Promise<void> {
-    const { imageUrl, encrypted } = { ...this.props };
+    const {imageUrl, encrypted} = {...this.props};
     const base64Image = this.props.encrypted
       ? await this.unzipAndDecrypt(imageUrl, encrypted)
-      : "";
-    this.setState({ base64Image });
+      : '';
+    this.setState({base64Image});
   }
 
   handleImageLoaded = () => {
-    this.setState({ imageStatus: ImageStatus.Loaded });
+    this.setState({imageStatus: ImageStatus.Loaded});
   };
 
   handleImageErrored = () => {
-    this.setState({ imageStatus: ImageStatus.Failed });
+    this.setState({imageStatus: ImageStatus.Failed});
   };
 
   async unzipAndDecrypt(zipUrl: string, encrypted?: boolean) {
@@ -68,22 +66,22 @@ class ImageWithStatus extends Component<
   }
 
   render() {
-    const { imageUrl, imageViewType, encrypted } = { ...this.props };
-    const { imageStatus, base64Image } = { ...this.state };
+    const {imageUrl, imageViewType, encrypted} = {...this.props};
+    const {imageStatus, base64Image} = {...this.state};
     return (
       <div className="image-with-status">
-        {imageStatus === "loading" && (
+        {imageStatus === 'loading' && (
           <div
             className={classNames({
-              "loading-outter": true,
-              "outter-doc": imageViewType === ImageViewTypes.GRID_LAYOUT,
-              "outter-circle":
+              'loading-outter': true,
+              'outter-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
+              'outter-circle':
                 imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
-              "outter-list": imageViewType === ImageViewTypes.LIST_LAYOUT,
+              'outter-list': imageViewType === ImageViewTypes.LIST_LAYOUT,
             })}
           >
             <div className="loading-inner">
-              <ProgressIndicator />
+              <ProgressIndicator/>
             </div>
           </div>
         )}
@@ -91,30 +89,30 @@ class ImageWithStatus extends Component<
         {encrypted && base64Image && (
           <img
             className={classNames({
-              loading: imageStatus === "loading",
-              "image-doc": imageViewType === ImageViewTypes.GRID_LAYOUT,
-              "img-circle": imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
-              "list-img": imageViewType === ImageViewTypes.LIST_LAYOUT,
+              loading: imageStatus === 'loading',
+              'image-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
+              'img-circle': imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
+              'list-img': imageViewType === ImageViewTypes.LIST_LAYOUT,
             })}
             src={base64Image as string}
             onLoad={this.handleImageLoaded}
             onError={this.handleImageErrored}
-            alt={""}
+            alt={''}
           />
         )}
 
         {!encrypted && (
           <img
             className={classNames({
-              loading: imageStatus === "loading",
-              "image-doc": imageViewType === ImageViewTypes.GRID_LAYOUT,
-              "img-circle": imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
-              "list-img": imageViewType === ImageViewTypes.LIST_LAYOUT,
+              loading: imageStatus === 'loading',
+              'image-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
+              'img-circle': imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
+              'list-img': imageViewType === ImageViewTypes.LIST_LAYOUT,
             })}
             src={imageUrl}
             onLoad={this.handleImageLoaded}
             onError={this.handleImageErrored}
-            alt={""}
+            alt={''}
           />
         )}
 

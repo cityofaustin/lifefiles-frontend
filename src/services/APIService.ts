@@ -115,6 +115,30 @@ class APIService {
     return responseJson;
   }
 
+  static async postShareRequestFile(file: File, documentType: string, fromAccountId: string, toAccountId: string) {
+    const path = '/share-requests';
+    const input = `${MYPASS_API}${path}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`
+    };
+    const formdata = new FormData();
+    formdata.append('img', file, file.name);
+    formdata.append('fromAccountId', fromAccountId);
+    formdata.append('toAccountId', toAccountId);
+    formdata.append('documentType', documentType);
+    // formdata.append('shareRequest', {fromAccountId: fromAccountId, toAccountId, documentType});
+    const init = {
+      method: 'POST',
+      headers,
+      body: formdata
+    };
+    // NOTE: putting a longer timeout over here since uploading files can take longer.
+    const response = await fetch(input, init, 20000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
   static async updateDocument(request: UpdateDocumentRequest): Promise<any> {
     const path = '/documents';
     const input = `${MYPASS_API}${path}/${request.id}`;

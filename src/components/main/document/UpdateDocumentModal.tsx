@@ -1,8 +1,7 @@
-import React, { ChangeEvent, Component, Fragment } from "react";
+import React, {ChangeEvent, Component} from 'react';
 import {
   Button,
   Col,
-  Form,
   FormGroup,
   Input,
   Label,
@@ -16,34 +15,32 @@ import {
   Row,
   TabContent,
   TabPane,
-} from "reactstrap";
-import classNames from "classnames";
-import Document from "../../../models/document/Document";
-import "./UpdateDocumentModal.scss";
-import DocumentService from "../../../services/DocumentService";
-import { ReactComponent as DeleteSvg } from "../../../img/delete.svg";
-import { ReactComponent as EditDocSvg } from "../../../img/edit-doc.svg";
-import { ReactComponent as EditDocSmSvg } from "../../../img/edit-doc-sm.svg";
-import { ReactComponent as CrossSvg } from "../../../img/cross2.svg";
-import { ReactComponent as CrossSmSvg } from "../../../img/cross2-sm.svg";
-import FileUploader from "../../common/FileUploader";
-import { ReactComponent as DownloadBtnSvg } from "../../../img/download-btn.svg";
+} from 'reactstrap';
+import classNames from 'classnames';
+import Document from '../../../models/document/Document';
+import './UpdateDocumentModal.scss';
+import DocumentService from '../../../services/DocumentService';
+import {ReactComponent as DeleteSvg} from '../../../img/delete.svg';
+import {ReactComponent as EditDocSvg} from '../../../img/edit-doc.svg';
+import {ReactComponent as EditDocSmSvg} from '../../../img/edit-doc-sm.svg';
+import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
+import {ReactComponent as CrossSmSvg} from '../../../img/cross2-sm.svg';
+import FileUploader from '../../common/FileUploader';
+import {ReactComponent as DownloadBtnSvg} from '../../../img/download-btn.svg';
 // import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
-import { ReactComponent as PrintBtnSvg } from "../../../img/print-btn.svg";
-import { ReactComponent as ZoomBtnSvg } from "../../../img/zoom-btn.svg";
-import { ReactComponent as ZoomBtnSmSvg } from "../../../img/zoom-btn-sm.svg";
-import Lightbox from "react-image-lightbox";
-import Select from "react-select/base";
-import Account from "../../../models/Account";
-import AccountService from "../../../services/AccountService";
-import AccountImpl from "../../../models/AccountImpl";
-import { roleDisplayMap } from "../../../models/Role";
-import { addMonths, format } from "date-fns";
-import Checkbox from "../../common/Checkbox";
-import ShareRequest from "../../../models/ShareRequest";
-import ShareRequestService from "../../../services/ShareRequestService";
-import UpdateDocumentRequest from "../../../models/document/UpdateDocumentRequest";
-import ShareDocWithContainer from "./ShareDocWithContainer";
+import {ReactComponent as PrintBtnSvg} from '../../../img/print-btn.svg';
+import {ReactComponent as ZoomBtnSvg} from '../../../img/zoom-btn.svg';
+import {ReactComponent as ZoomBtnSmSvg} from '../../../img/zoom-btn-sm.svg';
+import Lightbox from 'react-image-lightbox';
+import Account from '../../../models/Account';
+import AccountImpl from '../../../models/AccountImpl';
+import {format} from 'date-fns';
+import ShareRequest from '../../../models/ShareRequest';
+import ShareRequestService from '../../../services/ShareRequestService';
+import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
+import ShareDocWithContainer from './ShareDocWithContainer';
+import StringUtil from '../../../util/StringUtil';
+import EthCrypto, {Encrypted} from 'eth-crypto';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -68,20 +65,19 @@ interface UpdateDocumentModalState {
   selectedContact?: Account;
   showConfirmShare: boolean;
   newFile?: File;
+  base64Image?: string;
 }
 
-class UpdateDocumentModal extends Component<
-  UpdateDocumentModalProps,
-  UpdateDocumentModalState
-> {
+class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
+  UpdateDocumentModalState> {
   constructor(props: Readonly<UpdateDocumentModalProps>) {
     super(props);
 
     this.state = {
-      activeTab: "1",
+      activeTab: '1',
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: "",
+      deleteConfirmInput: '',
       isZoomed: false,
       showConfirmShare: false,
     };
@@ -89,12 +85,12 @@ class UpdateDocumentModal extends Component<
 
   toggleModal = () => {
     // clear state
-    const { toggleModal } = { ...this.props };
+    const {toggleModal} = {...this.props};
     this.setState({
-      activeTab: "1",
+      activeTab: '1',
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: "",
+      deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -102,20 +98,58 @@ class UpdateDocumentModal extends Component<
     toggleModal();
   };
 
+  async componentWillReceiveProps(nextProps: Readonly<UpdateDocumentModalProps>) {
+    if (nextProps.document !== this.props.document
+      && nextProps.document && nextProps.privateEncryptionKey) {
+      let base64Image = '';
+      try {
+        base64Image = await StringUtil.unzipString(
+          DocumentService.getDocumentURL(nextProps.document.url),
+          nextProps.privateEncryptionKey
+        );
+      } catch (err) {
+        console.error('failed to encrypt');
+      }
+      this.setState({base64Image});
+    }
+  }
+
+  // async componentWillReceiveProps(nextProps) {
+  //   let {base64Image} = {...this.state};
+  //   const { document } = {...this.props};
+  //   try {
+  //     if(document) {
+  //       base64Image = await this.encryptedUrlToBase64String(document.url);
+  //     }
+  //   } catch (err) {
+  //     console.error('failed to encrypt');
+  //   }
+  //   debugger;
+  //   this.setState({base64Image});
+  // }
+
+  // async encryptedUrlToBase64String(imageUrl: string) {
+  //   return await this.unzipAndDecrypt(imageUrl, true);
+  // }
+  //
+  // async unzipAndDecrypt(zipUrl: string, encrypted?: boolean) {
+  //
+  // }
+
   handleUpdateDocument = () => {
-    const { newFile } = { ...this.state };
+    const {newFile} = {...this.state};
     // clear state
-    const { handleUpdateDocument, document } = { ...this.props };
+    const {handleUpdateDocument, document} = {...this.props};
     handleUpdateDocument({
       id: document!._id!,
       img: newFile,
       validUntilDate: undefined, // TODO add expired at form somewhere
     });
     this.setState({
-      activeTab: "1",
+      activeTab: '1',
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: "",
+      deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -123,27 +157,41 @@ class UpdateDocumentModal extends Component<
   };
 
   handleShareDocWithContact = async () => {
-    const { document, addShareRequest, myAccount } = { ...this.props };
-    const { selectedContact } = { ...this.state };
+    const {document, addShareRequest, myAccount} = {...this.props};
+    const {selectedContact, base64Image} = {...this.state};
     // then add share and approve it api call
     try {
-      const newShareRequest = await ShareRequestService.addShareRequest(
-        document?.type!,
-        myAccount.id,
-        selectedContact?.id!
-      );
-      addShareRequest(newShareRequest);
+      if(selectedContact) {
+        const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
+        const encrypted: Encrypted = await EthCrypto.encryptWithPublicKey(
+          encryptionPublicKey,
+          base64Image!
+        );
+        const encryptedString = EthCrypto.cipher.stringify(encrypted);
+        const blob = await StringUtil.zipString(encryptedString as any);
+        const newZippedFile = new File([blob], 'encrypted-image.zip', {
+          type: 'application/zip',
+          lastModified: Date.now()
+        });
+        const newShareRequest = await ShareRequestService.addShareRequestFile(
+          newZippedFile,
+          document?.type!,
+          myAccount.id,
+          selectedContact?.id!
+        );
+        addShareRequest(newShareRequest);
+      }
     } catch (err) {
       console.error(err.message);
     }
     // Note: you don't need to approve anymore since your the owner
     // newShareRequest = await ShareRequestService.approveShareRequest(newShareRequest._id);
-    this.setState({ selectedContact, showConfirmShare: false });
+    this.setState({selectedContact, showConfirmShare: false});
   };
 
   handleShareDocCheck = async () => {
-    const { removeShareRequest } = { ...this.props };
-    const { selectedContact } = { ...this.state };
+    const {removeShareRequest} = {...this.props};
+    const {selectedContact} = {...this.state};
     let showConfirmShare = false;
     if (this.getDocumentSharedWithContact()) {
       try {
@@ -158,22 +206,22 @@ class UpdateDocumentModal extends Component<
       // show prompt
       showConfirmShare = true;
     }
-    this.setState({ selectedContact, showConfirmShare });
+    this.setState({selectedContact, showConfirmShare});
   };
 
   toggleConfirmShare = () => {
-    const { showConfirmShare } = { ...this.state };
-    this.setState({ showConfirmShare: !showConfirmShare });
+    const {showConfirmShare} = {...this.state};
+    this.setState({showConfirmShare: !showConfirmShare});
   };
 
   toggleTab = (tab: string) => {
-    const { activeTab } = { ...this.state };
+    const {activeTab} = {...this.state};
     if (activeTab !== tab)
-      this.setState({ activeTab: tab, showConfirmDeleteSection: false });
+      this.setState({activeTab: tab, showConfirmDeleteSection: false});
   };
 
   handleDeleteDocument = async (document: Document) => {
-    const { handleDeleteDocument } = { ...this.props };
+    const {handleDeleteDocument} = {...this.props};
     try {
       await handleDeleteDocument(document);
     } catch (err) {
@@ -182,24 +230,24 @@ class UpdateDocumentModal extends Component<
   };
 
   handleDeleteConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
+    const {value} = e.target;
     let hasConfirmedDelete = false;
-    if (value === "DELETE") {
+    if (value === 'DELETE') {
       hasConfirmedDelete = true;
     }
-    this.setState({ deleteConfirmInput: value, hasConfirmedDelete });
+    this.setState({deleteConfirmInput: value, hasConfirmedDelete});
   };
 
   confirmDelete = () => {
-    this.setState({ activeTab: "0", showConfirmDeleteSection: true });
+    this.setState({activeTab: '0', showConfirmDeleteSection: true});
   };
 
   setFile = (newFile: File) => {
-    this.setState({ newFile });
+    this.setState({newFile});
   };
 
   printImg(url: string) {
-    const win = window.open("");
+    const win = window.open('');
     win?.document.write(
       '<img src="' + url + '" onload="window.print();window.close()" />'
     );
@@ -207,8 +255,8 @@ class UpdateDocumentModal extends Component<
   }
 
   getDocumentSharedWithContact = () => {
-    const { selectedContact } = { ...this.state };
-    const { shareRequests } = { ...this.props };
+    const {selectedContact} = {...this.state};
+    const {shareRequests} = {...this.props};
     const shareRequestMatch = shareRequests.find(
       (shareRequest) => selectedContact?.id === shareRequest.shareWithAccountId
     );
@@ -219,11 +267,11 @@ class UpdateDocumentModal extends Component<
   };
 
   handleSelectContact = (selectedContact: Account) => {
-    this.setState({ selectedContact });
+    this.setState({selectedContact});
   };
 
   render() {
-    const { showModal, document, accounts, myAccount } = { ...this.props };
+    const {showModal, document, accounts, myAccount} = {...this.props};
     const {
       activeTab,
       showConfirmDeleteSection,
@@ -233,14 +281,15 @@ class UpdateDocumentModal extends Component<
       selectedContact,
       showConfirmShare,
       newFile,
-    } = { ...this.state };
+      base64Image
+    } = {...this.state};
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
-        <CrossSvg className="lg" />
-        <CrossSmSvg className="sm" />
+        <CrossSvg className="lg"/>
+        <CrossSmSvg className="sm"/>
       </div>
     );
-    let uploadedBy = "N/A";
+    let uploadedBy = 'N/A';
     if (document) {
       const uploadedByAccount = AccountImpl.getAccountByIdAndList(
         [...accounts, myAccount],
@@ -255,19 +304,19 @@ class UpdateDocumentModal extends Component<
       <Modal
         isOpen={showModal}
         toggle={this.toggleModal}
-        backdrop={"static"}
-        size={"xl"}
+        backdrop={'static'}
+        size={'xl'}
         className="update-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-          <EditDocSvg className="lg" />
-          <EditDocSmSvg className="sm" />
+          <EditDocSvg className="lg"/>
+          <EditDocSmSvg className="sm"/>
           <span>{document?.type}</span>
         </ModalHeader>
         <ModalBody className="update-doc-container">
           <div
             className={classNames({
-              "upload-doc-delete-container": true,
+              'upload-doc-delete-container': true,
               active: showConfirmDeleteSection,
             })}
           >
@@ -279,9 +328,9 @@ class UpdateDocumentModal extends Component<
           <Nav tabs>
             <NavItem>
               <NavLink
-                className={classNames({ active: activeTab === "1" })}
+                className={classNames({active: activeTab === '1'})}
                 onClick={() => {
-                  this.toggleTab("1");
+                  this.toggleTab('1');
                 }}
               >
                 Preview
@@ -289,9 +338,9 @@ class UpdateDocumentModal extends Component<
             </NavItem>
             <NavItem>
               <NavLink
-                className={classNames({ active: activeTab === "2" })}
+                className={classNames({active: activeTab === '2'})}
                 onClick={() => {
-                  this.toggleTab("2");
+                  this.toggleTab('2');
                 }}
               >
                 Replace
@@ -299,9 +348,9 @@ class UpdateDocumentModal extends Component<
             </NavItem>
             <NavItem>
               <NavLink
-                className={classNames({ active: activeTab === "3" })}
+                className={classNames({active: activeTab === '3'})}
                 onClick={() => {
-                  this.toggleTab("3");
+                  this.toggleTab('3');
                 }}
               >
                 Share
@@ -321,30 +370,25 @@ class UpdateDocumentModal extends Component<
                       <div className="img-container">
                         <img
                           className="doc-image"
-                          src={DocumentService.getDocumentURL(document!.url)}
+                          // src={DocumentService.getDocumentURL(document!.url)}
+                          src={base64Image}
                           alt="doc missing"
                         />
                         <ZoomBtnSmSvg
-                          onClick={() => this.setState({ isZoomed: true })}
+                          onClick={() => this.setState({isZoomed: true})}
                         />
                       </div>
                       <div className="img-access-sm">
                         <button
                           onClick={() => {
-                            window.location.href = DocumentService.getDocumentURL(
-                              document!.url
-                            );
+                            window.location.href = base64Image!;
                           }}
                           className="download-btn"
                         >
                           Download
                         </button>
                         <button
-                          onClick={() =>
-                            this.printImg(
-                              DocumentService.getDocumentURL(document!.url)
-                            )
-                          }
+                          onClick={() => this.printImg(base64Image!)}
                           className="print-btn"
                         >
                           Print
@@ -356,7 +400,7 @@ class UpdateDocumentModal extends Component<
                           download
                           target="_blank"
                         >
-                          <DownloadBtnSvg />
+                          <DownloadBtnSvg/>
                         </a>
                         <PrintBtnSvg
                           onClick={() =>
@@ -366,7 +410,7 @@ class UpdateDocumentModal extends Component<
                           }
                         />
                         <ZoomBtnSvg
-                          onClick={() => this.setState({ isZoomed: true })}
+                          onClick={() => this.setState({isZoomed: true})}
                         />
                       </div>
                     </div>
@@ -378,7 +422,7 @@ class UpdateDocumentModal extends Component<
                       <div className="preview-info-item">
                         <div className="attr">Update date</div>
                         <div className="attr-value">
-                          {format(new Date(document?.updatedAt!), "MM/dd/yyyy")}
+                          {format(new Date(document?.updatedAt!), 'MM/dd/yyyy')}
                         </div>
                       </div>
                       <div className="preview-info-item">
@@ -396,16 +440,16 @@ class UpdateDocumentModal extends Component<
               <div className="delete-sm">
                 <button
                   onClick={() =>
-                    this.setState({ showConfirmDeleteSection: true })
+                    this.setState({showConfirmDeleteSection: true})
                   }
                 >
                   {showConfirmDeleteSection && <strong>Delete File</strong>}
-                  {!showConfirmDeleteSection && "Delete File"}
+                  {!showConfirmDeleteSection && 'Delete File'}
                 </button>
                 {showConfirmDeleteSection && (
                   <div className="confirm-delete-sm">
                     <p>
-                      Deleting this file will <strong>permanently</strong>{" "}
+                      Deleting this file will <strong>permanently</strong>{' '}
                       revoke access to all users you have shared this document
                       with.
                     </p>
@@ -442,7 +486,9 @@ class UpdateDocumentModal extends Component<
               <div className="update-doc-tab-spacing">
                 <Row>
                   <Col sm="12">
-                    <FileUploader setFile={this.setFile} />
+                    <FileUploader
+                      setFile={this.setFile}
+                      privateEncryptionKey={this.props.privateEncryptionKey}/>
                   </Col>
                 </Row>
               </div>
@@ -480,7 +526,7 @@ class UpdateDocumentModal extends Component<
                 <div className="delete-info">
                   <div className="delete-info-prompt">
                     <p>
-                      Deleting this file will{" "}
+                      Deleting this file will{' '}
                       <span className="delete-info-danger">
                         permanently revoke access to all users.
                       </span>
@@ -514,7 +560,7 @@ class UpdateDocumentModal extends Component<
                   onClick={this.toggleModal}
                 >
                   Cancel
-                </Button>{" "}
+                </Button>{' '}
                 <Button
                   className="margin-wide"
                   color="danger"
@@ -530,12 +576,12 @@ class UpdateDocumentModal extends Component<
             <Lightbox
               // reactModalStyle={{zIndex: '1060'}}
               mainSrc={DocumentService.getDocumentURL(document!.url)}
-              onCloseRequest={() => this.setState({ isZoomed: false })}
+              onCloseRequest={() => this.setState({isZoomed: false})}
             />
           )}
           <Modal
             toggle={this.toggleConfirmShare}
-            size={"lg"}
+            size={'lg'}
             isOpen={showConfirmShare}
           >
             {/*<ModalHeader>Nested Modal title</ModalHeader>*/}
@@ -544,8 +590,8 @@ class UpdateDocumentModal extends Component<
                 <div className="confirm-share">
                   <div className="confirm-share-prompt">
                     You're about to share
-                    <br />
-                    {document?.type?.toUpperCase()} with{" "}
+                    <br/>
+                    {document?.type?.toUpperCase()} with{' '}
                     {AccountImpl.getFullName(
                       selectedContact?.firstName,
                       selectedContact?.lastName
@@ -580,7 +626,7 @@ class UpdateDocumentModal extends Component<
             </ModalBody>
           </Modal>
         </ModalBody>
-        {activeTab === "2" && (
+        {activeTab === '2' && (
           <ModalFooter className="modal-footer-center">
             <Button
               color="primary"
