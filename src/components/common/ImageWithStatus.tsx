@@ -9,7 +9,7 @@ import StringUtil from '../../util/StringUtil';
 export enum ImageViewTypes {
   GRID_LAYOUT,
   GRID_CIRCLE_LAYOUT,
-  LIST_LAYOUT,
+  LIST_LAYOUT
 }
 
 interface ImageWithStatusProps {
@@ -27,7 +27,7 @@ interface ImageWithStatusState {
 enum ImageStatus {
   Loading = 'loading',
   Failed = 'failed to load',
-  Loaded = 'loaded',
+  Loaded = 'loaded'
 }
 
 class ImageWithStatus extends Component<ImageWithStatusProps,
@@ -35,7 +35,7 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
   constructor(props: Readonly<ImageWithStatusProps>) {
     super(props);
     this.state = {
-      imageStatus: ImageStatus.Loading,
+      imageStatus: ImageStatus.Loading
     };
   }
 
@@ -77,7 +77,7 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
               'outter-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
               'outter-circle':
                 imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
-              'outter-list': imageViewType === ImageViewTypes.LIST_LAYOUT,
+              'outter-list': imageViewType === ImageViewTypes.LIST_LAYOUT
             })}
           >
             <div className="loading-inner">
@@ -92,7 +92,7 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
               loading: imageStatus === 'loading',
               'image-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
               'img-circle': imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
-              'list-img': imageViewType === ImageViewTypes.LIST_LAYOUT,
+              'list-img': imageViewType === ImageViewTypes.LIST_LAYOUT
             })}
             src={base64Image as string}
             onLoad={this.handleImageLoaded}
@@ -107,7 +107,7 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
               loading: imageStatus === 'loading',
               'image-doc': imageViewType === ImageViewTypes.GRID_LAYOUT,
               'img-circle': imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
-              'list-img': imageViewType === ImageViewTypes.LIST_LAYOUT,
+              'list-img': imageViewType === ImageViewTypes.LIST_LAYOUT
             })}
             src={imageUrl}
             onLoad={this.handleImageLoaded}

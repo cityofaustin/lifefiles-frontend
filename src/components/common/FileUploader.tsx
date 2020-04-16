@@ -1,10 +1,10 @@
-import React, { Component, Fragment } from "react";
-import Dropzone from "react-dropzone";
-import "./FileUploader.scss";
-import { ReactComponent as ReuploadBtnSvg } from "../../img/reupload-btn.svg";
-import { ReactComponent as ReuploadSmSvg } from "../../img/reupload-sm.svg";
-import EthCrypto, { Encrypted } from "eth-crypto";
-import StringUtil from "../../util/StringUtil";
+import React, {Component, Fragment} from 'react';
+import Dropzone from 'react-dropzone';
+import './FileUploader.scss';
+import {ReactComponent as ReuploadBtnSvg} from '../../img/reupload-btn.svg';
+import {ReactComponent as ReuploadSmSvg} from '../../img/reupload-sm.svg';
+import EthCrypto, {Encrypted} from 'eth-crypto';
+import StringUtil from '../../util/StringUtil';
 
 interface FileUploaderState {
   files: File[];
@@ -21,25 +21,25 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
     super(props);
 
     this.state = {
-      files: [],
+      files: []
     };
   }
 
   reuploadFiles = () => {
-    const { setFile } = { ...this.props };
+    const {setFile} = {...this.props};
     setFile(undefined);
-    this.setState({ files: [] });
+    this.setState({files: []});
   };
 
   handleOnDrop = async (acceptedFiles: File[]) => {
-    const { setFile } = { ...this.props };
+    const {setFile} = {...this.props};
     acceptedFiles = acceptedFiles.map((file) =>
       Object.assign(file, {
-        preview: URL.createObjectURL(file),
+        preview: URL.createObjectURL(file)
       })
     );
     const [oneFile] = [...acceptedFiles];
-    this.setState({ files: acceptedFiles });
+    this.setState({files: acceptedFiles});
 
     const encryptionPublicKey = EthCrypto.publicKeyByPrivateKey(
       this.props.privateEncryptionKey as string
@@ -65,15 +65,15 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
 
     const encryptedString = EthCrypto.cipher.stringify(encrypted);
     const blob = await StringUtil.zipString(encryptedString as any);
-    const newZippedFile = new File([blob], "encrypted-image.zip", {
-      type: "application/zip",
-      lastModified: Date.now(),
+    const newZippedFile = new File([blob], 'encrypted-image.zip', {
+      type: 'application/zip',
+      lastModified: Date.now()
     });
     setFile(newZippedFile);
   };
 
   renderFiles(files: File[]) {
-    const { documentType } = { ...this.props };
+    const {documentType} = {...this.props};
     if (files.length > 0) {
       const [oneFile] = [...files];
       return (
@@ -81,9 +81,9 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
           {/*{(oneFile as any).path} - {oneFile.size} bytes*/}
           <div className="file-image">
             <img
-              className={"document-summary-image"}
+              className={'document-summary-image'}
               src={(oneFile as any).preview}
-              alt={""}
+              alt={''}
             />
           </div>
           <div className="file-info">
@@ -102,7 +102,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
             <div className="file-reupload">
               <div>Not the right file?</div>
               <ReuploadBtnSvg
-                style={{ cursor: "pointer" }}
+                style={{cursor: 'pointer'}}
                 onClick={this.reuploadFiles}
               />
             </div>
@@ -110,7 +110,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
         </div>
       );
     } else {
-      return <Fragment />;
+      return <Fragment/>;
     }
   }
 
@@ -118,7 +118,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
     return (
       <div {...getRootProps()}>
         <input {...getInputProps()} />
-        <ReuploadSmSvg className="upload-sm" />
+        <ReuploadSmSvg className="upload-sm"/>
         <svg className="upload" width="997" height="327" viewBox="0 0 997 327">
           <defs>
             <filter
@@ -129,11 +129,11 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
               height="89"
               filterUnits="userSpaceOnUse"
             >
-              <feOffset dy="3" />
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feFlood floodOpacity="0.161" />
-              <feComposite operator="in" in2="blur" />
-              <feComposite in="SourceGraphic" />
+              <feOffset dy="3"/>
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feFlood floodOpacity="0.161"/>
+              <feComposite operator="in" in2="blur"/>
+              <feComposite in="SourceGraphic"/>
             </filter>
           </defs>
           <g transform="translate(-468 -319)">
@@ -145,8 +145,8 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
                 strokeDasharray="10 15"
                 opacity="0.6"
               >
-                <rect width="997" height="327" stroke="none" />
-                <rect x="1" y="1" width="995" height="325" fill="none" />
+                <rect width="997" height="327" stroke="none"/>
+                <rect x="1" y="1" width="995" height="325" fill="none"/>
               </g>
               <text
                 id="Upload_your_file_by_dropping_it_here..."
@@ -227,7 +227,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
   }
 
   render() {
-    const { files } = { ...this.state };
+    const {files} = {...this.state};
     // const {acceptedFiles, getRootProps, getInputProps} = useDropzone();
     //
     // const files = acceptedFiles.map(file => (
@@ -236,7 +236,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
 
     return (
       <Dropzone onDrop={this.handleOnDrop}>
-        {({ getRootProps, getInputProps }) => (
+        {({getRootProps, getInputProps}) => (
           <section className="dropzone-container">
             {files.length <= 0 && this.renderForm(getRootProps, getInputProps)}
             {files.length > 0 && this.renderFiles(files)}

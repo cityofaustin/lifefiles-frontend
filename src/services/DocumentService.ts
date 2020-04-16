@@ -12,8 +12,9 @@ class DocumentService extends AgentService {
   }
 
   static getDocumentURL(filename: string) {
-    return super.getAPIEndpoint() +
+    const result = super.getAPIEndpoint() +
       `${PATH}/${filename}/${AuthService.getAccessToken()}`;
+    return result;
   }
 
   static async addDocument(newFile: File, documentType: string): Promise<any> {
