@@ -13,9 +13,4 @@ describe('StringUtil', () => {
     expect(result).toBeTruthy();
   });
 
-  xit('should compress the string', async () => {
-    const input = 'test string';
-    const output = await StringUtil.zipString(input);
-    console.log(output);
-  });
 });

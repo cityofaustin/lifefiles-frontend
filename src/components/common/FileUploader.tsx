@@ -3,8 +3,9 @@ import Dropzone from 'react-dropzone';
 import './FileUploader.scss';
 import {ReactComponent as ReuploadBtnSvg} from '../../img/reupload-btn.svg';
 import {ReactComponent as ReuploadSmSvg} from '../../img/reupload-sm.svg';
-import EthCrypto, {Encrypted} from 'eth-crypto';
 import StringUtil from '../../util/StringUtil';
+import CryptoUtil from '../../util/CryptoUtil';
+import ZipUtil from '../../util/ZipUtil';
 
 interface FileUploaderState {
   files: File[];
@@ -32,43 +33,21 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
   };
 
   handleOnDrop = async (acceptedFiles: File[]) => {
-    const {setFile} = {...this.props};
+    const {setFile, privateEncryptionKey} = {...this.props};
     acceptedFiles = acceptedFiles.map((file) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file)
       })
     );
     const [oneFile] = [...acceptedFiles];
-    this.setState({files: acceptedFiles});
-
-    const encryptionPublicKey = EthCrypto.publicKeyByPrivateKey(
-      this.props.privateEncryptionKey as string
-    );
-
-    const readFileAsync = (file: any) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          resolve(reader.result);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    };
-
-    const base64String = await readFileAsync(oneFile);
-
-    const encrypted: Encrypted = await EthCrypto.encryptWithPublicKey(
-      encryptionPublicKey,
-      base64String as string
-    );
-
-    const encryptedString = EthCrypto.cipher.stringify(encrypted);
-    const blob = await StringUtil.zipString(encryptedString as any);
-    const newZippedFile = new File([blob], 'encrypted-image.zip', {
+    const base64String = await StringUtil.fileContentsToString(oneFile);
+    const encryptedString = await CryptoUtil.getEncryptedString(privateEncryptionKey!, base64String);
+    const zipped: Blob = await ZipUtil.zip(encryptedString);
+    const newZippedFile = new File([zipped], 'encrypted-image.zip', {
       type: 'application/zip',
       lastModified: Date.now()
     });
+    this.setState({files: acceptedFiles});
     setFile(newZippedFile);
   };
 

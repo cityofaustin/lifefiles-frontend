@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Component, Fragment } from "react";
+import React, {ChangeEvent, Component, Fragment} from 'react';
 import {
   Button,
   FormGroup,
@@ -8,17 +8,17 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-} from "reactstrap";
-import DocumentTypeService from "../../../services/DocumentTypeService";
-import FileUploader from "../../common/FileUploader";
-import DocumentType from "../../../models/DocumentType";
-import Document from "../../../models/document/Document";
-import { ReactComponent as CrossSvg } from "../../../img/cross2.svg";
-import { ReactComponent as CrossSmSvg } from "../../../img/cross2-sm.svg";
-import { ReactComponent as NewDocSvg } from "../../../img/new-doc-2.svg";
-import { ReactComponent as NewDocSmSvg } from "../../../img/new-doc-sm.svg";
-import Select, { OptionTypeBase } from "react-select";
-import "./AddDocumentModal.scss";
+} from 'reactstrap';
+import DocumentTypeService from '../../../services/DocumentTypeService';
+import FileUploader from '../../common/FileUploader';
+import DocumentType from '../../../models/DocumentType';
+import Document from '../../../models/document/Document';
+import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
+import {ReactComponent as CrossSmSvg} from '../../../img/cross2-sm.svg';
+import {ReactComponent as NewDocSvg} from '../../../img/new-doc-2.svg';
+import {ReactComponent as NewDocSmSvg} from '../../../img/new-doc-sm.svg';
+import Select, {OptionTypeBase} from 'react-select';
+import './AddDocumentModal.scss';
 
 interface AddDocumentModalProps {
   showModal: boolean;
@@ -38,39 +38,37 @@ interface AddDocumentModalState {
   uploadingStep: boolean;
 }
 
-class AddDocumentModal extends Component<
-  AddDocumentModalProps,
-  AddDocumentModalState
-> {
+class AddDocumentModal extends Component<AddDocumentModalProps,
+  AddDocumentModalState> {
   constructor(props: Readonly<AddDocumentModalProps>) {
     super(props);
 
     this.state = {
       uploadingStep: false,
-      documentType: "",
-      isOther: false,
+      documentType: '',
+      isOther: false
     };
   }
 
   setFile = (newFile: File) => {
-    this.setState({ newFile });
+    this.setState({newFile});
   };
 
   handleDocumentType = (documentTypeOption: OptionTypeBase) => {
-    const isOther = documentTypeOption.value === "Other";
+    const isOther = documentTypeOption.value === 'Other';
     const documentType =
-      documentTypeOption.value === "Other" ? "" : documentTypeOption.value;
-    this.setState({ documentType, isOther, documentTypeOption });
+      documentTypeOption.value === 'Other' ? '' : documentTypeOption.value;
+    this.setState({documentType, isOther, documentTypeOption});
   };
 
   handleDocumentTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    this.setState({ documentType: value, errorMessage: undefined });
+    const {value} = e.target;
+    this.setState({documentType: value, errorMessage: undefined});
   };
 
   handleAddNewDocument = async () => {
-    const { handleAddNewDocument, documents } = { ...this.props };
-    let { documentType, newFile, errorMessage, isOther } = { ...this.state };
+    const {handleAddNewDocument, documents} = {...this.props};
+    let {documentType, newFile, errorMessage, isOther} = {...this.state};
     // If document type exists show error message
     if (
       DocumentTypeService.findDocumentTypeMatchInDocuments(
@@ -78,18 +76,18 @@ class AddDocumentModal extends Component<
         documents
       )
     ) {
-      errorMessage = "document type already exists.";
+      errorMessage = 'document type already exists.';
     } else {
       try {
         await handleAddNewDocument(newFile!, documentType!);
         // reset the field since success
         errorMessage = undefined;
         newFile = undefined;
-        documentType = "";
+        documentType = '';
         isOther = false;
       } catch (err) {
         errorMessage =
-          "Oops, something went wrong. Please try again in a few minutes.";
+          'Oops, something went wrong. Please try again in a few minutes.';
       }
     }
     this.setState({
@@ -98,26 +96,26 @@ class AddDocumentModal extends Component<
       isOther,
       documentType,
       newFile,
-      errorMessage,
+      errorMessage
     });
   };
 
   toggleModal = () => {
     // clear state
-    const { toggleModal } = { ...this.props };
+    const {toggleModal} = {...this.props};
     this.setState({
       uploadingStep: false,
-      documentType: "",
+      documentType: '',
       isOther: false,
-      documentTypeOption: undefined,
+      documentTypeOption: undefined
     });
     toggleModal();
   };
 
   renderDocumentTypeSection() {
-    const { documentTypes, documents } = { ...this.props };
-    const { documentType, isOther, errorMessage, documentTypeOption } = {
-      ...this.state,
+    const {documentTypes, documents} = {...this.props};
+    const {documentType, isOther, errorMessage, documentTypeOption} = {
+      ...this.state
     };
 
     const options: OptionTypeBase[] = documentTypes.map((documentTypeItem) => ({
@@ -126,23 +124,23 @@ class AddDocumentModal extends Component<
       isDisabled: DocumentTypeService.findDocumentTypeMatchInDocuments(
         documentTypeItem.name,
         documents
-      ),
+      )
     }));
-    options.push({ value: "Other", label: "Other", isDisabled: false });
+    options.push({value: 'Other', label: 'Other', isDisabled: false});
 
     const customStyles = {
       control: (provided: any) => ({
         ...provided,
-        height: "54.8px",
+        height: '54.8px'
       }),
       option: (provided: any, state: any) => {
         // if(state.isSelected) {
         //   console.log(provided);
         // }
         const backgroundColor = state.isSelected
-          ? "#2362C7"
+          ? '#2362C7'
           : provided.backgroundColor;
-        const color = state.isSelected ? "white" : "#3b3b3b";
+        const color = state.isSelected ? 'white' : '#3b3b3b';
         //   label: "option"
         //   backgroundColor: "#2684FF"
         //   color: "hsl(0, 0%, 100%)"
@@ -158,81 +156,81 @@ class AddDocumentModal extends Component<
         return {
           ...provided,
           backgroundColor,
-          fontFamily: "Montserrat, Arial, sans-serif",
-          fontSize: "25px",
+          fontFamily: 'Montserrat, Arial, sans-serif',
+          fontSize: '25px',
           color,
-          paddingLeft: "27.5px",
-          paddingTop: "7px",
-          paddingBottom: "7px",
-          opacity: state.isDisabled ? 0.5 : 1,
+          paddingLeft: '27.5px',
+          paddingTop: '7px',
+          paddingBottom: '7px',
+          opacity: state.isDisabled ? 0.5 : 1
           // borderBottom: '1px dotted pink',
           // color: state.isSelected ? 'red' : 'blue',
           // padding: 20
         };
       },
       input: (provided: any) => ({
-        ...provided,
+        ...provided
       }),
       placeholder: (provided: any) => ({
         ...provided,
-        fontFamily: "Montserrat, Arial, sans-serif",
-        fontSize: "25px",
-        color: "#3b3b3b",
-        paddingLeft: "30px",
+        fontFamily: 'Montserrat, Arial, sans-serif',
+        fontSize: '25px',
+        color: '#3b3b3b',
+        paddingLeft: '30px'
         // marginTop: '12px',
         // marginBottom: '12px'
       }),
       singleValue: (provided: any, state: any) => ({
         ...provided,
-        fontFamily: "Montserrat, Arial, sans-serif",
-        fontSize: "25px",
-        color: "#3b3b3b",
-        paddingLeft: "30px",
+        fontFamily: 'Montserrat, Arial, sans-serif',
+        fontSize: '25px',
+        color: '#3b3b3b',
+        paddingLeft: '30px',
         opacity: state.isDisabled ? 0.5 : 1,
-        transition: "opacity 300ms",
-      }),
+        transition: 'opacity 300ms'
+      })
     };
     const customStylesSm = {
       control: (provided: any) => ({
         ...provided,
-        height: "54.8px",
+        height: '54.8px'
       }),
       option: (provided: any, state: any) => {
         const backgroundColor = state.isSelected
-          ? "#2362C7"
+          ? '#2362C7'
           : provided.backgroundColor;
-        const color = state.isSelected ? "white" : "#3b3b3b";
+        const color = state.isSelected ? 'white' : '#3b3b3b';
         return {
           ...provided,
           backgroundColor,
-          fontFamily: "Montserrat, Arial, sans-serif",
-          fontSize: "18px",
+          fontFamily: 'Montserrat, Arial, sans-serif',
+          fontSize: '18px',
           color,
-          paddingLeft: "27.5px",
-          paddingTop: "7px",
-          paddingBottom: "7px",
-          opacity: state.isDisabled ? 0.5 : 1,
+          paddingLeft: '27.5px',
+          paddingTop: '7px',
+          paddingBottom: '7px',
+          opacity: state.isDisabled ? 0.5 : 1
         };
       },
       input: (provided: any) => ({
-        ...provided,
+        ...provided
       }),
       placeholder: (provided: any) => ({
         ...provided,
-        fontFamily: "Montserrat, Arial, sans-serif",
-        fontSize: "18px",
-        color: "#3b3b3b",
-        paddingLeft: "30px",
+        fontFamily: 'Montserrat, Arial, sans-serif',
+        fontSize: '18px',
+        color: '#3b3b3b',
+        paddingLeft: '30px'
       }),
       singleValue: (provided: any, state: any) => ({
         ...provided,
-        fontFamily: "Montserrat, Arial, sans-serif",
-        fontSize: "18px",
-        color: "#3b3b3b",
-        paddingLeft: "30px",
+        fontFamily: 'Montserrat, Arial, sans-serif',
+        fontSize: '18px',
+        color: '#3b3b3b',
+        paddingLeft: '30px',
         opacity: state.isDisabled ? 0.5 : 1,
-        transition: "opacity 300ms",
-      }),
+        transition: 'opacity 300ms'
+      })
     };
     return (
       <section className="type-section">
@@ -243,7 +241,7 @@ class AddDocumentModal extends Component<
             onChange={this.handleDocumentType}
             options={options}
             isSearchable={false}
-            placeholder={"-Select document-"}
+            placeholder={'-Select document-'}
             styles={customStyles}
           />
         </div>
@@ -253,7 +251,7 @@ class AddDocumentModal extends Component<
             onChange={this.handleDocumentType}
             options={options}
             isSearchable={false}
-            placeholder={"-Select document-"}
+            placeholder={'-Select document-'}
             styles={customStylesSm}
           />
         </div>
@@ -280,7 +278,7 @@ class AddDocumentModal extends Component<
   }
 
   renderDocumentFileSection() {
-    const { documentType } = { ...this.state };
+    const {documentType} = {...this.state};
     return (
       <section>
         <FileUploader
@@ -293,25 +291,25 @@ class AddDocumentModal extends Component<
   }
 
   render() {
-    const { showModal } = { ...this.props };
-    const { documentType, newFile, uploadingStep } = { ...this.state };
+    const {showModal} = {...this.props};
+    const {documentType, newFile, uploadingStep} = {...this.state};
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
-        <CrossSvg className="lg" />
-        <CrossSmSvg className="sm" />
+        <CrossSvg className="lg"/>
+        <CrossSmSvg className="sm"/>
       </div>
     );
     return (
       <Modal
         isOpen={showModal}
         toggle={this.toggleModal}
-        backdrop={"static"}
-        size={"xl"}
+        backdrop={'static'}
+        size={'xl'}
         className="add-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-          <NewDocSvg />
-          <NewDocSmSvg />
+          <NewDocSvg/>
+          <NewDocSmSvg/>
           <span>Add New Document</span>
         </ModalHeader>
         <ModalBody>
@@ -330,7 +328,7 @@ class AddDocumentModal extends Component<
                 onClick={this.toggleModal}
               >
                 Cancel
-              </Button>{" "}
+              </Button>{' '}
             </Fragment>
           )}
           {!uploadingStep && (
@@ -338,7 +336,7 @@ class AddDocumentModal extends Component<
               className="margin-wide"
               color="primary"
               disabled={!documentType}
-              onClick={() => this.setState({ uploadingStep: true })}
+              onClick={() => this.setState({uploadingStep: true})}
             >
               Next
             </Button>
@@ -349,10 +347,10 @@ class AddDocumentModal extends Component<
                 className="margin-wide"
                 outline
                 color="secondary"
-                onClick={() => this.setState({ uploadingStep: false })}
+                onClick={() => this.setState({uploadingStep: false})}
               >
                 Go Back
-              </Button>{" "}
+              </Button>{' '}
             </Fragment>
           )}
           {uploadingStep && (

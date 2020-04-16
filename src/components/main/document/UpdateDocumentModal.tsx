@@ -41,6 +41,8 @@ import UpdateDocumentRequest from '../../../models/document/UpdateDocumentReques
 import ShareDocWithContainer from './ShareDocWithContainer';
 import StringUtil from '../../../util/StringUtil';
 import EthCrypto, {Encrypted} from 'eth-crypto';
+import ZipUtil from '../../../util/ZipUtil';
+import CryptoUtil from '../../../util/CryptoUtil';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -79,7 +81,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       hasConfirmedDelete: false,
       deleteConfirmInput: '',
       isZoomed: false,
-      showConfirmShare: false,
+      showConfirmShare: false
     };
   }
 
@@ -93,7 +95,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
-      showConfirmShare: false,
+      showConfirmShare: false
     });
     toggleModal();
   };
@@ -103,12 +105,11 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       && nextProps.document && nextProps.privateEncryptionKey) {
       let base64Image = '';
       try {
-        base64Image = await StringUtil.unzipString(
-          DocumentService.getDocumentURL(nextProps.document.url),
-          nextProps.privateEncryptionKey
-        );
+        // debugger;
+        const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(nextProps.document.url));
+        base64Image = await CryptoUtil.getDecryptedString(nextProps.privateEncryptionKey, encryptedString);
       } catch (err) {
-        console.error('failed to encrypt');
+        console.error(err);
       }
       this.setState({base64Image});
     }
@@ -143,7 +144,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     handleUpdateDocument({
       id: document!._id!,
       img: newFile,
-      validUntilDate: undefined, // TODO add expired at form somewhere
+      validUntilDate: undefined // TODO add expired at form somewhere
     });
     this.setState({
       activeTab: '1',
@@ -152,7 +153,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
-      showConfirmShare: false,
+      showConfirmShare: false
     });
   };
 
@@ -161,14 +162,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     const {selectedContact, base64Image} = {...this.state};
     // then add share and approve it api call
     try {
-      if(selectedContact) {
+      if (selectedContact) {
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
         const encrypted: Encrypted = await EthCrypto.encryptWithPublicKey(
           encryptionPublicKey,
           base64Image!
         );
         const encryptedString = EthCrypto.cipher.stringify(encrypted);
-        const blob = await StringUtil.zipString(encryptedString as any);
+        const blob = await ZipUtil.zip(encryptedString);
         const newZippedFile = new File([blob], 'encrypted-image.zip', {
           type: 'application/zip',
           lastModified: Date.now()
@@ -317,7 +318,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
           <div
             className={classNames({
               'upload-doc-delete-container': true,
-              active: showConfirmDeleteSection,
+              active: showConfirmDeleteSection
             })}
           >
             <DeleteSvg
@@ -459,7 +460,6 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                       <Input
                         type="text"
                         name="documentDelete"
-                        id="documentDelete"
                         value={deleteConfirmInput}
                         onChange={this.handleDeleteConfirmChange}
                         placeholder=""
@@ -540,7 +540,6 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                     <Input
                       type="text"
                       name="documentDelete"
-                      id="documentDelete"
                       value={deleteConfirmInput}
                       onChange={this.handleDeleteConfirmChange}
                       placeholder=""

@@ -2,9 +2,8 @@ import React, {Component} from 'react';
 import classNames from 'classnames';
 import './ImageWithStatus.scss';
 import ProgressIndicator from './ProgressIndicator';
-import DocumentService from '../../services/DocumentService';
-import APIService from '../../services/APIService';
-import StringUtil from '../../util/StringUtil';
+import ZipUtil from '../../util/ZipUtil';
+import CryptoUtil from '../../util/CryptoUtil';
 
 export enum ImageViewTypes {
   GRID_LAYOUT,
@@ -40,10 +39,12 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
   }
 
   async componentDidMount(): Promise<void> {
-    const {imageUrl, encrypted} = {...this.props};
-    const base64Image = this.props.encrypted
-      ? await this.unzipAndDecrypt(imageUrl, encrypted)
-      : '';
+    const {imageUrl, encrypted, privateEncryptionKey} = {...this.props};
+    let base64Image: string = '';
+    if(encrypted) {
+      const encryptedString: string = await ZipUtil.unzip(imageUrl);
+      base64Image = await CryptoUtil.getDecryptedString(privateEncryptionKey!, encryptedString);
+    }
     this.setState({base64Image});
   }
 
@@ -54,16 +55,6 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
   handleImageErrored = () => {
     this.setState({imageStatus: ImageStatus.Failed});
   };
-
-  async unzipAndDecrypt(zipUrl: string, encrypted?: boolean) {
-    if (encrypted) {
-      const base64Image = StringUtil.unzipString(
-        zipUrl,
-        this.props.privateEncryptionKey
-      );
-      return base64Image;
-    }
-  }
 
   render() {
     const {imageUrl, imageViewType, encrypted} = {...this.props};

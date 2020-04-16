@@ -1,8 +1,3 @@
-import JSZip from 'jszip';
-import EthCrypto from 'eth-crypto';
-// tslint:disable-next-line:no-var-requires
-const JSZipUtils = require('jszip-utils');
-
 class StringUtil {
   static getFirstUppercase(input: string): string {
     let result = '';
@@ -26,45 +21,15 @@ class StringUtil {
     // );
   }
 
-  static async zipString(input: string): Promise<Blob> {
-    const zip = new JSZip();
-    zip.file('encrypted.txt', input);
-    const content = await zip.generateAsync({
-      type: 'blob',
-      compression: 'DEFLATE'
+  static fileContentsToString(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
-    return content;
-  }
-
-  static async unzipString(
-    inputUrl: string,
-    privateEncryptionKey?: string
-  ): Promise<string> {
-    const data: any = await new JSZip.external.Promise((
-      resolve,
-      reject
-    ) => {
-      JSZipUtils.getBinaryContent(inputUrl, (err: any, data2: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data2);
-        }
-      });
-    });
-
-    const zip: any = await JSZip.loadAsync(data);
-    const unzipedFile = Object.keys(zip.files)[0];
-    const unzipedEncryptedString = await zip.files[unzipedFile].async('string');
-
-    const ethCrptoEncryptedObject = EthCrypto.cipher.parse(
-      unzipedEncryptedString
-    );
-    // debugger;
-    return await EthCrypto.decryptWithPrivateKey(
-      privateEncryptionKey as string,
-      ethCrptoEncryptedObject
-    );
   }
 
   static async stringFromFile(input: Blob): Promise<string> {

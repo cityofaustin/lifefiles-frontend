@@ -1,10 +1,10 @@
-import React, { Component, Fragment } from "react";
-import "./DocumentSummary.scss";
-import Document from "../../../models/document/Document";
-import DocumentService from "../../../services/DocumentService";
-import ImageWithStatus, { ImageViewTypes } from "../../common/ImageWithStatus";
-import Account from "../../../models/Account";
-import SharedWith from "./SharedWith";
+import React, {Component, Fragment} from 'react';
+import './DocumentSummary.scss';
+import Document from '../../../models/document/Document';
+import DocumentService from '../../../services/DocumentService';
+import ImageWithStatus, {ImageViewTypes} from '../../common/ImageWithStatus';
+import Account from '../../../models/Account';
+import SharedWith from './SharedWith';
 
 interface DocumentSummaryProps {
   document?: Document;
@@ -19,8 +19,8 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
   }
 
   render() {
-    const { document, sharedAccounts, privateEncryptionKey } = {
-      ...this.props,
+    const {document, sharedAccounts, privateEncryptionKey} = {
+      ...this.props
     };
     return (
       <div className="document-item">
@@ -39,10 +39,10 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
             {sharedAccounts.length > 0 && (
               <div>
                 <div className="subtitle">SHARED WITH</div>
-                <SharedWith sharedAccounts={sharedAccounts} />
+                <SharedWith sharedAccounts={sharedAccounts}/>
               </div>
             )}
-            {sharedAccounts.length <= 0 && <div className="no-shares" />}
+            {sharedAccounts.length <= 0 && <div className="no-shares"/>}
           </Fragment>
         )}
       </div>

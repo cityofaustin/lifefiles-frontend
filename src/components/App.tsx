@@ -47,18 +47,19 @@ class App extends Component<{}, AppState> {
   }
 
   handleLogin = async (response: any): Promise<void> => {
-    let {account, theme} = {...this.state};
+    let {account, theme, privateEncryptionKey} = {...this.state};
     this.setState({isLoading: true});
     try {
       const loginResponse: LoginResponse = response as LoginResponse;
       ({account} = {...loginResponse});
-      // const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
       theme = account?.role;
       AuthService.logIn(account?.token);
+      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
+      privateEncryptionKey = encryptionKeyResponse.encryptionKey;
     } catch (err) {
       console.error('failed to login.');
     }
-    this.setState({account, theme, isLoading: false});
+    this.setState({account, theme, isLoading: false, privateEncryptionKey});
   };
 
   handleLogout = () => {

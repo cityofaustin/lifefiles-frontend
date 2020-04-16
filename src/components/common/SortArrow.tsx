@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, {Component, Fragment} from 'react';
 
 interface SortArrowProps {
   isAscending: boolean;
@@ -8,13 +8,14 @@ interface SortArrowProps {
 class SortArrow extends Component<SortArrowProps> {
   static defaultProps = {
     isAscending: true,
-    onClick: () => {}
+    onClick: () => {
+    }
   };
 
   render() {
-    const { isAscending, onClick } = { ...this.props };
+    const {isAscending, onClick} = {...this.props};
     return (
-      <div onClick={onClick} style={{ display: "flex", alignItems: "center" }}>
+      <div onClick={onClick} style={{display: 'flex', alignItems: 'center'}}>
         {isAscending && (
           <svg width="10.828" height="15.414">
             <g transform="rotate(180, 5.414, 7.707)">
