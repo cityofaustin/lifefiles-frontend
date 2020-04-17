@@ -17,14 +17,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/acarnagey/mypass-frontend.git"
+    "url": "git+https://github.com/cityofaustin/mypass-frontend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/acarnagey/mypass-frontend/issues"
+    "url": "https://github.com/cityofaustin/mypass-frontend/issues"
   },
-  "homepage": "https://github.com/acarnagey/mypass-frontend#readme",
+  "homepage": "https://github.com/cityofaustin/mypass-frontend#readme",
   "dependencies": {
     "bootstrap": "^4.4.1",
     "classnames": "^2.2.6",

@@ -1,3 +1,4 @@
+@import '~bootstrap/scss/bootstrap';
 @import '../../variables';
 
 .network-item {
@@ -15,6 +16,13 @@
   }
   .img-container {
     margin-bottom: 20px;
+    position: relative;
+    .docs-shared-sm {
+      @include media-breakpoint-up(sm) {display: none; }
+      position: absolute;
+      bottom:0;
+      right:0;
+    }
   }
   .title {
     font-size: 25px;
@@ -27,7 +35,12 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0 41px;
+    @include media-breakpoint-up(sm) {
+      padding: 0 41px;
+    }
+    @include media-breakpoint-down(sm) {
+      padding: 0 27px;
+    }
     .info-item {
       display: flex;
       justify-content: space-between;
@@ -35,19 +48,33 @@
       .item-attr {
         font-weight: 500;
         color: #0e232c;
+        @include media-breakpoint-down(sm) {
+          font-size: 20px;
+        }
       }
       .item-value {
         color: rgba(70, 70, 70, 0.78);
+        @include media-breakpoint-down(sm) {
+          word-break: break-all;
+          width: 170px;
+          text-align: right;
+          font-size: 20px;
+          &.email {
+            width: 241px;
+          }
+        }
       }
     }
   }
   .subtitle {
+    @include media-breakpoint-down(sm) {display: none}
     margin-top: 14px;
     font-size: 20px;
     font-weight: bold;
     color: #d2d5d8;
   }
   .docs-shared {
+    @include media-breakpoint-down(sm) {display: none}
     margin-top: 13.7px;
   }
 }

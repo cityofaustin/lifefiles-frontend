@@ -223,7 +223,7 @@
         .tab-pane:nth-child(2) {
           .update-doc-tab-spacing {
             @include media-breakpoint-down(sm) {
-              margin: 24.5px;
+              margin: 24px 8px 24px 8px;
             }
             margin: 30px;
           }

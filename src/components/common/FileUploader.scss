@@ -1,4 +1,5 @@
 @import '~bootstrap/scss/bootstrap';
+@import '../variables.scss';
 
 .dropzone-container {
   display: flex;
@@ -6,8 +7,22 @@
   margin-top: 41px;
   @include media-breakpoint-down(sm) {
     margin: 0;
-    .upload {
-      display: none;
+    .dropzone-form {
+      display: flex;
+      flex: 1;
+      .upload-sm {
+        background-color: white;
+        border: dashed 2px $warm-grey;
+        // width: 100%;
+        display: flex;
+        flex: 1;
+        height: 328px;
+        align-items: center;
+        justify-content: center;
+      }
+      .upload {
+        display: none;
+      }
     }
     .file-preview {
       flex-direction: column;
@@ -28,9 +43,33 @@
     }
   }
   @include media-breakpoint-up(sm) {
-    .upload-sm {
-      display: none;
+    .dropzone-form {
+      display: flex;
+      flex: 1;
+      .upload-sm {
+        display: none;
+      }
+      .upload {
+        background-color: white;
+        border: dashed 2px $warm-grey;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 400px;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        .caption {
+          position: absolute;
+          top: 22px;
+          left: 30px;
+          font-size: 25px;
+          color: #484848;
+          opacity: 0.6;
+        }
+      }
     }
+
     .file-preview {
       flex-direction: row;
       .file-info {
