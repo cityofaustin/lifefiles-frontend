@@ -43,6 +43,7 @@ import StringUtil from '../../../util/StringUtil';
 import EthCrypto, { Encrypted } from 'eth-crypto';
 import ZipUtil from '../../../util/ZipUtil';
 import CryptoUtil from '../../../util/CryptoUtil';
+import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -81,7 +82,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       hasConfirmedDelete: false,
       deleteConfirmInput: '',
       isZoomed: false,
-      showConfirmShare: false
+      showConfirmShare: false,
+      base64Image: undefined
     };
   }
 
@@ -95,7 +97,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
-      showConfirmShare: false
+      showConfirmShare: false,
+      base64Image: undefined
     });
     toggleModal();
   };
@@ -103,7 +106,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
   async componentWillReceiveProps(nextProps: Readonly<UpdateDocumentModalProps>) {
     if (nextProps.document !== this.props.document
       && nextProps.document && nextProps.privateEncryptionKey) {
-      let base64Image = '';
+      let base64Image: string | undefined = undefined;
       try {
         // debugger;
         const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(nextProps.document.url));
@@ -153,7 +156,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
-      showConfirmShare: false
+      showConfirmShare: false,
+      base64Image: undefined
     });
   };
 
@@ -225,6 +229,16 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     const { handleDeleteDocument } = { ...this.props };
     try {
       await handleDeleteDocument(document);
+      this.setState({
+        activeTab: '1',
+        showConfirmDeleteSection: false,
+        hasConfirmedDelete: false,
+        deleteConfirmInput: '',
+        isZoomed: false,
+        selectedContact: undefined,
+        showConfirmShare: false,
+        base64Image: undefined
+      });
     } catch (err) {
       console.error(err.message);
     }
@@ -369,12 +383,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                         {/*<FlipDocBtnSvg className="pointer"/>*/}
                       </div>
                       <div className="img-container">
-                        <img
+                        <ImageWithStatus imageUrl={base64Image} imageViewType={ImageViewTypes.PREVIEW} />
+                        {/* <img
                           className="doc-image"
                           // src={DocumentService.getDocumentURL(document!.url)}
                           src={base64Image}
                           alt="doc missing"
-                        />
+                        /> */}
                         <ZoomBtnSmSvg
                           onClick={() => this.setState({ isZoomed: true })}
                         />
@@ -382,7 +397,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                       <div className="img-access-sm">
                         <button
                           onClick={() => {
-                            window.location.href = base64Image!;
+                            // Not allowed to navigate top frame to data URL
+                            // window.location.href = base64Image!;
+                            const iframe = "<iframe width='100%' height='100%' src='" + base64Image! + "'></iframe>"
+                            const x = window.open()!;
+                            x.document.open();
+                            x.document.write(iframe);
+                            x.document.close();
                           }}
                           className="download-btn"
                         >
@@ -397,18 +418,14 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                       </div>
                       <div className="img-access">
                         <a
-                          href={DocumentService.getDocumentURL(document!.url)}
+                          href={base64Image}
                           download
                           target="_blank"
                         >
                           <DownloadBtnSvg />
                         </a>
                         <PrintBtnSvg
-                          onClick={() =>
-                            this.printImg(
-                              DocumentService.getDocumentURL(document!.url)
-                            )
-                          }
+                          onClick={() =>this.printImg(base64Image!)}
                         />
                         <ZoomBtnSvg
                           onClick={() => this.setState({ isZoomed: true })}
@@ -514,7 +531,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                   {document && (
                     <img
                       className="delete-image"
-                      src={DocumentService.getDocumentURL(document!.url)}
+                      src={base64Image}
                       alt="doc missing"
                     />
                   )}
@@ -570,7 +587,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
           {isZoomed && (
             <Lightbox
               // reactModalStyle={{zIndex: '1060'}}
-              mainSrc={DocumentService.getDocumentURL(document!.url)}
+              mainSrc={base64Image!}
               onCloseRequest={() => this.setState({ isZoomed: false })}
             />
           )}
@@ -595,7 +612,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                   </div>
                   <img
                     className="share-doc-img"
-                    src={DocumentService.getDocumentURL(document!.url)}
+                    src={base64Image}
                     alt="doc missing"
                   />
                   <div className="confirm-prompt">

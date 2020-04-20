@@ -94,18 +94,18 @@
                   }
                 }
 
-                .doc-image {
-                  @include media-breakpoint-down(sm) {
-                    height: 190px;
-                    width: 100%;
-                  }
-                  @include media-breakpoint-up(sm) {
-                    max-width: 100%;
-                    min-width: 250px;
-                    height: 412px;
-                  }
-                  object-fit: contain;
-                }
+                // .doc-image {
+                //   @include media-breakpoint-down(sm) {
+                //     height: 190px;
+                //     width: 100%;
+                //   }
+                //   @include media-breakpoint-up(sm) {
+                //     max-width: 100%;
+                //     min-width: 250px;
+                //     height: 412px;
+                //   }
+                //   object-fit: contain;
+                // }
               }
               .img-access-sm {
                 @include media-breakpoint-up(sm) {
@@ -285,6 +285,11 @@
         .delete-buttons {
           display: flex;
           justify-content: flex-end;
+          button:nth-child(2) {
+            @include media-breakpoint-up(sm) {
+              margin-left: 14px;
+            }
+          }
         }
       }
     }

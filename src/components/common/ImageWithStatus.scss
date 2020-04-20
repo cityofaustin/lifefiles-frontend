@@ -20,21 +20,31 @@
       left: -50%;
       z-index: 2;
     }
+    .loading-inner-modal1 {
+      position: relative;
+      left: -50%;
+      z-index: 1001;
+    }
   }
 
   img {
     object-fit: contain;
     &.loading {
-      @include media-breakpoint-down(sm) { height: 250px; width: 250px; }
+      height: 250px !important;
+      width: 250px !important;
       opacity: 0.5;
       background-color: #ccc;
+      -webkit-animation: flickerAnimation 1s infinite;
+      -moz-animation: flickerAnimation 1s infinite;
+      -o-animation: flickerAnimation 1s infinite;
+      animation: flickerAnimation 1s infinite;
     }
     &.image-doc {
-      @media (max-width: 575.98px) {
+      @include media-breakpoint-down(sm) {
         width: calc(100%);
         //height: 258px;
       }
-      @media (min-width: 576px) {
+      @include media-breakpoint-up(sm) {
         max-width: 100%;
         min-width: 250px;
         height: 287px;
@@ -52,8 +62,39 @@
     &.list-img {
       width: 98px;
     }
+    &.preview {
+      @include media-breakpoint-down(sm) {
+        height: 190px;
+        width: 100%;
+      }
+      @include media-breakpoint-up(sm) {
+        max-width: 100%;
+        min-width: 250px;
+        height: 412px;
+      }
+      object-fit: contain;
+    }
   }
 
 }
 
-
+@keyframes flickerAnimation {
+  0%   { opacity:0.7; }
+  50%  { opacity:0.3; }
+  100% { opacity:0.7; }
+}
+@-o-keyframes flickerAnimation{
+  0%   { opacity:0.5; }
+  50%  { opacity:0.3; }
+  100% { opacity:0.5; }
+}
+@-moz-keyframes flickerAnimation{
+  0%   { opacity:0.5; }
+  50%  { opacity:0.3; }
+  100% { opacity:0.5; }
+}
+@-webkit-keyframes flickerAnimation{
+  0%   { opacity:0.5; }
+  50%  { opacity:0.3; }
+  100% { opacity:0.5; }
+}
