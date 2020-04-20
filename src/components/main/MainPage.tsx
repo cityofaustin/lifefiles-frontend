@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, { Component, Fragment } from 'react';
 import Chevron from '../common/Chevron';
 import {
   Breadcrumb,
@@ -15,20 +15,20 @@ import AddNewDocument from './document/AddNewDocument';
 import DocumentSummary from './document/DocumentSummary';
 import Document from '../../models/document/Document';
 import Account from '../../models/Account';
-import SvgButton, {SvgButtonTypes} from '../common/SvgButton';
+import SvgButton, { SvgButtonTypes } from '../common/SvgButton';
 import './MainPage.scss';
 import ShareRequest from '../../models/ShareRequest';
 import classNames from 'classnames';
 import AccountSummary from './account/AccountSummary';
-import {ReactComponent as NewDocumentSmallSvg} from '../../img/new-document-small.svg';
+import { ReactComponent as NewDocumentSmallSvg } from '../../img/new-document-small.svg';
 import SortArrow from '../common/SortArrow';
-import ImageWithStatus, {ImageViewTypes} from '../common/ImageWithStatus';
+import ImageWithStatus, { ImageViewTypes } from '../common/ImageWithStatus';
 import DocumentService from '../../services/DocumentService';
 import SharedWith from './document/SharedWith';
 import StringUtil from '../../util/StringUtil';
 import AccountImpl from '../../models/AccountImpl';
-import {format} from 'date-fns';
-import {ReactComponent as FabAdd} from '../../img/fab-add.svg';
+import { format } from 'date-fns';
+import { ReactComponent as FabAdd } from '../../img/fab-add.svg';
 
 interface MainPageProps {
   sortAsc: boolean;
@@ -79,17 +79,17 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   };
 
   toggleLayout = () => {
-    const {isLayoutGrid} = {...this.state};
-    this.setState({isLayoutGrid: !isLayoutGrid});
+    const { isLayoutGrid } = { ...this.state };
+    this.setState({ isLayoutGrid: !isLayoutGrid });
   };
 
   toggleTab = (tab: string) => {
-    const {activeTab, setActiveTab} = {...this.props};
+    const { activeTab, setActiveTab } = { ...this.props };
     if (activeTab !== tab) setActiveTab(tab);
   };
 
   renderGridSort() {
-    const {sortAsc, toggleSort, activeTab} = {...this.props};
+    const { sortAsc, toggleSort, activeTab } = { ...this.props };
     return (
       <Fragment>
         <div className="sort-section">
@@ -97,15 +97,15 @@ class MainPage extends Component<MainPageProps, MainPageState> {
           <div className="subtitle subtitle-key" onClick={toggleSort}>
             NAME
           </div>
-          <Chevron isAscending={sortAsc} onClick={toggleSort}/>
+          <Chevron isAscending={sortAsc} onClick={toggleSort} />
         </div>
         <div className="sort-section-sm">
           <div className="sort-container" onClick={toggleSort}>
-            <SortArrow isAscending={sortAsc}/>
+            <SortArrow isAscending={sortAsc} />
             <div className="subtitle subtitle-key">NAME</div>
           </div>
           {activeTab === '1' && (
-            <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID_MOBILE}/>
+            <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID_MOBILE} />
           )}
         </div>
       </Fragment>
@@ -120,11 +120,11 @@ class MainPage extends Component<MainPageProps, MainPageState> {
       searchedAccounts,
       shareRequests,
       privateEncryptionKey
-    } = {...this.props};
+    } = { ...this.props };
     return (
       <Fragment>
         {this.renderGridSort()}
-        <Row style={{marginRight: '0', minHeight: '480px'}}>
+        <Row style={{ marginRight: '0', minHeight: '480px' }}>
           <Col
             sm="12"
             md="6"
@@ -132,7 +132,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
             className="document-add-new document-item"
             onClick={handleAddNew}
           >
-            <AddNewDocument handleAddNew={handleAddNew}/>
+            <AddNewDocument handleAddNew={handleAddNew} />
           </Col>
           {searchedDocuments.length <= 0 && (
             <Col sm="12" md="6" lg="4" className="document-summary-container">
@@ -163,7 +163,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                 className="document-summary-container"
               >
                 <div
-                  style={{cursor: 'pointer', marginRight: '0'}}
+                  style={{ cursor: 'pointer', marginRight: '0' }}
                   onClick={() => handleSelectDocument(document)}
                 >
                   <DocumentSummary
@@ -191,107 +191,107 @@ class MainPage extends Component<MainPageProps, MainPageState> {
       searchedAccounts,
       shareRequests,
       myAccount
-    } = {...this.props};
+    } = { ...this.props };
     return (
       <div>
         <table className="doc-table">
           <thead>
-          <tr>
-            <th>
-              <div className="header-cell" onClick={toggleSort}>
-                <SortArrow isAscending={sortAsc}/>
-                <div>Name</div>
-              </div>
-            </th>
-            <th>Shared With</th>
-            <th>Updated</th>
-            <th>Valid Until</th>
-            <th>Notarized</th>
-          </tr>
+            <tr>
+              <th>
+                <div className="header-cell" onClick={toggleSort}>
+                  <SortArrow isAscending={sortAsc} />
+                  <div>Name</div>
+                </div>
+              </th>
+              <th>Shared With</th>
+              <th>Updated</th>
+              <th>Valid Until</th>
+              <th>Notarized</th>
+            </tr>
           </thead>
           <tbody>
-          <tr onClick={handleAddNew}>
-            <td>
-              <div className="add-new">
-                <div>
-                  <NewDocumentSmallSvg/>
+            <tr onClick={handleAddNew}>
+              <td>
+                <div className="add-new">
+                  <div>
+                    <NewDocumentSmallSvg />
+                  </div>
+                  <div>Add new</div>
                 </div>
-                <div>Add new</div>
-              </div>
-            </td>
-            <td/>
-            <td/>
-            <td/>
-            <td/>
-          </tr>
-          {searchedDocuments.map((document, idx) => {
-            const sharedAccounts: Account[] = this.getSharedAccounts(
-              document,
-              searchedAccounts,
-              shareRequests
-            );
-            const accountProfileURL = AccountImpl.getProfileURLByIdAndList(
-              [myAccount, ...searchedAccounts],
-              document.uploadedBy
-            );
-            const matchedAccount = AccountImpl.getAccountByIdAndList(
-              [myAccount, ...searchedAccounts],
-              document.uploadedBy
-            );
-            return (
-              <tr
-                key={document.type}
-                onClick={() => handleSelectDocument(document)}
-              >
-                <td>
-                  <div className="doc-name-cell">
-                    <ImageWithStatus
-                      imageViewType={ImageViewTypes.LIST_LAYOUT}
-                      imageUrl={DocumentService.getDocumentURL(document.url)}
-                    />
-                    <div>{document.type}</div>
-                  </div>
-                </td>
-                <td>
-                  <div className="doc-share-cell">
-                    <SharedWith sharedAccounts={sharedAccounts}/>
-                  </div>
-                </td>
-                <td>
-                  <div className="doc-updated-cell">
-                    {accountProfileURL && (
-                      <img
-                        className="profile-image"
-                        src={accountProfileURL}
-                        alt=""
+              </td>
+              <td />
+              <td />
+              <td />
+              <td />
+            </tr>
+            {searchedDocuments.map((document, idx) => {
+              const sharedAccounts: Account[] = this.getSharedAccounts(
+                document,
+                searchedAccounts,
+                shareRequests
+              );
+              const accountProfileURL = AccountImpl.getProfileURLByIdAndList(
+                [myAccount, ...searchedAccounts],
+                document.uploadedBy
+              );
+              const matchedAccount = AccountImpl.getAccountByIdAndList(
+                [myAccount, ...searchedAccounts],
+                document.uploadedBy
+              );
+              return (
+                <tr
+                  key={document.type}
+                  onClick={() => handleSelectDocument(document)}
+                >
+                  <td>
+                    <div className="doc-name-cell">
+                      <ImageWithStatus
+                        imageViewType={ImageViewTypes.LIST_LAYOUT}
+                        imageUrl={DocumentService.getDocumentURL(document.url)}
                       />
-                    )}
-                    {!accountProfileURL && (
-                      <div className="account-circle">
-                        {StringUtil.getFirstUppercase(
-                          matchedAccount!.username
-                        )}
-                      </div>
-                    )}
-                    <div>
-                      {format(new Date(document.updatedAt!), 'MMM d, y')}
+                      <div>{document.type}</div>
                     </div>
-                  </div>
-                </td>
-                <td>
-                  <div className="doc-valid-cell">
-                    {document.validateUntilDate
-                      ? format(
-                        new Date(document.validateUntilDate),
-                        'MMM d, y'
-                      )
-                      : 'N/A'}
-                  </div>
-                </td>
-                <td>{document.notarized}</td>
-              </tr>
-            );
-          })}
+                  </td>
+                  <td>
+                    <div className="doc-share-cell">
+                      <SharedWith sharedAccounts={sharedAccounts} />
+                    </div>
+                  </td>
+                  <td>
+                    <div className="doc-updated-cell">
+                      {accountProfileURL && (
+                        <img
+                          className="profile-image"
+                          src={accountProfileURL}
+                          alt=""
+                        />
+                      )}
+                      {!accountProfileURL && (
+                        <div className="account-circle">
+                          {StringUtil.getFirstUppercase(
+                            matchedAccount!.username
+                          )}
+                        </div>
+                      )}
+                      <div>
+                        {format(new Date(document.updatedAt!), 'MMM d, y')}
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="doc-valid-cell">
+                      {document.validateUntilDate
+                        ? format(
+                          new Date(document.validateUntilDate),
+                          'MMM d, y'
+                        )
+                        : 'N/A'}
+                    </div>
+                  </td>
+                  <td>{document.notarized}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {searchedDocuments.length <= 0 && (
@@ -320,7 +320,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
       myAccount,
       addShareRequest,
       removeShareRequest
-    } = {...this.props};
+    } = { ...this.props };
     return (
       <Fragment>
         {this.renderGridSort()}
@@ -358,12 +358,12 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   }
 
   renderNav() {
-    const {activeTab} = {...this.props};
+    const { activeTab } = { ...this.props };
     return (
       <Nav tabs className="large">
         <NavItem>
           <NavLink
-            className={classNames({active: activeTab === '1'})}
+            className={classNames({ active: activeTab === '1' })}
             onClick={() => {
               this.toggleTab('1');
             }}
@@ -373,7 +373,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
         </NavItem>
         <NavItem>
           <NavLink
-            className={classNames({active: activeTab === '2'})}
+            className={classNames({ active: activeTab === '2' })}
             onClick={() => {
               this.toggleTab('2');
             }}
@@ -386,12 +386,12 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   }
 
   renderNavSmall() {
-    const {activeTab} = {...this.props};
+    const { activeTab } = { ...this.props };
     return (
       <Nav tabs className="small">
         <NavItem>
           <NavLink
-            className={classNames({active: activeTab === '1'})}
+            className={classNames({ active: activeTab === '1' })}
             onClick={() => {
               this.toggleTab('1');
             }}
@@ -401,7 +401,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
         </NavItem>
         <NavItem>
           <NavLink
-            className={classNames({active: activeTab === '2'})}
+            className={classNames({ active: activeTab === '2' })}
             onClick={() => {
               this.toggleTab('2');
             }}
@@ -414,10 +414,10 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   }
 
   render() {
-    const {activeTab, referencedAccount, goBack, handleAddNew} = {
+    const { activeTab, referencedAccount, goBack, handleAddNew } = {
       ...this.props
     };
-    const {isLayoutGrid} = {...this.state};
+    const { isLayoutGrid } = { ...this.state };
     return (
       <div className="main-content">
         {referencedAccount && (
@@ -448,7 +448,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                     onClick={this.toggleLayout}
                   />
                 )}
-                <SvgButton buttonType={SvgButtonTypes.INFO}/>
+                <SvgButton buttonType={SvgButtonTypes.INFO} />
               </div>
             </div>
             <TabContent activeTab={activeTab}>
@@ -460,7 +460,9 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                 {isLayoutGrid && this.renderNetworkGridView()}
               </TabPane>
             </TabContent>
-            <FabAdd className="fab-add" onClick={handleAddNew}/>
+            {activeTab === '1' && (
+              <FabAdd className="fab-add" onClick={handleAddNew} />
+            )}
           </Fragment>
         )}
       </div>
