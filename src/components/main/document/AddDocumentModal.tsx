@@ -25,13 +25,14 @@ interface AddDocumentModalProps {
   toggleModal: () => void;
   documentTypes: DocumentType[];
   documents: Document[];
-  handleAddNewDocument: (newFile: File, documentType: string) => Promise<void>;
+  handleAddNewDocument: (newFile: File, newThumbnailFile: File, documentType: string) => Promise<void>;
   privateEncryptionKey?: string;
 }
 
 interface AddDocumentModalState {
   documentType: string;
   newFile?: File;
+  newThumbnailFile?: File;
   isOther: boolean;
   errorMessage?: string;
   documentTypeOption?: OptionTypeBase;
@@ -50,8 +51,8 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
     };
   }
 
-  setFile = (newFile: File) => {
-    this.setState({newFile});
+  setFile = (newFile: File, newThumbnailFile: File) => {
+    this.setState({newFile, newThumbnailFile});
   };
 
   handleDocumentType = (documentTypeOption: OptionTypeBase) => {
@@ -68,7 +69,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
 
   handleAddNewDocument = async () => {
     const {handleAddNewDocument, documents} = {...this.props};
-    let {documentType, newFile, errorMessage, isOther} = {...this.state};
+    let {documentType, newFile, newThumbnailFile, errorMessage, isOther} = {...this.state};
     // If document type exists show error message
     if (
       DocumentTypeService.findDocumentTypeMatchInDocuments(
@@ -79,7 +80,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       errorMessage = 'document type already exists.';
     } else {
       try {
-        await handleAddNewDocument(newFile!, documentType!);
+        await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!);
         // reset the field since success
         errorMessage = undefined;
         newFile = undefined;

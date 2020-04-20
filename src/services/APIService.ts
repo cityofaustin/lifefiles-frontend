@@ -92,7 +92,7 @@ class APIService {
     }
   }
 
-  static async postDocument(file: File, documentType: string, encryptionPubKey: string) {
+  static async postDocument(file: File, thumbnailFile: File, documentType: string, encryptionPubKey: string) {
     const path = '/documents';
     const input = `${MYPASS_API}${path}`;
     const headers = {
@@ -100,7 +100,7 @@ class APIService {
     };
     const formdata = new FormData();
     formdata.append('img', file, file.name);
-    // formdata.append('id', StringUtil.getUuidv4());
+    formdata.append('img', thumbnailFile, thumbnailFile.name);
     formdata.append('type', documentType);
     formdata.append('encryptionPubKey', encryptionPubKey);
     const init = {
@@ -109,13 +109,14 @@ class APIService {
       body: formdata
     };
     // NOTE: putting a longer timeout over here since uploading files can take longer.
-    const response = await fetch(input, init, 20000);
+    const response = await fetch(input, init, 60000);
     const responseJson = await response.json();
     this.handleErrorStatusCodes(response.status, responseJson);
     return responseJson;
   }
 
-  static async postShareRequestFile(file: File, documentType: string, fromAccountId: string, toAccountId: string) {
+  // TODO need to send thumbnail here
+  static async postShareRequestFile(file: File, thumbnailFile: File, documentType: string, fromAccountId: string, toAccountId: string) {
     const path = '/share-requests';
     const input = `${MYPASS_API}${path}`;
     const headers = {
@@ -123,6 +124,7 @@ class APIService {
     };
     const formdata = new FormData();
     formdata.append('img', file, file.name);
+    formdata.append('img', thumbnailFile, thumbnailFile.name);
     formdata.append('fromAccountId', fromAccountId);
     formdata.append('toAccountId', toAccountId);
     formdata.append('documentType', documentType);
@@ -146,8 +148,9 @@ class APIService {
       Authorization: `Bearer ${AuthService.getAccessToken()}`
     };
     const formdata = new FormData();
-    if(request.img) {
+    if(request.img && request.thumbnail) {
       formdata.append('img', request.img, request.img.name);
+      formdata.append('img', request.thumbnail, request.thumbnail.name);
     }
     if(request.validUntilDate) {
       formdata.append('validuntildate', format(request.validUntilDate, 'yyyy/dd/MM'));

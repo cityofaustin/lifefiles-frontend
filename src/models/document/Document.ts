@@ -4,6 +4,7 @@ interface Document {
   _id?: string;
   name?: string;
   url: string;
+  thumbnailUrl: string;
   notarized?: boolean;
   did?: string;
   hash: string;

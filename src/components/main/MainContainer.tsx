@@ -213,6 +213,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
   handleAddNewDocument = async (
     newFile: File,
+    newThumbnailFile: File,
     documentTypeSelected: string
   ) => {
     const {documents, searchedDocuments, documentQuery} = {...this.state};
@@ -223,6 +224,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         try {
           const response = await DocumentService.addDocument(
             newFile,
+            newThumbnailFile,
             documentTypeSelected!,
             account.didPublicEncryptionKey!
           );

@@ -27,9 +27,9 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
         {document && (
           <Fragment>
             <div>
-              <ImageWithStatus
+            <ImageWithStatus
                 imageViewType={ImageViewTypes.GRID_LAYOUT}
-                imageUrl={DocumentService.getDocumentURL(document.url)}
+                imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
                 encrypted
                 privateEncryptionKey={privateEncryptionKey}
               />

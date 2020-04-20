@@ -68,6 +68,7 @@ interface UpdateDocumentModalState {
   selectedContact?: Account;
   showConfirmShare: boolean;
   newFile?: File;
+  newThumbnailFile?: File;
   base64Image?: string;
 }
 
@@ -87,6 +88,21 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     };
   }
 
+  async componentWillReceiveProps(nextProps: Readonly<UpdateDocumentModalProps>) {
+    // debugger;
+    if (nextProps.document !== this.props.document
+      && nextProps.document && nextProps.privateEncryptionKey) {
+      let base64Image: string | undefined = undefined;
+      try {
+        const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(nextProps.document.url));
+        base64Image = await CryptoUtil.getDecryptedString(nextProps.privateEncryptionKey, encryptedString);
+      } catch (err) {
+        console.error(err);
+      }
+      this.setState({ base64Image });
+    }
+  }
+
   toggleModal = () => {
     // clear state
     const { toggleModal } = { ...this.props };
@@ -103,52 +119,16 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     toggleModal();
   };
 
-  async componentWillReceiveProps(nextProps: Readonly<UpdateDocumentModalProps>) {
-    if (nextProps.document !== this.props.document
-      && nextProps.document && nextProps.privateEncryptionKey) {
-      let base64Image: string | undefined = undefined;
-      try {
-        // debugger;
-        const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(nextProps.document.url));
-        base64Image = await CryptoUtil.getDecryptedString(nextProps.privateEncryptionKey, encryptedString);
-      } catch (err) {
-        console.error(err);
-      }
-      this.setState({ base64Image });
-    }
-  }
-
-  // async componentWillReceiveProps(nextProps) {
-  //   let {base64Image} = {...this.state};
-  //   const { document } = {...this.props};
-  //   try {
-  //     if(document) {
-  //       base64Image = await this.encryptedUrlToBase64String(document.url);
-  //     }
-  //   } catch (err) {
-  //     console.error('failed to encrypt');
-  //   }
-  //   debugger;
-  //   this.setState({base64Image});
-  // }
-
-  // async encryptedUrlToBase64String(imageUrl: string) {
-  //   return await this.unzipAndDecrypt(imageUrl, true);
-  // }
-  //
-  // async unzipAndDecrypt(zipUrl: string, encrypted?: boolean) {
-  //
-  // }
-
   handleUpdateDocument = () => {
-    const { newFile } = { ...this.state };
-    // clear state
+    const { newFile, newThumbnailFile } = { ...this.state };
     const { handleUpdateDocument, document } = { ...this.props };
     handleUpdateDocument({
       id: document!._id!,
       img: newFile,
+      thumbnail: newThumbnailFile,
       validUntilDate: undefined // TODO add expired at form somewhere
     });
+    // clear state
     this.setState({
       activeTab: '1',
       showConfirmDeleteSection: false,
@@ -166,20 +146,25 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     const { selectedContact, base64Image } = { ...this.state };
     // then add share and approve it api call
     try {
-      if (selectedContact) {
+      if (selectedContact && base64Image) {
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
-        const encrypted: Encrypted = await EthCrypto.encryptWithPublicKey(
-          encryptionPublicKey,
-          base64Image!
-        );
-        const encryptedString = EthCrypto.cipher.stringify(encrypted);
-        const blob = await ZipUtil.zip(encryptedString);
-        const newZippedFile = new File([blob], 'encrypted-image.zip', {
+        const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
+        const base64Thumbnail = await StringUtil.fileContentsToThumbnailString(file);
+        const encryptedString = await CryptoUtil.getEncryptedPublicString(encryptionPublicKey!, base64Image);
+        const encryptedThumbnail = await CryptoUtil.getEncryptedPublicString(encryptionPublicKey!, base64Thumbnail);
+        const zipped: Blob = await ZipUtil.zip(encryptedString);
+        const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
+        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+          type: 'application/zip',
+          lastModified: Date.now()
+        });
+        const newZippedThumbnailFile = new File([zippedThumbnail], 'encrypted-image-thumbnail.zip', {
           type: 'application/zip',
           lastModified: Date.now()
         });
         const newShareRequest = await ShareRequestService.addShareRequestFile(
           newZippedFile,
+          newZippedThumbnailFile,
           document?.type!,
           myAccount.id,
           selectedContact?.id!
@@ -257,8 +242,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     this.setState({ activeTab: '0', showConfirmDeleteSection: true });
   };
 
-  setFile = (newFile: File) => {
-    this.setState({ newFile });
+  setFile = (newFile: File, newThumbnailFile: File) => {
+    this.setState({ newFile, newThumbnailFile });
   };
 
   printImg(url: string) {

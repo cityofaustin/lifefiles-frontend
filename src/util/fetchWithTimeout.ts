@@ -1,7 +1,7 @@
 export default function (
   input: RequestInfo,
   init?: RequestInit,
-  timeout: number = 99000
+  timeout: number = 50000
 ): Promise<Response> {
   return Promise.race([
     fetch(input, init),

@@ -1,3 +1,5 @@
+import Resizer from 'react-image-file-resizer';
+
 class StringUtil {
   static getFirstUppercase(input: string): string {
     let result = '';
@@ -29,6 +31,37 @@ class StringUtil {
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
+    });
+  }
+
+  static dataURLtoFile(dataurl: string, filename: string): File {
+    const arr: string[] = dataurl.split(',');
+    const mime: string = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new File([u8arr], filename, { type: mime });
+  }
+
+  static fileContentsToThumbnailString(file: File): Promise<string> {
+    return new Promise((resolve) => {
+      Resizer.imageFileResizer(
+        file, //is the file of the new image that can now be uploaded...
+        450, // is the maxWidth of the new image
+        450, // is the maxHeight of the new image
+        'PNG', // is the compressFormat of the new image
+        75, // is the quality of the new image NOTE: can't compress since PNG
+        0, // is the rotatoion of the new image
+        (data) => {
+          resolve(data);
+        },  // is the callBack function of the new image URI
+        'base64'  // is the output type of the new image
+      );
     });
   }
 
