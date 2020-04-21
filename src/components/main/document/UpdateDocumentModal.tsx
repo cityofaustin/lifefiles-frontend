@@ -141,6 +141,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     });
   };
 
+  // TODO refactor this into a reusable function as it is being used also in accountsharemodal handlesharedocwithcontact
   handleShareDocWithContact = async () => {
     const { document, addShareRequest, myAccount } = { ...this.props };
     const { selectedContact, base64Image } = { ...this.state };

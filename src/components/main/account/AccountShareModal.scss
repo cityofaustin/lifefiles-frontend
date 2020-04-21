@@ -57,9 +57,9 @@
           border-radius: 20px;
           margin-right: 48px;
           box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+          height: 795px;
         }
         background-color: #f8f8f8;
-        height: 795px;
         .contact-detail-image {
           @include media-breakpoint-down(sm) {
             height: 225px;
@@ -110,28 +110,44 @@
           }
         }
         .permissions {
+          @include media-breakpoint-down(sm) {
+            padding: 10px 14px;
+          }
           display: flex;
           flex-direction: column;
           align-items: center;
           color: #0e232c;
           .permissions-title {
+            @include media-breakpoint-up(sm) {
+              padding: 8px 35.5px 0 35.5px;
+            }
             width: 100%;
             font-size: 25px;
             font-weight: bold;
-            padding: 8px 35.5px 0 35.5px;
           }
           .permissions-prompt {
-            font-size: 20px;
+            @include media-breakpoint-down(sm) {
+              padding: 5px 0 25px 0;
+              font-size: 16px;
+            }
+            @include media-breakpoint-up(sm) {
+              padding: 0 35.5px 8px 35.5px;
+              font-size: 20px;
+            }
             opacity: 0.5;
             font-weight: 500;
-            padding: 0 35.5px 8px 35.5px;
           }
           .permission {
+            @include media-breakpoint-down(sm) {
+              padding: 7.5px 0;
+            }
+            @include media-breakpoint-up(sm) {
+              padding: 11px 45px 11px 33.2px;
+            }
             display: flex;
             align-items: center;
             width: 100%;
             justify-content: space-between;
-            padding: 11px 45px 11px 33.2px;
             .permission-item {
               display: flex;
               align-items: center;
@@ -148,8 +164,16 @@
         }
       }
       .right-pane {
-        width: 626px;
+        @include media-breakpoint-down(sm) {
+          background-color: white;
+        }
+        @include media-breakpoint-up(sm) {
+          width: 626px;
+        }
         .share-title {
+          @include media-breakpoint-down(sm) {
+            display: none;
+          }
           font-size: 40px;
           font-weight: 500;
           color: #484848;
@@ -159,9 +183,15 @@
           flex-wrap: wrap;
 
           .document-item {
-            margin: 30px 36px 30px 0;
-            width: 270px;
-            height: 287px;
+            @include media-breakpoint-down(sm) {
+              margin: 15px 25px;
+              width: 100%;
+            }
+            @include media-breakpoint-up(sm) {
+              margin: 30px 36px 30px 0;
+              width: 270px;
+              height: 287px;
+            }
             display: flex;
             flex-direction: column;
             align-items: center;

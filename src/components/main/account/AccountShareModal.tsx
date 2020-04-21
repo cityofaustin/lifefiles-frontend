@@ -17,6 +17,10 @@ import DocumentService from '../../../services/DocumentService';
 import Checkbox from '../../common/Checkbox';
 import ShareRequestService from '../../../services/ShareRequestService';
 import ShareRequest from '../../../models/ShareRequest';
+import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
+import StringUtil from '../../../util/StringUtil';
+import CryptoUtil from '../../../util/CryptoUtil';
+import ZipUtil from '../../../util/ZipUtil';
 
 interface AccountShareModalProps {
   showModal: boolean;
@@ -27,6 +31,7 @@ interface AccountShareModalProps {
   shareRequests: ShareRequest[];
   addShareRequest: (request: ShareRequest) => void;
   removeShareRequest: (request: ShareRequest) => void;
+  privateEncryptionKey: string;
 }
 
 // NOTE: temporarily until get share api hooked up.
@@ -47,14 +52,37 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
     };
   }
 
+  // TODO refactor this into a reusable function as it is being used also in updatedocumentmodal handlesharedocwithcontact
   handleShareDocWithContact = async (document: Document): Promise<void> => {
-    const {myAccount, account, removeShareRequest, addShareRequest} = {...this.props};
+    const {myAccount, account, removeShareRequest, addShareRequest, privateEncryptionKey} = {...this.props};
     try {
       if(this.getDocumentSharedWithContact(document)) {
         await ShareRequestService.deleteShareRequest(this.getDocumentSharedWithContact(document)!._id!);
         removeShareRequest(this.getDocumentSharedWithContact(document)!);
       } else {
-        const newShareRequest = await ShareRequestService.addShareRequest(document?.type!, myAccount.id, account?.id!);
+        const encryptionPublicKey = account.didPublicEncryptionKey!;
+        const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(document.url));
+        const base64Image = await CryptoUtil.getDecryptedString(privateEncryptionKey, encryptedString);
+        const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
+        const base64Thumbnail = await StringUtil.fileContentsToThumbnailString(file);
+        const encryptedThumbnail = await CryptoUtil.getEncryptedPublicString(encryptionPublicKey!, base64Thumbnail);
+        const zipped: Blob = await ZipUtil.zip(encryptedString);
+        const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
+        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+          type: 'application/zip',
+          lastModified: Date.now()
+        });
+        const newZippedThumbnailFile = new File([zippedThumbnail], 'encrypted-image-thumbnail.zip', {
+          type: 'application/zip',
+          lastModified: Date.now()
+        });
+        const newShareRequest = await ShareRequestService.addShareRequestFile(
+          newZippedFile,
+          newZippedThumbnailFile,
+          document?.type!,
+          myAccount.id,
+          account?.id!
+        );
         addShareRequest(newShareRequest);
       }
     } catch (err) {
@@ -79,7 +107,7 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
   };
 
   render() {
-    const {toggleModal, showModal, account, searchedDocuments} = {...this.props};
+    const {toggleModal, showModal, account, searchedDocuments, privateEncryptionKey} = {...this.props};
     const {docShare} = {...this.state};
     // width="34.135" height="33.052"
     const closeBtn = (<div className="modal-close" onClick={toggleModal}><CrossSvg/></div>);
@@ -161,7 +189,13 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
                 {searchedDocuments.map((searchedDocument, idx) => (
                   <div key={idx} className="document-item">
                     <div className="doc-info">
-                      <img src={DocumentService.getDocumentURL(searchedDocument.url)} alt={''} />
+                      <ImageWithStatus
+                        imageViewType={ImageViewTypes.GRID_LAYOUT}
+                        imageUrl={DocumentService.getDocumentURL(searchedDocument.thumbnailUrl)}
+                        encrypted
+                        privateEncryptionKey={privateEncryptionKey}
+                      />
+                      {/* <img src={DocumentService.getDocumentURL(searchedDocument.url)} alt={''} /> */}
                       <div className="doc-type">{searchedDocument.type}</div>
                     </div>
                     <div className="doc-share">

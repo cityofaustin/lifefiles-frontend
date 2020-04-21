@@ -322,7 +322,8 @@ class MainPage extends Component<MainPageProps, MainPageState> {
       shareRequests,
       myAccount,
       addShareRequest,
-      removeShareRequest
+      removeShareRequest,
+      privateEncryptionKey
     } = { ...this.props };
     return (
       <Fragment>
@@ -351,6 +352,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                   myAccount={myAccount}
                   addShareRequest={addShareRequest}
                   removeShareRequest={removeShareRequest}
+                  privateEncryptionKey={privateEncryptionKey!}
                 />
               </Col>
             );

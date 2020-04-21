@@ -17,6 +17,7 @@ interface AccountSummaryProps {
   myAccount: Account;
   addShareRequest: (request: ShareRequest) => void;
   removeShareRequest: (request: ShareRequest) => void;
+  privateEncryptionKey: string;
 }
 
 interface AccountSummaryState {
@@ -34,7 +35,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
 
   render() {
     const { account, shareRequests, searchedDocuments, myAccount, addShareRequest,
-      removeShareRequest } = { ...this.props };
+      removeShareRequest, privateEncryptionKey } = { ...this.props };
     const { showAccountShareModal } = { ...this.state };
     const numberOfShares = (shareRequests) ? shareRequests.length : 0;
     return (
@@ -48,6 +49,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
           shareRequests={shareRequests}
           addShareRequest={addShareRequest}
           removeShareRequest={removeShareRequest}
+          privateEncryptionKey={privateEncryptionKey}
         />
         <div className="img-container">
           <ImageWithStatus
