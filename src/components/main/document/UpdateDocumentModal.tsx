@@ -92,7 +92,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     // debugger;
     if (nextProps.document !== this.props.document
       && nextProps.document && nextProps.privateEncryptionKey) {
-      let base64Image: string | undefined = undefined;
+      let base64Image: string | undefined;
       try {
         const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(nextProps.document.url));
         base64Image = await CryptoUtil.getDecryptedString(nextProps.privateEncryptionKey, encryptedString);
@@ -384,7 +384,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                           onClick={() => {
                             // Not allowed to navigate top frame to data URL
                             // window.location.href = base64Image!;
-                            const iframe = "<iframe width='100%' height='100%' src='" + base64Image! + "'></iframe>"
+                            const iframe = '<iframe width="100%" height="100%" src="' + base64Image! + '"></iframe>';
                             const x = window.open()!;
                             x.document.open();
                             x.document.write(iframe);

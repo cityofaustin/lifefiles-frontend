@@ -69,7 +69,8 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
 
   handleAddNewDocument = async () => {
     const {handleAddNewDocument, documents} = {...this.props};
-    let {documentType, newFile, newThumbnailFile, errorMessage, isOther} = {...this.state};
+    let {documentType, newFile, errorMessage, isOther} = {...this.state};
+    const {newThumbnailFile} = {...this.state};
     // If document type exists show error message
     if (
       DocumentTypeService.findDocumentTypeMatchInDocuments(

@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import {Modal, ModalBody, ModalHeader, TabPane} from 'reactstrap';
 import {ReactComponent as ContactSvg} from '../../../img/contact.svg';
-import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
+import {ReactComponent as CrossSvg} from '../../../img/cross3.svg';
 import AccountImpl from '../../../models/AccountImpl';
 import Account from '../../../models/Account';
 import AccountService from '../../../services/AccountService';
@@ -81,6 +81,7 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
   render() {
     const {toggleModal, showModal, account, searchedDocuments} = {...this.props};
     const {docShare} = {...this.state};
+    // width="34.135" height="33.052"
     const closeBtn = (<div className="modal-close" onClick={toggleModal}><CrossSvg/></div>);
 
     return (
@@ -92,8 +93,8 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
         className="account-share-modal"
       >
         <ModalHeader toggle={toggleModal} close={closeBtn}>
-          <ContactSvg style={{marginLeft: '10.6px', marginRight: '30.9px'}}/>
-          {AccountImpl.getFullName(account.firstName, account.lastName)}
+          <ContactSvg />
+          <span>{AccountImpl.getFullName(account.firstName, account.lastName)}</span>
         </ModalHeader>
         <ModalBody className="account-share-container">
           <div className="account-share">

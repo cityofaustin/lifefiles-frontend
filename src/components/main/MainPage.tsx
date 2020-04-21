@@ -190,7 +190,8 @@ class MainPage extends Component<MainPageProps, MainPageState> {
       handleSelectDocument,
       searchedAccounts,
       shareRequests,
-      myAccount
+      myAccount,
+      privateEncryptionKey
     } = { ...this.props };
     return (
       <div>
@@ -247,7 +248,9 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                     <div className="doc-name-cell">
                       <ImageWithStatus
                         imageViewType={ImageViewTypes.LIST_LAYOUT}
-                        imageUrl={DocumentService.getDocumentURL(document.url)}
+                        imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
+                        encrypted
+                        privateEncryptionKey={privateEncryptionKey}
                       />
                       <div>{document.type}</div>
                     </div>

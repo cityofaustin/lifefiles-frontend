@@ -88,7 +88,7 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
                 'outter-doc': imageViewType === ImageViewTypes.GRID_LAYOUT || ImageViewTypes.PREVIEW,
                 'outter-circle':
                   imageViewType === ImageViewTypes.GRID_CIRCLE_LAYOUT,
-                'outter-list': imageViewType === ImageViewTypes.LIST_LAYOUT,
+                'outter-list': imageViewType === ImageViewTypes.LIST_LAYOUT
               })}
             >
               <div className="loading-inner">

@@ -51,10 +51,10 @@ class StringUtil {
   static fileContentsToThumbnailString(file: File): Promise<string> {
     return new Promise((resolve) => {
       Resizer.imageFileResizer(
-        file, //is the file of the new image that can now be uploaded...
+        file, // is the file of the new image that can now be uploaded...
         450, // is the maxWidth of the new image
         450, // is the maxHeight of the new image
-        'PNG', // is the compressFormat of the new image
+        'JPEG', // is the compressFormat of the new image
         75, // is the quality of the new image NOTE: can't compress since PNG
         0, // is the rotatoion of the new image
         (data) => {
