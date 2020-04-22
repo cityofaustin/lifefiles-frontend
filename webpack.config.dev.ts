@@ -55,7 +55,13 @@ const config: webpack.Configuration = {
       {
         enforce: 'pre',
         test: /\.js$/,
-        loader: 'source-map-loader'
+        loader: 'source-map-loader',
+        exclude: [
+          (path.resolve(__dirname, 'node_modules') + '/ethereumjs-common'),
+          (path.resolve(__dirname, 'node_modules') + '/ethereumjs-util'),
+          (path.resolve(__dirname, 'node_modules') + '/ethereumjs-tx'),
+          (path.resolve(__dirname, 'node_modules') + '/rlp')
+        ]
       },
       {
         test: /\.s?css$/,

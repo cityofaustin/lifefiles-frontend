@@ -39,16 +39,12 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
     };
   }
 
-  async componentWillReceiveProps(nextProps: Readonly<ImageWithStatusProps>) {
-    // debugger;
-    if (nextProps.imageUrl && nextProps.imageUrl !== this.props.imageUrl
-      && nextProps.encrypted && nextProps.privateEncryptionKey) {
+  async componentDidUpdate(prevProps: Readonly<ImageWithStatusProps>) {
+    if (this.props.imageUrl && this.props.imageUrl !== prevProps.imageUrl
+      && this.props.encrypted && this.props.privateEncryptionKey) {
       let base64Image: string = '';
-      // console.log(imageUrl);
-      const encryptedString: string = await ZipUtil.unzip(nextProps.imageUrl);
-      // console.log(encryptedString);
-      base64Image = await CryptoUtil.getDecryptedString(nextProps.privateEncryptionKey!, encryptedString);
-      // console.log(base64Image);
+      const encryptedString: string = await ZipUtil.unzip(this.props.imageUrl);
+      base64Image = await CryptoUtil.getDecryptedString(this.props.privateEncryptionKey!, encryptedString);
       this.setState({ base64Image });
     }
   }

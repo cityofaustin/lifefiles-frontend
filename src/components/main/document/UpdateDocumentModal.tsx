@@ -88,14 +88,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     };
   }
 
-  async componentWillReceiveProps(nextProps: Readonly<UpdateDocumentModalProps>) {
-    // debugger;
-    if (nextProps.document !== this.props.document
-      && nextProps.document && nextProps.privateEncryptionKey) {
+  async componentDidUpdate(prevProps: Readonly<UpdateDocumentModalProps>) {
+    if (prevProps.document !== this.props.document
+      && this.props.document && this.props.privateEncryptionKey) {
       let base64Image: string | undefined;
       try {
-        const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(nextProps.document.url));
-        base64Image = await CryptoUtil.getDecryptedString(nextProps.privateEncryptionKey, encryptedString);
+        const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(this.props.document.url));
+        base64Image = await CryptoUtil.getDecryptedString(this.props.privateEncryptionKey, encryptedString);
       } catch (err) {
         console.error(err);
       }
@@ -411,7 +410,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                           <DownloadBtnSvg />
                         </a>
                         <PrintBtnSvg
-                          onClick={() =>this.printImg(base64Image!)}
+                          onClick={() => this.printImg(base64Image!)}
                         />
                         <ZoomBtnSvg
                           onClick={() => this.setState({ isZoomed: true })}

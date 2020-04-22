@@ -27,6 +27,7 @@ import ShareRequest from '../../models/ShareRequest';
 import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
 import AccountImpl from '../../models/AccountImpl';
 import {ReactComponent as LogoSm} from '../../img/logo-sm.svg';
+import Sidebar from '../layout/Sidebar';
 
 // TODO use react router dom and make this more of a app container
 
@@ -45,6 +46,7 @@ interface MainContainerState {
   accounts: Account[];
   searchedAccounts: Account[];
   activeTab: string;
+  sidebarOpen?: boolean;
 }
 
 interface MainContainerProps {
@@ -72,7 +74,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       documentQuery: '',
       accounts: [],
       searchedAccounts: [],
-      activeTab: '1'
+      activeTab: '1',
+      sidebarOpen: false
     };
   }
 
@@ -146,6 +149,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       searchedAccounts,
       documentQuery: query
     });
+  };
+
+  setSidebarOpen = (b: boolean) => {
+    this.setState({sidebarOpen: b});
   };
 
   toggleSort = () => {
@@ -374,19 +381,19 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const {isSmallMenuOpen} = {...this.state};
     return (
       <div id="main-top-bar-sm">
-        <Dropdown isOpen={isSmallMenuOpen} toggle={this.toggleSmallMenu}>
+        {/* <Dropdown isOpen={isSmallMenuOpen} toggle={this.toggleSmallMenu}>
           <DropdownToggle
             tag="span"
             data-toggle="dropdown"
             aria-expanded={isSmallMenuOpen}
-          >
-            <LogoSm/>
-          </DropdownToggle>
+          > */}
+            <LogoSm onClick={() => this.setSidebarOpen(true) } />
+          {/* </DropdownToggle>
           <DropdownMenu>
             <DropdownItem onClick={this.goToAccount}>My Account</DropdownItem>
             <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
           </DropdownMenu>
-        </Dropdown>
+        </Dropdown> */}
         <SearchInput handleSearch={this.handleSearch}/>
       </div>
     );
@@ -506,14 +513,21 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   render() {
-    const {account} = {...this.props};
-    const {isLoading, isAccount} = {...this.state};
+    const {account, handleLogout} = {...this.props};
+    const {isLoading, isAccount, sidebarOpen} = {...this.state};
     return (
       <Fragment>
         {isLoading && <ProgressIndicator isFullscreen/>}
         <div id="main-container">
           {this.renderAddDocumentModal()}
           {this.renderUpdateDocumentModal()}
+          <Sidebar
+          account={account}
+          handleLogout={handleLogout}
+          goToAccount={this.goToAccount}
+          isOpen={!!sidebarOpen}
+          setOpen={this.setSidebarOpen}
+          />
           {this.renderTopBar()}
           {this.renderTopBarSmall()}
           <div className="main-page">
