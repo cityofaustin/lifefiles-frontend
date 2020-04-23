@@ -1,13 +1,13 @@
 @import "~bootstrap/scss/bootstrap.scss";
 @import "../variables";
 
-@include media-breakpoint-down(sm) {
+@include media-breakpoint-down(md) {
   .document-header {
     display: none;
   }
 }
 
-@include media-breakpoint-up(sm) {
+@include media-breakpoint-up(md) {
   .document-header {
     display: flex;
     justify-content: space-between;
@@ -42,19 +42,19 @@
 }
 
 .sort-section {
-  @include media-breakpoint-down(sm) {
+  @include media-breakpoint-down(md) {
     display: none;
   }
-  @include media-breakpoint-up(sm) {
+  @include media-breakpoint-up(md) {
     display: flex;
   }
 }
 
 .sort-section-sm {
-  @include media-breakpoint-down(sm) {
+  @include media-breakpoint-down(md) {
     display: flex;
   }
-  @include media-breakpoint-up(sm) {
+  @include media-breakpoint-up(md) {
     display: none;
   }
   background-color: #f8f8f8;
@@ -118,6 +118,16 @@
           margin-right: 6.5px;
         }
       }
+      th {
+        &:not(:first-child) {
+          text-align: center;
+        }
+        @include media-breakpoint-down(lg) {
+          &:nth-child(n+4) {
+            display: none;
+          }
+        }
+      }
     }
   }
 
@@ -151,6 +161,11 @@
       td {
         @include media-breakpoint-down(sm) {
           &:nth-child(n+3) {
+            display: none;
+          }
+        }
+        @include media-breakpoint-down(lg) {
+          &:nth-child(n+4) {
             display: none;
           }
         }

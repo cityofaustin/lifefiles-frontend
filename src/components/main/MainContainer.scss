@@ -1,100 +1,72 @@
-@import '../variables';
-
-@media only screen and (min-width: 600px)  {
-  .logo {
-    width: 95px;
-    height: 95px;
-    object-fit: contain;
-  }
-
-  .account-profile-image {
-    width: 90px;
-    height: 90px;
-    object-fit: contain;
-    border-radius: 50%;
-  }
-}
-
-@media only screen and (max-width: 600px)  {
-  .account-profile-image {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    border-radius: 50%;
-  }
-
-  .logo {
-    display: none;
-  }
-}
+@import "~bootstrap/scss/bootstrap.scss";
+@import "../variables";
 
 #main-container {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-
-  @media (max-width: 575.98px) {
-    margin-bottom: 25px;
-    #main-top-bar {
+  @include media-breakpoint-up(sm) {
+    margin: 10px 30px 0 0;
+    #main-top-bar-sm {
       display: none;
     }
+  }
+  @include media-breakpoint-down(sm) {
+    margin: 0;
     #main-top-bar-sm {
+      margin: 20px 40px 0 40px;
       display: flex;
       align-items: center;
-      //outline: 1px solid red;
-      height: 26px;
-      margin: 21.3px 19.5px;
-      justify-content: space-between;
-      cursor: pointer;
-      z-index: 2;
     }
   }
 
-  @media (min-width: 576px) {
-    margin: 10px 107px 0 0;
-    #main-top-bar-sm {
+  #main-top-bar {
+    @include media-breakpoint-down(md) {
       display: none;
     }
-    #main-top-bar {
+    @include media-breakpoint-up(md) {
       display: table;
-      width: 100%;
-      padding-left: 10px;
+    }
+    width: 100%;
+    padding-left: 10px;
 
-      #main-logo {
-        cursor: pointer;
-        display: table-cell;
-        width: 95px;
-        padding: 20px 10px 20px 10px;
-      }
+    #main-logo {
+      cursor: pointer;
+      display: table-cell;
+      width: 95px;
+      padding: 20px 10px 20px 10px;
+    }
 
-      #main-search {
-        margin-left: 80px;
-        margin-right: 127px;
-        position: relative;
-        top: 4px;
+    #main-search {
+      @include media-breakpoint-up(md) {
+        margin: 0 20px 0 20px;
       }
+      @include media-breakpoint-up(lg) {
+        margin: 0 127px 0 80px;
+      }
+      position: relative;
+      top: 4px;
+    }
 
-      @media only screen and (max-width: 470px) {
-        #main-search {
-          display: none;
-        }
-      }
-
-      #main-profile {
-        display: table-cell;
-        width: 90px;
-        cursor: pointer;
-        text-align: right;
-      }
+    #main-profile {
+      display: table-cell;
+      width: 90px;
+      cursor: pointer;
+      text-align: right;
     }
   }
-
-
-  #main-search-sm {
-    display: none;
+  @include media-breakpoint-up(lg) {
+    margin: 10px 40px 0 0;
+  }
+  @include media-breakpoint-up(xl) {
+    margin: 10px 107px 0 0;
   }
 
-  @media only screen and (max-width: 470px) {
+  // #main-search-sm {
+  //   display: none;
+  // }
+
+  @include media-breakpoint-down(sm) {
     #main-search-sm {
       display: block;
       margin: 20px;
@@ -108,7 +80,7 @@
     // https://stackoverflow.com/a/43683067
     flex-shrink: 0;
 
-    @media only screen and (min-width: 600px) {
+    @include media-breakpoint-up(md) {
       .main-side {
         margin-top: 44.6px;
         border-top-right-radius: 74px;
@@ -116,7 +88,7 @@
         min-width: 134px;
         //height: 100%;
         @include themify($themes) {
-          background: themed('colorPrimary');
+          background: themed("colorPrimary");
         }
       }
     }
@@ -124,14 +96,30 @@
     .main-section {
       display: flex;
       width: 100%;
-      @media (min-width: 576px) {
+      // @include media-breakpoint-up(sm) {
+      //   margin-left: 15px;
+      //   margin-bottom: 92px;
+      //   .main-content {
+      //     padding: 14px 0 24px 66px;
+      //   }
+      // }
+      @include media-breakpoint-up(md) {
+        .main-content {
+          padding: 14px 0 24px 20px;
+        }
+      }
+      @include media-breakpoint-up(lg) {
         margin-left: 15px;
         margin-bottom: 92px;
+        .main-content {
+          padding: 14px 0 24px 20px;
+        }
+      }
+      @include media-breakpoint-up(xl) {
         .main-content {
           padding: 14px 0 24px 66px;
         }
       }
-
       .main-content {
         width: 100%;
       }
@@ -159,7 +147,7 @@
   //left:-20px;
   //bottom: 26px;
   @include themify($themes) {
-    background-color: themed('colorPrimary');
+    background-color: themed("colorPrimary");
   }
 }
 
@@ -180,7 +168,7 @@
 }
 
 .document-add-new {
-  @media (max-width: 575.98px) {
+  @include media-breakpoint-down(sm) {
     display: none;
   }
   text-align: center;
@@ -204,4 +192,3 @@
     background: #eee;
   }
 }
-

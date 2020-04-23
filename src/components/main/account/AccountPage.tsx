@@ -18,7 +18,7 @@ class AccountPage extends Component<AccountPageProps> {
     const {account, goBack} = {...this.props};
 
     return (
-      <div className="main-content">
+      <div className="main-content" style={{marginTop: '20px'}}>
         <Breadcrumb>
           <BreadcrumbItem className="breadcrumb-link" onClick={goBack}>My Documents</BreadcrumbItem>
           <BreadcrumbItem active>Profile</BreadcrumbItem>

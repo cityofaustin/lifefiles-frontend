@@ -1,3 +1,4 @@
+@import '~bootstrap/scss/bootstrap.scss';
 
 .login-background {
   background: #fafafa;
@@ -6,44 +7,66 @@
   flex: 1;
   justify-content: center;
   align-items: center;
-}
+  .login-container {
+    display: flex;
+    flex: 1;
+    margin: auto;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+    background: #fafafa;
 
-.login-container {
-  display: flex;
-  flex: 1;
-  margin: auto;
-  padding: 20px;
-  justify-content: center;
-  align-items: center;
-  background: #fafafa;
+    .login-card {
+      @include media-breakpoint-up(sm) {width: 320px;}
+      @include media-breakpoint-up(md) {width: 430px;}
+      @include media-breakpoint-up(lg) {width: 540px;}
 
-  .login-card {
-    width: 320px;
-    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
-    0px 1px 1px 0px rgba(0, 0, 0, 0.14),
-    0px 1px 3px 0px rgba(0,0,0,.12);
+      box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+      0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+      0px 1px 3px 0px rgba(0,0,0,.12);
 
-    .login-logo {
-      display: inline-block;
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-    }
+      .card-body {
+        @include media-breakpoint-up(sm) {font-size: 16px;padding: 20px;}
+        @include media-breakpoint-up(md) {font-size: 20.5px;padding: 30px;}
+        @include media-breakpoint-up(lg) {font-size: 25px;padding: 40px;}
 
-    .login-title {
-      display: inline-block;
-      font-size: 24px;
-      margin-left: 24px;
-    }
+        .login-logo {
+          display: inline-block;
+          width: 60px;
+          height: 60px;
+          object-fit: contain;
+        }
 
-    .login-subtitle {
-      font-size: 18px;
-      border-bottom: 1px solid #ccc;
-      margin: 14px 0 18px 0;
-    }
+        .login-title {
+          display: inline-block;
+          // font-size: 24px;
+          margin-left: 24px;
+        }
 
-    .login-btn {
-      margin-top: 8px;
+        .login-subtitle {
+          // font-size: 18px;
+          border-bottom: 1px solid #ccc;
+          margin: 14px 0 18px 0;
+        }
+
+        .login-btn {
+          @include media-breakpoint-down(lg) {
+            font-size: 20.5px;
+            height: 50.5px;
+            min-width: 150px;
+          }
+          @include media-breakpoint-down(sm) {
+            font-size: 16px;
+            height: 42px;
+            min-width: 100px;
+          }
+          font-size: 30px;
+          height: 59px;
+          min-width: 209px;
+          margin-top: 8px;
+        }
+      }
     }
   }
 }
+

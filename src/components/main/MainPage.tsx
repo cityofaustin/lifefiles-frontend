@@ -354,7 +354,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
               <Col
                 key={account.id}
                 sm="12"
-                md="12"
+                md="6"
                 lg="6"
                 xl="4"
                 className="network-container"
@@ -476,7 +476,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                 {!isLayoutGrid && this.renderDocumentListView()}
               </TabPane>
               <TabPane tabId="2">
-                {isLayoutGrid && this.renderNetworkGridView()}
+                {this.renderNetworkGridView()}
               </TabPane>
             </TabContent>
             {activeTab === '1' && (

@@ -217,7 +217,7 @@ body {
 }
 
 .nav-tabs.small {
-  @media (min-width: 576px) {display: none;}
+  @include media-breakpoint-up(md) {display: none;}
   font-size: 22px;
   font-weight: bold;
   text-transform: capitalize;
@@ -236,8 +236,9 @@ body {
 }
 
 .nav-tabs.large {
-  @media (max-width: 575.98px) {display: none;}
-  font-size: 35px;
+  @include media-breakpoint-down(sm) {display: none;}
+  @include media-breakpoint-down(lg) {font-size: 25px;}
+  @include media-breakpoint-up(lg) {font-size: 35px;}
   font-weight: bold;
   text-transform: none;
   .nav-link {
@@ -252,7 +253,7 @@ body {
 }
 
 .nav-tabs .nav-link {
-  @media (min-width: 576px) {min-width: 187px;}
+  @include media-breakpoint-up(sm) {min-width: 187px;}
   //outline: 1px solid green;
   border: 0 solid transparent;
   border-top-left-radius: 0.25rem;

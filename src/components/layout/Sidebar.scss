@@ -1,7 +1,7 @@
 @import '~bootstrap/scss/bootstrap.scss';
 @import "../variables.scss";
 .sidebar {
-  @include media-breakpoint-up(sm) {
+  @include media-breakpoint-up(md) {
     display: none;
   }
   .touchable-area {
@@ -148,6 +148,10 @@
         .sidemenu-footer {
           padding: 15.4px 0 10px 33px;
           color: #9a9a9a;
+          svg {
+            width: 173.523px;
+            height: 56.311px;
+          }
           ul {
             padding-top: 12px;
             padding-left: 25px;

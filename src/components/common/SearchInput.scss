@@ -1,12 +1,13 @@
+@import '~bootstrap/scss/bootstrap.scss';
 @import '../variables.scss';
 
 form.search-container {
-  @media (max-width: 575.98px) { display: none; }
+  @include media-breakpoint-down(sm) { display: none; }
   width: 100%;
   display: flex;
-  input.search {
-    @media only screen and (max-width: 600px)  { width: 100px; }
-  }
+  // input.search {
+  //   @media only screen and (max-width: 600px)  { width: 100px; }
+  // }
   input.searchbar {
     //border-color: #bbc0c4;
     background-color: $pale-grey;
@@ -52,10 +53,10 @@ form.search-container {
 }
 
 form.search-container-sm {
+  @include media-breakpoint-up(md) {display: none;}
   display: flex;
   flex: 1;
   margin-left: 32.5px;
-  @media (min-width: 576px) {display: none;}
   input.searchbar {
     background-color: $pale-grey;
     color: #3c4146;

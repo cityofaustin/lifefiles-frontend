@@ -18,7 +18,7 @@
     margin-bottom: 20px;
     position: relative;
     .docs-shared-sm {
-      @include media-breakpoint-up(sm) {display: none; }
+      @include media-breakpoint-up(md) {display: none; }
       position: absolute;
       bottom:0;
       right:0;
@@ -54,10 +54,10 @@
       }
       .item-value {
         color: rgba(70, 70, 70, 0.78);
+        word-break: break-all;
+        width: 170px;
+        text-align: right;
         @include media-breakpoint-down(sm) {
-          word-break: break-all;
-          width: 170px;
-          text-align: right;
           font-size: 20px;
           &.email {
             width: 241px;
