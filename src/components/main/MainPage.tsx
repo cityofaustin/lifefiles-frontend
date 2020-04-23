@@ -89,6 +89,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   };
 
   renderGridSort() {
+    const { isLayoutGrid } = { ...this.state };
     const { sortAsc, toggleSort, activeTab } = { ...this.props };
     return (
       <Fragment>
@@ -104,8 +105,17 @@ class MainPage extends Component<MainPageProps, MainPageState> {
             <SortArrow isAscending={sortAsc} />
             <div className="subtitle subtitle-key">NAME</div>
           </div>
-          {activeTab === '1' && (
-            <SvgButton buttonType={SvgButtonTypes.LAYOUT_GRID_MOBILE} />
+          {activeTab === '1' && isLayoutGrid && (
+            <SvgButton
+              buttonType={SvgButtonTypes.LAYOUT_GRID_MOBILE}
+              onClick={this.toggleLayout}
+            />
+          )}
+          {activeTab === '1' && !isLayoutGrid && (
+            <SvgButton
+              buttonType={SvgButtonTypes.LAYOUT_LIST_MOBILE}
+              onClick={this.toggleLayout}
+            />
           )}
         </div>
       </Fragment>
@@ -195,6 +205,7 @@ class MainPage extends Component<MainPageProps, MainPageState> {
     } = { ...this.props };
     return (
       <div>
+        {this.renderGridSort()}
         <table className="doc-table">
           <thead>
             <tr>
@@ -252,7 +263,10 @@ class MainPage extends Component<MainPageProps, MainPageState> {
                         encrypted
                         privateEncryptionKey={privateEncryptionKey}
                       />
-                      <div>{document.type}</div>
+                      <div className="doc-info">
+                        <div className="doc-type">{document.type}</div>
+                        <div className="doc-upd">{format(new Date(document.updatedAt!), 'MMM d, y')}</div>
+                      </div>
                     </div>
                   </td>
                   <td>

@@ -1,11 +1,24 @@
+@import "~bootstrap/scss/bootstrap.scss";
 
 .app-container {
   width: 100%;
-}
-
-.page-container {
-  display: flex;
-  height: 100%;
+  // this div is for debug purposes
+  .screen-info {
+    display: none;
+    position: absolute;
+    background-color: yellow;
+    &::before {
+      @include media-breakpoint-up(xs) {content: "xs";}
+      @include media-breakpoint-up(sm) {content: "sm";}
+      @include media-breakpoint-up(md) {content: "md";}
+      @include media-breakpoint-up(lg) {content: "lg";}
+      @include media-breakpoint-up(xl) {content: "xl";}
+    }
+  }
+  .page-container {
+    display: flex;
+    height: 100%;
+  }
 }
 
 .modal-content {
