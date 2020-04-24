@@ -18,7 +18,7 @@
     }
   }
   @include media-breakpoint-up(sm) {
-    padding: 0 !important;
+    padding: 7.5px;
     margin: 0;
     .document-item {
       min-height: 255px;

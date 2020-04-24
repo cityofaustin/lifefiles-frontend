@@ -1,5 +1,5 @@
-@import '~bootstrap/scss/bootstrap';
-@import '../variables.scss';
+@import "~bootstrap/scss/bootstrap";
+@import "../variables.scss";
 
 .dropzone-container {
   display: flex;
@@ -42,7 +42,100 @@
       }
     }
   }
-  @include media-breakpoint-up(sm) {
+
+  @include media-breakpoint-down(lg) {
+    .dropzone-form {
+      display: flex;
+      flex: 1;
+      .upload-sm {
+        display: none;
+      }
+      .upload {
+        background-color: white;
+        border: dashed 2px $warm-grey;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 400px;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        .caption {
+          position: absolute;
+          top: 22px;
+          left: 30px;
+          font-size: 25px;
+          color: #484848;
+          opacity: 0.6;
+        }
+      }
+    }
+
+    .file-preview {
+      flex-direction: row;
+      .file-info {
+        margin: 13.9px 0 13.9px 15px;
+        // margin: 13.9px 0 13.9px 40px;
+        .file-info-item {
+          .file-info-title {
+            font-weight: 500;
+            color: #747474;
+          }
+        }
+        .file-reupload {
+          margin: 0 0 10px 0 !important;
+          // margin: 0 0 0 10px;
+        }
+      }
+    }
+  }
+
+  @include media-breakpoint-up(lg) {
+    .dropzone-form {
+      display: flex;
+      flex: 1;
+      .upload-sm {
+        display: none;
+      }
+      .upload {
+        background-color: white;
+        border: dashed 2px $warm-grey;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 400px;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        .caption {
+          position: absolute;
+          top: 22px;
+          left: 30px;
+          font-size: 25px;
+          color: #484848;
+          opacity: 0.6;
+        }
+      }
+    }
+
+    .file-preview {
+      flex-direction: row;
+      .file-info {
+        margin: 13.9px 0 13.9px 40px;
+        .file-info-item {
+          .file-info-title {
+            font-weight: 500;
+            color: #747474;
+          }
+        }
+        .file-reupload {
+          margin: 0 0 0 10px;
+        }
+      }
+    }
+  }
+
+  @include media-breakpoint-up(xl) {
     .dropzone-form {
       display: flex;
       flex: 1;
@@ -83,6 +176,7 @@
       }
     }
   }
+
   .file-preview {
     display: flex;
     flex: 1;
@@ -99,6 +193,12 @@
       display: flex;
       font-size: 20px;
       color: #484848;
+      @include media-breakpoint-down(lg) {
+        flex-direction: column-reverse;
+      }
+      @include media-breakpoint-up(lg) {
+        flex-direction: row;
+      }
       .file-info-items {
         flex-grow: 1;
         .file-info-item:not(:first-child) {
@@ -116,34 +216,4 @@
       }
     }
   }
-
 }
-
-//.dropzone {
-//  flex: 1;
-//  display: flex;
-//  justify-content: flex-start;
-//  height: 479.4px;
-//  flex-direction: column;
-//  padding: 22px 30px;
-//  background-color: #f6f6f6;
-//  color: #bdbdbd;
-//  outline: none;
-//  transition: border .24s ease-in-out;
-//  p {
-//    font-size: 25px;
-//  }
-//}
-//.dropzone-bottom {
-//  background-image: linear-gradient(to right, #a8a8a8 40%, rgba(255,255,255,0) 0%);
-//  background-position: bottom;
-//  background-size: 25px 2px;
-//  background-repeat: repeat-x;
-//}
-//
-//.dropzone-left {
-//  background-image: linear-gradient(#a8a8a8 40%, rgba(255,255,255,0) 0%);
-//  background-position: left;
-//  background-size: 2px 25px;
-//  background-repeat: repeat-y;
-//}

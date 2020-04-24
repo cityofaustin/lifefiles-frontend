@@ -53,11 +53,15 @@
   }
 }
 
-@include media-breakpoint-up(sm) {
+@include media-breakpoint-up(md) {
   .add-doc-modal {
     .modal-content {
       .modal-header {
         .modal-title {
+          color: green;
+          span {
+            font-size: 24px;
+          }
           svg:nth-child(1) {
             margin-left: 10.6px;
             margin-right: 30.9px;
@@ -74,7 +78,7 @@
       .modal-body {
         .document-type-container {
           .type-section {
-            margin: 0 130px;
+            margin: 0 40px;
             height: 388px;
             .type-prompt {
               color: #3b3b3b;
@@ -94,10 +98,17 @@
         }
       }
       .modal-footer {
+        padding: 18px;
         .margin-wide {
           margin: 11px !important;
         }
       }
     }
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  .add-doc-modal .modal-content .modal-body .document-type-container .type-section {
+    margin: 0 130px;
   }
 }

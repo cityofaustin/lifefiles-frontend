@@ -312,7 +312,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
           <NewDocSvg/>
           <NewDocSmSvg/>
-          <span>Add New Document</span>
+          <span>New Document</span>
         </ModalHeader>
         <ModalBody>
           <div className="document-type-container">

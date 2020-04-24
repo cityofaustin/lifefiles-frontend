@@ -257,7 +257,7 @@
 // end network
 
 .fab-add {
-  @media (min-width: 576px) {
+  @include media-breakpoint-up(md) {
     display: none;
   }
   position: fixed;

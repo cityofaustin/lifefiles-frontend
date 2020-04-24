@@ -151,7 +151,7 @@ body {
 }
 
 .modal-close {
-  @include media-breakpoint-up(sm) {
+  @include media-breakpoint-up(md) {
     padding: 13px;
   }
   cursor: pointer;
