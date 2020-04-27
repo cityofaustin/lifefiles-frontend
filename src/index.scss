@@ -131,15 +131,18 @@ body {
       border-top-left-radius: calc(17px - 1px);
       border-top-right-radius: calc(17px - 1px);
       .modal-title {
-        @include media-breakpoint-down(sm) {
-          font-size: 18px;
-          span {
-            vertical-align: text-top;
-          }
-        }
-        font-size: 35px;
+        font-size: 18px;
         color: #f8f8f8;
         font-weight: 500;
+        span {
+          vertical-align: text-top;
+        }
+        @include media-breakpoint-up(md) {
+          font-size: 24px;
+        }
+        @include media-breakpoint-up(lg) {
+          font-size: 35px;
+        }
       }
     }
     .modal-body {
@@ -197,19 +200,19 @@ body {
 // bootstrap tabs
 
 .nav-tabs {
-  @include media-breakpoint-down(sm) {
-    font-size: 15px;
-    .nav-item {
-      width: calc(100%/3);
-    }
-  }
-  @include media-breakpoint-up(sm) {
-    font-size: 20px;
-  }
-  //border-bottom: 1px solid #dee2e6;
   border-bottom: 0 solid transparent;
   font-weight: 500;
   text-transform: uppercase;
+  font-size: 15px;
+  .nav-item {
+    width: calc(100%/3);
+  }
+  @include media-breakpoint-up(md) {
+    font-size: 20px;
+    .nav-item {
+      width: inherit;
+    }
+  }
 }
 
 .nav-tabs.xs {
@@ -217,11 +220,12 @@ body {
 }
 
 .nav-tabs.small {
-  @include media-breakpoint-up(md) {display: none;}
+  display: flex;
   font-size: 22px;
   font-weight: bold;
   text-transform: capitalize;
   margin: 10px 9px 0 9px;
+  @include media-breakpoint-up(md) {display: none;}
   .nav-item {
     width: 50%;
     .nav-link {
@@ -236,8 +240,11 @@ body {
 }
 
 .nav-tabs.large {
-  @include media-breakpoint-down(sm) {display: none;}
-  @include media-breakpoint-down(lg) {font-size: 25px;}
+  display: none;
+  font-size: 25px;
+  @include media-breakpoint-up(sm) {
+    display: flex;
+  }
   @include media-breakpoint-up(lg) {font-size: 35px;}
   font-weight: bold;
   text-transform: none;
@@ -253,8 +260,6 @@ body {
 }
 
 .nav-tabs .nav-link {
-  @include media-breakpoint-up(sm) {min-width: 187px;}
-  //outline: 1px solid green;
   border: 0 solid transparent;
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
@@ -262,6 +267,7 @@ body {
   text-align: center;
   opacity: 0.7;
   cursor: pointer;
+  @include media-breakpoint-up(md) { min-width: 187px; }
 }
 
 .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
@@ -273,16 +279,11 @@ body {
 }
 
 .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
-  //border-color: #e9ecef #e9ecef #dee2e6;
   border-color: transparent;
 }
 
 .nav-link.active:hover, .nav-link.active:focus {
   border-color: $blue;
-}
-
-.tab-content {
-  //margin-top: 24.1px;
 }
 
 // end bootstrap tabs

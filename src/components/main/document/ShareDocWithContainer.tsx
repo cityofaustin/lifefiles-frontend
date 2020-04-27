@@ -109,7 +109,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
               <Carousel
                 responsive={{
                   mobile: {
-                    breakpoint: {max: 576, min: 0},
+                    breakpoint: {max: 768, min: 0},
                     items: 2
                   }
                 }}
@@ -140,17 +140,19 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
             <div className="share-for-container">
               <div className="share-for-form-group">
                 <label>Share for...</label>
-                <div style={{width: '224px'}}>
+                <div className="duration">
                   <Select/>
                 </div>
               </div>
               <div className="date-container">
                 <div className="date-indicator">From</div>
                 <div className="date-value">{format(new Date(), 'MMMM d, y')}</div>
+                {/* <div className="date-value">September 25, 2020</div> */}
               </div>
               <div className="date-container">
                 <div className="date-indicator">To</div>
                 <div className="date-value">{format(addMonths(new Date(), 1), 'MMMM d, y')}</div>
+                {/* <div className="date-value">September 25, 2020</div> */}
               </div>
             </div>
           </div>

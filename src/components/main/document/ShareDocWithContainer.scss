@@ -1,164 +1,107 @@
-@import '~bootstrap/scss/bootstrap';
-@import '../../variables';
+@import "~bootstrap/scss/bootstrap";
+@import "../../variables";
 
-@include media-breakpoint-down(sm) {
-  .share-container {
-    margin: 0;
-    flex-direction: column-reverse;
-    .right-panel {
-      margin-top: 10px;
-      .contact-list {
-        .title {
-          margin-left: 8px;
-        }
-        .subtitle {
-          margin-left: 8px;
-          margin-top: 8px;
-          margin-bottom: 15px;
-          font-size: 15px;
-        }
-        .contact-grid { display: none; }
-        .contact-grid-sm {
-          .react-multi-carousel-list {
-            .contact {
-              margin: 0 auto;
-              width: 137.4px;
-              height: 140px;
-              //border: solid 1px #cecece;
-              border-radius: 14px;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-evenly;
-              align-items: center;
-              cursor: pointer;
-              &.active {
-                background: #ececec;
-              }
-              .contact-image {
-                width: 86px;
-                height: 86px;
-                border-radius: 50%;
-              }
-              .contact-name {
-                font-size: 16px;
-                color: #484848;
-              }
-            }
-            button {
-              // https://css-tricks.com/forums/topic/safari-for-ios-z-index-ordering-bug-while-scrolling-a-page-with-a-fixed-element/
-              -webkit-transform: translate3d(0,0,0);
-              &.react-multiple-carousel__arrow--left { left: 0;}
-              &.react-multiple-carousel__arrow--right { right: 0;}
-            }
-          }
-        }
-      }
-      .share-time-limit {display: none;}
-    }
-    .contact-details {
+.share-container {
+  display: flex;
+  margin: 0;
+  flex-direction: column-reverse;
+  @include media-breakpoint-up(sm) {
+    margin: 36px 0 12.2px 0;
+  }
+  @include media-breakpoint-up(lg) {
+    flex-direction: row;
+  }
+  @include media-breakpoint-up(xl) {
+    margin: 36px 7.9px 12.2px 31.9px;
+  }
+  .contact-details {
+    @include media-breakpoint-down(sm) {
       margin-left: 8px;
       margin-top: 20px;
       background-color: white;
       border-radius: 8px;
       box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-      .contact-top {
-        display: flex;
-        .contact-detail-image {
-          height: 122px;
-          width: 122px;
-          border-top-left-radius: 8px;
-        }
-        .contact-detail-share-doc-sm {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          .prompt {
-            font-size: 12px;
-            font-weight: 500;
-            margin: 5px 0 9px 0;
-          }
-          .share-status {
-            text-align: center;
-            font-size: 10px;
-            opacity: 0.5;
-            font-weight: 500;
-            color: $dark-blue-grey;
-            margin-top: 5px;
-          }
-        }
-      }
-      .contact-detail-info {
-        padding: 8.5px 9px 0 14px;
-        margin-bottom: 10px;
-        .info-item {
-          margin: 2.5px 0;
-          .item-attr {
-            font-weight: normal;
-          }
-        }
-      }
-      .contact-detail-share-doc {display: none;}
     }
-  }
-}
-
-@include media-breakpoint-up(sm) {
-  .share-container {
-    margin: 36px 7.9px 12.2px 31.9px;
-    .right-panel {
-      .contact-list {
-        .subtitle {
-          font-size: 13px;
-          margin-top: 0;
-        }
-        .contact-grid { display: flex; }
-        .contact-grid-sm { display: none; }
-      }
-    }
-    .contact-details {
+    @include media-breakpoint-up(sm) {
       margin-right: 13px;
       background-color: #f8f8f8;
       border-radius: 20px;
       width: 293px;
-      height: 569px;
-      .contact-detail-image {
-        height: 218px;
-        width: 100%;
-        border-top-left-radius: 20px;
-        border-top-right-radius: 20px;
-      }
-      .contact-detail-share-doc-sm {display: none;}
-      .contact-detail-info {
-        padding: 8.5px 18px 12.5px 18px;
-        .info-item {
-          margin: 6.5px 0;
-        }
-      }
-      .contact-detail-share-doc {
-        display: flex;
-      }
     }
-  }
-}
-
-.share-container {
-  display: flex;
-  .contact-details {
     &.active {
       box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
     }
-    .contact-detail-image {
-      object-fit: cover;
+    .contact-top {
+      @include media-breakpoint-down(sm) {
+        display: flex;
+      }
+      .contact-detail-image {
+        object-fit: cover;
+        @include media-breakpoint-down(sm) {
+          height: 122px;
+          width: 122px;
+          border-top-left-radius: 8px;
+        }
+        @include media-breakpoint-up(sm) {
+          height: 218px;
+          width: 100%;
+          border-top-left-radius: 20px;
+          border-top-right-radius: 20px;
+        }
+      }
+      .contact-detail-share-doc-sm {
+        @include media-breakpoint-down(sm) {
+          display: flex;
+        }
+        @include media-breakpoint-up(sm) {
+          display: none;
+        }
+        flex-direction: column;
+        align-items: center;
+        .prompt {
+          font-size: 12px;
+          font-weight: 500;
+          margin: 5px 0 9px 0;
+        }
+        .share-status {
+          text-align: center;
+          font-size: 10px;
+          opacity: 0.5;
+          font-weight: 500;
+          color: $dark-blue-grey;
+          margin-top: 5px;
+        }
+      }
     }
     .contact-detail-info {
       background-color: white;
+      @include media-breakpoint-down(sm) {
+        padding: 8.5px 9px 0 14px;
+        margin-bottom: 10px;
+      }
+      @include media-breakpoint-up(sm) {
+        padding: 8.5px 18px 12.5px 18px;
+      }
       .info-item {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
+        @include media-breakpoint-down(sm) {
+          margin: 2.5px 0;
+        }
+        @include media-breakpoint-up(sm) {
+          margin: 6.5px 0;
+        }
+        &:nth-child(5) .item-value {
+          word-break: break-all;
+          width: 132px;
+        }
         .item-attr {
           font-weight: 500;
           color: $dark-blue-grey;
+          @include media-breakpoint-down(sm) {
+            font-weight: normal;
+          }
         }
         .item-value {
           color: $greyish-brown-78;
@@ -170,7 +113,14 @@
       justify-content: space-evenly;
       height: 196px;
       align-items: center;
+      @include media-breakpoint-down(sm) {
+        display: none;
+      }
+      @include media-breakpoint-up(sm) {
+        display: flex;
+      }
       .prompt {
+        text-align: center;
         font-size: 20px;
         font-weight: 500;
         color: #0e232c;
@@ -185,36 +135,49 @@
       }
     }
   }
-
   .right-panel {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     max-width: 694px;
-
+    @include media-breakpoint-down(sm) {
+      margin-top: 10px;
+    }
     .contact-list {
       flex-grow: 1;
-
       .title {
         font-size: 20px;
         font-weight: 500;
         color: #484848;
         text-transform: uppercase;
         margin-bottom: -5px;
+        @include media-breakpoint-down(sm) {
+          margin-left: 8px;
+        }
       }
-
       .subtitle {
         opacity: 0.5;
         color: #0e232c;
-        //font-size: 13px;
         font-weight: 500;
         margin-bottom: 5px;
+        @include media-breakpoint-down(sm) {
+          margin-left: 8px;
+          margin-top: 8px;
+          margin-bottom: 15px;
+          font-size: 15px;
+        }
+        @include media-breakpoint-up(sm) {
+          font-size: 13px;
+          margin-top: 0;
+        }
       }
-
       .contact-grid {
+        display: none;
+        @include media-breakpoint-up(md) {
+          display: flex;
+        }
         margin-top: 6px;
         flex-wrap: wrap;
-
         .contact {
           width: 160px;
           height: 140px;
@@ -240,18 +203,60 @@
             color: #484848;
           }
         }
-
-        .contact:nth-child(4n+0) {
+        .contact:nth-child(4n + 0) {
           margin-right: 0;
         }
       }
+      .contact-grid-sm {
+        display: block;
+        @include media-breakpoint-up(md) {
+          display: none;
+        }
+        .react-multi-carousel-list {
+          .contact {
+            margin: 0 auto;
+            width: 137.4px;
+            height: 140px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            cursor: pointer;
+            &.active {
+              background: #ececec;
+            }
+            .contact-image {
+              width: 86px;
+              height: 86px;
+              border-radius: 50%;
+            }
+            .contact-name {
+              font-size: 16px;
+              color: #484848;
+            }
+          }
+          button {
+            // https://css-tricks.com/forums/topic/safari-for-ios-z-index-ordering-bug-while-scrolling-a-page-with-a-fixed-element/
+            -webkit-transform: translate3d(0, 0, 0);
+            &.react-multiple-carousel__arrow--left {
+              left: 0;
+            }
+            &.react-multiple-carousel__arrow--right {
+              right: 0;
+            }
+          }
+        }
+      }
     }
-
     .share-time-limit {
-      position: relative;
-      height: 209px;
-      border-radius: 12px;
-
+      display: none;
+      @include media-breakpoint-up(lg) {
+        display: block;
+        position: relative;
+        height: 209px;
+        border-radius: 12px;
+      }
       .share-time-disabled-overlay {
         background-color: #f2f2f2;
         opacity: 0.68;
@@ -261,7 +266,6 @@
         position: absolute;
         border-radius: 12px;
       }
-
       .title {
         margin-top: 12px;
         margin-left: 15px;
@@ -270,7 +274,6 @@
         color: #484848;
         text-transform: uppercase;
       }
-
       .subtitle {
         margin-left: 15px;
         font-size: 13px;
@@ -278,15 +281,16 @@
         color: #0e232c;
         opacity: 0.5;
       }
-
       .share-for-container {
         display: flex;
         justify-content: space-around;
-        margin-left: 38px;
-        margin-top: 27px;
-
+        margin: 27px 0 0 15px;
+        @include media-breakpoint-up(xl) {
+          margin-left: 38px;
+          margin-top: 27px;
+        }
         .share-for-form-group {
-          //margin-right: 79px;
+          margin-right: 8px;
           label {
             font-size: 20px;
             font-weight: 500;
@@ -294,25 +298,24 @@
             opacity: 0.6;
             margin: 0;
           }
+          .duration {
+            width: 180px;
+            @include media-breakpoint-up(xl) {
+              width: 224px;
+            }
+          }
         }
-
         .date-container {
           font-size: 20px;
-
           .date-indicator {
             font-weight: bold;
             color: #90afe2;
           }
-
           .date-value {
             color: #484848;
             font-weight: 500;
             opacity: 0.6;
           }
-
-          //.date-container:nth-child(2) {
-          //  margin-right: 48px;
-          //}
         }
       }
     }

@@ -3,42 +3,57 @@
 
 .update-doc-modal {
   .modal-content {
-    @include media-breakpoint-up(sm) {background-color: white !important;}
+    @include media-breakpoint-up(md) {background-color: white !important;}
     .modal-header {
+      align-items: center;
       .modal-title {
+        @include media-breakpoint-up(md) {
+          font-size: 24px !important;
+        }
+        @include media-breakpoint-up(lg) {
+          font-size: 35px !important;
+        }
         svg.lg {
-          @include media-breakpoint-down(sm) {display: none; }
+          display: none;
+          @include media-breakpoint-up(md) {display: inline; }
           margin-left: 10.6px;
           margin-right: 30.9px;
         }
         svg.sm {
-          @include media-breakpoint-up(sm) { display: none; }
+          display: inline;
+          @include media-breakpoint-up(md) { display: none; }
           margin-right: 16px;
         }
       }
       .modal-close {
         .sm {
-          @include media-breakpoint-up(sm) { display: none; }
+          display: inline;
+          @include media-breakpoint-up(md) { display: none; }
         }
         .lg {
-          @include media-breakpoint-down(sm) {display: none; }
+          display: none;
+          @include media-breakpoint-up(md) { display: inline; }
         }
       }
     }
     .update-doc-container {
-      @include media-breakpoint-up(sm) {
+      padding: 14.3px 17px !important;
+      background-color: #f6f6f6;
+      margin: 0;
+      @include media-breakpoint-up(md) {
         margin: 29px 33.1px;
       }
-      @include media-breakpoint-down(sm) {
-        padding: 14.3px 17px !important;
-        background-color: #f6f6f6;
-      }
       .upload-doc-delete-container {
-        @include media-breakpoint-down(sm) {display: none;}
+        display: none;
         position: absolute;
-        right: 55.9px;
-        //top: 9px;
         padding: 8px 34.5px;
+        @include media-breakpoint-up(md) {
+          display: block;
+          right: 16px;
+        }
+        @include media-breakpoint-up(lg) {
+          right: 55.9px;
+        }
         &.active {
           border-top-left-radius: 14px;
           border-top-right-radius: 14px;
@@ -49,6 +64,24 @@
             g {
               fill: white;
             }
+          }
+        }
+      }
+      .nav-tabs {
+        @include media-breakpoint-up(md) {
+          // margin: 0 -33px;
+          font-size: 15px;
+          .nav-item {
+            width: 100px;
+            .nav-link {
+              min-width: 0;
+            }
+          }
+        }
+        @include media-breakpoint-up(lg) {
+          font-size: 20px;
+          .nav-item {
+            width: auto;
           }
         }
       }
@@ -68,7 +101,8 @@
 
             .preview-img-container {
               display: flex;
-              @include media-breakpoint-down(sm) { flex-direction: column }
+              flex-direction: column;
+              @include media-breakpoint-up(lg) { flex-direction: row; }
               .img-tools {
                 margin-right: 32px;
               }
@@ -77,42 +111,31 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                @include media-breakpoint-up(sm) {
+                //
+                position: relative;
+                margin: 22px 0;
+                svg {
+                  position: absolute;
+                  bottom: -3px;
+                  right: 52px;
+                }
+                @include media-breakpoint-down(sm) {
+
+                }
+                @include media-breakpoint-up(md) {
                   height: 412px;
                   flex-grow: 1;
                   svg {
                     display: none;
                   }
                 }
-                @include media-breakpoint-down(sm) {
-                  position: relative;
-                  margin: 22px 0;
-                  svg {
-                    position: absolute;
-                    bottom: -3px;
-                    right: 52px;
-                  }
-                }
-
-                // .doc-image {
-                //   @include media-breakpoint-down(sm) {
-                //     height: 190px;
-                //     width: 100%;
-                //   }
-                //   @include media-breakpoint-up(sm) {
-                //     max-width: 100%;
-                //     min-width: 250px;
-                //     height: 412px;
-                //   }
-                //   object-fit: contain;
-                // }
               }
               .img-access-sm {
-                @include media-breakpoint-up(sm) {
-                  display: none;
-                }
                 display: flex;
                 justify-content: space-evenly;
+                @include media-breakpoint-up(md) {
+                  display: none;
+                }
                 button {
                   padding: 6px 20px;
                   border-radius: 22px;
@@ -128,14 +151,18 @@
                 }
               }
               .img-access {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
                 @include media-breakpoint-down(sm) {
                   display: none;
                 }
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-end;
-                margin-left: 32px;
-
+                @include media-breakpoint-up(lg) {
+                  align-items: flex-start;
+                  justify-content: flex-end;
+                  margin-left: 32px;
+                }
                 svg {
                   margin: 6px 0;
                   cursor: pointer;
@@ -146,19 +173,24 @@
             .preview-info {
               margin-top: 27.5px;
               .preview-info-item {
-                @include media-breakpoint-down(sm) {
-                  margin: 8px 0 8px 49px;
-                  flex-direction: column;
-                  .attr {
-                    font-size: 14px;
-                    color: #9a9a9a;
-                  }
-                  .attr-value {
-                    font-size: 20px;
-                    color: #484848;
-                  }
+                display: flex;
+                justify-content: space-between;
+                font-size: 24px;
+
+                margin: 8px 0 8px 49px;
+                flex-direction: column;
+                .attr {
+                  font-size: 14px;
+                  color: #9a9a9a;
                 }
-                @include media-breakpoint-up(sm) {
+                .attr-value {
+                  font-size: 20px;
+                  color: #484848;
+                }
+
+                @include media-breakpoint-up(md) {
+                  margin: 0;
+                  flex-direction: row;
                   background-image: linear-gradient(to right, #9a9a9a 50%, rgba(255, 255, 255, 0) 0%);
                   background-position: bottom;
                   background-size: 16px 1px;
@@ -166,24 +198,29 @@
                   &:last-child {
                     background: none;
                   }
+                }
+                @include media-breakpoint-up(lg) {
+                  font-size: 30px;
+                  .attr {
+                    font-size: 30px;
+                    color: #191919;
+                  }
                   .attr-value {
+                    font-size: 30px;
                     color: #919191;
                   }
                 }
-                display: flex;
-                justify-content: space-between;
-                font-size: 30px;
               }
             }
           }
           .delete-sm {
-            @include media-breakpoint-up(sm) { display: none;}
             display: flex;
             flex-direction: column;
             justify-content: center;
             margin-top: 20px;
             margin-bottom: -20px;
             font-size: 15px;
+            @include media-breakpoint-up(md) { display: none;}
             & > button {
               color: #d95868;
               background-color: transparent;
@@ -230,15 +267,25 @@
         }
       }
       .confirm-delete-container {
-        @include media-breakpoint-down(sm) { display: none;}
-        background-color: #f6f6f6;
-        border-top-left-radius: 30px;
-        border-bottom-left-radius: 30px;
-        border-bottom-right-radius: 30px;
-        margin: 0 40px;
-        padding: 44px 34px 31px 44px;
+        display: none;
+        @include media-breakpoint-up(md) {
+          display: block;
+          background-color: #f6f6f6;
+          border-top-left-radius: 30px;
+          border-bottom-left-radius: 30px;
+          border-bottom-right-radius: 30px;
+          padding: 32px 16px;
+          margin: 0;
+        }
+        @include media-breakpoint-up(lg) {
+          padding: 44px 34px 31px 44px;
+          margin: 0 40px;
+        }
         .delete-prompt {
-          margin-bottom: 67px;
+          margin-bottom: 32px;
+          @include media-breakpoint-up(xl) {
+            margin-bottom: 67px;
+          }
           font-size: 30px;
           font-weight: bold;
           color: #484848;
@@ -247,10 +294,20 @@
         }
         .delete-section {
           display: flex;
-          height: 352px;
+          flex-direction: column;
+          @include media-breakpoint-up(xl) {
+            height: 352px;
+            flex-direction: row;
+          }
           .delete-image-container {
             display: flex;
             align-items: center;
+            justify-content: center;
+            margin-bottom: 32px;
+            @include media-breakpoint-up(xl) {
+              justify-content: normal;
+              margin-bottom: 0;
+            }
             .delete-image {
               width: 375px;
               object-fit: contain;
@@ -269,8 +326,11 @@
             }
           }
           .form-group {
-            margin-top: 55px;
+            margin-top: 24px;
             margin-right: 39.8px;
+            @include media-breakpoint-up(xl) {
+              margin-top: 55px;
+            }
 
             .other-prompt {
               font-size: 25px;
@@ -284,10 +344,17 @@
         }
         .delete-buttons {
           display: flex;
-          justify-content: flex-end;
+          flex-direction: column;
           button:nth-child(2) {
-            @include media-breakpoint-up(sm) {
-              margin-left: 14px;
+            margin-top: 12px;
+          }
+          @include media-breakpoint-up(lg) {
+            justify-content: flex-end;
+            flex-direction: row;
+            button:nth-child(2) {
+              @include media-breakpoint-up(sm) {
+                margin: 0 0 0 14px;
+              }
             }
           }
         }

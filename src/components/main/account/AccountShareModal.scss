@@ -47,20 +47,25 @@
       padding: 0;
     }
     .account-share {
-      @include media-breakpoint-up(sm) {
+      @include media-breakpoint-up(lg) {
         padding: 11px;
         display: flex;
       }
       .left-pane {
+        background-color: #f8f8f8;
         @include media-breakpoint-up(sm) {
           width: 410px;
+          margin: auto;
           border-radius: 20px;
-          margin-right: 48px;
           box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-          height: 795px;
+          height: fit-content;
         }
-        background-color: #f8f8f8;
+        @include media-breakpoint-up(lg) {
+          margin: 0 48px 0 0;
+        }
         .contact-detail-image {
+          width: 100%;
+          object-fit: cover;
           @include media-breakpoint-down(sm) {
             height: 225px;
           }
@@ -69,8 +74,6 @@
             border-top-right-radius: 20px;
             height: 255px;
           }
-          width: 100%;
-          object-fit: cover;
         }
         .delete-contact-container {
           @include media-breakpoint-down(sm) {
@@ -164,38 +167,35 @@
         }
       }
       .right-pane {
-        @include media-breakpoint-down(sm) {
-          background-color: white;
-        }
-        @include media-breakpoint-up(sm) {
+        @include media-breakpoint-up(lg) {
           width: 626px;
         }
         .share-title {
-          @include media-breakpoint-down(sm) {
-            display: none;
+          display: none;
+          @include media-breakpoint-up(lg) {
+            display: block;
+            font-size: 40px;
+            font-weight: 500;
+            color: #484848;
           }
-          font-size: 40px;
-          font-weight: 500;
-          color: #484848;
         }
         .document-grid {
           display: flex;
           flex-wrap: wrap;
 
           .document-item {
-            @include media-breakpoint-down(sm) {
-              margin: 15px 25px;
-              width: 100%;
-            }
-            @include media-breakpoint-up(sm) {
-              margin: 30px 36px 30px 0;
-              width: 270px;
-              height: 287px;
-            }
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
+            margin: 15px 25px;
+            width: 100%;
+            @include media-breakpoint-up(lg) {
+              // margin: 30px 36px 30px 0;
+              margin: 0 36px 0 0;
+              width: 270px;
+              // height: 287px;
+            }
             .doc-info {
               display: flex;
               flex-direction: column;
