@@ -28,6 +28,7 @@ import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
 import AccountImpl from '../../models/AccountImpl';
 import {ReactComponent as LogoSm} from '../../img/logo-sm.svg';
 import Sidebar from '../layout/Sidebar';
+import ShareRequestService from '../../services/ShareRequestService';
 
 // TODO use react router dom and make this more of a app container
 
@@ -47,6 +48,7 @@ interface MainContainerState {
   searchedAccounts: Account[];
   activeTab: string;
   sidebarOpen?: boolean;
+  clientShares: Map<string, ShareRequest[]>;
 }
 
 interface MainContainerProps {
@@ -75,13 +77,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       accounts: [],
       searchedAccounts: [],
       activeTab: '1',
-      sidebarOpen: false
+      sidebarOpen: false,
+      clientShares: new Map<string, ShareRequest[]>()
     };
   }
 
   async componentDidMount() {
     const {account} = {...this.props};
-    const {sortAsc} = {...this.state};
+    const {sortAsc, clientShares} = {...this.state};
     let {documentTypes, accounts} = {...this.state};
     const documents: Document[] = account.documents;
     this.setState({isLoading: true});
@@ -95,6 +98,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             }
           }
         );
+        for(const otherOwnerAccount of accounts) {
+          const shareRequests = await ShareRequestService.get(otherOwnerAccount.id);
+          clientShares.set(otherOwnerAccount.id, shareRequests);
+        }
       } else {
         accounts = (await AccountService.getAccounts()).filter(
           (accountItem) => {
@@ -118,7 +125,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       searchedDocuments: this.sortDocuments(documents, sortAsc),
       isLoading: false,
       accounts,
-      searchedAccounts: this.sortAccounts(accounts, sortAsc)
+      searchedAccounts: this.sortAccounts(accounts, sortAsc),
+      clientShares
     });
   }
 
@@ -381,19 +389,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const {isSmallMenuOpen} = {...this.state};
     return (
       <div id="main-top-bar-sm">
-        {/* <Dropdown isOpen={isSmallMenuOpen} toggle={this.toggleSmallMenu}>
-          <DropdownToggle
-            tag="span"
-            data-toggle="dropdown"
-            aria-expanded={isSmallMenuOpen}
-          > */}
-            <LogoSm onClick={() => this.setSidebarOpen(true) } />
-          {/* </DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem onClick={this.goToAccount}>My Account</DropdownItem>
-            <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
-          </DropdownMenu>
-        </Dropdown> */}
+        <LogoSm onClick={() => this.setSidebarOpen(true) } />
         <SearchInput handleSearch={this.handleSearch}/>
       </div>
     );
@@ -461,8 +457,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMyClients() {
-    const {searchedDocuments, accounts, isAccount, sortAsc} = {...this.state};
-    const {account} = {...this.props};
+    const {searchedDocuments, accounts, isAccount, sortAsc, clientShares} = {...this.state};
+    const {account, privateEncryptionKey} = {...this.props};
 
     if (!isAccount) {
       return (
@@ -476,6 +472,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           myAccount={account}
           addShareRequest={this.addShareRequest}
           removeShareRequest={this.removeShareRequest}
+          privateEncryptionKey={privateEncryptionKey!}
+          clientShares={clientShares}
         />
       );
     }

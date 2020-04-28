@@ -55,7 +55,9 @@
       // font-size: 1.15em;
       .top-section {
         padding: 13px 17px 17px 17px;
-        background-color: $blue;
+        @include themify($themes) {
+          background-color: themed('colorPrimary');
+        }
         color: white;
         .img-container {
           padding-bottom: 5px;
@@ -121,7 +123,9 @@
                 height: 31.2px;
                 width: 25.7px;
                 path {
-                  fill: $blue;
+                  @include themify($themes) {
+                    fill: themed('colorPrimary');
+                  }
                 }
               }
             }
@@ -129,6 +133,16 @@
               svg {
                 width: 46.662px;
                 height: 39.155px;
+                path:first-child {
+                  @include themify($themes) {
+                    fill: themed('colorPrimary');
+                  }
+                }
+                path:nth-child(2) {
+                  @include themify($themes) {
+                    fill: themed('colorPrimary');
+                  }
+                }
               }
             }
             &:nth-child(3) {
@@ -151,6 +165,11 @@
           svg {
             width: 173.523px;
             height: 56.311px;
+            path {
+              @include themify($themes) {
+                fill: themed('colorPrimary');
+              }
+            }
           }
           ul {
             padding-top: 12px;

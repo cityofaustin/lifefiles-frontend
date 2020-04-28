@@ -79,7 +79,7 @@ class App extends Component<{}, AppState> {
     };
     return (
       <div className={`app-container theme-${theme}`}>
-        <div className="screen-info" />
+        {process.env.NODE_ENV === 'development' && <div className="screen-info" />}
         {isLoading && <ProgressIndicator isFullscreen/>}
         {!isLoading && (
           <div className="page-container">

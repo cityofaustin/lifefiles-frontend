@@ -1,0 +1,14 @@
+@import '~bootstrap/scss/bootstrap.scss';
+
+.main-content {
+  .big-title {
+    color: #4ba9d9;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 33px 0 0 38px;
+    @include media-breakpoint-up(md) {
+      font-size: 35px;
+      margin: 0 0 0 5px;
+    }
+  }
+}
