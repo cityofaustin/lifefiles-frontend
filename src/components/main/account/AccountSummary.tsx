@@ -9,6 +9,7 @@ import DocShared from '../document/DocShared';
 import ShareRequest from '../../../models/ShareRequest';
 import AccountShareModal from './AccountShareModal';
 import Document from '../../../models/document/Document';
+import { Redirect } from 'react-router-dom';
 
 interface AccountSummaryProps {
   account: Account;
@@ -23,6 +24,7 @@ interface AccountSummaryProps {
 
 interface AccountSummaryState {
   showAccountShareModal: boolean;
+  goToClientDocuments: boolean;
 }
 
 class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState> {
@@ -30,14 +32,15 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
     super(props);
 
     this.state = {
-      showAccountShareModal: false
+      showAccountShareModal: false,
+      goToClientDocuments: false
     };
   }
 
   handleAccountSummaryClick = () => {
     const {isNotary} = {...this.props};
     if(isNotary) {
-      // TODO go to other page from props
+      this.setState({ goToClientDocuments: true });
     } else {
       this.setState({ showAccountShareModal: true });
     }
@@ -46,10 +49,11 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
   render() {
     const { account, shareRequests, searchedDocuments, myAccount, addShareRequest,
       removeShareRequest, privateEncryptionKey, isNotary } = { ...this.props };
-    const { showAccountShareModal } = { ...this.state };
+    const { showAccountShareModal, goToClientDocuments } = { ...this.state };
     const numberOfShares = (shareRequests) ? shareRequests.length : 0;
     return (
       <div className="network-item" onClick={this.handleAccountSummaryClick}>
+        { goToClientDocuments && <Redirect push to={`/clients/${account.id}/documents`}/> }
         <AccountShareModal
           showModal={showAccountShareModal}
           toggleModal={() => this.setState({ showAccountShareModal: !showAccountShareModal })}

@@ -1,8 +1,9 @@
-import React, {Component} from 'react';
-import {Breadcrumb, BreadcrumbItem, DropdownToggle, ListGroup, ListGroupItem} from 'reactstrap';
+import React, { Component } from 'react';
+import { Breadcrumb, BreadcrumbItem, DropdownToggle, ListGroup, ListGroupItem } from 'reactstrap';
 import Account from '../../../models/Account';
 import StringUtil from '../../../util/StringUtil';
 import AccountService from '../../../services/AccountService';
+import { Link } from 'react-router-dom';
 
 interface AccountPageProps {
   account: Account;
@@ -15,12 +16,16 @@ class AccountPage extends Component<AccountPageProps> {
   }
 
   render() {
-    const {account, goBack} = {...this.props};
+    const { account, goBack } = { ...this.props };
 
     return (
-      <div className="main-content" style={{marginTop: '20px'}}>
+      <div className="main-content" style={{ marginTop: '20px' }}>
         <Breadcrumb>
-          <BreadcrumbItem className="breadcrumb-link" onClick={goBack}>My Documents</BreadcrumbItem>
+          <BreadcrumbItem className="breadcrumb-link">
+            <Link to={account.role === 'owner' ? '/documents' : '/clients'}>
+              {account.role === 'owner' ? 'My Documents' : 'My Clients'}
+            </Link>
+          </BreadcrumbItem>
           <BreadcrumbItem active>Profile</BreadcrumbItem>
         </Breadcrumb>
         <ListGroup>
@@ -31,12 +36,12 @@ class AccountPage extends Component<AccountPageProps> {
             {/*/>*/}
             {account.profileImageUrl && (
               <img className="shared-with-image-single" src={AccountService.getProfileURL(account.profileImageUrl)}
-                   alt="Profile"/>
+                alt="Profile" />
             )}
             {!account.profileImageUrl && (
               <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>
             )}
-            <div style={{marginLeft: '24px', display: 'inline-block'}}>
+            <div style={{ marginLeft: '24px', display: 'inline-block' }}>
               {/*{`${account.firstName} ${account.lastName}`}*/}
               {account.username}
             </div>

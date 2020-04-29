@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Component, Fragment } from 'react';
 import { ListGroup, ListGroupItem, Row, Col } from 'reactstrap';
 import Account from '../../../models/Account';
-import MainPage from '../MainPage';
+import MainPage from '../DocumentPage';
 import Document from '../../../models/document/Document';
 import ShareRequestService from '../../../services/ShareRequestService';
 import ShareRequest from '../../../models/ShareRequest';

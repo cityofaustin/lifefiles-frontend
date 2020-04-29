@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from 'react';
+import React, { Component, Fragment } from 'react';
 import {
   Col,
   Dropdown,
@@ -21,14 +21,30 @@ import DocumentTypeService from '../../services/DocumentTypeService';
 import AddDocumentModal from './document/AddDocumentModal';
 import UpdateDocumentModal from './document/UpdateDocumentModal';
 import AccountService from '../../services/AccountService';
-import MainPage from './MainPage';
+import DocumentPage from './DocumentPage';
 import ClientPage from './account/ClientPage';
 import ShareRequest from '../../models/ShareRequest';
 import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
 import AccountImpl from '../../models/AccountImpl';
-import {ReactComponent as LogoSm} from '../../img/logo-sm.svg';
+import { ReactComponent as LogoSm } from '../../img/logo-sm.svg';
 import Sidebar from '../layout/Sidebar';
 import ShareRequestService from '../../services/ShareRequestService';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  Link,
+  Redirect,
+  useParams
+} from 'react-router-dom';
+// import { createBrowserHistory, createHashHistory } from 'history';
+
+// export const history = createBrowserHistory();
+
+// export const history = createHashHistory({
+//   hashType: 'slash',
+//   getUserConfirmation: (message, callback) => callback(window.confirm(message))
+// });
 
 // TODO use react router dom and make this more of a app container
 
@@ -83,11 +99,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   async componentDidMount() {
-    const {account} = {...this.props};
-    const {sortAsc, clientShares} = {...this.state};
-    let {documentTypes, accounts} = {...this.state};
+    const { account } = { ...this.props };
+    const { sortAsc, clientShares } = { ...this.state };
+    let { documentTypes, accounts } = { ...this.state };
     const documents: Document[] = account.documents;
-    this.setState({isLoading: true});
+    this.setState({ isLoading: true });
     try {
       documentTypes = (await DocumentTypeService.get()).documentTypes;
       if (account.role === 'notary') {
@@ -98,7 +114,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             }
           }
         );
-        for(const otherOwnerAccount of accounts) {
+        for (const otherOwnerAccount of accounts) {
           const shareRequests = await ShareRequestService.get(otherOwnerAccount.id);
           clientShares.set(otherOwnerAccount.id, shareRequests);
         }
@@ -131,7 +147,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   handleSearch = (query: string) => {
-    const {documents, accounts, sortAsc} = {...this.state};
+    const { documents, accounts, sortAsc } = { ...this.state };
     let searchedDocuments = documents.filter((document) => {
       return (
         document.type &&
@@ -160,15 +176,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   setSidebarOpen = (b: boolean) => {
-    this.setState({sidebarOpen: b});
+    this.setState({ sidebarOpen: b });
   };
 
   toggleSort = () => {
-    let {sortAsc, searchedDocuments, searchedAccounts} = {...this.state};
+    let { sortAsc, searchedDocuments, searchedAccounts } = { ...this.state };
     sortAsc = !sortAsc;
     searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
     searchedAccounts = this.sortAccounts(searchedAccounts, sortAsc);
-    this.setState({sortAsc, searchedDocuments, searchedAccounts});
+    this.setState({ sortAsc, searchedDocuments, searchedAccounts });
   };
 
   sortDocuments(documents: Document[], sortAsc: boolean) {
@@ -196,15 +212,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   handleSelectDocument = (document?: Document) => {
-    this.setState({documentSelected: document});
+    this.setState({ documentSelected: document });
   };
 
   goToAccount = () => {
-    this.setState({documentSelected: undefined, isAccount: true});
+    this.setState({ documentSelected: undefined, isAccount: true });
   };
 
   goBack = () => {
-    this.setState({documentSelected: undefined, isAccount: false});
+    this.setState({ documentSelected: undefined, isAccount: false });
   };
 
   handleAddNew = () => {
@@ -212,18 +228,18 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   toggleModal = () => {
-    const {showModal} = {...this.state};
-    this.setState({showModal: !showModal});
+    const { showModal } = { ...this.state };
+    this.setState({ showModal: !showModal });
   };
 
   toggleAccountMenu = () => {
-    const {isAccountMenuOpen} = {...this.state};
-    this.setState({isAccountMenuOpen: !isAccountMenuOpen});
+    const { isAccountMenuOpen } = { ...this.state };
+    this.setState({ isAccountMenuOpen: !isAccountMenuOpen });
   };
 
   toggleSmallMenu = () => {
-    const {isSmallMenuOpen} = {...this.state};
-    this.setState({isSmallMenuOpen: !isSmallMenuOpen});
+    const { isSmallMenuOpen } = { ...this.state };
+    this.setState({ isSmallMenuOpen: !isSmallMenuOpen });
   };
 
   handleAddNewDocument = async (
@@ -231,9 +247,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     newThumbnailFile: File,
     documentTypeSelected: string
   ) => {
-    const {documents, searchedDocuments, documentQuery} = {...this.state};
-    const {account} = {...this.props};
-    this.setState({isLoading: true});
+    const { documents, searchedDocuments, documentQuery } = { ...this.state };
+    const { account } = { ...this.props };
+    this.setState({ isLoading: true });
     try {
       if (newFile) {
         try {
@@ -254,7 +270,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       console.error('failed to upload file');
     }
     this.setState(
-      {documents, searchedDocuments, showModal: false, isLoading: false},
+      { documents, searchedDocuments, showModal: false, isLoading: false },
       () => {
         this.handleSearch(documentQuery);
       }
@@ -262,9 +278,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   handleUpdateDocument = async (request: UpdateDocumentRequest) => {
-    let {documents} = {...this.state};
-    const {documentQuery} = {...this.state};
-    this.setState({isLoading: true});
+    let { documents } = { ...this.state };
+    const { documentQuery } = { ...this.state };
+    this.setState({ isLoading: true });
     try {
       const updatedDoc = await DocumentService.updateDocument(request);
       // TODO get API call to return updatedAt
@@ -289,9 +305,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   handleDeleteDocument = async (document: Document) => {
-    const {account} = {...this.props};
-    let {documents, searchedDocuments} = {...this.state};
-    this.setState({isLoading: true});
+    const { account } = { ...this.props };
+    let { documents, searchedDocuments } = { ...this.state };
+    this.setState({ isLoading: true });
 
     try {
       await DocumentService.deleteDocument(document.url);
@@ -323,15 +339,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   addShareRequest = (request: ShareRequest) => {
-    const {updateAccountShareRequests, account} = {...this.props};
-    const {shareRequests} = {...account};
+    const { updateAccountShareRequests, account } = { ...this.props };
+    const { shareRequests } = { ...account };
     shareRequests.push(request);
     updateAccountShareRequests(shareRequests);
   };
 
   removeShareRequest = (request: ShareRequest) => {
-    const {updateAccountShareRequests, account} = {...this.props};
-    let {shareRequests} = {...account};
+    const { updateAccountShareRequests, account } = { ...this.props };
+    let { shareRequests } = { ...account };
     shareRequests = shareRequests.filter(
       (shareRequest) => shareRequest._id !== request._id
     );
@@ -339,12 +355,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   setActiveTab = (tab: string) => {
-    this.setState({activeTab: tab});
+    this.setState({ activeTab: tab });
   };
 
   renderAddDocumentModal() {
-    const {showModal, documentTypes, documents} = {...this.state};
-    const {privateEncryptionKey} = {...this.props};
+    const { showModal, documentTypes, documents } = { ...this.state };
+    const { privateEncryptionKey } = { ...this.props };
     return (
       <AddDocumentModal
         showModal={showModal}
@@ -358,8 +374,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal() {
-    const {documentSelected, accounts} = {...this.state};
-    const {account} = {...this.props};
+    const { documentSelected, accounts } = { ...this.state };
+    const { account } = { ...this.props };
     const shareRequests: ShareRequest[] = account.shareRequests.filter(
       (sharedRequest) => {
         if (sharedRequest.documentType === documentSelected?.type) {
@@ -371,7 +387,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       <UpdateDocumentModal
         accounts={accounts}
         showModal={!!documentSelected}
-        toggleModal={() => this.setState({documentSelected: undefined})}
+        toggleModal={() => this.setState({ documentSelected: undefined })}
         document={documentSelected}
         shareRequests={shareRequests}
         handleUpdateDocument={this.handleUpdateDocument}
@@ -385,29 +401,31 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderTopBarSmall() {
-    const {handleLogout} = {...this.props};
-    const {isSmallMenuOpen} = {...this.state};
+    const { handleLogout } = { ...this.props };
+    const { isSmallMenuOpen } = { ...this.state };
     return (
       <div id="main-top-bar-sm">
-        <LogoSm onClick={() => this.setSidebarOpen(true) } />
-        <SearchInput handleSearch={this.handleSearch}/>
+        <LogoSm onClick={() => this.setSidebarOpen(true)} />
+        <SearchInput handleSearch={this.handleSearch} />
       </div>
     );
   }
 
   renderTopBar() {
-    const {account, handleLogout} = {...this.props};
-    const {isAccountMenuOpen} = {...this.state};
+    const { account, handleLogout } = { ...this.props };
+    const { isAccountMenuOpen } = { ...this.state };
 
     return (
       <div>
         <div id="main-top-bar">
           <div id="main-logo" onClick={() => this.setActiveTab('1')}>
-            <Folder/>
+            <Link to={account.role === 'notary' ? '/clients' : '/documents'}>
+              <Folder />
+            </Link>
           </div>
           <Row id="main-search">
-            <Col style={{display: 'flex'}}>
-              <SearchInput handleSearch={this.handleSearch}/>
+            <Col style={{ display: 'flex' }}>
+              <SearchInput handleSearch={this.handleSearch} />
             </Col>
           </Row>
           <div id="main-profile">
@@ -434,8 +452,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 )}
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem onClick={this.goToAccount}>
-                  My Account
+                <DropdownItem>
+                  <Link to="/account">
+                    My Account
+                  </Link>
                 </DropdownItem>
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
@@ -447,99 +467,124 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderAccount() {
-    const {account} = {...this.props};
-    const {isAccount} = {...this.state};
+    const { account } = { ...this.props };
+    // const { isAccount } = { ...this.state };
 
-    if (isAccount) {
-      return <AccountPage goBack={this.goBack} account={account}/>;
-    }
-    return <Fragment/>;
+    // if (isAccount) {
+    return <AccountPage goBack={this.goBack} account={account} />;
+    // }
+    // return <Fragment />;
   }
 
   renderMyClients() {
-    const {searchedDocuments, accounts, isAccount, sortAsc, clientShares} = {...this.state};
-    const {account, privateEncryptionKey} = {...this.props};
-
-    if (!isAccount) {
-      return (
-        <ClientPage
-          otherOwnerAccounts={accounts}
-          handleAddNew={this.handleAddNew}
-          handleSelectDocument={this.handleSelectDocument}
-          searchedDocuments={searchedDocuments}
-          sortAsc={sortAsc}
-          toggleSort={this.toggleSort}
-          myAccount={account}
-          addShareRequest={this.addShareRequest}
-          removeShareRequest={this.removeShareRequest}
-          privateEncryptionKey={privateEncryptionKey!}
-          clientShares={clientShares}
-        />
-      );
-    }
+    const { searchedDocuments, accounts, sortAsc, clientShares } = { ...this.state };
+    const { account, privateEncryptionKey } = { ...this.props };
+    return (
+      <ClientPage
+        otherOwnerAccounts={accounts}
+        handleAddNew={this.handleAddNew}
+        handleSelectDocument={this.handleSelectDocument}
+        searchedDocuments={searchedDocuments}
+        sortAsc={sortAsc}
+        toggleSort={this.toggleSort}
+        myAccount={account}
+        addShareRequest={this.addShareRequest}
+        removeShareRequest={this.removeShareRequest}
+        privateEncryptionKey={privateEncryptionKey!}
+        clientShares={clientShares}
+      />
+    );
   }
 
-  renderMainPage() {
+  renderDocumentPage(props) {
     const {
       searchedDocuments,
-      isAccount,
       sortAsc,
       searchedAccounts,
-      activeTab
-    } = {...this.state};
-    const {account, privateEncryptionKey} = {...this.props};
-    if (!isAccount) {
-      return (
-        <MainPage
-          sortAsc={sortAsc}
-          toggleSort={this.toggleSort}
-          handleAddNew={this.handleAddNew}
-          searchedDocuments={searchedDocuments}
-          handleSelectDocument={this.handleSelectDocument}
-          searchedAccounts={searchedAccounts}
-          shareRequests={account.shareRequests}
-          activeTab={activeTab}
-          setActiveTab={this.setActiveTab}
-          myAccount={account}
-          addShareRequest={this.addShareRequest}
-          removeShareRequest={this.removeShareRequest}
-          privateEncryptionKey={privateEncryptionKey}
-        />
-      );
-    }
-    return <Fragment/>;
+      activeTab,
+      accounts
+    } = { ...this.state };
+    const { account, privateEncryptionKey } = { ...this.props };
+    return (
+      <DocumentPage
+        sortAsc={sortAsc}
+        toggleSort={this.toggleSort}
+        handleAddNew={this.handleAddNew}
+        searchedDocuments={searchedDocuments}
+        handleSelectDocument={this.handleSelectDocument}
+        searchedAccounts={searchedAccounts}
+        shareRequests={account.shareRequests}
+        activeTab={activeTab}
+        setActiveTab={this.setActiveTab}
+        myAccount={account}
+        addShareRequest={this.addShareRequest}
+        removeShareRequest={this.removeShareRequest}
+        privateEncryptionKey={privateEncryptionKey}
+        match={props.match}
+        accounts={accounts}
+      />
+    );
   }
 
   render() {
-    const {account, handleLogout} = {...this.props};
-    const {isLoading, isAccount, sidebarOpen} = {...this.state};
+    const { account, handleLogout } = { ...this.props };
+    const { isLoading, isAccount, sidebarOpen } = { ...this.state };
     return (
-      <Fragment>
-        {isLoading && <ProgressIndicator isFullscreen/>}
+      <Router
+        hashType="slash"
+        // history={history}
+      >
+        {isLoading && <ProgressIndicator isFullscreen />}
         <div id="main-container">
           {this.renderAddDocumentModal()}
           {this.renderUpdateDocumentModal()}
           <Sidebar
-          account={account}
-          handleLogout={handleLogout}
-          goToAccount={this.goToAccount}
-          isOpen={!!sidebarOpen}
-          setOpen={this.setSidebarOpen}
+            account={account}
+            handleLogout={handleLogout}
+            goToAccount={this.goToAccount}
+            isOpen={!!sidebarOpen}
+            setOpen={this.setSidebarOpen}
           />
           {this.renderTopBar()}
           {this.renderTopBarSmall()}
           <div className="main-page">
-            <div className="main-side"/>
+            <div className="main-side" />
             <div className="main-section">
-              {this.renderAccount()}
-              {account.role === 'owner' && this.renderMainPage()}
-              {!isAccount &&
-              account.role === 'notary' &&
-              this.renderMyClients()}
+              {isAccount && <Redirect push to="/account" />}
+              <Switch>
+                <Route exact path="/">
+                  {account.role === 'notary' && <Redirect to="/clients" />}
+                  {account.role === 'owner' && <Redirect to="/documents" />}
+                </Route>
+                <Route exact path="/account">
+                  {this.renderAccount()}
+                </Route>
+                <Route exact path="/documents" render={(props) => {
+                  return (
+                    <Fragment>
+                      {account.role === 'notary' && <Redirect push to="/clients" />}
+                      {this.renderDocumentPage(props)}
+                    </Fragment>
+                  );
+                }} />
+                <Route exact path="/clients">
+                  {account.role === 'owner' && <Redirect push to="/documents" />}
+                  {this.renderMyClients()}
+                </Route>
+                <Route exact path="/clients/:id/documents" render={
+                  (props) => {
+                    return (
+                      <Fragment>
+                        {account.role === 'owner' && <Redirect push to="/documents" />}
+                        {this.renderDocumentPage(props)}
+                      </Fragment>
+                    )
+                  }} />
+              </Switch>
             </div>
           </div>
         </div>
-      </Fragment>
+      </Router>
     );
   }
 }

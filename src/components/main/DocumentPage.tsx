@@ -16,7 +16,7 @@ import DocumentSummary from './document/DocumentSummary';
 import Document from '../../models/document/Document';
 import Account from '../../models/Account';
 import SvgButton, { SvgButtonTypes } from '../common/SvgButton';
-import './MainPage.scss';
+import './DocumentPage.scss';
 import ShareRequest from '../../models/ShareRequest';
 import classNames from 'classnames';
 import AccountSummary from './account/AccountSummary';
@@ -29,6 +29,7 @@ import StringUtil from '../../util/StringUtil';
 import AccountImpl from '../../models/AccountImpl';
 import { format } from 'date-fns';
 import { ReactComponent as FabAdd } from '../../img/fab-add.svg';
+import {Link} from 'react-router-dom';
 
 interface MainPageProps {
   sortAsc: boolean;
@@ -36,7 +37,7 @@ interface MainPageProps {
   handleAddNew: () => void;
   searchedDocuments: Document[];
   handleSelectDocument: (document: Document) => void;
-  referencedAccount?: Account;
+  // referencedAccount?: Account;
   goBack?: () => void;
   shareRequests: ShareRequest[];
   searchedAccounts: Account[];
@@ -46,13 +47,15 @@ interface MainPageProps {
   addShareRequest: (request: ShareRequest) => void;
   removeShareRequest: (request: ShareRequest) => void;
   privateEncryptionKey?: string;
+  match?: any;
+  accounts: Account[];
 }
 
 interface MainPageState {
   isLayoutGrid: boolean;
 }
 
-class MainPage extends Component<MainPageProps, MainPageState> {
+class DocumentPage extends Component<MainPageProps, MainPageState> {
   constructor(props: Readonly<MainPageProps>) {
     super(props);
     this.state = {
@@ -433,23 +436,30 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   }
 
   render() {
-    const { activeTab, referencedAccount, goBack, handleAddNew } = {
+    const { activeTab, goBack, handleAddNew, accounts } = {
       ...this.props
     };
     const { isLayoutGrid } = { ...this.state };
+    const {id} = this.props.match.params;
+    let referencedAccount;
+    if(id) {
+      referencedAccount = accounts.filter(account => account.id === id)[0];
+    }
     return (
       <div className="main-content">
         {referencedAccount && (
           <Breadcrumb>
             <BreadcrumbItem className="breadcrumb-link" onClick={goBack}>
-              My Clients
+              <Link to="/clients">
+                My Clients
+              </Link>
             </BreadcrumbItem>
             <BreadcrumbItem active>
-              {referencedAccount?.username}
+              {AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}
             </BreadcrumbItem>
           </Breadcrumb>
         )}
-        {!referencedAccount && (
+        {!id && (
           <Fragment>
             {this.renderNavSmall()}
             <div className="document-header">
@@ -489,4 +499,4 @@ class MainPage extends Component<MainPageProps, MainPageState> {
   }
 }
 
-export default MainPage;
+export default DocumentPage;

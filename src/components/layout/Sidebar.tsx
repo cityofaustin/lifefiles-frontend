@@ -11,6 +11,7 @@ import { ReactComponent as ContactGroup } from '../../img/contact-grp.svg';
 import { ReactComponent as Cog } from '../../img/cog.svg';
 import { ReactComponent as Help } from '../../img/help.svg';
 import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
+import { Link } from 'react-router-dom';
 
 
 interface SidebarProps {
@@ -69,8 +70,9 @@ class SideBar extends Component<SidebarProps> {
                 </div>
                 <div className="bottom-section">
                   <nav className="bm-item-list">
-                    <span className="bm-item menu-item" onClick={this.goToAccount}>
-                      <span><Contact /></span><span>My Profile</span>
+                    <span className="bm-item menu-item" onClick={() => setOpen(false)}>
+                        <span><Contact /></span><Link to="/account"><span>My Profile</span>
+                      </Link>
                     </span>
                     <span className="bm-item menu-item">
                       <span><ContactGroup /></span><span>My Network</span>
