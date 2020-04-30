@@ -34,19 +34,8 @@ import {
   Switch,
   Route,
   Link,
-  Redirect,
-  useParams
+  Redirect
 } from 'react-router-dom';
-// import { createBrowserHistory, createHashHistory } from 'history';
-
-// export const history = createBrowserHistory();
-
-// export const history = createHashHistory({
-//   hashType: 'slash',
-//   getUserConfirmation: (message, callback) => callback(window.confirm(message))
-// });
-
-// TODO use react router dom and make this more of a app container
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -283,7 +272,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({ isLoading: true });
     try {
       const updatedDoc = await DocumentService.updateDocument(request);
-      // TODO get API call to return updatedAt
+      // FIXME: get API call to return updatedAt
       updatedDoc.updatedAt = new Date();
       documents = documents.map((doc) =>
         doc.type === updatedDoc.type ? updatedDoc : doc
@@ -356,6 +345,37 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
   setActiveTab = (tab: string) => {
     this.setState({ activeTab: tab });
+  };
+
+  handleClientSelected = async (otherOwnerAccount: Account) => {
+    const {searchedDocuments, documentQuery} = {...this.state};
+    let {documents} = {...this.state};
+    const {account} = {...this.props};
+    this.setState({isLoading: true});
+    try {
+      const shareRequests = await ShareRequestService.get(otherOwnerAccount.id);
+      const sharedDocuments: Document[] = shareRequests
+      .filter((shareRequest: ShareRequest) => {
+        return shareRequest.shareWithAccountId === account.id;
+      })
+      .map((shareRequest: ShareRequest) => {
+        return {
+          type: shareRequest.documentType,
+          url: shareRequest.documentUrl,
+          thumbnailUrl: shareRequest.documentThumbnailUrl
+        };
+      });
+      const docTypes = await DocumentTypeService.getDocumentTypesAccountHas(otherOwnerAccount.id);
+      documents = [...documents, ...sharedDocuments];
+    } catch (err) {
+      console.error(err.message);
+    }
+    this.setState(
+      { documents, searchedDocuments, isLoading: false },
+      () => {
+        this.handleSearch(documentQuery);
+      }
+    );
   };
 
   renderAddDocumentModal() {
@@ -492,6 +512,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         removeShareRequest={this.removeShareRequest}
         privateEncryptionKey={privateEncryptionKey!}
         clientShares={clientShares}
+        handleClientSelected={this.handleClientSelected}
       />
     );
   }
@@ -505,6 +526,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       accounts
     } = { ...this.state };
     const { account, privateEncryptionKey } = { ...this.props };
+    const { id } = props.match.params;
+    let referencedAccount;
+    if (id) {
+      referencedAccount = accounts.filter(accountItem => accountItem.id === id)[0];
+    }
     return (
       <DocumentPage
         sortAsc={sortAsc}
@@ -520,8 +546,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         addShareRequest={this.addShareRequest}
         removeShareRequest={this.removeShareRequest}
         privateEncryptionKey={privateEncryptionKey}
-        match={props.match}
-        accounts={accounts}
+        referencedAccount={referencedAccount}
+        handleClientSelected={this.handleClientSelected}
       />
     );
   }
@@ -532,7 +558,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     return (
       <Router
         hashType="slash"
-        // history={history}
+      // history={history}
       >
         {isLoading && <ProgressIndicator isFullscreen />}
         <div id="main-container">

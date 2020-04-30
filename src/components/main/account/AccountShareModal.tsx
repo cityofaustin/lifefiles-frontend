@@ -52,7 +52,6 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
     };
   }
 
-  // TODO refactor this into a reusable function as it is being used also in updatedocumentmodal handlesharedocwithcontact
   handleShareDocWithContact = async (document: Document): Promise<void> => {
     const {myAccount, account, removeShareRequest, addShareRequest, privateEncryptionKey} = {...this.props};
     try {

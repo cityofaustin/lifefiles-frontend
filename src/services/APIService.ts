@@ -115,7 +115,6 @@ class APIService {
     return responseJson;
   }
 
-  // TODO need to send thumbnail here
   static async postShareRequestFile(file: File, thumbnailFile: File, documentType: string, fromAccountId: string, toAccountId: string) {
     const path = '/share-requests';
     const input = `${MYPASS_API}${path}`;

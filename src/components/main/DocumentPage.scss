@@ -11,6 +11,7 @@
   .document-header {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
   }
 }
 
@@ -88,6 +89,49 @@
   }
 }
 
+.client-documents {
+  background-color: #f8f8f8;
+  border-radius: 20px;
+  margin-top: 14px;
+  .header {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    min-height: 77px;
+    padding: 8px 38px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f8f8f8;
+    color: white;
+    @include themify($themes) {
+      background-color: themed("colorPrimary");
+    }
+    .client-section {
+      font-size: 20px;
+      font-weight: 500;
+      svg {
+        height: 32.653px;
+      }
+      img {
+        height: 63.7px;
+        width: 63.7px;
+        border-radius: 50%;
+        margin: 0 23px;
+        background-color: #f8f8f8;
+      }
+    }
+    .permission-section {
+      font-size: 25px;
+      .title {
+        text-transform: uppercase;
+        color: white;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
 // list/table view
 
 .doc-table {
@@ -107,7 +151,9 @@
     tr {
       height: 51px;
       font-weight: bold;
-      color: #90afe2;
+      @include themify($themes) {
+        color: themed("colorDisabled");
+      }
       text-transform: uppercase;
 
       .header-cell {
@@ -123,7 +169,7 @@
           text-align: center;
         }
         @include media-breakpoint-down(lg) {
-          &:nth-child(n+4) {
+          &:nth-child(n + 4) {
             display: none;
           }
         }
@@ -160,12 +206,12 @@
 
       td {
         @include media-breakpoint-down(sm) {
-          &:nth-child(n+3) {
+          &:nth-child(n + 3) {
             display: none;
           }
         }
         @include media-breakpoint-down(lg) {
-          &:nth-child(n+4) {
+          &:nth-child(n + 4) {
             display: none;
           }
         }

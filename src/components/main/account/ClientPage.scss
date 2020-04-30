@@ -1,14 +1,35 @@
 @import '~bootstrap/scss/bootstrap.scss';
+@import '../../variables.scss';
 
 .main-content {
   .big-title {
     color: #4ba9d9;
     font-size: 22px;
     font-weight: bold;
-    margin: 33px 0 0 38px;
+    margin: 10px 0 0 18px;
     @include media-breakpoint-up(md) {
       font-size: 35px;
       margin: 0 0 0 5px;
+    }
+  }
+  .bt-breadcrumb {
+    display: flex;
+    align-items: center;
+    a {
+      @include themify($themes) {
+        color: themed("colorPrimary");
+      }
+    }
+    svg {
+      margin: 0 14px;
+      height: 20px;
+      @include media-breakpoint-up(md) {
+        height: 32.653px;
+        margin: 0 22px;
+      }
+    }
+    span {
+      opacity: 0.7;
     }
   }
 }

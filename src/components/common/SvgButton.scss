@@ -19,7 +19,9 @@
   }
   &:hover {
     .button-square {
-      fill: $blue;
+      @include themify($themes) {
+        fill: themed("colorPrimary");
+      }
     }
     .grid-lines {
       opacity: 0;
@@ -45,7 +47,9 @@
   }
   &:hover {
     .button-square {
-      fill: $blue;
+      @include themify($themes) {
+        fill: themed("colorPrimary");
+      }
     }
     .list-lines {
       opacity: 0;

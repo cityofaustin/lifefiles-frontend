@@ -5,6 +5,7 @@ interface ShareRequest {
   documentType: string;
   approved: boolean;
   documentUrl: string;
+  documentThumbnailUrl: string;
   documentId: string;
 }
 

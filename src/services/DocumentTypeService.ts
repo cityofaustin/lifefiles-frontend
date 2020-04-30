@@ -9,6 +9,10 @@ class DocumentTypeService extends AgentService {
     return await super.get(PATH);
   }
 
+  static async getDocumentTypesAccountHas(accountId: string) {
+    return await super.get(`/account/${accountId}`+PATH);
+  }
+
   static findDocumentTypeMatchInDocuments(documentTypeName: string, documents: Document[]) {
     return documents.some(document => document.type === documentTypeName);
   }

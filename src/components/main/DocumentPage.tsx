@@ -1,8 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import Chevron from '../common/Chevron';
 import {
-  Breadcrumb,
-  BreadcrumbItem,
   Col,
   Nav,
   NavItem,
@@ -29,15 +27,18 @@ import StringUtil from '../../util/StringUtil';
 import AccountImpl from '../../models/AccountImpl';
 import { format } from 'date-fns';
 import { ReactComponent as FabAdd } from '../../img/fab-add.svg';
-import {Link} from 'react-router-dom';
+import { ReactComponent as ChevronLeft } from '../../img/chevron-left.svg';
+import { ReactComponent as ChevronRight } from '../../img/chevron-right.svg';
+import { Link } from 'react-router-dom';
+import AccountService from '../../services/AccountService';
 
-interface MainPageProps {
+interface DocumentPageProps {
   sortAsc: boolean;
   toggleSort: () => void;
   handleAddNew: () => void;
   searchedDocuments: Document[];
   handleSelectDocument: (document: Document) => void;
-  // referencedAccount?: Account;
+  referencedAccount?: Account;
   goBack?: () => void;
   shareRequests: ShareRequest[];
   searchedAccounts: Account[];
@@ -47,20 +48,34 @@ interface MainPageProps {
   addShareRequest: (request: ShareRequest) => void;
   removeShareRequest: (request: ShareRequest) => void;
   privateEncryptionKey?: string;
-  match?: any;
-  accounts: Account[];
+  handleClientSelected: (clientSelected: Account) => void;
 }
 
 interface MainPageState {
   isLayoutGrid: boolean;
 }
 
-class DocumentPage extends Component<MainPageProps, MainPageState> {
-  constructor(props: Readonly<MainPageProps>) {
+class DocumentPage extends Component<DocumentPageProps, MainPageState> {
+
+  static defaultProps = {
+    handleClientSelected: () => {}
+  };
+
+  constructor(props: Readonly<DocumentPageProps>) {
     super(props);
     this.state = {
       isLayoutGrid: true
     };
+  }
+
+  async componentDidUpdate(prevProps: Readonly<DocumentPageProps>) {
+    if(this.props.referencedAccount) {
+      if (prevProps.referencedAccount === undefined
+        || (this.props.referencedAccount && prevProps.referencedAccount && this.props.referencedAccount.id !== prevProps.referencedAccount.id)) {
+          // if there is a client that is selected that is new, then refetch the documents
+          this.props.handleClientSelected(this.props.referencedAccount);
+      }
+    }
   }
 
   getSharedAccounts = (
@@ -435,65 +450,83 @@ class DocumentPage extends Component<MainPageProps, MainPageState> {
     );
   }
 
-  render() {
-    const { activeTab, goBack, handleAddNew, accounts } = {
-      ...this.props
-    };
+  renderTabContent() {
+    const { activeTab } = {...this.props};
     const { isLayoutGrid } = { ...this.state };
-    const {id} = this.props.match.params;
-    let referencedAccount;
-    if(id) {
-      referencedAccount = accounts.filter(account => account.id === id)[0];
-    }
+
+    return (
+      <TabContent activeTab={activeTab}>
+            <TabPane tabId="1">
+              {isLayoutGrid && this.renderDocumentGridView()}
+              {!isLayoutGrid && this.renderDocumentListView()}
+            </TabPane>
+            <TabPane tabId="2">
+              {this.renderNetworkGridView()}
+            </TabPane>
+          </TabContent>
+    );
+  }
+
+  render() {
+    const { activeTab, handleAddNew, referencedAccount } = {...this.props};
+    const { isLayoutGrid } = { ...this.state };
+
     return (
       <div className="main-content">
-        {referencedAccount && (
-          <Breadcrumb>
-            <BreadcrumbItem className="breadcrumb-link" onClick={goBack}>
-              <Link to="/clients">
-                My Clients
+        <Fragment>
+          {!referencedAccount && this.renderNavSmall()}
+          <div className="document-header">
+            {!referencedAccount && this.renderNav()}
+            {referencedAccount && (
+              <Fragment>
+                <div className="big-title bt-breadcrumb">
+                  <Link to="/clients">
+                    My Clients
               </Link>
-            </BreadcrumbItem>
-            <BreadcrumbItem active>
-              {AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}
-            </BreadcrumbItem>
-          </Breadcrumb>
-        )}
-        {!id && (
-          <Fragment>
-            {this.renderNavSmall()}
-            <div className="document-header">
-              {this.renderNav()}
-              <div className="document-toolbar">
-                {activeTab === '1' && isLayoutGrid && (
-                  <SvgButton
-                    buttonType={SvgButtonTypes.LAYOUT_GRID}
-                    onClick={this.toggleLayout}
-                  />
-                )}
-                {activeTab === '1' && !isLayoutGrid && (
-                  <SvgButton
-                    buttonType={SvgButtonTypes.LAYOUT_LIST}
-                    onClick={this.toggleLayout}
-                  />
-                )}
-                <SvgButton buttonType={SvgButtonTypes.INFO} />
-              </div>
-            </div>
-            <TabContent activeTab={activeTab}>
-              <TabPane tabId="1">
-                {isLayoutGrid && this.renderDocumentGridView()}
-                {!isLayoutGrid && this.renderDocumentListView()}
-              </TabPane>
-              <TabPane tabId="2">
-                {this.renderNetworkGridView()}
-              </TabPane>
-            </TabContent>
-            {activeTab === '1' && (
-              <FabAdd className="fab-add" onClick={handleAddNew} />
+                  <ChevronRight />
+                  <span>{AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}</span>
+                </div>
+              </Fragment>
             )}
-          </Fragment>
-        )}
+
+            <div className="document-toolbar">
+              {activeTab === '1' && isLayoutGrid && (
+                <SvgButton
+                  buttonType={SvgButtonTypes.LAYOUT_GRID}
+                  onClick={this.toggleLayout}
+                />
+              )}
+              {activeTab === '1' && !isLayoutGrid && (
+                <SvgButton
+                  buttonType={SvgButtonTypes.LAYOUT_LIST}
+                  onClick={this.toggleLayout}
+                />
+              )}
+              <SvgButton buttonType={SvgButtonTypes.INFO} />
+            </div>
+          </div>
+
+          {!referencedAccount && this.renderTabContent()}
+          {referencedAccount && (
+            <div className="client-documents">
+              <div className="header">
+                <div className="client-section">
+                  <ChevronLeft />
+                  <img src={AccountService.getProfileURL(referencedAccount.profileImageUrl!)} alt="" />
+                  <span>{AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}</span>
+                </div>
+                <div className="permission-section">
+                  <span className="title">permissions</span>
+                </div>
+              </div>
+              {this.renderTabContent()}
+            </div>
+          )}
+
+          {activeTab === '1' && (
+            <FabAdd className="fab-add" onClick={handleAddNew} />
+          )}
+        </Fragment>
       </div>
     );
   }

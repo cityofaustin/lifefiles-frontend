@@ -20,6 +20,7 @@ interface AccountSummaryProps {
   removeShareRequest: (request: ShareRequest) => void;
   privateEncryptionKey: string;
   isNotary?: boolean;
+  handleClientSelected: (clientSelected: Account) => void;
 }
 
 interface AccountSummaryState {
@@ -28,6 +29,11 @@ interface AccountSummaryState {
 }
 
 class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState> {
+
+  static defaultProps = {
+    handleClientSelected: () => {}
+  };
+
   constructor(props: Readonly<AccountSummaryProps>) {
     super(props);
 
@@ -38,8 +44,9 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
   }
 
   handleAccountSummaryClick = () => {
-    const {isNotary} = {...this.props};
+    const {isNotary, handleClientSelected, account} = {...this.props};
     if(isNotary) {
+      handleClientSelected(account);
       this.setState({ goToClientDocuments: true });
     } else {
       this.setState({ showAccountShareModal: true });
@@ -92,7 +99,6 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
             <div className="item-attr">Phone</div>
             <div className="item-value">{account?.phoneNumber || '-'}</div>
           </div>
-          {/*TODO do screen overflow here*/}
           <div className="info-item">
             <div className="item-attr">E-mail</div>
             <div className="item-value email">{account.email}</div>

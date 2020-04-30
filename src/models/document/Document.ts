@@ -7,7 +7,7 @@ interface Document {
   thumbnailUrl: string;
   notarized?: boolean;
   did?: string;
-  hash: string;
+  hash?: string;
   vcJwt?: string;
   vpJwt?: string;
   type: string;
