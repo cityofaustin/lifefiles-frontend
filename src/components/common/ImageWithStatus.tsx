@@ -50,16 +50,19 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
   }
 
   async componentDidMount(): Promise<void> {
+    let { imageStatus } = {...this.state};
     const { imageUrl, encrypted, privateEncryptionKey } = { ...this.props };
     let base64Image: string = '';
-    if (encrypted && imageUrl) {
-      // console.log(imageUrl);
-      const encryptedString: string = await ZipUtil.unzip(imageUrl);
-      // console.log(encryptedString);
-      base64Image = await CryptoUtil.getDecryptedString(privateEncryptionKey!, encryptedString);
-      // console.log(base64Image);
+    try {
+      if (encrypted && imageUrl) {
+        const encryptedString: string = await ZipUtil.unzip(imageUrl);
+        base64Image = await CryptoUtil.getDecryptedString(privateEncryptionKey!, encryptedString);
+      }
+    } catch (err) {
+      console.error(err);
+      imageStatus = ImageStatus.Loaded;
     }
-    this.setState({ base64Image });
+    this.setState({ base64Image, imageStatus });
   }
 
   handleImageLoaded = () => {
@@ -93,7 +96,7 @@ class ImageWithStatus extends Component<ImageWithStatusProps,
             </div>
           )}
 
-          {encrypted && base64Image && (
+          {encrypted && base64Image && base64Image.length > 0 && (
             <img
               className={classNames({
                 loading: (imageStatus === 'loading' || base64Image === ''),

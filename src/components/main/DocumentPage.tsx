@@ -194,12 +194,17 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   style={{ cursor: 'pointer', marginRight: '0' }}
                   onClick={() => handleSelectDocument(document)}
                 >
-                  <DocumentSummary
-                    document={document}
-                    documentIdx={idx++}
-                    sharedAccounts={sharedAccounts}
-                    privateEncryptionKey={privateEncryptionKey}
-                  />
+                  {document.thumbnailUrl !== '' && (
+                    <DocumentSummary
+                      document={document}
+                      documentIdx={idx++}
+                      sharedAccounts={sharedAccounts}
+                      privateEncryptionKey={privateEncryptionKey}
+                    />
+                  )}
+                  {document.thumbnailUrl === '' && (
+                    <div>not shared</div>
+                  )}
                 </div>
               </Col>
             );
@@ -275,15 +280,17 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 >
                   <td>
                     <div className="doc-name-cell">
-                      <ImageWithStatus
-                        imageViewType={ImageViewTypes.LIST_LAYOUT}
-                        imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
-                        encrypted
-                        privateEncryptionKey={privateEncryptionKey}
-                      />
+                      {document.thumbnailUrl !== '' && (
+                        <ImageWithStatus
+                          imageViewType={ImageViewTypes.LIST_LAYOUT}
+                          imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
+                          encrypted
+                          privateEncryptionKey={privateEncryptionKey}
+                        />
+                      )}
                       <div className="doc-info">
                         <div className="doc-type">{document.type}</div>
-                        <div className="doc-upd">{format(new Date(document.updatedAt!), 'MMM d, y')}</div>
+                        <div className="doc-upd">{document.updatedAt && format(new Date(document.updatedAt), 'MMM d, y')}</div>
                       </div>
                     </div>
                   </td>
@@ -303,13 +310,13 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                       )}
                       {!accountProfileURL && (
                         <div className="account-circle">
-                          {StringUtil.getFirstUppercase(
+                          {(matchedAccount && StringUtil.getFirstUppercase(
                             matchedAccount!.username
-                          )}
+                          ))}
                         </div>
                       )}
                       <div>
-                        {format(new Date(document.updatedAt!), 'MMM d, y')}
+                        {document.updatedAt && format(new Date(document.updatedAt), 'MMM d, y')}
                       </div>
                     </div>
                   </td>
@@ -519,7 +526,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <span className="title">permissions</span>
                 </div>
               </div>
-              {this.renderTabContent()}
+              <div className="documents-section">
+                {this.renderTabContent()}
+              </div>
             </div>
           )}
 

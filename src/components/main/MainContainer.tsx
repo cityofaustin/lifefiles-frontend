@@ -362,11 +362,24 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         return {
           type: shareRequest.documentType,
           url: shareRequest.documentUrl,
-          thumbnailUrl: shareRequest.documentThumbnailUrl
+          thumbnailUrl: shareRequest.documentThumbnailUrl,
+          sharedWithAccountIds: []
         };
       });
-      const docTypes = await DocumentTypeService.getDocumentTypesAccountHas(otherOwnerAccount.id);
-      documents = [...documents, ...sharedDocuments];
+      const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(otherOwnerAccount.id);
+      const notSharedDocuments: Document[] = docTypes
+      .filter(docType => {
+        return !sharedDocuments.some(sharedDocument => sharedDocument.type === docType);
+      })
+      .map((docType => {
+        return {
+          type: docType,
+          url: '',
+          thumbnailUrl: '',
+          sharedWithAccountIds: []
+        };
+      }));
+      documents = [...account.documents, ...sharedDocuments, ...notSharedDocuments];
     } catch (err) {
       console.error(err.message);
     }
