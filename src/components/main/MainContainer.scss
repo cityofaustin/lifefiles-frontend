@@ -17,6 +17,9 @@
       margin: 20px 18px 14px 18px;
       display: flex;
       align-items: center;
+      svg {
+        z-index: 2;
+      }
     }
   }
 

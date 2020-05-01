@@ -31,6 +31,7 @@ import { ReactComponent as ChevronLeft } from '../../img/chevron-left.svg';
 import { ReactComponent as ChevronRight } from '../../img/chevron-right.svg';
 import { Link } from 'react-router-dom';
 import AccountService from '../../services/AccountService';
+import {ReactComponent as NotSharedDoc } from '../../img/not-shared-doc.svg';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -203,7 +204,11 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                     />
                   )}
                   {document.thumbnailUrl === '' && (
-                    <div>not shared</div>
+                    <div className="not-shared-doc-container">
+                      <NotSharedDoc />
+                      <div className="title">{document.type}</div>
+                      <div className="subtitle">not shared</div>
+                    </div>
                   )}
                 </div>
               </Col>
