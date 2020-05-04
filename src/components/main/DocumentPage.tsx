@@ -13,12 +13,10 @@ import AddNewDocument from './document/AddNewDocument';
 import DocumentSummary from './document/DocumentSummary';
 import Document from '../../models/document/Document';
 import Account from '../../models/Account';
-import SvgButton, { SvgButtonTypes } from '../common/SvgButton';
 import './DocumentPage.scss';
 import ShareRequest from '../../models/ShareRequest';
 import classNames from 'classnames';
 import AccountSummary from './account/AccountSummary';
-import { ReactComponent as NewDocumentSmallSvg } from '../../img/new-document-small.svg';
 import SortArrow from '../common/SortArrow';
 import ImageWithStatus, { ImageViewTypes } from '../common/ImageWithStatus';
 import DocumentService from '../../services/DocumentService';
@@ -26,11 +24,14 @@ import SharedWith from './document/SharedWith';
 import StringUtil from '../../util/StringUtil';
 import AccountImpl from '../../models/AccountImpl';
 import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
+import AccountService from '../../services/AccountService';
+
+import SvgButton, { SvgButtonTypes } from '../common/SvgButton';
+import {ReactComponent as NewDoc} from '../../img/new-document.svg';
 import { ReactComponent as FabAdd } from '../../img/fab-add.svg';
 import { ReactComponent as ChevronLeft } from '../../img/chevron-left.svg';
 import { ReactComponent as ChevronRight } from '../../img/chevron-right.svg';
-import { Link } from 'react-router-dom';
-import AccountService from '../../services/AccountService';
 import {ReactComponent as NotSharedDoc } from '../../img/not-shared-doc.svg';
 
 interface DocumentPageProps {
@@ -254,7 +255,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
               <td>
                 <div className="add-new">
                   <div>
-                    <NewDocumentSmallSvg />
+                    <NewDoc />
                   </div>
                   <div>Add new</div>
                 </div>
@@ -292,6 +293,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                           encrypted
                           privateEncryptionKey={privateEncryptionKey}
                         />
+                      )}
+                      {document.thumbnailUrl === '' && (
+                        <NotSharedDoc />
                       )}
                       <div className="doc-info">
                         <div className="doc-type">{document.type}</div>

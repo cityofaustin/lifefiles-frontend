@@ -221,6 +221,11 @@
         div:first-child {
           margin-right: 59.8px;
         }
+
+        svg {
+          height: 63.2px;
+          width: 49.8px;
+        }
       }
 
       td {
@@ -241,6 +246,12 @@
           .doc-name-cell {
             display: flex;
             margin-left: 23px;
+            svg {
+              height: 69.6px;
+              width: 54.8px;
+              margin-left: 29.5px;
+              margin-right: 19.8px;
+            }
             align-items: center;
             .doc-info {
               margin-left: 40px;

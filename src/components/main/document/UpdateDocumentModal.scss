@@ -1,12 +1,21 @@
-@import '~bootstrap/scss/bootstrap';
-@import '../../variables';
+@import "~bootstrap/scss/bootstrap";
+@import "../../variables";
 
 .update-doc-modal {
   .modal-content {
-    @include media-breakpoint-up(md) {background-color: white !important;}
+    @include media-breakpoint-up(md) {
+      background-color: white !important;
+    }
     .modal-header {
       align-items: center;
       .modal-title {
+        img {
+          width: 63.7px;
+          height: 63.7px;
+          margin-left: 6px;
+          margin-right: 28.3px;
+          border-radius: 50%;
+        }
         @include media-breakpoint-up(md) {
           font-size: 24px !important;
         }
@@ -15,33 +24,94 @@
         }
         svg.lg {
           display: none;
-          @include media-breakpoint-up(md) {display: inline; }
+          @include media-breakpoint-up(md) {
+            display: inline;
+          }
           margin-left: 10.6px;
           margin-right: 30.9px;
         }
         svg.sm {
           display: inline;
-          @include media-breakpoint-up(md) { display: none; }
+          @include media-breakpoint-up(md) {
+            display: none;
+          }
           margin-right: 16px;
         }
       }
       .modal-close {
+        @include themify($themes) {
+          background: themed("colorPrimary");
+        }
+        &:hover {
+          background: white;
+          svg g {
+            @include themify($themes) {
+              stroke: themed("colorPrimary");
+            }
+          }
+        }
         .sm {
           display: inline;
-          @include media-breakpoint-up(md) { display: none; }
+          @include media-breakpoint-up(md) {
+            display: none;
+          }
         }
         .lg {
           display: none;
-          @include media-breakpoint-up(md) { display: inline; }
+          @include media-breakpoint-up(md) {
+            display: inline;
+          }
         }
       }
     }
     .update-doc-container {
       padding: 14.3px 17px !important;
-      background-color: #f6f6f6;
+      // background-color: #f6f6f6;
       margin: 0;
       @include media-breakpoint-up(md) {
         margin: 29px 33.1px;
+      }
+      .share-request {
+        // background-color: white;
+        margin-top: 174px;
+        margin-bottom: 43.7px;
+        display: flex;
+        flex-direction: column;
+        // align-items: center;
+        .file-container {
+          display: flex;
+          justify-content: space-evenly;
+          svg {
+            width: 261.8px;
+            height: 332.5px;
+          }
+          .file-info {
+            .attr {
+              font-size: 25px;
+              color: #9a9a9a;
+            }
+            .value {
+              font-size: 33px;
+              color: #484848;
+            }
+          }
+        }
+        .request-access {
+          margin-top: 130px;
+          display: flex;
+          justify-content: center;
+          button {
+            width: 250px;
+            height: 52px;
+            border-radius: 17px;
+            color: white;
+            font-size: 25px;
+            font-weight: 500;
+            @include themify($themes) {
+              background-color: themed("colorPrimary");
+            }
+          }
+        }
       }
       .upload-doc-delete-container {
         display: none;
@@ -102,7 +172,9 @@
             .preview-img-container {
               display: flex;
               flex-direction: column;
-              @include media-breakpoint-up(lg) { flex-direction: row; }
+              @include media-breakpoint-up(lg) {
+                flex-direction: row;
+              }
               .img-tools {
                 margin-right: 32px;
               }
@@ -120,7 +192,6 @@
                   right: 52px;
                 }
                 @include media-breakpoint-down(sm) {
-
                 }
                 @include media-breakpoint-up(md) {
                   height: 412px;
@@ -220,7 +291,9 @@
             margin-top: 20px;
             margin-bottom: -20px;
             font-size: 15px;
-            @include media-breakpoint-up(md) { display: none;}
+            @include media-breakpoint-up(md) {
+              display: none;
+            }
             & > button {
               color: #d95868;
               background-color: transparent;
@@ -364,19 +437,31 @@
 }
 
 .confirm-share {
-  @include media-breakpoint-down(sm) {margin: 0;}
-  @include media-breakpoint-up(sm) {margin: 34px 47px;}
+  @include media-breakpoint-down(sm) {
+    margin: 0;
+  }
+  @include media-breakpoint-up(sm) {
+    margin: 34px 47px;
+  }
   display: flex;
   flex-direction: column;
   align-items: center;
-  @include media-breakpoint-up(sm) {font-size: 30px;}
-  @include media-breakpoint-down(sm) {font-size: 20px;}
+  @include media-breakpoint-up(sm) {
+    font-size: 30px;
+  }
+  @include media-breakpoint-down(sm) {
+    font-size: 20px;
+  }
   .confirm-share-prompt {
     color: #484848;
     opacity: 0.75;
     text-align: center;
-    @include media-breakpoint-up(sm) {margin-bottom: 27px;}
-    @include media-breakpoint-down(sm) {margin-bottom: 17px;}
+    @include media-breakpoint-up(sm) {
+      margin-bottom: 27px;
+    }
+    @include media-breakpoint-down(sm) {
+      margin-bottom: 17px;
+    }
   }
   .share-doc-img {
     max-width: 100%;
@@ -385,8 +470,12 @@
     object-fit: contain;
   }
   .confirm-prompt {
-    @include media-breakpoint-up(sm) {margin: 38px 0;}
-    @include media-breakpoint-down(sm) {margin: 28px 0;}
+    @include media-breakpoint-up(sm) {
+      margin: 38px 0;
+    }
+    @include media-breakpoint-down(sm) {
+      margin: 28px 0;
+    }
     color: #484848;
     opacity: 0.75;
     text-align: center;

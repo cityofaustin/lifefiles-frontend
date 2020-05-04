@@ -19,11 +19,11 @@ class ShareRequestService extends AgentService {
     return await super.delete(`/share-requests/${id}`);
   }
 
-  static async addShareRequest(documentType: string, fromAccountId: string, toAccountId: string) {
-    return await super.post('/share-requests', {shareRequest: {documentType, fromAccountId, toAccountId}});
-  }
+  // static async addShareRequest(documentType: string, fromAccountId: string, toAccountId: string) {
+  //   return await super.post('/share-requests', {shareRequest: {documentType, fromAccountId, toAccountId}});
+  // }
 
-  static async addShareRequestFile(file: File, thumbnailFile: File, documentType: string, fromAccountId: string, toAccountId: string) {
+  static async addShareRequestFile(file: File | undefined, thumbnailFile: File | undefined, documentType: string, fromAccountId: string, toAccountId: string) {
     return await super.postShareRequestFile(file, thumbnailFile, documentType, fromAccountId, toAccountId);
   }
 }

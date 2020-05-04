@@ -19,6 +19,9 @@ import {ReactComponent as NewDocSvg} from '../../../img/new-doc-2.svg';
 import {ReactComponent as NewDocSmSvg} from '../../../img/new-doc-sm.svg';
 import Select, {OptionTypeBase} from 'react-select';
 import './AddDocumentModal.scss';
+import AccountImpl from '../../../models/AccountImpl';
+import Account from '../../../models/Account';
+import AccountService from '../../../services/AccountService';
 
 interface AddDocumentModalProps {
   showModal: boolean;
@@ -27,6 +30,7 @@ interface AddDocumentModalProps {
   documents: Document[];
   handleAddNewDocument: (newFile: File, newThumbnailFile: File, documentType: string) => Promise<void>;
   privateEncryptionKey?: string;
+  referencedAccount?: Account;
 }
 
 interface AddDocumentModalState {
@@ -293,7 +297,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   }
 
   render() {
-    const {showModal} = {...this.props};
+    const {showModal, referencedAccount} = {...this.props};
     const {documentType, newFile, uploadingStep} = {...this.state};
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -310,9 +314,19 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
         className="add-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-          <NewDocSvg/>
-          <NewDocSmSvg/>
-          <span>New Document</span>
+          {referencedAccount && (
+            <Fragment>
+              <img src={AccountService.getProfileURL(referencedAccount.profileImageUrl!)} alt="" />
+              <span>{AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}</span>
+            </Fragment>
+          )}
+          {!referencedAccount && (
+            <Fragment>
+              <NewDocSvg/>
+              <NewDocSmSvg/>
+              <span>New Document</span>
+            </Fragment>
+          )}
         </ModalHeader>
         <ModalBody>
           <div className="document-type-container">

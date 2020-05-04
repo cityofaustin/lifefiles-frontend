@@ -39,6 +39,8 @@ class App extends Component<{}, AppState> {
         privateEncryptionKey = encryptionKeyResponse.encryptionKey;
         ({account} = {...loginResponse});
         theme = account?.role;
+        document.body.classList.remove();
+        document.body.classList.add(`theme-${theme}`);
       } catch (err) {
         console.error(err.message);
       }
@@ -78,7 +80,7 @@ class App extends Component<{}, AppState> {
       ...this.state
     };
     return (
-      <div className={`app-container theme-${theme}`}>
+      <div className="app-container">
         {process.env.NODE_ENV === 'development' && <div className="screen-info" />}
         {isLoading && <ProgressIndicator isFullscreen/>}
         {!isLoading && (

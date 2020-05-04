@@ -115,15 +115,19 @@ class APIService {
     return responseJson;
   }
 
-  static async postShareRequestFile(file: File, thumbnailFile: File, documentType: string, fromAccountId: string, toAccountId: string) {
+  static async postShareRequestFile(file: File | undefined, thumbnailFile: File | undefined, documentType: string, fromAccountId: string, toAccountId: string) {
     const path = '/share-requests';
     const input = `${MYPASS_API}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`
     };
     const formdata = new FormData();
-    formdata.append('img', file, file.name);
-    formdata.append('img', thumbnailFile, thumbnailFile.name);
+    if(file) {
+      formdata.append('img', file, file.name);
+    }
+    if(thumbnailFile) {
+      formdata.append('img', thumbnailFile, thumbnailFile.name);
+    }
     formdata.append('fromAccountId', fromAccountId);
     formdata.append('toAccountId', toAccountId);
     formdata.append('documentType', documentType);

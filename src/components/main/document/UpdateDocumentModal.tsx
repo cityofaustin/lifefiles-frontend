@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Component } from 'react';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
   Button,
   Col,
@@ -31,6 +31,7 @@ import { ReactComponent as DownloadBtnSvg } from '../../../img/download-btn.svg'
 import { ReactComponent as PrintBtnSvg } from '../../../img/print-btn.svg';
 import { ReactComponent as ZoomBtnSvg } from '../../../img/zoom-btn.svg';
 import { ReactComponent as ZoomBtnSmSvg } from '../../../img/zoom-btn-sm.svg';
+import { ReactComponent as NotSharedDoc } from '../../../img/not-shared-doc.svg';
 import Lightbox from 'react-image-lightbox';
 import Account from '../../../models/Account';
 import AccountImpl from '../../../models/AccountImpl';
@@ -40,10 +41,10 @@ import ShareRequestService from '../../../services/ShareRequestService';
 import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
 import ShareDocWithContainer from './ShareDocWithContainer';
 import StringUtil from '../../../util/StringUtil';
-import EthCrypto, { Encrypted } from 'eth-crypto';
 import ZipUtil from '../../../util/ZipUtil';
 import CryptoUtil from '../../../util/CryptoUtil';
 import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
+import AccountService from '../../../services/AccountService';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -57,6 +58,7 @@ interface UpdateDocumentModalProps {
   myAccount: Account;
   handleUpdateDocument: (request: UpdateDocumentRequest) => void;
   privateEncryptionKey?: string;
+  referencedAccount?: Account;
 }
 
 interface UpdateDocumentModalState {
@@ -70,6 +72,7 @@ interface UpdateDocumentModalState {
   newFile?: File;
   newThumbnailFile?: File;
   base64Image?: string;
+  pendingAccess: boolean;
 }
 
 class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
@@ -84,7 +87,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       deleteConfirmInput: '',
       isZoomed: false,
       showConfirmShare: false,
-      base64Image: undefined
+      base64Image: undefined,
+      pendingAccess: false
     };
   }
 
@@ -92,11 +96,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     if (prevProps.document !== this.props.document
       && this.props.document && this.props.privateEncryptionKey) {
       let base64Image: string | undefined;
-      try {
-        const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(this.props.document.url));
-        base64Image = await CryptoUtil.getDecryptedString(this.props.privateEncryptionKey, encryptedString);
-      } catch (err) {
-        console.error(err);
+      if (this.props.document.url.length > 0) {
+        try {
+          const encryptedString = await ZipUtil.unzip(DocumentService.getDocumentURL(this.props.document.url));
+          base64Image = await CryptoUtil.getDecryptedString(this.props.privateEncryptionKey, encryptedString);
+        } catch (err) {
+          console.error(err);
+        }
       }
       this.setState({ base64Image });
     }
@@ -206,7 +212,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
   toggleTab = (tab: string) => {
     const { activeTab } = { ...this.state };
     if (activeTab !== tab)
-      this.setState({ activeTab: tab, showConfirmDeleteSection: false });
+      this.setState({ activeTab: tab, showConfirmDeleteSection: false, pendingAccess: false });
   };
 
   handleDeleteDocument = async (document: Document) => {
@@ -269,8 +275,21 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     this.setState({ selectedContact });
   };
 
+  handleRequestAccess = async () => {
+    const { myAccount, referencedAccount, document } = { ...this.props };
+    // TODO: set this in main container
+    const shareRequestResponse = await ShareRequestService.addShareRequestFile(
+      undefined,
+      undefined,
+      document!.type,
+      referencedAccount!.id,
+      myAccount.id
+    );
+    this.setState({ pendingAccess: true });
+  };
+
   render() {
-    const { showModal, document, accounts, myAccount } = { ...this.props };
+    const { showModal, document, accounts, myAccount, referencedAccount } = { ...this.props };
     const {
       activeTab,
       showConfirmDeleteSection,
@@ -280,7 +299,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       selectedContact,
       showConfirmShare,
       newFile,
-      base64Image
+      base64Image,
+      pendingAccess
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -308,319 +328,356 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
         className="update-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-          <EditDocSvg className="lg" />
-          <EditDocSmSvg className="sm" />
-          <span>{document?.type}</span>
+          {referencedAccount && (
+            <Fragment>
+              <img src={AccountService.getProfileURL(referencedAccount.profileImageUrl!)} alt="" />
+              <span>{AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)} - {document?.type}</span>
+            </Fragment>
+          )}
+          {!referencedAccount && (
+            <Fragment>
+              <EditDocSvg className="lg" />
+              <EditDocSmSvg className="sm" />
+              <span>{document?.type}</span>
+            </Fragment>
+          )}
         </ModalHeader>
         <ModalBody className="update-doc-container">
-          <div
-            className={classNames({
-              'upload-doc-delete-container': true,
-              active: showConfirmDeleteSection
-            })}
-          >
-            <DeleteSvg
-              className="delete-svg"
-              onClick={() => this.confirmDelete()}
-            />
-          </div>
-          <Nav tabs>
-            <NavItem>
-              <NavLink
-                className={classNames({ active: activeTab === '1' })}
-                onClick={() => {
-                  this.toggleTab('1');
-                }}
+          {document && document.url.length <= 0 && (
+            <div className="share-request">
+              <div className="file-container">
+                <NotSharedDoc />
+                <div className="file-info">
+                  <div className="attr">File</div>
+                  <div className="value">{document.type}</div>
+                  <div className="attr">Upload Date</div>
+                  <div className="value">{document.updatedAt || '-'}</div>
+                  <div className="attr">Upload By</div>
+                  <div className="value">{document.uploadedBy || '-'}</div>
+                  <div className="attr">Valid Until</div>
+                  <div className="value">{document.validateUntilDate || '-'}</div>
+                </div>
+              </div>
+              <div className="request-access">
+                <button onClick={this.handleRequestAccess} disabled={(pendingAccess || document.sharedWithAccountIds.length > 0)}>
+                  {(pendingAccess || document.sharedWithAccountIds.length > 0) ? 'Access Pending' : 'Request Access'}
+                </button>
+              </div>
+            </div>
+          )}
+          {document && document.url.length > 0 && (
+            <Fragment>
+              <div
+                className={classNames({
+                  'upload-doc-delete-container': true,
+                  active: showConfirmDeleteSection
+                })}
               >
-                Preview
+                <DeleteSvg
+                  className="delete-svg"
+                  onClick={() => this.confirmDelete()}
+                />
+              </div>
+              <Nav tabs>
+                <NavItem>
+                  <NavLink
+                    className={classNames({ active: activeTab === '1' })}
+                    onClick={() => {
+                      this.toggleTab('1');
+                    }}
+                  >
+                    Preview
               </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink
-                className={classNames({ active: activeTab === '2' })}
-                onClick={() => {
-                  this.toggleTab('2');
-                }}
-              >
-                Replace
+                </NavItem>
+                <NavItem>
+                  <NavLink
+                    className={classNames({ active: activeTab === '2' })}
+                    onClick={() => {
+                      this.toggleTab('2');
+                    }}
+                  >
+                    Replace
               </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink
-                className={classNames({ active: activeTab === '3' })}
-                onClick={() => {
-                  this.toggleTab('3');
-                }}
-              >
-                Share
+                </NavItem>
+                <NavItem>
+                  <NavLink
+                    className={classNames({ active: activeTab === '3' })}
+                    onClick={() => {
+                      this.toggleTab('3');
+                    }}
+                  >
+                    Share
               </NavLink>
-            </NavItem>
-          </Nav>
-          <TabContent activeTab={activeTab}>
-            <TabPane tabId="1">
-              <Row>
-                {document && (
-                  <Col sm="12" className="preview-container">
-                    <div className="preview-img-container">
-                      <div className="img-tools">
-                        {/* NOTE: leaving out for now until we have functionality server side */}
-                        {/*<FlipDocBtnSvg className="pointer"/>*/}
-                      </div>
-                      <div className="img-container">
-                        <ImageWithStatus imageUrl={base64Image} imageViewType={ImageViewTypes.PREVIEW} />
-                        {/* <img
+                </NavItem>
+              </Nav>
+              <TabContent activeTab={activeTab}>
+                <TabPane tabId="1">
+                  <Row>
+                    {document && (
+                      <Col sm="12" className="preview-container">
+                        <div className="preview-img-container">
+                          <div className="img-tools">
+                            {/* NOTE: leaving out for now until we have functionality server side */}
+                            {/*<FlipDocBtnSvg className="pointer"/>*/}
+                          </div>
+                          <div className="img-container">
+                            <ImageWithStatus imageUrl={base64Image} imageViewType={ImageViewTypes.PREVIEW} />
+                            {/* <img
                           className="doc-image"
                           // src={DocumentService.getDocumentURL(document!.url)}
                           src={base64Image}
                           alt="doc missing"
                         /> */}
-                        <ZoomBtnSmSvg
-                          onClick={() => this.setState({ isZoomed: true })}
-                        />
-                      </div>
-                      <div className="img-access-sm">
-                        <button
-                          onClick={() => {
-                            // Not allowed to navigate top frame to data URL
-                            // window.location.href = base64Image!;
-                            const iframe = '<iframe width="100%" height="100%" src="' + base64Image! + '"></iframe>';
-                            const x = window.open()!;
-                            x.document.open();
-                            x.document.write(iframe);
-                            x.document.close();
-                          }}
-                          className="download-btn"
-                        >
-                          Download
+                            <ZoomBtnSmSvg
+                              onClick={() => this.setState({ isZoomed: true })}
+                            />
+                          </div>
+                          <div className="img-access-sm">
+                            <button
+                              onClick={() => {
+                                // Not allowed to navigate top frame to data URL
+                                // window.location.href = base64Image!;
+                                const iframe = '<iframe width="100%" height="100%" src="' + base64Image! + '"></iframe>';
+                                const x = window.open()!;
+                                x.document.open();
+                                x.document.write(iframe);
+                                x.document.close();
+                              }}
+                              className="download-btn"
+                            >
+                              Download
                         </button>
-                        <button
-                          onClick={() => this.printImg(base64Image!)}
-                          className="print-btn"
-                        >
-                          Print
+                            <button
+                              onClick={() => this.printImg(base64Image!)}
+                              className="print-btn"
+                            >
+                              Print
                         </button>
-                      </div>
-                      <div className="img-access">
-                        <a
-                          href={base64Image}
-                          download
-                          target="_blank"
-                        >
-                          <DownloadBtnSvg />
-                        </a>
-                        <PrintBtnSvg
-                          onClick={() => this.printImg(base64Image!)}
-                        />
-                        <ZoomBtnSvg
-                          onClick={() => this.setState({ isZoomed: true })}
-                        />
-                      </div>
-                    </div>
-                    <div className="preview-info">
-                      <div className="preview-info-item">
-                        <div className="attr">File</div>
-                        <div className="attr-value">{document!.type}</div>
-                      </div>
-                      <div className="preview-info-item">
-                        <div className="attr">Update date</div>
-                        <div className="attr-value">
-                          {format(new Date(document?.updatedAt!), 'MM/dd/yyyy')}
+                          </div>
+                          <div className="img-access">
+                            <a
+                              href={base64Image}
+                              download
+                              target="_blank"
+                            >
+                              <DownloadBtnSvg />
+                            </a>
+                            <PrintBtnSvg
+                              onClick={() => this.printImg(base64Image!)}
+                            />
+                            <ZoomBtnSvg
+                              onClick={() => this.setState({ isZoomed: true })}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="preview-info-item">
-                        <div className="attr">Uploaded by</div>
-                        <div className="attr-value">{uploadedBy}</div>
-                      </div>
-                      <div className="preview-info-item">
-                        <div className="attr">Valid Until</div>
-                        <div className="attr-value">N/A</div>
-                      </div>
-                    </div>
-                  </Col>
-                )}
-              </Row>
-              <div className="delete-sm">
-                <button
-                  onClick={() =>
-                    this.setState({ showConfirmDeleteSection: true })
-                  }
-                >
-                  {showConfirmDeleteSection && <strong>Delete File</strong>}
-                  {!showConfirmDeleteSection && 'Delete File'}
-                </button>
-                {showConfirmDeleteSection && (
-                  <div className="confirm-delete-sm">
-                    <p>
-                      Deleting this file will <strong>permanently</strong>{' '}
+                        <div className="preview-info">
+                          <div className="preview-info-item">
+                            <div className="attr">File</div>
+                            <div className="attr-value">{document!.type}</div>
+                          </div>
+                          <div className="preview-info-item">
+                            <div className="attr">Update date</div>
+                            <div className="attr-value">
+                              {document?.updatedAt && format(new Date(document?.updatedAt), 'MM/dd/yyyy')}
+                              {!document?.updatedAt && '-'}
+                            </div>
+                          </div>
+                          <div className="preview-info-item">
+                            <div className="attr">Uploaded by</div>
+                            <div className="attr-value">{uploadedBy}</div>
+                          </div>
+                          <div className="preview-info-item">
+                            <div className="attr">Valid Until</div>
+                            <div className="attr-value">N/A</div>
+                          </div>
+                        </div>
+                      </Col>
+                    )}
+                  </Row>
+                  <div className="delete-sm">
+                    <button
+                      onClick={() =>
+                        this.setState({ showConfirmDeleteSection: true })
+                      }
+                    >
+                      {showConfirmDeleteSection && <strong>Delete File</strong>}
+                      {!showConfirmDeleteSection && 'Delete File'}
+                    </button>
+                    {showConfirmDeleteSection && (
+                      <div className="confirm-delete-sm">
+                        <p>
+                          Deleting this file will <strong>permanently</strong>{' '}
                       revoke access to all users you have shared this document
                       with.
                     </p>
-                    <p>Are you sure?</p>
-                    <FormGroup>
-                      <Label for="documentDelete">Type DELETE to confirm</Label>
-                      <Input
-                        type="text"
-                        name="documentDelete"
-                        value={deleteConfirmInput}
-                        onChange={this.handleDeleteConfirmChange}
-                        placeholder=""
-                        autoComplete="off"
-                      />
-                      <span className="delete-info">
-                        Please enter the text exactly as displayed to confirm
+                        <p>Are you sure?</p>
+                        <FormGroup>
+                          <Label for="documentDelete">Type DELETE to confirm</Label>
+                          <Input
+                            type="text"
+                            name="documentDelete"
+                            value={deleteConfirmInput}
+                            onChange={this.handleDeleteConfirmChange}
+                            placeholder=""
+                            autoComplete="off"
+                          />
+                          <span className="delete-info">
+                            Please enter the text exactly as displayed to confirm
                       </span>
-                    </FormGroup>
-                    <div className="delete-final">
-                      <Button
-                        color="danger"
-                        onClick={() => this.handleDeleteDocument(document!)}
-                        disabled={!hasConfirmedDelete}
-                      >
-                        Delete
+                        </FormGroup>
+                        <div className="delete-final">
+                          <Button
+                            color="danger"
+                            onClick={() => this.handleDeleteDocument(document!)}
+                            disabled={!hasConfirmedDelete}
+                          >
+                            Delete
                       </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </TabPane>
+                <TabPane tabId="2">
+                  <div className="update-doc-tab-spacing">
+                    <FileUploader
+                      setFile={this.setFile}
+                      privateEncryptionKey={this.props.privateEncryptionKey} />
+                  </div>
+                </TabPane>
+                <TabPane tabId="3">
+                  <div>
+                    <ShareDocWithContainer
+                      accounts={accounts}
+                      getDocumentSharedWithContact={
+                        this.getDocumentSharedWithContact
+                      }
+                      handleShareDocCheck={this.handleShareDocCheck}
+                      selectedContact={selectedContact}
+                      handleSelectContact={this.handleSelectContact}
+                      document={document}
+                    />
+                  </div>
+                </TabPane>
+              </TabContent>
+              {showConfirmDeleteSection && (
+                <div className="confirm-delete-container">
+                  <div className="delete-prompt">
+                    Are you sure you want to permanently delete this file?
+              </div>
+                  <div className="delete-section">
+                    <div className="delete-image-container">
+                      {document && (
+                        <img
+                          className="delete-image"
+                          src={base64Image}
+                          alt="doc missing"
+                        />
+                      )}
+                    </div>
+                    <div className="delete-info">
+                      <div className="delete-info-prompt">
+                        <p>
+                          Deleting this file will{' '}
+                          <span className="delete-info-danger">
+                            permanently revoke access to all users.
+                      </span>
+                        </p>
+                        <p>Are you sure?</p>
+                      </div>
+                      <FormGroup>
+                        <Label for="documentDelete" className="other-prompt">
+                          Type DELETE to confirm
+                    </Label>
+                        <Input
+                          type="text"
+                          name="documentDelete"
+                          value={deleteConfirmInput}
+                          onChange={this.handleDeleteConfirmChange}
+                          placeholder=""
+                          autoComplete="off"
+                        />
+                        <span>
+                          Please enter the text exactly as displayed to confirm
+                    </span>
+                      </FormGroup>
                     </div>
                   </div>
-                )}
-              </div>
-            </TabPane>
-            <TabPane tabId="2">
-              <div className="update-doc-tab-spacing">
-                <FileUploader
-                  setFile={this.setFile}
-                  privateEncryptionKey={this.props.privateEncryptionKey} />
-              </div>
-            </TabPane>
-            <TabPane tabId="3">
-              <div>
-                <ShareDocWithContainer
-                  accounts={accounts}
-                  getDocumentSharedWithContact={
-                    this.getDocumentSharedWithContact
-                  }
-                  handleShareDocCheck={this.handleShareDocCheck}
-                  selectedContact={selectedContact}
-                  handleSelectContact={this.handleSelectContact}
-                  document={document}
-                />
-              </div>
-            </TabPane>
-          </TabContent>
-          {showConfirmDeleteSection && (
-            <div className="confirm-delete-container">
-              <div className="delete-prompt">
-                Are you sure you want to permanently delete this file?
-              </div>
-              <div className="delete-section">
-                <div className="delete-image-container">
-                  {document && (
-                    <img
-                      className="delete-image"
-                      src={base64Image}
-                      alt="doc missing"
-                    />
-                  )}
-                </div>
-                <div className="delete-info">
-                  <div className="delete-info-prompt">
-                    <p>
-                      Deleting this file will{' '}
-                      <span className="delete-info-danger">
-                        permanently revoke access to all users.
-                      </span>
-                    </p>
-                    <p>Are you sure?</p>
-                  </div>
-                  <FormGroup>
-                    <Label for="documentDelete" className="other-prompt">
-                      Type DELETE to confirm
-                    </Label>
-                    <Input
-                      type="text"
-                      name="documentDelete"
-                      value={deleteConfirmInput}
-                      onChange={this.handleDeleteConfirmChange}
-                      placeholder=""
-                      autoComplete="off"
-                    />
-                    <span>
-                      Please enter the text exactly as displayed to confirm
-                    </span>
-                  </FormGroup>
-                </div>
-              </div>
-              <div className="delete-buttons">
-                <Button
-                  className="margin-wide"
-                  outline
-                  color="secondary"
-                  onClick={this.toggleModal}
-                >
-                  Cancel
-                </Button>{' '}
-                <Button
-                  className="margin-wide"
-                  color="danger"
-                  onClick={() => this.handleDeleteDocument(document!)}
-                  disabled={!hasConfirmedDelete}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          )}
-          {isZoomed && (
-            <Lightbox
-              // reactModalStyle={{zIndex: '1060'}}
-              mainSrc={base64Image!}
-              onCloseRequest={() => this.setState({ isZoomed: false })}
-            />
-          )}
-          <Modal
-            toggle={this.toggleConfirmShare}
-            size={'lg'}
-            isOpen={showConfirmShare}
-          >
-            {/*<ModalHeader>Nested Modal title</ModalHeader>*/}
-            <ModalBody>
-              {document && (
-                <div className="confirm-share">
-                  <div className="confirm-share-prompt">
-                    You're about to share
-                    <br />
-                    {document?.type?.toUpperCase()} with{' '}
-                    {AccountImpl.getFullName(
-                      selectedContact?.firstName,
-                      selectedContact?.lastName
-                    ).toUpperCase()}
-                    .
-                  </div>
-                  <img
-                    className="share-doc-img"
-                    src={base64Image}
-                    alt="doc missing"
-                  />
-                  <div className="confirm-prompt">
-                    Are you sure you want to continue?
-                  </div>
-                  <div className="confirm-buttons">
+                  <div className="delete-buttons">
                     <Button
+                      className="margin-wide"
                       outline
                       color="secondary"
-                      onClick={this.toggleConfirmShare}
+                      onClick={this.toggleModal}
                     >
-                      No, take me back
-                    </Button>
+                      Cancel
+                </Button>{' '}
                     <Button
-                      color="primary"
-                      onClick={this.handleShareDocWithContact}
+                      className="margin-wide"
+                      color="danger"
+                      onClick={() => this.handleDeleteDocument(document!)}
+                      disabled={!hasConfirmedDelete}
                     >
-                      Yes, share access
-                    </Button>
+                      Delete
+                </Button>
                   </div>
                 </div>
               )}
-            </ModalBody>
-          </Modal>
+              {isZoomed && (
+                <Lightbox
+                  // reactModalStyle={{zIndex: '1060'}}
+                  mainSrc={base64Image!}
+                  onCloseRequest={() => this.setState({ isZoomed: false })}
+                />
+              )}
+              <Modal
+                toggle={this.toggleConfirmShare}
+                size={'lg'}
+                isOpen={showConfirmShare}
+              >
+                {/*<ModalHeader>Nested Modal title</ModalHeader>*/}
+                <ModalBody>
+                  {document && (
+                    <div className="confirm-share">
+                      <div className="confirm-share-prompt">
+                        You're about to share
+                    <br />
+                        {document?.type?.toUpperCase()} with{' '}
+                        {AccountImpl.getFullName(
+                          selectedContact?.firstName,
+                          selectedContact?.lastName
+                        ).toUpperCase()}
+                    .
+                  </div>
+                      <img
+                        className="share-doc-img"
+                        src={base64Image}
+                        alt="doc missing"
+                      />
+                      <div className="confirm-prompt">
+                        Are you sure you want to continue?
+                  </div>
+                      <div className="confirm-buttons">
+                        <Button
+                          outline
+                          color="secondary"
+                          onClick={this.toggleConfirmShare}
+                        >
+                          No, take me back
+                    </Button>
+                        <Button
+                          color="primary"
+                          onClick={this.handleShareDocWithContact}
+                        >
+                          Yes, share access
+                    </Button>
+                      </div>
+                    </div>
+                  )}
+                </ModalBody>
+              </Modal>
+            </Fragment>
+          )}
         </ModalBody>
         {activeTab === '2' && (
           <ModalFooter className="modal-footer-center">

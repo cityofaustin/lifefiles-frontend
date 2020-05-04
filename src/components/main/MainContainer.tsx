@@ -361,9 +361,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       .map((shareRequest: ShareRequest) => {
         return {
           type: shareRequest.documentType,
-          url: shareRequest.documentUrl,
-          thumbnailUrl: shareRequest.documentThumbnailUrl,
-          sharedWithAccountIds: []
+          // FIXME: this could be handled more elegantly, but this way works for now, the server should be sending owner's documenturl
+          // and not the thumbnail but should instead be sending both as empty strings.
+          url: shareRequest.approved ? shareRequest.documentUrl : '',
+          thumbnailUrl: shareRequest.documentThumbnailUrl ? shareRequest.documentThumbnailUrl : '',
+          sharedWithAccountIds: [shareRequest.shareWithAccountId]
         };
       });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(otherOwnerAccount.id);
@@ -391,9 +393,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     );
   };
 
-  renderAddDocumentModal() {
-    const { showModal, documentTypes, documents } = { ...this.state };
+  renderAddDocumentModal(props) {
+    const { showModal, documentTypes, documents, accounts } = { ...this.state };
     const { privateEncryptionKey } = { ...this.props };
+    const { id } = props.match.params;
+    let referencedAccount;
+    if (id) {
+      referencedAccount = accounts.filter(accountItem => accountItem.id === id)[0];
+    }
     return (
       <AddDocumentModal
         showModal={showModal}
@@ -402,13 +409,19 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         documents={documents}
         handleAddNewDocument={this.handleAddNewDocument}
         privateEncryptionKey={privateEncryptionKey}
+        referencedAccount={referencedAccount}
       />
     );
   }
 
-  renderUpdateDocumentModal() {
+  renderUpdateDocumentModal(props) {
     const { documentSelected, accounts } = { ...this.state };
     const { account } = { ...this.props };
+    const { id } = props.match.params;
+    let referencedAccount;
+    if (id) {
+      referencedAccount = accounts.filter(accountItem => accountItem.id === id)[0];
+    }
     const shareRequests: ShareRequest[] = account.shareRequests.filter(
       (sharedRequest) => {
         if (sharedRequest.documentType === documentSelected?.type) {
@@ -429,6 +442,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         removeShareRequest={this.removeShareRequest}
         myAccount={account}
         privateEncryptionKey={this.props.privateEncryptionKey}
+        referencedAccount={referencedAccount}
       />
     );
   }
@@ -575,8 +589,6 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       >
         {isLoading && <ProgressIndicator isFullscreen />}
         <div id="main-container">
-          {this.renderAddDocumentModal()}
-          {this.renderUpdateDocumentModal()}
           <Sidebar
             account={account}
             handleLogout={handleLogout}
@@ -602,6 +614,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   return (
                     <Fragment>
                       {account.role === 'notary' && <Redirect push to="/clients" />}
+                      {this.renderAddDocumentModal(props)}
+                      {this.renderUpdateDocumentModal(props)}
                       {this.renderDocumentPage(props)}
                     </Fragment>
                   );
@@ -615,9 +629,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     return (
                       <Fragment>
                         {account.role === 'owner' && <Redirect push to="/documents" />}
+                        {this.renderAddDocumentModal(props)}
+                        {this.renderUpdateDocumentModal(props)}
                         {this.renderDocumentPage(props)}
                       </Fragment>
-                    )
+                    );
                   }} />
               </Switch>
             </div>
