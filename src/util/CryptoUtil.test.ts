@@ -2,7 +2,7 @@ import CryptoUtil from './CryptoUtil';
 
 describe('CryptoUtil', () => {
   it('should be able to encrypt by public key and decrypt by private key', async () => {
-    const encryptedStringTest = await CryptoUtil.getEncryptedPublicString(publicEncryptionKey, decryptedString);
+    const encryptedStringTest = await CryptoUtil.getEncryptedByPublicString(publicEncryptionKey, decryptedString);
     const encryptedStringTest2 = await CryptoUtil.getEncryptedString(privateEncryptionKey, decryptedString);
     expect(encryptedStringTest.length).toBeGreaterThan(5000);
     const decryptedStringTest = await CryptoUtil.getDecryptedString(privateEncryptionKey, encryptedStringTest);
