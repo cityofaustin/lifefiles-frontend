@@ -443,6 +443,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         myAccount={account}
         privateEncryptionKey={this.props.privateEncryptionKey}
         referencedAccount={referencedAccount}
+        handleClientSelected={this.handleClientSelected}
       />
     );
   }

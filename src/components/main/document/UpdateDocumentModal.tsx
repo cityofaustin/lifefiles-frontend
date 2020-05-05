@@ -59,6 +59,7 @@ interface UpdateDocumentModalProps {
   handleUpdateDocument: (request: UpdateDocumentRequest) => void;
   privateEncryptionKey?: string;
   referencedAccount?: Account;
+  handleClientSelected: (otherOwnerAccount: Account) => void; // to refresh the share request data
 }
 
 interface UpdateDocumentModalState {
@@ -119,7 +120,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
-      base64Image: undefined
+      base64Image: undefined,
+      pendingAccess: false
     });
     toggleModal();
   };
@@ -276,15 +278,16 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
   };
 
   handleRequestAccess = async () => {
-    const { myAccount, referencedAccount, document } = { ...this.props };
-    // TODO: set this in main container
-    const shareRequestResponse = await ShareRequestService.addShareRequestFile(
+    const { myAccount, referencedAccount, document, handleClientSelected } = { ...this.props };
+    await ShareRequestService.addShareRequestFile(
       undefined,
       undefined,
       document!.type,
       referencedAccount!.id,
       myAccount.id
     );
+    // set this in main container
+    handleClientSelected(referencedAccount!);
     this.setState({ pendingAccess: true });
   };
 
