@@ -246,6 +246,20 @@
           .doc-name-cell {
             display: flex;
             margin-left: 23px;
+            .image-container {
+              position: relative;
+              .badge-container {
+                display: flex;
+                position: absolute;
+                top: -15px;
+                left: -15px;
+                svg {
+                  height: 34px;
+                  width: 34px;
+                  margin: 0;
+                }
+              }
+            }
             svg {
               height: 69.6px;
               width: 54.8px;

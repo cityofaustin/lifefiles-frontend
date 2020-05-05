@@ -36,6 +36,8 @@ import {
   Link,
   Redirect
 } from 'react-router-dom';
+import ZipUtil from '../../util/ZipUtil';
+import CryptoUtil from '../../util/CryptoUtil';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -234,23 +236,49 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   handleAddNewDocument = async (
     newFile: File,
     newThumbnailFile: File,
-    documentTypeSelected: string
+    documentTypeSelected: string,
+    referencedAccount?: Account
   ) => {
     const { documents, searchedDocuments, documentQuery } = { ...this.state };
-    const { account } = { ...this.props };
+    const { account, privateEncryptionKey } = { ...this.props };
     this.setState({ isLoading: true });
     try {
       if (newFile) {
         try {
-          const response = await DocumentService.addDocument(
-            newFile,
-            newThumbnailFile,
-            documentTypeSelected!,
-            account.didPublicEncryptionKey!
-          );
-          const newDocument = response.document;
-          newDocument._id = newDocument.id;
-          documents.push(newDocument);
+          if(referencedAccount) {
+            const caseWorkerFile = newFile;
+            const caseWorkerThumbnail = newThumbnailFile;
+            const originalBase64 = await CryptoUtil.getDecryptedString(privateEncryptionKey!, (await ZipUtil.unzip(await StringUtil.fileContentsToString(newFile))));
+            const thumbnailBase64 = await CryptoUtil.getDecryptedString(privateEncryptionKey!, (await ZipUtil.unzip(await StringUtil.fileContentsToString(newThumbnailFile))));
+            const ownerEncrypted = await CryptoUtil.getEncryptedByPublicString(referencedAccount.didPublicEncryptionKey!, originalBase64);
+            const ownerEncryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(referencedAccount.didPublicEncryptionKey!, thumbnailBase64);
+            const ownerZipped: Blob = await ZipUtil.zip(ownerEncrypted);
+            const ownerZippedThumbnail: Blob = await ZipUtil.zip(ownerEncryptedThumbnail);
+            const ownerFile = new File([ownerZipped], 'encrypted-image.zip', {type: 'application/zip',lastModified: Date.now()});
+            const ownerThumbnail = new File([ownerZippedThumbnail], 'encrypted-image-thumbnail.zip', {type: 'application/zip',lastModified: Date.now()});
+            const response = await DocumentService.uploadDocumentOnBehalfOfUser(
+              caseWorkerFile,
+              caseWorkerThumbnail,
+              ownerFile,
+              ownerThumbnail,
+              documentTypeSelected!,
+              referencedAccount.id
+            );
+            this.handleClientSelected(referencedAccount);
+            // const newDocument = response.document;
+            // newDocument._id = newDocument.id;
+            // documents.push(newDocument);
+          } else {
+            const response = await DocumentService.addDocument(
+              newFile,
+              newThumbnailFile,
+              documentTypeSelected!,
+              account.didPublicEncryptionKey!
+            );
+            const newDocument = response.document;
+            newDocument._id = newDocument.id;
+            documents.push(newDocument);
+          }
         } catch (err) {
           console.error(err.message);
         }

@@ -11,8 +11,8 @@ class ShareRequestService extends AgentService {
     return await super.get(`/account/${accountId}${PATH}`);
   }
 
-  static async approveShareRequest(id: string) {
-    return await super.put(`/share-requests/${id}`, { approved: true });
+  static async approveShareRequestFile(file: File, thumbnailFile: File, id: string) {
+    return await super.putShareRequestFile(`/share-requests/${id}`, file, thumbnailFile);
   }
 
   static async deleteShareRequest(id: string) {

@@ -39,7 +39,7 @@ class App extends Component<{}, AppState> {
         privateEncryptionKey = encryptionKeyResponse.encryptionKey;
         ({account} = {...loginResponse});
         theme = account?.role;
-        document.body.classList.remove();
+        document.body.classList.remove('theme-notary', 'theme-owner');
         document.body.classList.add(`theme-${theme}`);
       } catch (err) {
         console.error(err.message);
@@ -55,6 +55,8 @@ class App extends Component<{}, AppState> {
       const loginResponse: LoginResponse = response as LoginResponse;
       ({account} = {...loginResponse});
       theme = account?.role;
+      document.body.classList.remove('theme-notary', 'theme-owner');
+      document.body.classList.add(`theme-${theme}`);
       AuthService.logIn(account?.token);
       const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
       privateEncryptionKey = encryptionKeyResponse.encryptionKey;

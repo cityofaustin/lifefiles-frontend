@@ -1,21 +1,30 @@
 import React, {Component, Fragment} from 'react';
-import './DocumentSummary.scss';
 import Document from '../../../models/document/Document';
 import DocumentService from '../../../services/DocumentService';
 import ImageWithStatus, {ImageViewTypes} from '../../common/ImageWithStatus';
 import Account from '../../../models/Account';
 import SharedWith from './SharedWith';
+import ShareRequest from '../../../models/ShareRequest';
+import Badge from '../../common/Badge';
+import './DocumentSummary.scss';
 
 interface DocumentSummaryProps {
   document?: Document;
   documentIdx: number;
   sharedAccounts: Account[];
   privateEncryptionKey?: string;
+  shareRequests: ShareRequest[];
 }
 
 class DocumentSummary extends Component<DocumentSummaryProps> {
   constructor(props: Readonly<DocumentSummaryProps>) {
     super(props);
+  }
+
+  containsBadge() {
+    const {shareRequests} = {...this.props};
+    const pendingShareRequest = shareRequests.find(shareRequest => shareRequest.approved === false);
+    return pendingShareRequest;
   }
 
   render() {
@@ -34,7 +43,11 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
                 privateEncryptionKey={privateEncryptionKey}
               />
             </div>
-
+            { this.containsBadge() && (
+              <div className="badge-container">
+                <Badge />
+              </div>
+            )}
             <div className="title">{document.type}</div>
             {sharedAccounts.length > 0 && (
               <div>

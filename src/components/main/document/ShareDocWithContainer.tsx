@@ -14,7 +14,7 @@ import Document from '../../../models/document/Document';
 
 interface ShareDocWithContainerProps {
   selectedContact?: Account;
-  getDocumentSharedWithContact: () => ShareRequest | undefined;
+  getDocumentSharedWithContact: (selectedContact: Account) => ShareRequest | undefined;
   handleShareDocCheck: () => Promise<void>;
   accounts: Account[];
   handleSelectContact: (contact: Account) => void;
@@ -22,11 +22,25 @@ interface ShareDocWithContainerProps {
 }
 
 class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
+
+  getShareStatus(shareRequest: ShareRequest | undefined) {
+    if(shareRequest) {
+      if(shareRequest.approved) {
+        return 'shared';
+      } else {
+        return 'pending';
+      }
+    } else {
+      return 'not shared';
+    }
+  }
+
   render() {
     const {
       selectedContact, getDocumentSharedWithContact, handleShareDocCheck, accounts,
       handleSelectContact, document
     } = {...this.props};
+    const shareRequest = getDocumentSharedWithContact(selectedContact!);
     return (
       <div className="share-container">
         <div className={classNames({'contact-details': true, active: selectedContact})}>
@@ -40,9 +54,9 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                   <div className="prompt">
                     Share {document!.type}?
                   </div>
-                  <Checkbox isLarge isChecked={!!getDocumentSharedWithContact()} onClick={handleShareDocCheck}/>
+                  <Checkbox isLarge isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
                   <div className="share-status">
-                    This file is {!!getDocumentSharedWithContact() ? '' : 'NOT '}currently shared with
+                    This file is {(shareRequest && shareRequest.approved) ? '' : 'NOT '}currently shared with
                     {' ' + selectedContact.username}
                   </div>
                 </div>
@@ -73,11 +87,13 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
               </div>
               <div className="contact-detail-share-doc">
                 <div className="prompt">
-                  Share {document!.type}?
+                  {shareRequest === undefined && `Share ${document!.type}?`}
+                  {shareRequest && shareRequest.approved && `Share ${document!.type}?`}
+                  {shareRequest && !shareRequest.approved && `${selectedContact.firstName} has Requested Access to your Document`}
                 </div>
-                <Checkbox isLarge isChecked={!!getDocumentSharedWithContact()} onClick={handleShareDocCheck}/>
+                <Checkbox isLarge isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
                 <div className="share-status">
-                  This file is {!!getDocumentSharedWithContact() ? '' : 'NOT '}currently shared with
+                  This file is {(shareRequest && shareRequest.approved) ? '' : 'NOT '}currently shared with
                   {' ' + selectedContact.username}
                 </div>
               </div>
@@ -102,6 +118,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                        src={AccountService.getProfileURL(account.profileImageUrl!)}
                        alt="Profile"/>
                   <div className="contact-name">{account.username}</div>
+                  <div className="share-status">{this.getShareStatus(getDocumentSharedWithContact(account))}</div>
                 </div>
               ))}
             </div>
@@ -128,6 +145,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                          src={AccountService.getProfileURL(account.profileImageUrl!)}
                          alt="Profile"/>
                     <div className="contact-name">{account.username}</div>
+                    <div className="share-status">{this.getShareStatus(getDocumentSharedWithContact(account))}</div>
                   </div>
                 ))}
               </Carousel>

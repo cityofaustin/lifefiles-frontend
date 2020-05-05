@@ -16,7 +16,7 @@ class CryptoUtil {
     );
   }
 
-  static async getEncryptedPublicString(publicEncryptionKey: string, input: string): Promise<string> {
+  static async getEncryptedByPublicString(publicEncryptionKey: string, input: string): Promise<string> {
     if(USE_ENCRYPTION && USE_ENCRYPTION === 'true') {
       const encrypted: Encrypted = await this.getEncrypted(publicEncryptionKey, input);
       return EthCrypto.cipher.stringify(encrypted);

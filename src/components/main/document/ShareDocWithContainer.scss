@@ -202,6 +202,11 @@
             font-size: 16px;
             color: #484848;
           }
+          .share-status {
+            color: #d2d5d8;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
         }
         .contact:nth-child(4n + 0) {
           margin-right: 0;
@@ -234,6 +239,11 @@
             .contact-name {
               font-size: 16px;
               color: #484848;
+            }
+            .share-status {
+              color: #d2d5d8;
+              font-weight: bold;
+              text-transform: uppercase;
             }
           }
           button {

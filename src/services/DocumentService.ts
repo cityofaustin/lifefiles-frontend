@@ -21,6 +21,10 @@ class DocumentService extends AgentService {
     return await super.postDocument(newFile, newThumbnailFile, documentType, encryptionPubKey);
   }
 
+  static async uplooadDocumentOnBehalfOfUser(newCaseworkerFile: File, newCaseworkerThumbnail: File, newOwnerFile: File, newOwnerThumbnail: File, documentType: string, ownerId: string) {
+    return await super.uploadDocumentOnBehalfOfUser(newCaseworkerFile, newCaseworkerThumbnail, newOwnerFile, newOwnerThumbnail, documentType, ownerId);
+  }
+
   static async updateDocument(request: UpdateDocumentRequest): Promise<Document> {
     return (await super.updateDocument(request)).updatedDocument;
   }

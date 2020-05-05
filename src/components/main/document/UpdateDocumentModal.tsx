@@ -149,7 +149,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
   };
 
   handleShareDocWithContact = async () => {
-    const { document, addShareRequest, myAccount } = { ...this.props };
+    const { document, addShareRequest, myAccount, removeShareRequest } = { ...this.props };
     const { selectedContact, base64Image } = { ...this.state };
     // then add share and approve it api call
     try {
@@ -157,8 +157,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
         const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
         const base64Thumbnail = await StringUtil.fileContentsToThumbnailString(file);
-        const encryptedString = await CryptoUtil.getEncryptedPublicString(encryptionPublicKey!, base64Image);
-        const encryptedThumbnail = await CryptoUtil.getEncryptedPublicString(encryptionPublicKey!, base64Thumbnail);
+        const encryptedString = await CryptoUtil.getEncryptedByPublicString(encryptionPublicKey!, base64Image);
+        const encryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(encryptionPublicKey!, base64Thumbnail);
         const zipped: Blob = await ZipUtil.zip(encryptedString);
         const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
         const newZippedFile = new File([zipped], 'encrypted-image.zip', {
@@ -169,14 +169,21 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
           type: 'application/zip',
           lastModified: Date.now()
         });
-        const newShareRequest = await ShareRequestService.addShareRequestFile(
-          newZippedFile,
-          newZippedThumbnailFile,
-          document?.type!,
-          myAccount.id,
-          selectedContact?.id!
-        );
-        addShareRequest(newShareRequest);
+        if (this.getDocumentSharedWithContact(selectedContact) && this.getDocumentSharedWithContact(selectedContact)?.approved === false) {
+          const approvedShareRequest = await ShareRequestService.approveShareRequestFile(newZippedFile, newZippedThumbnailFile, this.getDocumentSharedWithContact(selectedContact)!._id!);
+          // update the existing shareRequest with this approved one.
+          removeShareRequest(this.getDocumentSharedWithContact(selectedContact)!);
+          addShareRequest(approvedShareRequest);
+        } else {
+          const newShareRequest = await ShareRequestService.addShareRequestFile(
+            newZippedFile,
+            newZippedThumbnailFile,
+            document?.type!,
+            myAccount.id,
+            selectedContact?.id!
+          );
+          addShareRequest(newShareRequest);
+        }
       }
     } catch (err) {
       console.error(err.message);
@@ -190,12 +197,12 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     const { removeShareRequest } = { ...this.props };
     const { selectedContact } = { ...this.state };
     let showConfirmShare = false;
-    if (this.getDocumentSharedWithContact()) {
+    if (this.getDocumentSharedWithContact(selectedContact!) && this.getDocumentSharedWithContact(selectedContact!)?.approved) {
       try {
         await ShareRequestService.deleteShareRequest(
-          this.getDocumentSharedWithContact()!._id!
+          this.getDocumentSharedWithContact(selectedContact!)!._id!
         );
-        removeShareRequest(this.getDocumentSharedWithContact()!);
+        removeShareRequest(this.getDocumentSharedWithContact(selectedContact!)!);
       } catch (err) {
         console.error(err.message);
       }
@@ -261,8 +268,8 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     win?.focus();
   }
 
-  getDocumentSharedWithContact = () => {
-    const { selectedContact } = { ...this.state };
+  getDocumentSharedWithContact = (selectedContact: Account) => {
+    // const { selectedContact } = { ...this.state };
     const { shareRequests } = { ...this.props };
     const shareRequestMatch = shareRequests.find(
       (shareRequest) => selectedContact?.id === shareRequest.shareWithAccountId
@@ -552,9 +559,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                   <div>
                     <ShareDocWithContainer
                       accounts={accounts}
-                      getDocumentSharedWithContact={
-                        this.getDocumentSharedWithContact
-                      }
+                      getDocumentSharedWithContact={this.getDocumentSharedWithContact}
                       handleShareDocCheck={this.handleShareDocCheck}
                       selectedContact={selectedContact}
                       handleSelectContact={this.handleSelectContact}

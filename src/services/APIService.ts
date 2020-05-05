@@ -10,6 +10,7 @@ import UpdateDocumentResponse from '../models/document/UpdateDocumentResponse';
 const MYPASS_API = process.env.MYPASS_API;
 
 class APIService {
+
   static getHeaders(): HeadersInit {
       const headers: HeadersInit = {'Content-Type': 'application/json'};
       if(AuthService.isLoggedIn()) {
@@ -115,6 +116,31 @@ class APIService {
     return responseJson;
   }
 
+  static async uploadDocumentOnBehalfOfUser(newCaseworkerFile: File, newCaseworkerThumbnail: File, newOwnerFile: File, newOwnerThumbnail: File, documentType: string, ownerId: string) {
+    const path = '/upload-document-on-behalf-of-user';
+    const input = `${MYPASS_API}${path}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`
+    };
+    const formdata = new FormData();
+    formdata.append('img', newCaseworkerFile, newCaseworkerFile.name);
+    formdata.append('img', newCaseworkerThumbnail, newCaseworkerThumbnail.name);
+    formdata.append('img', newOwnerFile, newOwnerFile.name);
+    formdata.append('img', newOwnerThumbnail, newOwnerThumbnail.name);
+    formdata.append('type', documentType);
+    formdata.append('uploadForAccountId', ownerId);
+    const init = {
+      method: 'POST',
+      headers,
+      body: formdata
+    };
+    // NOTE: putting a longer timeout over here since uploading files can take longer.
+    const response = await fetch(input, init, 60000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
   static async postShareRequestFile(file: File | undefined, thumbnailFile: File | undefined, documentType: string, fromAccountId: string, toAccountId: string) {
     const path = '/share-requests';
     const input = `${MYPASS_API}${path}`;
@@ -134,6 +160,31 @@ class APIService {
     // formdata.append('shareRequest', {fromAccountId: fromAccountId, toAccountId, documentType});
     const init = {
       method: 'POST',
+      headers,
+      body: formdata
+    };
+    // NOTE: putting a longer timeout over here since uploading files can take longer.
+    const response = await fetch(input, init, 20000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
+  static async putShareRequestFile(path, file: File, thumbnailFile: File) {
+    const input = `${MYPASS_API}${path}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`
+    };
+    const formdata = new FormData();
+    if(file) {
+      formdata.append('img', file, file.name);
+    }
+    if(thumbnailFile) {
+      formdata.append('img', thumbnailFile, thumbnailFile.name);
+    }
+    formdata.append('approved', 'true');
+    const init = {
+      method: 'PUT',
       headers,
       body: formdata
     };

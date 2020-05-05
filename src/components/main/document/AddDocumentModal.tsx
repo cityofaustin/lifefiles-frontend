@@ -28,7 +28,7 @@ interface AddDocumentModalProps {
   toggleModal: () => void;
   documentTypes: DocumentType[];
   documents: Document[];
-  handleAddNewDocument: (newFile: File, newThumbnailFile: File, documentType: string) => Promise<void>;
+  handleAddNewDocument: (newFile: File, newThumbnailFile: File, documentType: string, referencedAccount?: Account) => Promise<void>;
   privateEncryptionKey?: string;
   referencedAccount?: Account;
 }
@@ -72,7 +72,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   };
 
   handleAddNewDocument = async () => {
-    const {handleAddNewDocument, documents} = {...this.props};
+    const {handleAddNewDocument, documents, referencedAccount} = {...this.props};
     let {documentType, newFile, errorMessage, isOther} = {...this.state};
     const {newThumbnailFile} = {...this.state};
     // If document type exists show error message
@@ -85,7 +85,11 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       errorMessage = 'document type already exists.';
     } else {
       try {
-        await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!);
+        if(referencedAccount) {
+          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount);
+        } else {
+          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!);
+        }
         // reset the field since success
         errorMessage = undefined;
         newFile = undefined;

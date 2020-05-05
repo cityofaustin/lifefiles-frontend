@@ -64,7 +64,7 @@ class AccountShareModal extends Component<AccountShareModalProps, AccountShareMo
         const base64Image = await CryptoUtil.getDecryptedString(privateEncryptionKey, encryptedString);
         const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
         const base64Thumbnail = await StringUtil.fileContentsToThumbnailString(file);
-        const encryptedThumbnail = await CryptoUtil.getEncryptedPublicString(encryptionPublicKey!, base64Thumbnail);
+        const encryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(encryptionPublicKey!, base64Thumbnail);
         const zipped: Blob = await ZipUtil.zip(encryptedString);
         const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
         const newZippedFile = new File([zipped], 'encrypted-image.zip', {

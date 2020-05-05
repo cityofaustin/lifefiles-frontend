@@ -33,6 +33,7 @@ import { ReactComponent as FabAdd } from '../../img/fab-add.svg';
 import { ReactComponent as ChevronLeft } from '../../img/chevron-left.svg';
 import { ReactComponent as ChevronRight } from '../../img/chevron-right.svg';
 import {ReactComponent as NotSharedDoc } from '../../img/not-shared-doc.svg';
+import Badge from '../common/Badge';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -89,7 +90,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       const matchedShareRequest = shareRequests.find((shareRequest) => {
         return (
           shareRequest.shareWithAccountId === sharedAccount.id &&
-          shareRequest.documentType === document.type
+          shareRequest.documentType === document.type &&
+          shareRequest.approved
         );
       });
       if (matchedShareRequest) {
@@ -184,6 +186,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
               searchedAccounts,
               shareRequests
             );
+            const matchedShareRequests: ShareRequest[] = shareRequests.filter(shareRequest => shareRequest.documentType === document.type);
             return (
               <Col
                 key={idx}
@@ -202,6 +205,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                       documentIdx={idx++}
                       sharedAccounts={sharedAccounts}
                       privateEncryptionKey={privateEncryptionKey}
+                      shareRequests={matchedShareRequests}
                     />
                   )}
                   {document.thumbnailUrl === '' && (
@@ -287,12 +291,19 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <td>
                     <div className="doc-name-cell">
                       {document.thumbnailUrl !== '' && (
-                        <ImageWithStatus
-                          imageViewType={ImageViewTypes.LIST_LAYOUT}
-                          imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
-                          encrypted
-                          privateEncryptionKey={privateEncryptionKey}
-                        />
+                        <div className="image-container">
+                          <ImageWithStatus
+                            imageViewType={ImageViewTypes.LIST_LAYOUT}
+                            imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
+                            encrypted
+                            privateEncryptionKey={privateEncryptionKey}
+                          />
+                          { this.containsBadge(document.type) && (
+                            <div className="badge-container">
+                              <Badge />
+                            </div>
+                          )}
+                        </div>
                       )}
                       {document.thumbnailUrl === '' && (
                         <NotSharedDoc />
@@ -361,6 +372,12 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
         )}
       </div>
     );
+  }
+
+  containsBadge(documentType) {
+    const {shareRequests} = {...this.props};
+    const pendingShareRequest = shareRequests.find(shareRequest => shareRequest.approved === false && shareRequest.documentType === documentType);
+    return pendingShareRequest;
   }
 
   renderNetworkGridView() {
