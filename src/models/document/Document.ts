@@ -18,6 +18,7 @@ interface Document {
   permanentOrgFileArchiveNumber?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  claimed?: boolean;
 }
 
 export default Document;

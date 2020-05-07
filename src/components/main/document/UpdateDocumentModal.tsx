@@ -148,6 +148,21 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     });
   };
 
+  // TODO:
+  handleClaim = () => {
+    // clear state
+    this.setState({
+      activeTab: '1',
+      showConfirmDeleteSection: false,
+      hasConfirmedDelete: false,
+      deleteConfirmInput: '',
+      isZoomed: false,
+      selectedContact: undefined,
+      showConfirmShare: false,
+      base64Image: undefined
+    });
+  };
+
   handleShareDocWithContact = async () => {
     const { document, addShareRequest, myAccount, removeShareRequest } = { ...this.props };
     const { selectedContact, base64Image } = { ...this.state };
@@ -369,7 +384,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                 </div>
               </div>
               <div className="request-access">
-                <button onClick={this.handleRequestAccess} disabled={(pendingAccess || document.sharedWithAccountIds.length > 0)}>
+                <button className="button" onClick={this.handleRequestAccess} disabled={(pendingAccess || document.sharedWithAccountIds.length > 0)}>
                   {(pendingAccess || document.sharedWithAccountIds.length > 0) ? 'Access Pending' : 'Request Access'}
                 </button>
               </div>
@@ -377,17 +392,19 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
           )}
           {document && document.url.length > 0 && (
             <Fragment>
-              <div
-                className={classNames({
-                  'upload-doc-delete-container': true,
-                  active: showConfirmDeleteSection
-                })}
-              >
-                <DeleteSvg
-                  className="delete-svg"
-                  onClick={() => this.confirmDelete()}
-                />
-              </div>
+              {!referencedAccount && (
+                <div
+                  className={classNames({
+                    'upload-doc-delete-container': true,
+                    active: showConfirmDeleteSection
+                  })}
+                >
+                  <DeleteSvg
+                    className="delete-svg"
+                    onClick={() => this.confirmDelete()}
+                  />
+                </div>
+              )}
               <Nav tabs>
                 <NavItem>
                   <NavLink
@@ -397,7 +414,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                     }}
                   >
                     Preview
-              </NavLink>
+                  </NavLink>
                 </NavItem>
                 <NavItem>
                   <NavLink
@@ -407,18 +424,20 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                     }}
                   >
                     Replace
-              </NavLink>
+                  </NavLink>
                 </NavItem>
-                <NavItem>
-                  <NavLink
-                    className={classNames({ active: activeTab === '3' })}
-                    onClick={() => {
-                      this.toggleTab('3');
-                    }}
-                  >
-                    Share
-              </NavLink>
-                </NavItem>
+                {!referencedAccount && (
+                  <NavItem>
+                    <NavLink
+                      className={classNames({ active: activeTab === '3' })}
+                      onClick={() => {
+                        this.toggleTab('3');
+                      }}
+                    >
+                      Share
+                    </NavLink>
+                  </NavItem>
+                )}
               </Nav>
               <TabContent activeTab={activeTab}>
                 <TabPane tabId="1">
@@ -456,13 +475,13 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                               className="download-btn"
                             >
                               Download
-                        </button>
+                            </button>
                             <button
                               onClick={() => this.printImg(base64Image!)}
                               className="print-btn"
                             >
                               Print
-                        </button>
+                            </button>
                           </div>
                           <div className="img-access">
                             <a
@@ -504,49 +523,52 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                       </Col>
                     )}
                   </Row>
-                  <div className="delete-sm">
-                    <button
-                      onClick={() =>
-                        this.setState({ showConfirmDeleteSection: true })
-                      }
-                    >
-                      {showConfirmDeleteSection && <strong>Delete File</strong>}
-                      {!showConfirmDeleteSection && 'Delete File'}
-                    </button>
-                    {showConfirmDeleteSection && (
-                      <div className="confirm-delete-sm">
-                        <p>
-                          Deleting this file will <strong>permanently</strong>{' '}
-                      revoke access to all users you have shared this document
-                      with.
-                    </p>
-                        <p>Are you sure?</p>
-                        <FormGroup>
-                          <Label for="documentDelete">Type DELETE to confirm</Label>
-                          <Input
-                            type="text"
-                            name="documentDelete"
-                            value={deleteConfirmInput}
-                            onChange={this.handleDeleteConfirmChange}
-                            placeholder=""
-                            autoComplete="off"
-                          />
-                          <span className="delete-info">
-                            Please enter the text exactly as displayed to confirm
-                      </span>
-                        </FormGroup>
-                        <div className="delete-final">
-                          <Button
-                            color="danger"
-                            onClick={() => this.handleDeleteDocument(document!)}
-                            disabled={!hasConfirmedDelete}
-                          >
-                            Delete
-                      </Button>
+                  {!referencedAccount && (
+                    <div className="delete-sm">
+                      <button
+                        onClick={() =>
+                          this.setState({ showConfirmDeleteSection: true })
+                        }
+                      >
+                        {showConfirmDeleteSection && <strong>Delete File</strong>}
+                        {!showConfirmDeleteSection && 'Delete File'}
+                      </button>
+                      {showConfirmDeleteSection && (
+                        <div className="confirm-delete-sm">
+                          <p>
+                            Deleting this file will <strong>permanently</strong>{' '}
+                            revoke access to all users you have shared this document
+                            with.
+                          </p>
+                          <p>Are you sure?</p>
+                          <FormGroup>
+                            <Label for="documentDelete">Type DELETE to confirm</Label>
+                            <Input
+                              type="text"
+                              name="documentDelete"
+                              value={deleteConfirmInput}
+                              onChange={this.handleDeleteConfirmChange}
+                              placeholder=""
+                              autoComplete="off"
+                            />
+                            <span className="delete-info">
+                              Please enter the text exactly as displayed to confirm
+                            </span>
+                          </FormGroup>
+                          <div className="delete-final">
+                            <Button
+                              color="danger"
+                              onClick={() => this.handleDeleteDocument(document!)}
+                              disabled={!hasConfirmedDelete}
+                            >
+                              Delete
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+
+                  )}
                 </TabPane>
                 <TabPane tabId="2">
                   <div className="update-doc-tab-spacing">
@@ -557,14 +579,25 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                 </TabPane>
                 <TabPane tabId="3">
                   <div>
-                    <ShareDocWithContainer
-                      accounts={accounts}
-                      getDocumentSharedWithContact={this.getDocumentSharedWithContact}
-                      handleShareDocCheck={this.handleShareDocCheck}
-                      selectedContact={selectedContact}
-                      handleSelectContact={this.handleSelectContact}
-                      document={document}
-                    />
+                    {document.claimed && (
+                      <ShareDocWithContainer
+                        accounts={accounts}
+                        getDocumentSharedWithContact={this.getDocumentSharedWithContact}
+                        handleShareDocCheck={this.handleShareDocCheck}
+                        selectedContact={selectedContact}
+                        handleSelectContact={this.handleSelectContact}
+                        document={document}
+                      />
+                    )}
+                    {document.claimed !== undefined && document.claimed === false && (
+                      <div className="claim-container">
+                        <div className="info">You must claim this document before you can share it</div>
+                        <div className="img-container">
+                            <ImageWithStatus imageUrl={base64Image} imageViewType={ImageViewTypes.PREVIEW} />
+                        </div>
+                        <button className="button" onClick={this.handleClaim}>Claim</button>
+                      </div>
+                    )}
                   </div>
                 </TabPane>
               </TabContent>
@@ -572,7 +605,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                 <div className="confirm-delete-container">
                   <div className="delete-prompt">
                     Are you sure you want to permanently delete this file?
-              </div>
+                  </div>
                   <div className="delete-section">
                     <div className="delete-image-container">
                       {document && (

@@ -213,6 +213,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                       <NotSharedDoc />
                       <div className="title">{document.type}</div>
                       <div className="subtitle">not shared</div>
+                      {document.sharedWithAccountIds.length === 0 && <div className="request-action"><button className="button btn-rounder">Request Access</button></div>}
+                      {document.sharedWithAccountIds.length > 0  && <div className="caption">Access Pending</div>}
                     </div>
                   )}
                 </div>
@@ -234,7 +236,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       searchedAccounts,
       shareRequests,
       myAccount,
-      privateEncryptionKey
+      privateEncryptionKey,
+      referencedAccount
     } = { ...this.props };
     return (
       <div>
@@ -248,7 +251,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <div>Name</div>
                 </div>
               </th>
-              <th>Shared With</th>
+              <th>{referencedAccount ? 'Shared' : 'Shared With'}</th>
               <th>Updated</th>
               <th>Valid Until</th>
               <th>Notarized</th>
@@ -305,9 +308,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                           )}
                         </div>
                       )}
-                      {document.thumbnailUrl === '' && (
-                        <NotSharedDoc />
-                      )}
+                      {document.thumbnailUrl === '' && (<NotSharedDoc />)}
                       <div className="doc-info">
                         <div className="doc-type">{document.type}</div>
                         <div className="doc-upd">{document.updatedAt && format(new Date(document.updatedAt), 'MMM d, y')}</div>
@@ -316,17 +317,30 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   </td>
                   <td>
                     <div className="doc-share-cell">
-                      <SharedWith sharedAccounts={sharedAccounts} />
+                      {referencedAccount && document.thumbnailUrl !== '' && <div className="subtitle">shared</div>}
+                      {referencedAccount && document.thumbnailUrl === '' && (
+                        <Fragment>
+                          {document.sharedWithAccountIds.length === 0 && <div className="request-action"><button className="button btn-rounder">Request Access</button></div>}
+                          {document.sharedWithAccountIds.length > 0 && <div className="caption">Access Pending</div>}
+                        </Fragment>
+                      )}
+                      {document.claimed !== undefined && document.claimed === false && sharedAccounts.length > 0 && (
+                        <button className="button">Claim</button>
+                      )}
+                      {document.claimed && sharedAccounts.length > 0 && <SharedWith sharedAccounts={sharedAccounts} />}
                     </div>
                   </td>
                   <td>
                     <div className="doc-updated-cell">
                       {accountProfileURL && (
-                        <img
-                          className="profile-image"
-                          src={accountProfileURL}
-                          alt=""
-                        />
+                        <div className="image-container">
+                          <img
+                            className="profile-image"
+                            src={accountProfileURL}
+                            alt=""
+                          />
+                          {document.claimed !== undefined && document.claimed === false && sharedAccounts.length > 0 && <Badge />}
+                        </div>
                       )}
                       {!accountProfileURL && (
                         <div className="account-circle">

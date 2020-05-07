@@ -276,7 +276,9 @@ body {
   color: #495057;
   background-color: inherit;
   border-color: transparent;
-  border-bottom: 4px solid $blue;
+  @include themify($themes) {
+    border-bottom: 4px solid themed("colorPrimary");
+  }
   opacity: 1;
 }
 
@@ -285,7 +287,9 @@ body {
 }
 
 .nav-link.active:hover, .nav-link.active:focus {
-  border-color: $blue;
+  @include themify($themes) {
+    border-color: themed("colorPrimary");
+  }
 }
 
 // end bootstrap tabs
@@ -296,4 +300,25 @@ body {
 
 .ReactModal__Overlay {
   z-index: 1060 !important;
+}
+
+button {
+  &.button {
+    width: fit-content;
+    color: white;
+    font-size: 25px;
+    font-weight: 500;
+    @include themify($themes) {
+      background-color: themed("colorPrimary");
+    }
+    &:disabled {
+      background-color: #ccc;
+    }
+    padding: 10px 29px;
+    border-radius: 17px;
+  }
+  &.btn-rounder {
+    padding: 7px 23px;
+    border-radius: 26px;
+  }
 }

@@ -149,6 +149,15 @@
     text-transform: uppercase;
     font-size: 20px;
   }
+  .request-action {
+    margin-top: 22px;
+  }
+  .caption {
+    font-size: 20px;
+    font-weight: bold;
+    color: #9a9a9a;
+    text-transform: uppercase;
+  }
 }
 
 // list/table view
@@ -299,8 +308,19 @@
         .doc-share-cell,
         .doc-valid-cell {
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          .subtitle {
+            margin: 0;
+            text-transform: uppercase;
+          }
+          .caption {
+            font-size: 20px;
+            font-weight: bold;
+            color: #9a9a9a;
+            text-transform: uppercase;
+          }
         }
 
         .doc-updated-cell {
@@ -308,13 +328,21 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          .profile-image {
-            width: 52px;
-            height: 52px;
-            object-fit: contain;
-            border-radius: 50%;
-            display: inline-block;
-            margin-bottom: 5px;
+          .image-container {
+            position: relative;
+            .profile-image {
+              width: 52px;
+              height: 52px;
+              object-fit: contain;
+              border-radius: 50%;
+              display: inline-block;
+              margin-bottom: 5px;
+            }
+            svg {
+              position: absolute;
+              top: -9px;
+              left: -15px;
+            }
           }
         }
       }
