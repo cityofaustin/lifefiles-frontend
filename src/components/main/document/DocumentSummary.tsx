@@ -14,6 +14,7 @@ interface DocumentSummaryProps {
   sharedAccounts: Account[];
   privateEncryptionKey?: string;
   shareRequests: ShareRequest[];
+  handleSelectDocument: (document: Document, goToClaim?: boolean) => void;
 }
 
 class DocumentSummary extends Component<DocumentSummaryProps> {
@@ -33,9 +34,7 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
   }
 
   render() {
-    const {document, sharedAccounts, privateEncryptionKey} = {
-      ...this.props
-    };
+    const {document, sharedAccounts, privateEncryptionKey, handleSelectDocument} = {...this.props};
     return (
       <div className="document-item">
         {document && (
@@ -76,7 +75,7 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
             {document.claimed !== undefined && document.claimed === false && sharedAccounts.length > 0 && (
               <Fragment>
                 <div className="subtitle">NOT CLAIMED</div>
-                <div className="claim-action"><button className="button">Claim</button></div>
+                <div className="claim-action"><button className="button" onClick={(e) => {e.stopPropagation();handleSelectDocument(document, true);}}>Claim</button></div>
               </Fragment>
             )}
             {sharedAccounts.length <= 0 && <div className="no-shares"/>}

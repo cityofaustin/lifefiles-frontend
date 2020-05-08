@@ -26,6 +26,7 @@ import AccountImpl from '../../models/AccountImpl';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import AccountService from '../../services/AccountService';
+import UserPreferenceUtil from '../../util/UserPreferenceUtil';
 
 import SvgButton, { SvgButtonTypes } from '../common/SvgButton';
 import { ReactComponent as NewDoc } from '../../img/new-document.svg';
@@ -40,7 +41,7 @@ interface DocumentPageProps {
   toggleSort: () => void;
   handleAddNew: () => void;
   searchedDocuments: Document[];
-  handleSelectDocument: (document: Document) => void;
+  handleSelectDocument: (document: Document, goToClaim?: boolean) => void;
   referencedAccount?: Account;
   goBack?: () => void;
   shareRequests: ShareRequest[];
@@ -67,7 +68,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
   constructor(props: Readonly<DocumentPageProps>) {
     super(props);
     this.state = {
-      isLayoutGrid: true
+      isLayoutGrid: UserPreferenceUtil.getIsLayoutGrid()
     };
   }
 
@@ -102,6 +103,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
 
   toggleLayout = () => {
     const { isLayoutGrid } = { ...this.state };
+    UserPreferenceUtil.setIsLayoutGrid(!isLayoutGrid);
     this.setState({ isLayoutGrid: !isLayoutGrid });
   };
 
@@ -208,6 +210,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                       sharedAccounts={sharedAccounts}
                       privateEncryptionKey={privateEncryptionKey}
                       shareRequests={matchedShareRequests}
+                      handleSelectDocument={handleSelectDocument}
                     />
                   )}
                   {document.thumbnailUrl === '' && (
@@ -291,7 +294,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
               return (
                 <tr
                   key={document.type}
-                  onClick={() => handleSelectDocument(document)}
+                  onClick={() => handleSelectDocument(document, false)}
                 >
                   <td>
                     <div className="doc-name-cell">
@@ -327,7 +330,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                         </Fragment>
                       )}
                       {document.claimed !== undefined && document.claimed === false && sharedAccounts.length > 0 && (
-                        <button className="button">Claim</button>
+                        <button className="button" onClick={(e) => {e.stopPropagation();handleSelectDocument(document, true);}}>Claim</button>
                       )}
                       {document.claimed && sharedAccounts.length > 0 && <SharedWith sharedAccounts={sharedAccounts} />}
                     </div>

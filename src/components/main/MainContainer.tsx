@@ -54,6 +54,7 @@ interface MainContainerState {
   accounts: Account[];
   searchedAccounts: Account[];
   activeTab: string;
+  activeDocumentTab: string;
   sidebarOpen?: boolean;
   clientShares: Map<string, ShareRequest[]>;
 }
@@ -84,6 +85,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       accounts: [],
       searchedAccounts: [],
       activeTab: '1',
+      activeDocumentTab: '1',
       sidebarOpen: false,
       clientShares: new Map<string, ShareRequest[]>()
     };
@@ -202,16 +204,16 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     });
   }
 
-  handleSelectDocument = (document?: Document) => {
-    this.setState({ documentSelected: document });
+  handleSelectDocument = (document?: Document, goToClaim?: boolean) => {
+    this.setState({ documentSelected: document, activeDocumentTab: goToClaim ? '3' : '1' });
   };
 
   goToAccount = () => {
-    this.setState({ documentSelected: undefined, isAccount: true });
+    this.setState({ documentSelected: undefined, isAccount: true, activeDocumentTab: '1' });
   };
 
   goBack = () => {
-    this.setState({ documentSelected: undefined, isAccount: false });
+    this.setState({ documentSelected: undefined, isAccount: false, activeDocumentTab: '1' });
   };
 
   handleAddNew = () => {
@@ -313,7 +315,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         documents,
         showModal: false,
         isLoading: false,
-        documentSelected: undefined
+        documentSelected: undefined,
+        activeDocumentTab: '1'
       },
       () => {
         this.handleSearch(documentQuery);
@@ -351,7 +354,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       documents,
       searchedDocuments,
       isLoading: false,
-      documentSelected: undefined
+      documentSelected: undefined,
+      activeDocumentTab: '1'
     });
   };
 
@@ -443,7 +447,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal(props) {
-    const { documentSelected, accounts } = { ...this.state };
+    const { documentSelected, accounts, activeDocumentTab } = { ...this.state };
     const { account } = { ...this.props };
     const { id } = props.match.params;
     let referencedAccount;
@@ -461,7 +465,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       <UpdateDocumentModal
         accounts={accounts}
         showModal={!!documentSelected}
-        toggleModal={() => this.setState({ documentSelected: undefined })}
+        toggleModal={() => this.setState({ documentSelected: undefined, activeDocumentTab: '1' })}
         document={documentSelected}
         shareRequests={shareRequests}
         handleUpdateDocument={this.handleUpdateDocument}
@@ -472,6 +476,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         privateEncryptionKey={this.props.privateEncryptionKey}
         referencedAccount={referencedAccount}
         handleClientSelected={this.handleClientSelected}
+        activeTab={activeDocumentTab}
       />
     );
   }

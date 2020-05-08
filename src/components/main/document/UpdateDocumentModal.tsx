@@ -60,6 +60,7 @@ interface UpdateDocumentModalProps {
   privateEncryptionKey?: string;
   referencedAccount?: Account;
   handleClientSelected: (otherOwnerAccount: Account) => void; // to refresh the share request data
+  activeTab: string;
 }
 
 interface UpdateDocumentModalState {
@@ -82,7 +83,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     super(props);
 
     this.state = {
-      activeTab: '1',
+      activeTab: props.activeTab,
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
       deleteConfirmInput: '',
@@ -94,6 +95,9 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
   }
 
   async componentDidUpdate(prevProps: Readonly<UpdateDocumentModalProps>) {
+    if (prevProps.activeTab !== this.props.activeTab) {
+      this.setState({activeTab: this.props.activeTab});
+    }
     if (prevProps.document !== this.props.document
       && this.props.document && this.props.privateEncryptionKey) {
       let base64Image: string | undefined;

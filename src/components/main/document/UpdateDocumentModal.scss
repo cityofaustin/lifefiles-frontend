@@ -378,12 +378,21 @@
                 flex-direction: row;
               }
               .image-with-status {
+                width: 100%;
+                @include media-breakpoint-up(lg) {
+                  width: 60%;
+                }
                 .preview {
                   height: auto;
                 }
               }
               .doc-info {
-                margin-left: 24px;
+                margin: 20px 0 0 0;
+                width: 100%;
+                @include media-breakpoint-up(lg) {
+                  margin: 0 0 0 24px;
+                  width: 40%;
+                }
                 .info-attr {
                   color: #9a9a9a;
                   font-size: 16px;
