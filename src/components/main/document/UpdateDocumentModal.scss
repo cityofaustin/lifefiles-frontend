@@ -359,13 +359,64 @@
             align-items: center;
             .info {
               padding: 18px 40px;
-              margin: 60px 0;
               width: fit-content;
-              font-size: 25px;
               font-weight: 500;
               border-radius: 34px;
               background-color: $pale-grey;
               color: $blue;
+              margin: 18px 0;
+              font-size: 20px;
+              @include media-breakpoint-up(lg) {
+                margin: 60px 0;
+                font-size: 25px;
+              }
+            }
+            .doc {
+              display: flex;
+              flex-direction: column;
+              @include media-breakpoint-up(lg) {
+                flex-direction: row;
+              }
+              .image-with-status {
+                .preview {
+                  height: auto;
+                }
+              }
+              .doc-info {
+                margin-left: 24px;
+                .info-attr {
+                  color: #9a9a9a;
+                  font-size: 16px;
+                  @include media-breakpoint-up(lg) {
+                    font-size: 20px;
+                  }
+                }
+                .info-val {
+                  color: #484848;
+                  font-size: 22px;
+                  @include media-breakpoint-up(lg) {
+                    font-size: 30px;
+                  }
+                }
+              }
+            }
+            .buttons {
+              justify-content: flex-start;
+              display: flex;
+              flex-direction: row-reverse;
+              width: 100%;
+              & button {
+                margin: 11px;
+              }
+              // TODO: do this like wireframe
+              & button:nth-child(2) {
+                display: none;
+              }
+              @include media-breakpoint-up(md) {
+                & button:nth-child(2) {
+                  display: block;
+                }
+              }
             }
           }
         }

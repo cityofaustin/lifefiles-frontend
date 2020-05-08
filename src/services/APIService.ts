@@ -209,6 +209,9 @@ class APIService {
     if(request.validUntilDate) {
       formdata.append('validuntildate', format(request.validUntilDate, 'yyyy/dd/MM'));
     }
+    if(request.claimed) {
+      formdata.append('claimed', request.claimed + '');
+    }
     const init = {
       method: 'PUT',
       headers,

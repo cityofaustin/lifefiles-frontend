@@ -28,11 +28,11 @@ import { Link } from 'react-router-dom';
 import AccountService from '../../services/AccountService';
 
 import SvgButton, { SvgButtonTypes } from '../common/SvgButton';
-import {ReactComponent as NewDoc} from '../../img/new-document.svg';
+import { ReactComponent as NewDoc } from '../../img/new-document.svg';
 import { ReactComponent as FabAdd } from '../../img/fab-add.svg';
 import { ReactComponent as ChevronLeft } from '../../img/chevron-left.svg';
 import { ReactComponent as ChevronRight } from '../../img/chevron-right.svg';
-import {ReactComponent as NotSharedDoc } from '../../img/not-shared-doc.svg';
+import { ReactComponent as NotSharedDoc } from '../../img/not-shared-doc.svg';
 import Badge from '../common/Badge';
 
 interface DocumentPageProps {
@@ -61,7 +61,7 @@ interface MainPageState {
 class DocumentPage extends Component<DocumentPageProps, MainPageState> {
 
   static defaultProps = {
-    handleClientSelected: () => {}
+    handleClientSelected: () => { }
   };
 
   constructor(props: Readonly<DocumentPageProps>) {
@@ -72,11 +72,11 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
   }
 
   async componentDidUpdate(prevProps: Readonly<DocumentPageProps>) {
-    if(this.props.referencedAccount) {
+    if (this.props.referencedAccount) {
       if (prevProps.referencedAccount === undefined
         || (this.props.referencedAccount && prevProps.referencedAccount && this.props.referencedAccount.id !== prevProps.referencedAccount.id)) {
-          // if there is a client that is selected that is new, then refetch the documents
-          this.props.handleClientSelected(this.props.referencedAccount);
+        // if there is a client that is selected that is new, then refetch the documents
+        this.props.handleClientSelected(this.props.referencedAccount);
       }
     }
   }
@@ -115,13 +115,15 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     const { sortAsc, toggleSort, activeTab } = { ...this.props };
     return (
       <Fragment>
-        <div className="sort-section">
-          <div className="subtitle">Sort by</div>
-          <div className="subtitle subtitle-key" onClick={toggleSort}>
-            NAME
+        {isLayoutGrid && (
+          <div className="sort-section">
+            <div className="subtitle">Sort by</div>
+            <div className="subtitle subtitle-key" onClick={toggleSort}>
+              NAME
+            </div>
+            <Chevron isAscending={sortAsc} onClick={toggleSort} />
           </div>
-          <Chevron isAscending={sortAsc} onClick={toggleSort} />
-        </div>
+        )}
         <div className="sort-section-sm">
           <div className="sort-container" onClick={toggleSort}>
             <SortArrow isAscending={sortAsc} />
@@ -214,7 +216,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                       <div className="title">{document.type}</div>
                       <div className="subtitle">not shared</div>
                       {document.sharedWithAccountIds.length === 0 && <div className="request-action"><button className="button btn-rounder">Request Access</button></div>}
-                      {document.sharedWithAccountIds.length > 0  && <div className="caption">Access Pending</div>}
+                      {document.sharedWithAccountIds.length > 0 && <div className="caption">Access Pending</div>}
                     </div>
                   )}
                 </div>
@@ -301,7 +303,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                             encrypted
                             privateEncryptionKey={privateEncryptionKey}
                           />
-                          { this.containsBadge(document.type) && (
+                          {this.containsBadge(document.type) && (
                             <div className="badge-container">
                               <Badge />
                             </div>
@@ -389,7 +391,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
   }
 
   containsBadge(documentType) {
-    const {shareRequests} = {...this.props};
+    const { shareRequests } = { ...this.props };
     const pendingShareRequest = shareRequests.find(shareRequest => shareRequest.approved === false && shareRequest.documentType === documentType);
     return pendingShareRequest;
   }
@@ -498,24 +500,24 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
   }
 
   renderTabContent() {
-    const { activeTab } = {...this.props};
+    const { activeTab } = { ...this.props };
     const { isLayoutGrid } = { ...this.state };
 
     return (
       <TabContent activeTab={activeTab}>
-            <TabPane tabId="1">
-              {isLayoutGrid && this.renderDocumentGridView()}
-              {!isLayoutGrid && this.renderDocumentListView()}
-            </TabPane>
-            <TabPane tabId="2">
-              {this.renderNetworkGridView()}
-            </TabPane>
-          </TabContent>
+        <TabPane tabId="1">
+          {isLayoutGrid && this.renderDocumentGridView()}
+          {!isLayoutGrid && this.renderDocumentListView()}
+        </TabPane>
+        <TabPane tabId="2">
+          {this.renderNetworkGridView()}
+        </TabPane>
+      </TabContent>
     );
   }
 
   render() {
-    const { activeTab, handleAddNew, referencedAccount } = {...this.props};
+    const { activeTab, handleAddNew, referencedAccount } = { ...this.props };
     const { isLayoutGrid } = { ...this.state };
 
     return (

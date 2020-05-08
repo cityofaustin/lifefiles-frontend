@@ -4,6 +4,7 @@ interface UpdateDocumentRequest {
   img?: File;
   thumbnail?: File;
   validUntilDate?: Date;
+  claimed?: boolean;
 }
 
 export default UpdateDocumentRequest;

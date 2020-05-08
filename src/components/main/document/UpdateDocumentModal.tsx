@@ -148,8 +148,16 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
     });
   };
 
-  // TODO:
   handleClaim = () => {
+    const { handleUpdateDocument, document } = { ...this.props };
+
+    handleUpdateDocument({
+      id: document!._id!,
+      img: undefined,
+      thumbnail: undefined,
+      validUntilDate: undefined, // FIXME: add expired at form somewhere
+      claimed: true
+    });
     // clear state
     this.setState({
       activeTab: '1',
@@ -592,10 +600,20 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                     {document.claimed !== undefined && document.claimed === false && (
                       <div className="claim-container">
                         <div className="info">You must claim this document before you can share it</div>
-                        <div className="img-container">
+                        <div className="doc">
                             <ImageWithStatus imageUrl={base64Image} imageViewType={ImageViewTypes.PREVIEW} />
+                            <div className="doc-info">
+                              <div className="info-attr">File Name</div>
+                              <div className="info-val">{document.name}</div>
+                              <div className="info-attr">Document Name</div>
+                              <div className="info-val">{document.type}</div>
+                              {/* TODO: expiration date */}
+                            </div>
                         </div>
-                        <button className="button" onClick={this.handleClaim}>Claim</button>
+                        <div className="buttons">
+                          <button className="button" onClick={this.handleClaim}>Claim</button>
+                          <button className="danger-outline button" onClick={() => this.confirmDelete()}>Delete</button>
+                        </div>
                       </div>
                     )}
                   </div>

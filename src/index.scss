@@ -321,4 +321,9 @@ button {
     padding: 7px 23px;
     border-radius: 26px;
   }
+  &.danger-outline {
+    border: solid 3px #d95868;
+    background-color: transparent !important;
+    color: #d95868;
+  }
 }
