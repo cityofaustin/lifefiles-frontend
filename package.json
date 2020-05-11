@@ -34,6 +34,7 @@
     "jszip-utils": "^0.1.0",
     "material-components-web": "^5.1.0",
     "react": "^16.13.0",
+    "react-datepicker": "^2.15.0",
     "react-dom": "^16.13.0",
     "react-dropzone": "^10.2.1",
     "react-image-file-resizer": "^0.2.3",

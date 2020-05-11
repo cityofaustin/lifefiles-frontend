@@ -13,7 +13,7 @@ interface FileUploaderState {
 }
 
 interface FileUploaderProps {
-  setFile: (file?: File, thumbnailFile?: File) => void;
+  setFile: (file?: File, thumbnailFile?: File, previewURL?: string) => void;
   documentType?: string;
   privateEncryptionKey?: string;
 }
@@ -56,7 +56,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
       lastModified: Date.now()
     });
     this.setState({ files: acceptedFiles });
-    setFile(newZippedFile, newZippedThumbnailFile);
+    setFile(newZippedFile, newZippedThumbnailFile, (oneFile as any).preview);
   };
 
   renderFiles(files: File[]) {
@@ -120,11 +120,6 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
 
   render() {
     const { files } = { ...this.state };
-    // const {acceptedFiles, getRootProps, getInputProps} = useDropzone();
-    //
-    // const files = acceptedFiles.map(file => (
-
-    // ));
 
     return (
       <Dropzone onDrop={this.handleOnDrop}>

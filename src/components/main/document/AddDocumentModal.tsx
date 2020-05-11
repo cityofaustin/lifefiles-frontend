@@ -1,4 +1,4 @@
-import React, {ChangeEvent, Component, Fragment} from 'react';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
   Button,
   FormGroup,
@@ -13,15 +13,19 @@ import DocumentTypeService from '../../../services/DocumentTypeService';
 import FileUploader from '../../common/FileUploader';
 import DocumentType from '../../../models/DocumentType';
 import Document from '../../../models/document/Document';
-import {ReactComponent as CrossSvg} from '../../../img/cross2.svg';
-import {ReactComponent as CrossSmSvg} from '../../../img/cross2-sm.svg';
-import {ReactComponent as NewDocSvg} from '../../../img/new-doc-2.svg';
-import {ReactComponent as NewDocSmSvg} from '../../../img/new-doc-sm.svg';
-import Select, {OptionTypeBase} from 'react-select';
+import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
+import { ReactComponent as CrossSmSvg } from '../../../img/cross2-sm.svg';
+import { ReactComponent as NewDocSvg } from '../../../img/new-doc-2.svg';
+import { ReactComponent as NewDocSmSvg } from '../../../img/new-doc-sm.svg';
+import Select, { OptionTypeBase } from 'react-select';
 import './AddDocumentModal.scss';
 import AccountImpl from '../../../models/AccountImpl';
 import Account from '../../../models/Account';
 import AccountService from '../../../services/AccountService';
+import Toggle from '../../common/Toggle';
+import DatePicker from 'react-datepicker';
+// NOTE: you could use this to add min max date selection
+// import {subMonths, addMonths} from 'date-fns';
 
 interface AddDocumentModalProps {
   showModal: boolean;
@@ -33,6 +37,13 @@ interface AddDocumentModalProps {
   referencedAccount?: Account;
 }
 
+enum AddDocumentStep {
+  TYPE_SELECTION,
+  FILE_SELECTION,
+  NOTARIZATION,
+  EXPIRATION
+}
+
 interface AddDocumentModalState {
   documentType: string;
   newFile?: File;
@@ -40,7 +51,10 @@ interface AddDocumentModalState {
   isOther: boolean;
   errorMessage?: string;
   documentTypeOption?: OptionTypeBase;
-  uploadingStep: boolean;
+  addDocumentStep: AddDocumentStep;
+  previewURL?: string;
+  hasExpiration: boolean;
+  expirateDate: Date;
 }
 
 class AddDocumentModal extends Component<AddDocumentModalProps,
@@ -49,33 +63,35 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
     super(props);
 
     this.state = {
-      uploadingStep: false,
+      addDocumentStep: AddDocumentStep.TYPE_SELECTION,
       documentType: '',
-      isOther: false
+      isOther: false,
+      hasExpiration: false,
+      expirateDate: new Date()
     };
   }
 
-  setFile = (newFile: File, newThumbnailFile: File) => {
-    this.setState({newFile, newThumbnailFile});
+  setFile = (newFile: File, newThumbnailFile: File, previewURL: string) => {
+    this.setState({ newFile, newThumbnailFile, previewURL });
   };
 
   handleDocumentType = (documentTypeOption: OptionTypeBase) => {
     const isOther = documentTypeOption.value === 'Other';
     const documentType =
       documentTypeOption.value === 'Other' ? '' : documentTypeOption.value;
-    this.setState({documentType, isOther, documentTypeOption});
+    this.setState({ documentType, isOther, documentTypeOption });
   };
 
   handleDocumentTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const {value} = e.target;
-    this.setState({documentType: value, errorMessage: undefined});
+    const { value } = e.target;
+    this.setState({ documentType: value, errorMessage: undefined });
   };
 
   handleAddNewDocument = async () => {
-    const {handleAddNewDocument, documents, referencedAccount} = {...this.props};
-    let {documentType, newFile, errorMessage, isOther} = {...this.state};
-    const {newThumbnailFile} = {...this.state};
-    // If document type exists show error message
+    const { handleAddNewDocument, documents, referencedAccount } = { ...this.props };
+    let { documentType, newFile, errorMessage, isOther } = { ...this.state };
+    const { newThumbnailFile } = { ...this.state };
+    // If document type exists show error message, this shouldn't happen though
     if (
       DocumentTypeService.findDocumentTypeMatchInDocuments(
         documentType!,
@@ -85,7 +101,8 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       errorMessage = 'document type already exists.';
     } else {
       try {
-        if(referencedAccount) {
+        // TODO: add expiration date here once you adjust the API call.
+        if (referencedAccount) {
           await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount);
         } else {
           await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!);
@@ -101,30 +118,34 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       }
     }
     this.setState({
-      uploadingStep: false,
+      addDocumentStep: AddDocumentStep.TYPE_SELECTION,
       documentTypeOption: undefined,
       isOther,
       documentType,
       newFile,
-      errorMessage
+      errorMessage,
+      hasExpiration: false,
+      expirateDate: new Date()
     });
   };
 
   toggleModal = () => {
     // clear state
-    const {toggleModal} = {...this.props};
+    const { toggleModal } = { ...this.props };
     this.setState({
-      uploadingStep: false,
+      addDocumentStep: AddDocumentStep.TYPE_SELECTION,
       documentType: '',
       isOther: false,
-      documentTypeOption: undefined
+      documentTypeOption: undefined,
+      hasExpiration: false,
+      expirateDate: new Date()
     });
     toggleModal();
   };
 
   renderDocumentTypeSection() {
-    const {documentTypes, documents} = {...this.props};
-    const {documentType, isOther, errorMessage, documentTypeOption} = {
+    const { documentTypes, documents } = { ...this.props };
+    const { documentType, isOther, errorMessage, documentTypeOption } = {
       ...this.state
     };
 
@@ -136,7 +157,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
         documents
       )
     }));
-    options.push({value: 'Other', label: 'Other', isDisabled: false});
+    options.push({ value: 'Other', label: 'Other', isDisabled: false });
 
     const customStyles = {
       control: (provided: any) => ({
@@ -288,7 +309,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   }
 
   renderDocumentFileSection() {
-    const {documentType} = {...this.state};
+    const { documentType } = { ...this.state };
     return (
       <section>
         <FileUploader
@@ -300,13 +321,47 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
     );
   }
 
+  renderExpirationDateSection() {
+    const {previewURL, hasExpiration, expirateDate} = {...this.state};
+    return (
+      <section className="expiration-date-section">
+        <div className="image-container">
+          <img
+              src={previewURL}
+              alt=""
+          />
+        </div>
+        <div className="expiration-date-container">
+          <div className="expiration-toggle">
+            <div className="prompt">Does this document have an expiration date?</div>
+            <Toggle isLarge value={hasExpiration} onToggle={() => this.setState({hasExpiration: !hasExpiration})} />
+          </div>
+          {hasExpiration && (
+            <div className="date-picker">
+              <div className="label">EXPIRATION DATE</div>
+              <DatePicker
+                selected={expirateDate}
+                onChange={date => {this.setState({expirateDate: date})}}
+                dateFormatCalendar={'MMM yyyy'}
+                peekNextMonth
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+              />
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
+
   render() {
-    const {showModal, referencedAccount} = {...this.props};
-    const {documentType, newFile, uploadingStep} = {...this.state};
+    const { showModal, referencedAccount } = { ...this.props };
+    const { documentType, newFile, addDocumentStep } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
-        <CrossSvg className="lg"/>
-        <CrossSmSvg className="sm"/>
+        <CrossSvg className="lg" />
+        <CrossSmSvg className="sm" />
       </div>
     );
     return (
@@ -326,20 +381,23 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
           )}
           {!referencedAccount && (
             <Fragment>
-              <NewDocSvg/>
-              <NewDocSmSvg/>
+              <NewDocSvg />
+              <NewDocSmSvg />
               <span>New Document</span>
             </Fragment>
           )}
         </ModalHeader>
         <ModalBody>
           <div className="document-type-container">
-            {!uploadingStep && this.renderDocumentTypeSection()}
-            {uploadingStep && this.renderDocumentFileSection()}
+            {[AddDocumentStep.TYPE_SELECTION].includes(addDocumentStep) && this.renderDocumentTypeSection()}
+            {AddDocumentStep.FILE_SELECTION === addDocumentStep && this.renderDocumentFileSection()}
+            {/* TODO: */}
+            {AddDocumentStep.NOTARIZATION === addDocumentStep && <Fragment />}
+            {AddDocumentStep.EXPIRATION === addDocumentStep && this.renderExpirationDateSection()}
           </div>
         </ModalBody>
         <ModalFooter>
-          {!uploadingStep && (
+          {AddDocumentStep.TYPE_SELECTION === addDocumentStep && (
             <Fragment>
               <Button
                 className="margin-wide"
@@ -349,39 +407,58 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
               >
                 Cancel
               </Button>{' '}
+              <Button
+                className="margin-wide"
+                color="primary"
+                disabled={!documentType}
+                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.FILE_SELECTION })}
+              >
+                Next
+              </Button>
             </Fragment>
           )}
-          {!uploadingStep && (
-            <Button
-              className="margin-wide"
-              color="primary"
-              disabled={!documentType}
-              onClick={() => this.setState({uploadingStep: true})}
-            >
-              Next
-            </Button>
-          )}
-          {uploadingStep && (
+          {AddDocumentStep.FILE_SELECTION === addDocumentStep && (
             <Fragment>
               <Button
                 className="margin-wide"
                 outline
                 color="secondary"
-                onClick={() => this.setState({uploadingStep: false})}
+                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.TYPE_SELECTION })}
               >
                 Go Back
               </Button>{' '}
+              <Button
+                className="margin-wide"
+                color="primary"
+                disabled={!newFile || !documentType}
+                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.EXPIRATION })}
+              >
+                Next
+              </Button>
             </Fragment>
           )}
-          {uploadingStep && (
-            <Button
-              className="margin-wide"
-              color="primary"
-              disabled={!newFile || !documentType}
-              onClick={this.handleAddNewDocument}
-            >
-              Save
-            </Button>
+          {AddDocumentStep.NOTARIZATION === addDocumentStep && (
+            // TODO:
+            <Fragment />
+          )}
+          {AddDocumentStep.EXPIRATION === addDocumentStep && (
+            <Fragment>
+              <Button
+                className="margin-wide"
+                outline
+                color="secondary"
+                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.FILE_SELECTION })}
+              >
+                Go Back
+              </Button>{' '}
+              <Button
+                className="margin-wide"
+                color="primary"
+                onClick={this.handleAddNewDocument}
+              >
+                Add File
+              </Button>
+            </Fragment>
           )}
         </ModalFooter>
       </Modal>
