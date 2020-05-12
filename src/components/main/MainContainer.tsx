@@ -239,7 +239,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     newFile: File,
     newThumbnailFile: File,
     documentTypeSelected: string,
-    referencedAccount?: Account
+    referencedAccount?: Account,
+    validUntilDate?: Date
   ) => {
     const { documents, searchedDocuments, documentQuery } = { ...this.state };
     const { account, privateEncryptionKey } = { ...this.props };
@@ -275,9 +276,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               newFile,
               newThumbnailFile,
               documentTypeSelected!,
-              account.didPublicEncryptionKey!
+              account.didPublicEncryptionKey!,
+              validUntilDate
             );
             const newDocument = response.document;
+            // NOTE: The uploaded by account object is nice but switching to account id to make consistent with the /my-account api call
+            newDocument.uploadedBy = newDocument.uploadedBy.id;
             newDocument._id = newDocument.id;
             documents.push(newDocument);
           }

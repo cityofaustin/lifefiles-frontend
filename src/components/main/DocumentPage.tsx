@@ -361,9 +361,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   </td>
                   <td>
                     <div className="doc-valid-cell">
-                      {document.validateUntilDate
+                      {document.validUntilDate
                         ? format(
-                          new Date(document.validateUntilDate),
+                          new Date(document.validUntilDate),
                           'MMM d, y'
                         )
                         : 'N/A'}

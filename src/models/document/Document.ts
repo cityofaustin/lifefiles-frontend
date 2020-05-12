@@ -14,7 +14,7 @@ interface Document {
   uploadedBy?: Account | string;
   belongsTo?: Account;
   sharedWithAccountIds: string[];
-  validateUntilDate?: Date;
+  validUntilDate?: Date;
   permanentOrgFileArchiveNumber?: string;
   createdAt?: Date;
   updatedAt?: Date;

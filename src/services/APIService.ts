@@ -93,7 +93,7 @@ class APIService {
     }
   }
 
-  static async postDocument(file: File, thumbnailFile: File, documentType: string, encryptionPubKey: string) {
+  static async postDocument(file: File, thumbnailFile: File, documentType: string, encryptionPubKey: string, validUntilDate?: Date) {
     const path = '/documents';
     const input = `${MYPASS_API}${path}`;
     const headers = {
@@ -104,6 +104,9 @@ class APIService {
     formdata.append('img', thumbnailFile, thumbnailFile.name);
     formdata.append('type', documentType);
     formdata.append('encryptionPubKey', encryptionPubKey);
+    if (validUntilDate) {
+      formdata.append('validuntildate', validUntilDate.toISOString());
+    }
     const init = {
       method: 'POST',
       headers,

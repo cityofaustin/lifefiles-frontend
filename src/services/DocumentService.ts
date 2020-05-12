@@ -17,8 +17,8 @@ class DocumentService extends AgentService {
     return result;
   }
 
-  static async addDocument(newFile: File, newThumbnailFile: File, documentType: string, encryptionPubKey: string): Promise<any> {
-    return await super.postDocument(newFile, newThumbnailFile, documentType, encryptionPubKey);
+  static async addDocument(newFile: File, newThumbnailFile: File, documentType: string, encryptionPubKey: string, validUntilDate?: Date): Promise<any> {
+    return await super.postDocument(newFile, newThumbnailFile, documentType, encryptionPubKey, validUntilDate);
   }
 
   static async uplooadDocumentOnBehalfOfUser(newCaseworkerFile: File, newCaseworkerThumbnail: File, newOwnerFile: File, newOwnerThumbnail: File, documentType: string, ownerId: string) {

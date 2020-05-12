@@ -392,7 +392,7 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                   <div className="attr">Upload By</div>
                   <div className="value">{document.uploadedBy || '-'}</div>
                   <div className="attr">Valid Until</div>
-                  <div className="value">{document.validateUntilDate || '-'}</div>
+                  <div className="value">{document.validUntilDate || '-'}</div>
                 </div>
               </div>
               <div className="request-access">
@@ -529,7 +529,10 @@ class UpdateDocumentModal extends Component<UpdateDocumentModalProps,
                           </div>
                           <div className="preview-info-item">
                             <div className="attr">Valid Until</div>
-                            <div className="attr-value">N/A</div>
+                            <div className="attr-value">
+                              {document?.validUntilDate && format(new Date(document?.validUntilDate), 'MM/dd/yyyy')}
+                              {!document?.validUntilDate && '-'}
+                            </div>
                           </div>
                         </div>
                       </Col>

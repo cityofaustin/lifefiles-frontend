@@ -32,7 +32,7 @@ interface AddDocumentModalProps {
   toggleModal: () => void;
   documentTypes: DocumentType[];
   documents: Document[];
-  handleAddNewDocument: (newFile: File, newThumbnailFile: File, documentType: string, referencedAccount?: Account) => Promise<void>;
+  handleAddNewDocument: (newFile: File, newThumbnailFile: File, documentType: string, referencedAccount?: Account, validUntilDate?: Date) => Promise<void>;
   privateEncryptionKey?: string;
   referencedAccount?: Account;
 }
@@ -53,8 +53,8 @@ interface AddDocumentModalState {
   documentTypeOption?: OptionTypeBase;
   addDocumentStep: AddDocumentStep;
   previewURL?: string;
-  hasExpiration: boolean;
-  expirateDate: Date;
+  hasValidUntilDate: boolean;
+  validUntilDate: Date;
 }
 
 class AddDocumentModal extends Component<AddDocumentModalProps,
@@ -66,8 +66,8 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       addDocumentStep: AddDocumentStep.TYPE_SELECTION,
       documentType: '',
       isOther: false,
-      hasExpiration: false,
-      expirateDate: new Date()
+      hasValidUntilDate: false,
+      validUntilDate: new Date()
     };
   }
 
@@ -90,6 +90,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   handleAddNewDocument = async () => {
     const { handleAddNewDocument, documents, referencedAccount } = { ...this.props };
     let { documentType, newFile, errorMessage, isOther } = { ...this.state };
+    const { hasValidUntilDate, validUntilDate } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
     // If document type exists show error message, this shouldn't happen though
     if (
@@ -101,11 +102,14 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       errorMessage = 'document type already exists.';
     } else {
       try {
-        // TODO: add expiration date here once you adjust the API call.
+        let validDate: Date | undefined;
+        if (hasValidUntilDate) {
+          validDate = validUntilDate;
+        }
         if (referencedAccount) {
-          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount);
+          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount, validDate);
         } else {
-          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!);
+          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, undefined, validDate);
         }
         // reset the field since success
         errorMessage = undefined;
@@ -124,8 +128,8 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       documentType,
       newFile,
       errorMessage,
-      hasExpiration: false,
-      expirateDate: new Date()
+      hasValidUntilDate: false,
+      validUntilDate: new Date()
     });
   };
 
@@ -137,8 +141,8 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       documentType: '',
       isOther: false,
       documentTypeOption: undefined,
-      hasExpiration: false,
-      expirateDate: new Date()
+      hasValidUntilDate: false,
+      validUntilDate: new Date()
     });
     toggleModal();
   };
@@ -322,7 +326,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   }
 
   renderExpirationDateSection() {
-    const {previewURL, hasExpiration, expirateDate} = {...this.state};
+    const {previewURL, hasValidUntilDate, validUntilDate} = {...this.state};
     return (
       <section className="expiration-date-section">
         <div className="image-container">
@@ -334,14 +338,14 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
         <div className="expiration-date-container">
           <div className="expiration-toggle">
             <div className="prompt">Does this document have an expiration date?</div>
-            <Toggle isLarge value={hasExpiration} onToggle={() => this.setState({hasExpiration: !hasExpiration})} />
+            <Toggle isLarge value={hasValidUntilDate} onToggle={() => this.setState({hasValidUntilDate: !hasValidUntilDate})} />
           </div>
-          {hasExpiration && (
+          {hasValidUntilDate && (
             <div className="date-picker">
               <div className="label">EXPIRATION DATE</div>
               <DatePicker
-                selected={expirateDate}
-                onChange={date => {this.setState({expirateDate: date})}}
+                selected={validUntilDate}
+                onChange={date => {this.setState({validUntilDate: date});}}
                 dateFormatCalendar={'MMM yyyy'}
                 peekNextMonth
                 showMonthDropdown
