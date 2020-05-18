@@ -1,5 +1,5 @@
-import React, { Component, Fragment } from "react";
-import "./AdminDocumentType.scss";
+import React, { Component, Fragment } from 'react';
+import './AdminDocumentType.scss';
 
 interface AdminDocumentTypeProps {
   documentTypeName?: string;
@@ -15,14 +15,14 @@ interface AdminDocumentTypeProps {
 
 class AdminDocumentType extends Component<AdminDocumentTypeProps> {
   state = {
-    newName: "",
+    newName: '',
     newFieldKeys: [] as string[],
     newFieldValues: [] as string[],
     checks: {},
   };
 
   handleNewNameChange = (e) => {
-    e.target.value;
+    // e.target.value;
     this.setState({ newName: e.target.value });
   };
 
@@ -32,7 +32,7 @@ class AdminDocumentType extends Component<AdminDocumentTypeProps> {
         <form onSubmit={this.props.handleSubmitNewDocumentType}>
           <label>Document Type Name:</label>
           <input
-            key={"name-key"}
+            key={'name-key'}
             name="name"
             value={this.state.newName}
             onChange={this.handleNewNameChange}
@@ -109,7 +109,7 @@ class AdminDocumentType extends Component<AdminDocumentTypeProps> {
       isProtectedDoc,
       isRecordableDoc,
       fields,
-      edit,
+      edit
     } = { ...this.props };
 
     if (this.props.edit) {

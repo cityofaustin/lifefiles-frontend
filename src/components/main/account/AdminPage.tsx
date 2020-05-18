@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import Account from "../../../models/Account";
-import AdminDocumentType from "../../admin/AdminDocumentType";
-import AdminService from "../../../services/AdminService";
+import React, { Component } from 'react';
+import Account from '../../../models/Account';
+import AdminDocumentType from '../../admin/AdminDocumentType';
+import AdminService from '../../../services/AdminService';
 
 interface AdminPageProps {
   account: Account;
@@ -16,7 +16,7 @@ class AdminPage extends Component<AdminPageProps> {
 
   async componentDidMount() {
     const adminResponse = await AdminService.getAdminInfo();
-    console.log("Admin Response:");
+    console.log('Admin Response:');
     console.log(adminResponse);
 
     this.setState({
@@ -35,7 +35,7 @@ class AdminPage extends Component<AdminPageProps> {
   async handleSubmitNewDocumentType(e) {
     e.preventDefault();
 
-    let reqObject = {
+    const reqObject = {
       name: e.target.name.value,
       isTwoSided: e.target.isTwoSided.checked,
       hasExpirationDate: e.target.hasExpirationDate.checked,
@@ -46,16 +46,16 @@ class AdminPage extends Component<AdminPageProps> {
     await AdminService.addNewDocumentType(reqObject);
   }
 
-  async handleDeleteDocumentType(id) {
+  async handleDeleteDocumentType(id: any) {
     AdminService.deleteDocumentType(id);
   }
 
   renderViewFeatures(viewFeatures) {
     const viewFeaturesArr = [] as any;
 
-    for (let vf of viewFeatures) {
+    for (const vf of viewFeatures) {
       viewFeaturesArr.push(
-        <div style={{ padding: "40px" }} className="col-lg-6">
+        <div style={{ padding: '40px' }} className="col-lg-6">
           <p>{vf.featureName}</p>
         </div>
       );
@@ -67,14 +67,14 @@ class AdminPage extends Component<AdminPageProps> {
   renderAccountTypes(accountTypes) {
     const accountTypesArr = [] as any;
 
-    for (let at of accountTypes) {
-      let veiwFeaturesString = "";
-      for (let vf of at.viewFeatures) {
-        veiwFeaturesString += vf.featureName + " - ";
+    for (const at of accountTypes) {
+      let veiwFeaturesString = '';
+      for (const vf of at.viewFeatures) {
+        veiwFeaturesString += vf.featureName + ' - ';
       }
 
       accountTypesArr.push(
-        <div style={{ padding: "40px" }} className="col-lg-6">
+        <div style={{ padding: '40px' }} className="col-lg-6">
           <p>Name: {at.accountTypeName}</p>
           <p>Admin Level: {at.adminLevel}</p>
           <p>View Features: {veiwFeaturesString}</p>
@@ -88,9 +88,9 @@ class AdminPage extends Component<AdminPageProps> {
   renderDocuementTypes(documentTypes) {
     const docTypes = [] as any;
 
-    for (let dt of documentTypes) {
+    for (const dt of documentTypes) {
       docTypes.push(
-        <div style={{ width: "400px", padding: "40px" }} className="col-lg-3">
+        <div style={{ width: '400px', padding: '40px' }} className="col-lg-3">
           <AdminDocumentType
             key={dt.name}
             documentTypeName={dt.name}
@@ -111,7 +111,7 @@ class AdminPage extends Component<AdminPageProps> {
 
     // Add an editable one
     docTypes.push(
-      <div style={{ width: "400px", padding: "40px" }} className="col-lg-3">
+      <div style={{ width: '400px', padding: '40px' }} className="col-lg-3">
         <AdminDocumentType
           key="add-new-doctype"
           edit={true}
@@ -126,7 +126,7 @@ class AdminPage extends Component<AdminPageProps> {
   render() {
     const { documentTypes, viewFeatures, accountTypes } = { ...this.state };
     return (
-      <div className="main-content" style={{ marginTop: "20px" }}>
+      <div className="main-content" style={{ marginTop: '20px' }}>
         <h1> Admin Page </h1>
 
         <h2> Document Types </h2>

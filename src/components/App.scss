@@ -1,10 +1,18 @@
 @import "~bootstrap/scss/bootstrap.scss";
+@import './variables.scss';
 
 .app-container {
   width: 100%;
   // this div is for debug purposes
+  @include themify($themes) {
+    background-color: themed('backgroundColor');
+    // color: themed('color');
+  }
   .screen-info {
     // display: none;
+    @include themify($themes) {
+      color: themed('buttonTextColor');
+    }
     position: absolute;
     background-color: yellow;
     &::before {
