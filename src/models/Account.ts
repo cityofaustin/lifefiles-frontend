@@ -1,6 +1,6 @@
-import ShareRequest from './ShareRequest';
-import Document from './document/Document';
-import Role from './Role';
+import ShareRequest from "./ShareRequest";
+import Document from "./document/Document";
+import Role from "./Role";
 
 interface Account {
   username: string;
@@ -17,6 +17,7 @@ interface Account {
   organization?: string;
   firstName?: string;
   lastName?: string;
+  adminInfo?: any;
 }
 
 export default Account;

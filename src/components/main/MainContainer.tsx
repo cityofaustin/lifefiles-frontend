@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import './MainContainer.scss';
 import AccountPage from './account/AccountPage';
+import AdminPage from './account/AdminPage';
 import SearchInput from '../common/SearchInput';
 import Account from '../../models/Account';
 import Document from '../../models/document/Document';
@@ -557,6 +558,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     // return <Fragment />;
   }
 
+  renderAdminPage() {
+    const { account, privateEncryptionKey } = { ...this.props };
+    return <AdminPage goBack={this.goBack} account={account} />;
+  }
+
   renderMyClients() {
     const { searchedDocuments, accounts, sortAsc, clientShares } = { ...this.state };
     const { account, privateEncryptionKey } = { ...this.props };
@@ -640,6 +646,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 <Route exact path="/">
                   {account.role === 'notary' && <Redirect to="/clients" />}
                   {account.role === 'owner' && <Redirect to="/documents" />}
+                  {account.role === 'admin' && <Redirect to="/admin" />}
                 </Route>
                 <Route exact path="/account">
                   {this.renderAccount()}
@@ -668,7 +675,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                         {this.renderDocumentPage(props)}
                       </Fragment>
                     );
-                  }} />
+                  }} />>
+
+                <Route exact path="/admin">
+                
+                  {this.renderAdminPage()}
+                </Route>
               </Switch>
             </div>
           </div>
