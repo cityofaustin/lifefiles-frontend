@@ -17,6 +17,7 @@ interface Account {
   organization?: string;
   firstName?: string;
   lastName?: string;
+  adminInfo?: any;
 }
 
 export default Account;

@@ -28,8 +28,8 @@
       {
         "singleline": "never",
         "multiline": {
-          "objects": "never",
-          "arrays": "never",
+          "objects": "ignore",
+          "arrays": "ignore",
           "functions": "never",
           "typeLiterals": "ignore"
         }

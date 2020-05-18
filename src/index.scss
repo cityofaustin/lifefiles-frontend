@@ -21,10 +21,17 @@ body {
   display: flex;
   width: 100vw;
 }
+.theme-admin {
+  background-color: #121212;
+}
 
 #root {
   display: flex;
   width: 100%;
+  @include themify($themes) {
+    background-color: themed('backgroundColor');
+    color: themed('color');
+  }
 }
 
 .error {
@@ -95,6 +102,7 @@ body {
   @include themify($themes) {
     background-color: themed('colorPrimary');
     border-color: themed('colorPrimary');
+    color: themed('buttonTextColor');
   }
 }
 
@@ -306,11 +314,12 @@ body {
 button {
   &.button {
     width: fit-content;
-    color: white;
+    // color: white;
     font-size: 25px;
     font-weight: 500;
     @include themify($themes) {
       background-color: themed("colorPrimary");
+      color: themed("buttonTextColor");
     }
     &:disabled {
       background-color: #ccc;
