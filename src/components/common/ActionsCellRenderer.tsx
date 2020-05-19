@@ -4,6 +4,7 @@ import {ReactComponent as SaveSvg} from '../../img/save.svg';
 import './ActionsCellRenderer.scss';
 
 interface ActionsCellRendererProps {
+  data: any;
   value: boolean;
   setValue: (value) => void;
 }
@@ -16,19 +17,20 @@ ActionsCellRendererProps
     this.setState({ isChecked: boolValue });
   }
 
-  onUpdate = () => {
-    this.props.setValue('update');
+  onSave = () => {
+    this.props.setValue('save');
   };
 
   onDelete = () => {
+    const id = this.props.data._id;
     this.props.setValue('delete');
-  }
+  };
 
   render() {
     return (
       <div className="actions-cell">
         <DeleteSvg onClick={this.onDelete} />
-        <SaveSvg onClick={this.onUpdate} />
+        <SaveSvg onClick={this.onSave} />
       </div>
     );
   }
