@@ -1,3 +1,27 @@
+.grid {
+  justify-content: center;
+  display: flex;
+  .check-box {
+    svg {
+      width: 20px;
+      height: 20px;
+      .checkbox-checked_svg__fill-background {
+        fill: #03dac6;
+      }
+      .checkbox-checked_svg__border {
+        fill: #03dac6;
+      }
+      .checkbox-checked_svg__tick-color {
+        fill: black;
+      }
+    }
+  }
+}
+
 .check-box {
   cursor: pointer;
+  svg {
+    width: 32px;
+    height: 32px;
+  }
 }
