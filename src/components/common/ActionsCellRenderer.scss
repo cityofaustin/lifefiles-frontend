@@ -1,0 +1,21 @@
+.actions-cell {
+  justify-content: space-evenly;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  svg {
+    cursor: pointer;
+  }
+  svg:first-child {
+    width: 19.719px;
+    height: 26.691px;
+    g {
+      fill: #e1e1e1;
+    }
+  }
+  svg:nth-child(2) {
+    width: 24px;
+    height: 24px;
+    fill: #e1e1e1;
+  }
+}

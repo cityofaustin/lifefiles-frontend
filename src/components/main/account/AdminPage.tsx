@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import Account from '../../../models/Account';
 import AdminDocumentType from '../../admin/AdminDocumentType';
 import AdminService from '../../../services/AdminService';
+import './AdminPage.scss';
+import CheckboxCellRenderer from '../../common/CheckboxCellRenderer';
+import ActionsCellRenderer from '../../common/ActionsCellRenderer';
+
+import { AgGridReact } from 'ag-grid-react';
 
 interface AdminPageProps {
   account: Account;
@@ -9,27 +14,35 @@ interface AdminPageProps {
 }
 
 class AdminPage extends Component<AdminPageProps> {
-  state = { documentTypes: [], viewFeatures: [], accountTypes: [] };
+  state = {
+    documentTypes: [],
+    viewFeatures: [],
+    accountTypes: [],
+    documentTypesColumnDefs: [
+      { headerName: 'Name', field: 'name', filter: true,  editable: true },
+      { headerName: 'Two Sided', field: 'isTwoSided', cellRenderer: 'checkboxCellRenderer'},
+      { headerName: 'Expiration Date', field: 'hasExpirationDate', cellRenderer: 'checkboxCellRenderer' },
+      { headerName: 'Protected', field: 'isProtectedDoc', cellRenderer: 'checkboxCellRenderer' },
+      { headerName: 'Recordable', field: 'isRecordableDoc', cellRenderer: 'checkboxCellRenderer' },
+      { headerName: 'Actions', field: '_id', sortable: false, cellRenderer: 'actionsCellRenderer' },
+    ],
+  };
+
   constructor(props: Readonly<AdminPageProps>) {
     super(props);
   }
 
   async componentDidMount() {
-    const adminResponse = await AdminService.getAdminInfo();
-    console.log('Admin Response:');
-    console.log(adminResponse);
-
-    this.setState({
-      documentTypes: adminResponse.account.adminInfo.documentTypes,
-    });
-
-    this.setState({
-      viewFeatures: adminResponse.account.adminInfo.viewFeatures,
-    });
-
-    this.setState({
-      accountTypes: adminResponse.account.adminInfo.accountTypes,
-    });
+    const { account } = {...this.props};
+    if(account.role === 'admin') {
+      const adminResponse = await AdminService.getAdminInfo();
+      // console.log('Admin Response:');
+      // console.log(adminResponse);
+      this.setState({documentTypes: adminResponse.account.adminInfo.documentTypes,
+        viewFeatures: adminResponse.account.adminInfo.viewFeatures,
+        accountTypes: adminResponse.account.adminInfo.accountTypes,
+      });
+    }
   }
 
   async handleSubmitNewDocumentType(e) {
@@ -50,12 +63,16 @@ class AdminPage extends Component<AdminPageProps> {
     AdminService.deleteDocumentType(id);
   }
 
+  onDoocumentTypeCellValueChanged = (params) => {
+    debugger;
+  };
+
   renderViewFeatures(viewFeatures) {
     const viewFeaturesArr = [] as any;
 
     for (const vf of viewFeatures) {
       viewFeaturesArr.push(
-        <div style={{ padding: '40px' }} className="col-lg-6">
+        <div key={vf._id} style={{ padding: '40px' }} className="col-lg-6">
           <p>{vf.featureName}</p>
         </div>
       );
@@ -74,7 +91,7 @@ class AdminPage extends Component<AdminPageProps> {
       }
 
       accountTypesArr.push(
-        <div style={{ padding: '40px' }} className="col-lg-6">
+        <div key={at._id} style={{ padding: '40px' }} className="col-lg-6">
           <p>Name: {at.accountTypeName}</p>
           <p>Admin Level: {at.adminLevel}</p>
           <p>View Features: {veiwFeaturesString}</p>
@@ -90,7 +107,7 @@ class AdminPage extends Component<AdminPageProps> {
 
     for (const dt of documentTypes) {
       docTypes.push(
-        <div style={{ width: '400px', padding: '40px' }} className="col-lg-3">
+        <div key={dt._id} style={{ width: '400px', padding: '40px' }} className="col-lg-3">
           <AdminDocumentType
             key={dt.name}
             documentTypeName={dt.name}
@@ -111,7 +128,7 @@ class AdminPage extends Component<AdminPageProps> {
 
     // Add an editable one
     docTypes.push(
-      <div style={{ width: '400px', padding: '40px' }} className="col-lg-3">
+      <div key={'add-new'} style={{ width: '400px', padding: '40px' }} className="col-lg-3">
         <AdminDocumentType
           key="add-new-doctype"
           edit={true}
@@ -124,12 +141,31 @@ class AdminPage extends Component<AdminPageProps> {
   }
 
   render() {
-    const { documentTypes, viewFeatures, accountTypes } = { ...this.state };
+    const { documentTypes, documentTypesColumnDefs, viewFeatures, accountTypes } = { ...this.state };
     return (
-      <div className="main-content" style={{ marginTop: '20px' }}>
+      <div className="admin-content" style={{ marginTop: '20px' }}>
         <h1> Admin Page </h1>
-
         <h2> Document Types </h2>
+        <div
+          className="ag-theme-alpine-dark"
+          style={{
+            height: documentTypes.length > 0 ? `${documentTypes.length*50}px` : '300px',
+            width: '100%',
+          }}
+        >
+          <AgGridReact
+            columnDefs={documentTypesColumnDefs}
+            rowData={documentTypes}
+            frameworkComponents={{checkboxCellRenderer: CheckboxCellRenderer, actionsCellRenderer: ActionsCellRenderer}}
+            defaultColDef={{
+              flex: 1,
+              editable: false,
+              resizable: true,
+              sortable: true
+            }}
+            onCellValueChanged={this.onDoocumentTypeCellValueChanged}
+          />
+        </div>
         <div className="row">{this.renderDocuementTypes(documentTypes)}</div>
 
         <h2> Account Types </h2>
