@@ -6,6 +6,7 @@ import './AdminPage.scss';
 import CheckboxCellRenderer from '../../common/CheckboxCellRenderer';
 import ActionsCellRenderer from '../../common/ActionsCellRenderer';
 import { ReactComponent as AddSvg } from '../../../img/add.svg';
+import { ReactComponent as SaveSvg } from '../../../img/save.svg';
 
 import { AgGridReact } from 'ag-grid-react';
 import { Alert } from 'reactstrap';
@@ -14,6 +15,7 @@ import {
   ColumnApi,
   GridOptions,
   CellValueChangedEvent,
+  ColDef,
 } from 'ag-grid-community';
 
 interface AdminPageProps {
@@ -25,7 +27,9 @@ interface AdminPageState {
   documentTypes: any[];
   viewFeatures: any;
   accountTypes: any;
-  documentTypesColumnDefs: any;
+  documentTypesColumnDefs: ColDef[];
+  viewFeaturesColumnDefs: ColDef[];
+  accountTypesColumnDefs: ColDef[];
   documentTypeSavedSuccess: boolean;
   documentTypeDeletedSuccess: boolean;
 }
@@ -69,6 +73,16 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           cellRenderer: 'actionsCellRenderer',
         },
       ],
+      viewFeaturesColumnDefs: [
+        { headerName: 'View All Owners', field: 'ownerViewFeature' },
+        { headerName: 'View All Helpers', field: 'helperViewFeature' },
+      ],
+      accountTypesColumnDefs: [
+        { headerName: 'Title', field: 'accountTypeName' },
+        { headerName: 'Account Type', field: 'accountTypeName' },
+        { headerName: 'Is Notary', field: 'accountTypeName' },
+        { headerName: 'Admin Level', field: 'adminLevel' },
+      ],
       documentTypeSavedSuccess: false,
       documentTypeDeletedSuccess: false,
     };
@@ -97,33 +111,24 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     this.documentTypesGridColumnApi = params.columnApi!;
   };
 
-  // async handleSubmitNewDocumentType(e) {
-  //   e.preventDefault();
-
-  //   const reqObject = {
-  //     name: e.target.name.value,
-  //     isTwoSided: e.target.isTwoSided.checked,
-  //     hasExpirationDate: e.target.hasExpirationDate.checked,
-  //     isProtectedDoc: e.target.isProtectedDoc.checked,
-  //     isRecordableDoc: e.target.isRecordableDoc.checked,
-  //   };
-
-  //   await AdminService.addNewDocumentType(reqObject);
-  // }
-
   async handleDeleteDocumentType(id: any) {}
 
   onDocumentTypeCellValueChanged = async (params: CellValueChangedEvent) => {
-    let { documentTypes, documentTypeDeletedSuccess, documentTypeSavedSuccess } = { ...this.state };
+    let {
+      documentTypes,
+      documentTypeDeletedSuccess,
+      documentTypeSavedSuccess,
+    } = { ...this.state };
     if (params.value === 'save') {
       // TODO: add api call either update or create or delete
       const reqObject = { ...params.data };
       delete reqObject.action;
       if (params.data._id) {
-        await AdminService.addNewDocumentType(reqObject);
+        await AdminService.updatedDocumentType(reqObject);
       } else {
-        const newDocType = (await AdminService.addNewDocumentType(reqObject)).savedDocType;
-        for(let i = 0; i < documentTypes.length; i++) {
+        const newDocType = (await AdminService.addNewDocumentType(reqObject))
+          .savedDocType;
+        for (let i = 0; i < documentTypes.length; i++) {
           if (i === params.rowIndex) {
             documentTypes[i]._id = newDocType._id;
           }
@@ -143,7 +148,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           return index !== params.rowIndex;
         });
         if (deleteId) {
-          // await AdminService.deleteDocumentType(deleteId);
+          await AdminService.deleteDocumentType(deleteId);
         }
         documentTypeDeletedSuccess = true;
       } catch (err) {
@@ -156,7 +161,10 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         this.documentTypesGridApi.setRowData(documentTypes);
         this.documentTypesGridApi.refreshCells();
         window.setTimeout(() => {
-          this.setState({ documentTypeDeletedSuccess: false, documentTypeSavedSuccess: false });
+          this.setState({
+            documentTypeDeletedSuccess: false,
+            documentTypeSavedSuccess: false,
+          });
         }, 2000);
       }
     );
@@ -177,6 +185,25 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       this.documentTypesGridApi.refreshCells();
       // this.documentTypesGridApi.redrawRows();
     });
+  };
+
+  getAccountTypesViewFeatures = (accountTypes, viewFeatures) => {
+    const accountTypeViewFeatures: any[] = [];
+    for(const viewFeature of viewFeatures) { // rows
+      // [{admin: 'true - gridView', cityAdministrator: 'true - gridView'}, ...]
+      const accountTypeViewFeature = {};
+      for(const accountType of accountTypes) {
+        accountTypeViewFeature[accountType.accountTypeName] = '';
+        if(accountType.viewFeatures.find(accountViewFeature => accountViewFeature.featureName === viewFeature.featureName)) {
+          accountTypeViewFeature[accountType.accountTypeName] += 'True';
+        } else {
+          accountTypeViewFeature[accountType.accountTypeName] += 'False';
+        }
+        accountTypeViewFeature[accountType.accountTypeName] += ` - ${viewFeature.featureName}`;
+      }
+      accountTypeViewFeatures.push(accountTypeViewFeature);
+    }
+    return accountTypeViewFeatures;
   };
 
   renderViewFeatures(viewFeatures) {
@@ -214,63 +241,21 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     return accountTypesArr;
   }
 
-  // renderDocuementTypes(documentTypes) {
-  //   const docTypes = [] as any;
-
-  //   let i = 0;
-  //   for (const dt of documentTypes) {
-  //     docTypes.push(
-  //       <div
-  //         key={dt._id}
-  //         style={{ width: '400px', padding: '40px' }}
-  //         className="col-lg-3"
-  //       >
-  //         <AdminDocumentType
-  //           key={i}
-  //           documentTypeName={dt.name}
-  //           isTwoSided={dt.isTwoSided}
-  //           hasExpirationDate={dt.hasExpirationDate}
-  //           isProtectedDoc={dt.isProtectedDoc}
-  //           isRecordableDoc={dt.isRecordableDoc}
-  //           fields={dt.fields}
-  //           edit={false}
-  //           handleSubmitNewDocumentType={this.handleSubmitNewDocumentType}
-  //           handleDeleteDocumentType={() =>
-  //             this.handleDeleteDocumentType(dt._id)
-  //           }
-  //         ></AdminDocumentType>
-  //       </div>
-  //     );
-  //     i++;
-  //   }
-
-  //   // Add an editable one
-  //   docTypes.push(
-  //     <div
-  //       key={'add-new'}
-  //       style={{ width: '400px', padding: '40px' }}
-  //       className="col-lg-3"
-  //     >
-  //       <AdminDocumentType
-  //         key="add-new-doctype"
-  //         edit={true}
-  //         handleSubmitNewDocumentType={this.handleSubmitNewDocumentType}
-  //       ></AdminDocumentType>
-  //     </div>
-  //   );
-
-  //   return docTypes;
-  // }
-
   render() {
     const {
       documentTypes,
       documentTypesColumnDefs,
+      viewFeaturesColumnDefs,
+      accountTypesColumnDefs,
       viewFeatures,
       accountTypes,
       documentTypeSavedSuccess,
       documentTypeDeletedSuccess,
     } = { ...this.state };
+    const accountTypeViewFeatures = this.getAccountTypesViewFeatures(accountTypes, viewFeatures);
+    if(accountTypeViewFeatures.length > 0) {
+      // debugger;
+    }
     return (
       <div className="admin-content" style={{ marginTop: '20px' }}>
         <h1>Admin Page</h1>
@@ -312,13 +297,121 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             onGridReady={this.onDocumentTypesGridReady}
           />
         </div>
+        <br />
+        <p>
+          * Don't delete all of the document types or the app won't work
+          properly.
+        </p>
+        <h2 className="view-feature-title">
+          The View Features/Permissions Used
+        </h2>
+        <div className="save-container">
+          <SaveSvg className="save" onClick={this.handleAddDocumentType} />
+        </div>
+        <div
+          className="ag-theme-alpine-dark"
+          style={{
+            height:
+              viewFeatures.length > 0
+                ? `${viewFeatures.length * 42 + 51}px`
+                : '300px',
+            width: '100%',
+          }}
+        >
+          <AgGridReact
+            columnDefs={viewFeaturesColumnDefs}
+            rowData={viewFeatures.map((viewFeature) => ({
+              ownerViewFeature: viewFeature.featureName,
+              helperViewFeature: viewFeature.featureName,
+            }))}
+            frameworkComponents={{
+              checkboxCellRenderer: CheckboxCellRenderer,
+              actionsCellRenderer: ActionsCellRenderer,
+            }}
+            defaultColDef={{
+              flex: 1,
+              editable: false,
+              resizable: true,
+              sortable: true,
+            }}
+            onCellValueChanged={() => {}}
+            animateRows
+            onGridReady={() => {}}
+          />
+        </div>
+        {/* <div className="row">{this.renderViewFeatures(viewFeatures)}</div> */}
         {/* <div className="row">{this.renderDocuementTypes(documentTypes)}</div> */}
 
         <h2 className="account">The Account Types Used</h2>
-        <div className="row">{this.renderAccountTypes(accountTypes)}</div>
-
-        <h2>View Features</h2>
-        <div className="row">{this.renderViewFeatures(viewFeatures)}</div>
+        <div className="add-container">
+          <AddSvg className="add" onClick={() => {}} />
+        </div>
+        <div
+          className="ag-theme-alpine-dark"
+          style={{
+            height:
+              accountTypes.length > 0
+                ? `${accountTypes.length * 42 + 51}px`
+                : '300px',
+            width: '100%',
+          }}
+        >
+          <AgGridReact
+            columnDefs={accountTypesColumnDefs}
+            rowData={accountTypes}
+            frameworkComponents={{
+              checkboxCellRenderer: CheckboxCellRenderer,
+              actionsCellRenderer: ActionsCellRenderer,
+            }}
+            defaultColDef={{
+              flex: 1,
+              editable: false,
+              resizable: true,
+              sortable: true,
+            }}
+            onCellValueChanged={() => {}}
+            animateRows
+            onGridReady={() => {}}
+          />
+        </div>
+        <h2 className="account">The Share Permissions Per Admin... TBD</h2>
+        <h2 className="account">The Share Permissions Per Owner... TBD</h2>
+        <h2 className="account">The Share Permissions Per Helper... TBD</h2>
+        <h2 className="account">The Share Permissions Per Account Type Used</h2>
+        <div
+          className="ag-theme-alpine-dark"
+          style={{
+            height:
+              viewFeatures.length > 0
+                ? `${viewFeatures.length * 42 + 51}px`
+                : '300px',
+            width: '100%',
+          }}
+        >
+          <AgGridReact
+            columnDefs={accountTypes.map(accountType => {
+              return {
+                headerName: accountType.accountTypeName,
+                field: accountType.accountTypeName
+              };
+            })}
+            rowData={accountTypeViewFeatures}
+            frameworkComponents={{
+              checkboxCellRenderer: CheckboxCellRenderer,
+              actionsCellRenderer: ActionsCellRenderer,
+            }}
+            defaultColDef={{
+              flex: 1,
+              editable: false,
+              resizable: true,
+              sortable: true,
+            }}
+            onCellValueChanged={() => {}}
+            animateRows
+            onGridReady={() => {}}
+          />
+        </div>
+        {/* <div className="row">{this.renderAccountTypes(accountTypes)}</div> */}
       </div>
     );
   }

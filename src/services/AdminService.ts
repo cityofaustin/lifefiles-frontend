@@ -18,6 +18,10 @@ class AccountService extends AgentService {
   static async addNewDocumentType(docTypeReq) {
     return await super.post('/admin-document-types/', docTypeReq);
   }
+
+  static async updatedDocumentType(documentType) {
+    return await super.put('/admin-document-types/' + documentType._id, documentType);
+  }
 }
 
 export default AccountService;
