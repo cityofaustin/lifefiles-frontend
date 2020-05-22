@@ -5,6 +5,7 @@ import AdminService from '../../../services/AdminService';
 import './AdminPage.scss';
 import CheckboxCellRenderer from '../../common/CheckboxCellRenderer';
 import CheckboxNameCellRenderer from '../../common/CheckboxNameCellRenderer';
+import RoleCellRenderer from '../../common/RoleCellRenderer';
 import ActionsCellRenderer from '../../common/ActionsCellRenderer';
 import { ReactComponent as AddSvg } from '../../../img/add.svg';
 import { ReactComponent as SaveSvg } from '../../../img/save.svg';
@@ -30,15 +31,26 @@ interface AdminPageState {
   coreFeatures: any;
   accountTypes: any;
   documentTypesColumnDefs: ColDef[];
-  // viewFeaturesColumnDefs: ColDef[];
   accountTypesColumnDefs: ColDef[];
   documentTypeSavedSuccess: boolean;
   documentTypeDeletedSuccess: boolean;
+  accountTypeSavedSuccess: boolean;
+  accountTypeDeletedSuccess: boolean;
+  viewFeatureOwnerSavedSuccess: boolean;
+  viewFeatureOwnerDeletedSuccess: boolean;
+  viewFeatureHelperSavedSuccess: boolean;
+  viewFeatureHelperDeletedSuccess: boolean;
+  coreFeatureOwnerSavedSuccess: boolean;
+  coreFeatureOwnerDeletedSuccess: boolean;
+  coreFeatureHelperSavedSuccess: boolean;
+  coreFeatureHelperDeletedSuccess: boolean;
 }
 
 class AdminPage extends Component<AdminPageProps, AdminPageState> {
   documentTypesGridApi: GridApi;
   documentTypesGridColumnApi: ColumnApi;
+  accountTypesGridApi: GridApi;
+  accountTypesGridColumnApi: ColumnApi;
 
   constructor(props: Readonly<AdminPageProps>) {
     super(props);
@@ -76,21 +88,18 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           cellRenderer: 'actionsCellRenderer',
         },
       ],
-      // viewFeaturesColumnDefs: [
-      //   {
-      //     headerName: 'View All Owners',
-      //     field: 'ownerViewFeature',
-      //     cellRenderer: 'checkboxNameCellRenderer',
-      //   },
-      //   {
-      //     headerName: 'View All Helpers',
-      //     field: 'helperViewFeature',
-      //     cellRenderer: 'checkboxNameCellRenderer',
-      //   },
-      // ],
       accountTypesColumnDefs: [
-        { headerName: 'Title', field: 'accountTypeName' },
-        { headerName: 'Role', field: 'role' },
+        { headerName: 'Title', field: 'accountTypeName', editable: true },
+        {
+          field: 'role',
+          cellRenderer: 'roleCellRenderer',
+          // cellEditor: 'agRichSelectCellEditor',
+          cellEditorParams: {
+            values: ['owner', 'helper'],
+            cellRenderer: 'roleCellRenderer',
+          },
+          editable: true
+        },
         // NOTE: took out for now
         // { headerName: 'Admin Level', field: 'adminLevel' },
         {
@@ -102,6 +111,16 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       ],
       documentTypeSavedSuccess: false,
       documentTypeDeletedSuccess: false,
+      accountTypeSavedSuccess: false,
+      accountTypeDeletedSuccess: false,
+      viewFeatureOwnerSavedSuccess: false,
+      viewFeatureOwnerDeletedSuccess: false,
+      viewFeatureHelperSavedSuccess: false,
+      viewFeatureHelperDeletedSuccess: false,
+      coreFeatureOwnerSavedSuccess: false,
+      coreFeatureOwnerDeletedSuccess: false,
+      coreFeatureHelperSavedSuccess: false,
+      coreFeatureHelperDeletedSuccess: false,
     };
   }
 
@@ -109,8 +128,6 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     const { account } = { ...this.props };
     if (account.role === 'admin') {
       const adminResponse = await AdminService.getAdminInfo();
-      // console.log('Admin Response:');
-      // console.log(adminResponse);
       this.setState({
         documentTypes: adminResponse.account.adminInfo.documentTypes
         .map((documentType) => ({ ...documentType, action: '' })),
@@ -129,7 +146,49 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     this.documentTypesGridColumnApi = params.columnApi!;
   };
 
-  async handleDeleteDocumentType(id: any) {}
+  onAccountTypesGridReady = (params: GridOptions) => {
+    this.accountTypesGridApi = params.api!;
+    this.accountTypesGridColumnApi = params.columnApi!;
+  };
+
+  onAccountTypeCellValueChanged = (params: CellValueChangedEvent) => {
+    let {
+      accountTypes,
+      accountTypeDeletedSuccess,
+      accountTypeSavedSuccess,
+    } = { ...this.state };
+    if (params.value === 'save') {
+      // TODO:
+      accountTypeSavedSuccess = true;
+    }
+    if (params.value === 'delete') {
+      // TODO:
+      let deleteId;
+      accountTypes = accountTypes.filter((accountType, index) => {
+        if (index === params.rowIndex && accountType._id) {
+          deleteId = accountType._id;
+        }
+        return index !== params.rowIndex;
+      });
+      if (deleteId) {
+        // await AdminService.deleteAccountType(deleteId);
+      }
+      accountTypeDeletedSuccess = true;
+    }
+    this.setState(
+      { accountTypes, accountTypeDeletedSuccess, accountTypeSavedSuccess },
+      () => {
+        this.accountTypesGridApi.setRowData(accountTypes);
+        this.accountTypesGridApi.refreshCells();
+        window.setTimeout(() => {
+          this.setState({
+            accountTypeDeletedSuccess: false,
+            accountTypeSavedSuccess: false,
+          });
+        }, 2000);
+      }
+    );
+  };
 
   onDocumentTypeCellValueChanged = async (params: CellValueChangedEvent) => {
     let {
@@ -205,6 +264,23 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     });
   };
 
+  handleAddAccountType = () => {
+    const { accountTypes } = { ...this.state };
+    accountTypes.push({
+      // so that the feature tables don't crash with an empty column
+      accountTypeName: `Helper Type #${accountTypes.length + 1}`,
+      adminLevel: 2,
+      coreFeatures: [],
+      role: 'helper',
+      viewFeatures: [],
+      action: '',
+    });
+    this.setState({ accountTypes }, () => {
+      this.accountTypesGridApi.setRowData(accountTypes);
+      this.accountTypesGridApi.refreshCells();
+    });
+  };
+
   getAccountTypesViewFeatures = (accountTypes, viewFeatures) => {
     const accountTypeViewFeatures: any[] = [];
     for (const viewFeature of viewFeatures) {
@@ -214,7 +290,6 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       for (const accountType of accountTypes) {
         accountTypeViewFeature[accountType.accountTypeName] = '';
         const checkLabelItem = { isChecked: false, label: '' };
-        // debugger;
         if (
           accountType.viewFeatures.find(
             (accountViewFeature) =>
@@ -272,7 +347,12 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       accountTypes,
       documentTypeSavedSuccess,
       documentTypeDeletedSuccess,
+      accountTypeSavedSuccess,
+      accountTypeDeletedSuccess,
     } = { ...this.state };
+    // const accountTypeViewFeatures = [];
+    // const accountTypeCoreFeaturesOwner = [];
+    // const accountTypeCoreFeaturesHelper = [];
     const accountTypeViewFeatures = this.getAccountTypesViewFeatures(
       accountTypes,
       viewFeatures
@@ -285,6 +365,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       accountTypes.filter(accountType => accountType.role === 'helper'),
       coreFeatures.filter(coreFeature => coreFeature.featureRole === 'helper')
     );
+    // debugger;
     return (
       <div className="admin-content" style={{ marginTop: '20px' }}>
         <h1>Admin Page</h1>
@@ -334,8 +415,14 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         </p>
 
         <h2 className="account">Account Types</h2>
+        <Alert color="success" isOpen={accountTypeSavedSuccess}>
+          Successfully Saved Account Type!
+        </Alert>
+        <Alert color="danger" isOpen={accountTypeDeletedSuccess}>
+          Successfully Deleted Account Type!
+        </Alert>
         <div className="add-container" style={{width: '650px'}}>
-          <AddSvg className="add" onClick={() => {}} />
+          <AddSvg className="add" onClick={this.handleAddAccountType} />
         </div>
         <div
           className="ag-theme-alpine-dark"
@@ -351,8 +438,8 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             columnDefs={accountTypesColumnDefs}
             rowData={accountTypes}
             frameworkComponents={{
-              checkboxCellRenderer: CheckboxCellRenderer,
               actionsCellRenderer: ActionsCellRenderer,
+              roleCellRenderer: RoleCellRenderer
             }}
             defaultColDef={{
               flex: 1,
@@ -360,9 +447,9 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
               resizable: true,
               sortable: true,
             }}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={this.onAccountTypeCellValueChanged}
             animateRows
-            onGridReady={() => {}}
+            onGridReady={this.onAccountTypesGridReady}
             // domLayout="print"
           />
         </div>
@@ -374,7 +461,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         </h2>
         <h3>Owners</h3>
         <div className="save-container">
-          <SaveSvg className="save" onClick={this.handleAddDocumentType} />
+          <SaveSvg className="save" onClick={() => {}} />
         </div>
         <div
           className="ag-theme-alpine-dark"
@@ -412,7 +499,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         </div>
         <h3>Helpers</h3>
         <div className="save-container">
-          <SaveSvg className="save" onClick={this.handleAddDocumentType} />
+          <SaveSvg className="save" onClick={() => {}} />
         </div>
         <div
           className="ag-theme-alpine-dark"
@@ -455,7 +542,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         </h2>
         <h3>Owners</h3>
         <div className="save-container">
-          <SaveSvg className="save" onClick={this.handleAddDocumentType} />
+          <SaveSvg className="save" onClick={() => {}} />
         </div>
         <div
           className="ag-theme-alpine-dark"
@@ -493,7 +580,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         </div>
         <h3>Helpers</h3>
         <div className="save-container">
-          <SaveSvg className="save" onClick={this.handleAddDocumentType} />
+          <SaveSvg className="save" onClick={() => {}} />
         </div>
         <div
           className="ag-theme-alpine-dark"

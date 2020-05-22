@@ -20,10 +20,14 @@ export default class CheckboxNameCellRenderer extends Component<CheckboxNameCell
   }
 
   onChanged = () => {
-    // TODO:
-    // const checked = !this.state.isChecked;
-    // this.setState({ isChecked: checked });
-    // this.props.setValue(checked);
+    const {isChecked, label} = {...this.state};
+    const newState = {
+      isChecked: !isChecked,
+      label
+    };
+    this.setState({ isChecked: newState.isChecked }, () => {
+      this.props.setValue(JSON.stringify(newState));
+    });
   };
 
   render() {
