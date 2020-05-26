@@ -1,13 +1,24 @@
 $themes: (
   owner: (
     colorPrimary: #2362C7,
-    colorDisabled: #90afe2
-    //logoImg: url(../img/logo/logo_owner_t_v2.png),
+    colorDisabled: #90afe2,
+    backgroundColor: #fcfcfc,
+    color: #000,
+    buttonTextColor: white
   ),
   notary: (
     colorPrimary: #4ca9d8,
-    colorDisabled: #cad2e6
-    //logoImg: url(../img/logo/logo_notary_t_v2.png),
+    colorDisabled: #cad2e6,
+    backgroundColor: #fcfcfc,
+    color: #000,
+    buttonTextColor: white
+  ),
+  admin: (
+    colorPrimary: #03dac6,
+    colorDisabled: #cad2e6,
+    backgroundColor: #121212,
+    color: #e1e1e1,
+    buttonTextColor: black
   )
 );
 

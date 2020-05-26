@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import './MainContainer.scss';
 import AccountPage from './account/AccountPage';
+import AdminPage from './account/AdminPage';
 import SearchInput from '../common/SearchInput';
 import Account from '../../models/Account';
 import Document from '../../models/document/Document';
@@ -248,7 +249,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     try {
       if (newFile) {
         try {
-          if(referencedAccount) {
+          if (referencedAccount) {
             const caseWorkerFile = newFile;
             const caseWorkerThumbnail = newThumbnailFile;
             const originalBase64 = await CryptoUtil.getDecryptedString(privateEncryptionKey!, (await ZipUtil.unzip(await StringUtil.fileContentsToString(newFile))));
@@ -257,8 +258,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             const ownerEncryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(referencedAccount.didPublicEncryptionKey!, thumbnailBase64);
             const ownerZipped: Blob = await ZipUtil.zip(ownerEncrypted);
             const ownerZippedThumbnail: Blob = await ZipUtil.zip(ownerEncryptedThumbnail);
-            const ownerFile = new File([ownerZipped], 'encrypted-image.zip', {type: 'application/zip',lastModified: Date.now()});
-            const ownerThumbnail = new File([ownerZippedThumbnail], 'encrypted-image-thumbnail.zip', {type: 'application/zip',lastModified: Date.now()});
+            const ownerFile = new File([ownerZipped], 'encrypted-image.zip', { type: 'application/zip', lastModified: Date.now() });
+            const ownerThumbnail = new File([ownerZippedThumbnail], 'encrypted-image-thumbnail.zip', { type: 'application/zip', lastModified: Date.now() });
             const response = await DocumentService.uploadDocumentOnBehalfOfUser(
               caseWorkerFile,
               caseWorkerThumbnail,
@@ -384,39 +385,39 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   handleClientSelected = async (otherOwnerAccount: Account) => {
-    const {searchedDocuments, documentQuery} = {...this.state};
-    let {documents} = {...this.state};
-    const {account} = {...this.props};
-    this.setState({isLoading: true});
+    const { searchedDocuments, documentQuery } = { ...this.state };
+    let { documents } = { ...this.state };
+    const { account } = { ...this.props };
+    this.setState({ isLoading: true });
     try {
       const shareRequests = await ShareRequestService.get(otherOwnerAccount.id);
       const sharedDocuments: Document[] = shareRequests
-      .filter((shareRequest: ShareRequest) => {
-        return shareRequest.shareWithAccountId === account.id;
-      })
-      .map((shareRequest: ShareRequest) => {
-        return {
-          type: shareRequest.documentType,
-          // FIXME: this could be handled more elegantly, but this way works for now, the server should be sending owner's documenturl
-          // and not the thumbnail but should instead be sending both as empty strings.
-          url: shareRequest.approved ? shareRequest.documentUrl : '',
-          thumbnailUrl: shareRequest.documentThumbnailUrl ? shareRequest.documentThumbnailUrl : '',
-          sharedWithAccountIds: [shareRequest.shareWithAccountId]
-        };
-      });
+        .filter((shareRequest: ShareRequest) => {
+          return shareRequest.shareWithAccountId === account.id;
+        })
+        .map((shareRequest: ShareRequest) => {
+          return {
+            type: shareRequest.documentType,
+            // FIXME: this could be handled more elegantly, but this way works for now, the server should be sending owner's documenturl
+            // and not the thumbnail but should instead be sending both as empty strings.
+            url: shareRequest.approved ? shareRequest.documentUrl : '',
+            thumbnailUrl: shareRequest.documentThumbnailUrl ? shareRequest.documentThumbnailUrl : '',
+            sharedWithAccountIds: [shareRequest.shareWithAccountId]
+          };
+        });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(otherOwnerAccount.id);
       const notSharedDocuments: Document[] = docTypes
-      .filter(docType => {
-        return !sharedDocuments.some(sharedDocument => sharedDocument.type === docType);
-      })
-      .map((docType => {
-        return {
-          type: docType,
-          url: '',
-          thumbnailUrl: '',
-          sharedWithAccountIds: []
-        };
-      }));
+        .filter(docType => {
+          return !sharedDocuments.some(sharedDocument => sharedDocument.type === docType);
+        })
+        .map((docType => {
+          return {
+            type: docType,
+            url: '',
+            thumbnailUrl: '',
+            sharedWithAccountIds: []
+          };
+        }));
       documents = [...account.documents, ...sharedDocuments, ...notSharedDocuments];
     } catch (err) {
       console.error(err.message);
@@ -486,12 +487,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderTopBarSmall() {
-    const { handleLogout } = { ...this.props };
+    const { account } = { ...this.props };
     const { isSmallMenuOpen } = { ...this.state };
     return (
       <div id="main-top-bar-sm">
         <LogoSm onClick={() => this.setSidebarOpen(true)} />
-        <SearchInput handleSearch={this.handleSearch} />
+        {account.role !== 'admin' && (
+          <SearchInput handleSearch={this.handleSearch} />
+        )}
       </div>
     );
   }
@@ -508,11 +511,13 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               <Folder />
             </Link>
           </div>
-          <Row id="main-search">
-            <Col style={{ display: 'flex' }}>
-              <SearchInput handleSearch={this.handleSearch} />
-            </Col>
-          </Row>
+          {account.role !== 'admin' && (
+            <Row id="main-search">
+              <Col style={{ display: 'flex' }}>
+                <SearchInput handleSearch={this.handleSearch} />
+              </Col>
+            </Row>
+          )}
           <div id="main-profile">
             <Dropdown
               isOpen={isAccountMenuOpen}
@@ -559,6 +564,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     return <AccountPage goBack={this.goBack} account={account} />;
     // }
     // return <Fragment />;
+  }
+
+  renderAdminPage() {
+    const { account, privateEncryptionKey } = { ...this.props };
+    return <AdminPage goBack={this.goBack} account={account} />;
   }
 
   renderMyClients() {
@@ -637,13 +647,16 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           {this.renderTopBar()}
           {this.renderTopBarSmall()}
           <div className="main-page">
-            <div className="main-side" />
+            {account.role !== 'admin' && (
+              <div className="main-side" />
+            )}
             <div className="main-section">
               {isAccount && <Redirect push to="/account" />}
               <Switch>
                 <Route exact path="/">
                   {account.role === 'notary' && <Redirect to="/clients" />}
                   {account.role === 'owner' && <Redirect to="/documents" />}
+                  {account.role === 'admin' && <Redirect to="/admin" />}
                 </Route>
                 <Route exact path="/account">
                   {this.renderAccount()}
@@ -652,6 +665,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   return (
                     <Fragment>
                       {account.role === 'notary' && <Redirect push to="/clients" />}
+                      {account.role === 'admin' && <Redirect push to="/admin" />}
                       {this.renderAddDocumentModal(props)}
                       {this.renderUpdateDocumentModal(props)}
                       {this.renderDocumentPage(props)}
@@ -660,6 +674,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 }} />
                 <Route exact path="/clients">
                   {account.role === 'owner' && <Redirect push to="/documents" />}
+                  {account.role === 'admin' && <Redirect push to="/admin" />}
                   {this.renderMyClients()}
                 </Route>
                 <Route exact path="/clients/:id/documents" render={
@@ -667,12 +682,18 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     return (
                       <Fragment>
                         {account.role === 'owner' && <Redirect push to="/documents" />}
+                        {account.role === 'admin' && <Redirect push to="/admin" />}
                         {this.renderAddDocumentModal(props)}
                         {this.renderUpdateDocumentModal(props)}
                         {this.renderDocumentPage(props)}
                       </Fragment>
                     );
-                  }} />
+                  }} />>
+                <Route exact path="/admin">
+                  {account.role === 'owner' && <Redirect push to="/documents" />}
+                  {account.role === 'notary' && <Redirect push to="/clients" />}
+                  {this.renderAdminPage()}
+                </Route>
               </Switch>
             </div>
           </div>

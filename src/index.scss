@@ -10,6 +10,8 @@
 @import '~bootstrap/scss/bootstrap';
 @import '~react-multi-carousel/lib/styles.css';
 @import '~react-datepicker/src/stylesheets/datepicker';
+@import '~ag-grid-community/src/styles/ag-grid';
+@import '~ag-grid-community/src/styles/ag-theme-alpine-dark/sass/ag-theme-alpine-dark';
 
 html { height:100%; }
 
@@ -21,10 +23,17 @@ body {
   display: flex;
   width: 100vw;
 }
+.theme-admin {
+  background-color: #121212;
+}
 
 #root {
   display: flex;
   width: 100%;
+  @include themify($themes) {
+    background-color: themed('backgroundColor');
+    color: themed('color');
+  }
 }
 
 .error {
@@ -95,6 +104,7 @@ body {
   @include themify($themes) {
     background-color: themed('colorPrimary');
     border-color: themed('colorPrimary');
+    color: themed('buttonTextColor');
   }
 }
 
@@ -306,11 +316,12 @@ body {
 button {
   &.button {
     width: fit-content;
-    color: white;
+    // color: white;
     font-size: 25px;
     font-weight: 500;
     @include themify($themes) {
       background-color: themed("colorPrimary");
+      color: themed("buttonTextColor");
     }
     &:disabled {
       background-color: #ccc;
@@ -327,4 +338,22 @@ button {
     background-color: transparent !important;
     color: #d95868;
   }
+}
+
+.alert-success {
+  // color: #;
+  // background-color: #d4edda;
+  // border-color: #c3e6cb;
+  color: #d4edda;
+  background-color: #155724;
+  border-color: #155724;
+}
+
+.alert-danger {
+  // color: #693237;
+  // background-color: #f4dfe1;
+  // border-color: #f0d2d5;
+  color: #f4dfe1;
+  background-color: #693237;
+  border-color: #693237;
 }

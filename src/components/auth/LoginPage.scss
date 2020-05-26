@@ -15,6 +15,7 @@
     justify-content: center;
     align-items: center;
     background: #fafafa;
+    color: black;
 
     .login-card {
       @include media-breakpoint-up(sm) {width: 320px;}
