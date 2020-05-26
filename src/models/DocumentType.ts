@@ -1,6 +1,12 @@
 interface DocumentType {
+  _id?: string;
   name: string;
-  fields: DocumentField[];
+  fields?: DocumentField[];
+  isTwoSided?: boolean;
+  isRecordableDoc?: boolean;
+  isProtectedDoc?: boolean;
+  hasExpirationDate?: boolean;
+  action?: string; // needed for the grid, might split this out
 }
 
 interface DocumentField {

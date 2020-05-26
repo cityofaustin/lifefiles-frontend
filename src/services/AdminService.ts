@@ -1,12 +1,7 @@
 import AgentService from './APIService';
-import LoginRequest from '../models/auth/LoginRequest';
-import LoginResponse from '../models/auth/LoginResponse';
-import Account from '../models/Account';
-import AuthService from './AuthService';
+import AccountType from '../models/admin/AccountType';
 
-const PATH = '/accounts';
-
-class AccountService extends AgentService {
+class AdminService extends AgentService {
   static async getAdminInfo() {
     return await super.get('/my-admin-account');
   }
@@ -22,6 +17,18 @@ class AccountService extends AgentService {
   static async updatedDocumentType(documentType) {
     return await super.put('/admin-document-types/' + documentType._id, documentType);
   }
+
+  static async addAccountType(accountType: AccountType) {
+    return await super.post('/admin-account-types/', accountType);
+  }
+
+  static async updateAccountType(accountType: AccountType) {
+    return await super.put('/admin-account-types/' + accountType._id, accountType);
+  }
+
+  static async deleteAccountType(accountTypeId) {
+    return await super.delete('/admin-account-types/' + accountTypeId);
+  }
 }
 
-export default AccountService;
+export default AdminService;
