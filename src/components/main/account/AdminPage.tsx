@@ -19,6 +19,11 @@ import {
   CellValueChangedEvent,
   ColDef,
 } from 'ag-grid-community';
+import AccountType from '../../../models/admin/AccountType';
+import CoreFeature from '../../../models/admin/CoreFeature';
+import ViewFeature from '../../../models/admin/ViewFeature';
+import DocumentType from '../../../models/DocumentType';
+import RoleType from '../../../models/admin/RoleType';
 
 interface AdminPageProps {
   account: Account;
@@ -26,10 +31,10 @@ interface AdminPageProps {
 }
 
 interface AdminPageState {
-  documentTypes: any[];
-  viewFeatures: any;
-  coreFeatures: any;
-  accountTypes: any;
+  documentTypes: DocumentType[];
+  viewFeatures: ViewFeature[];
+  coreFeatures: CoreFeature[];
+  accountTypes: AccountType[];
   documentTypesColumnDefs: ColDef[];
   accountTypesColumnDefs: ColDef[];
   documentTypeSavedSuccess: boolean;
@@ -37,13 +42,9 @@ interface AdminPageState {
   accountTypeSavedSuccess: boolean;
   accountTypeDeletedSuccess: boolean;
   viewFeatureOwnerSavedSuccess: boolean;
-  viewFeatureOwnerDeletedSuccess: boolean;
   viewFeatureHelperSavedSuccess: boolean;
-  viewFeatureHelperDeletedSuccess: boolean;
   coreFeatureOwnerSavedSuccess: boolean;
-  coreFeatureOwnerDeletedSuccess: boolean;
   coreFeatureHelperSavedSuccess: boolean;
-  coreFeatureHelperDeletedSuccess: boolean;
 }
 
 class AdminPage extends Component<AdminPageProps, AdminPageState> {
@@ -98,7 +99,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             values: ['owner', 'helper'],
             cellRenderer: 'roleCellRenderer',
           },
-          editable: true
+          editable: true,
         },
         // NOTE: took out for now
         // { headerName: 'Admin Level', field: 'adminLevel' },
@@ -114,13 +115,9 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       accountTypeSavedSuccess: false,
       accountTypeDeletedSuccess: false,
       viewFeatureOwnerSavedSuccess: false,
-      viewFeatureOwnerDeletedSuccess: false,
       viewFeatureHelperSavedSuccess: false,
-      viewFeatureHelperDeletedSuccess: false,
       coreFeatureOwnerSavedSuccess: false,
-      coreFeatureOwnerDeletedSuccess: false,
       coreFeatureHelperSavedSuccess: false,
-      coreFeatureHelperDeletedSuccess: false,
     };
   }
 
@@ -129,14 +126,15 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     if (account.role === 'admin') {
       const adminResponse = await AdminService.getAdminInfo();
       this.setState({
-        documentTypes: adminResponse.account.adminInfo.documentTypes
-        .map((documentType) => ({ ...documentType, action: '' })),
+        documentTypes: adminResponse.account.adminInfo.documentTypes.map(
+          (documentType) => ({ ...documentType, action: '' })
+        ),
         viewFeatures: adminResponse.account.adminInfo.viewFeatures,
         coreFeatures: adminResponse.account.adminInfo.coreFeatures,
         // NOTE: leaving out admin for now until further decisions made.
         accountTypes: adminResponse.account.adminInfo.accountTypes
-        .filter(accountType => accountType.role !== 'admin')
-        .map(accountType => ({...accountType, action: ''})),
+          .filter((accountType) => accountType.role !== 'admin')
+          .map((accountType) => ({ ...accountType, action: '' })),
       });
     }
   }
@@ -151,18 +149,27 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     this.accountTypesGridColumnApi = params.columnApi!;
   };
 
-  onAccountTypeCellValueChanged = (params: CellValueChangedEvent) => {
-    let {
-      accountTypes,
-      accountTypeDeletedSuccess,
-      accountTypeSavedSuccess,
-    } = { ...this.state };
+  onAccountTypeCellValueChanged = async (params: CellValueChangedEvent) => {
+    let { accountTypes, accountTypeDeletedSuccess, accountTypeSavedSuccess } = {
+      ...this.state,
+    };
     if (params.value === 'save') {
-      // TODO:
+      const reqObject = { ...params.data };
+      delete reqObject.action;
+      if (params.data._id) {
+        await AdminService.updateAccountType(reqObject);
+      } else {
+        const newAccountType = (await AdminService.addAccountType(reqObject))
+          .response;
+        for (let i = 0; i < accountTypes.length; i++) {
+          if (i === params.rowIndex) {
+            accountTypes[i]._id = newAccountType._id;
+          }
+        }
+      }
       accountTypeSavedSuccess = true;
     }
     if (params.value === 'delete') {
-      // TODO:
       let deleteId;
       accountTypes = accountTypes.filter((accountType, index) => {
         if (index === params.rowIndex && accountType._id) {
@@ -171,7 +178,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         return index !== params.rowIndex;
       });
       if (deleteId) {
-        // await AdminService.deleteAccountType(deleteId);
+        await AdminService.deleteAccountType(deleteId);
       }
       accountTypeDeletedSuccess = true;
     }
@@ -190,6 +197,60 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     );
   };
 
+  onAccountTypeViewFeatureCellValueChanged = (params: CellValueChangedEvent) => {
+    const {accountTypes, viewFeatures} = {...this.state};
+    const data = params.data;
+    const accountTypeName = params.colDef.field;
+    const viewFeautureCheck = {
+      featureDisplay: JSON.parse(params.value).label,
+      isChecked: JSON.parse(params.value).isChecked
+    };
+    for(const accountType of accountTypes) {
+      if(accountType.accountTypeName === accountTypeName) {
+        if(viewFeautureCheck.isChecked) {
+          // then find it in viewfeatures and add it too the account type array
+          for(const viewFeature of viewFeatures) {
+            if(viewFeature.featureDisplay === viewFeautureCheck.featureDisplay) {
+              accountType.viewFeatures.push(viewFeature);
+            }
+          }
+        } else {
+          // then remove it from the account type array
+          accountType.viewFeatures = accountType.viewFeatures.filter(viewFeature => {
+            return viewFeature.featureDisplay !== viewFeautureCheck.featureDisplay;
+          });
+        }
+      }
+    }
+    this.setState({accountTypes});
+  };
+
+  onAccountTypeCoreFeatureCellValueChanged = (params: CellValueChangedEvent) => {
+    const {accountTypes, coreFeatures} = {...this.state};
+    const data = params.data;
+    const accountTypeName = params.colDef.field;
+    const coreFeautureCheck = {
+      featureDisplay: JSON.parse(params.value).label,
+      isChecked: JSON.parse(params.value).isChecked
+    };
+    for(const accountType of accountTypes) {
+      if(accountType.accountTypeName === accountTypeName) {
+        if(coreFeautureCheck.isChecked) {
+          for(const coreFeature of coreFeatures) {
+            if(coreFeature.featureDisplay === coreFeautureCheck.featureDisplay) {
+              accountType.coreFeatures.push(coreFeature);
+            }
+          }
+        } else {
+          accountType.coreFeatures = accountType.coreFeatures.filter(coreFeature => {
+            return coreFeature.featureDisplay !== coreFeautureCheck.featureDisplay;
+          });
+        }
+      }
+    }
+    this.setState({accountTypes});
+  };
+
   onDocumentTypeCellValueChanged = async (params: CellValueChangedEvent) => {
     let {
       documentTypes,
@@ -197,7 +258,6 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       documentTypeSavedSuccess,
     } = { ...this.state };
     if (params.value === 'save') {
-      // TODO: add api call either update or create or delete
       const reqObject = { ...params.data };
       delete reqObject.action;
       if (params.data._id) {
@@ -271,7 +331,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       accountTypeName: `Helper Type #${accountTypes.length + 1}`,
       adminLevel: 2,
       coreFeatures: [],
-      role: 'helper',
+      role: RoleType.HELPER,
       viewFeatures: [],
       action: '',
     });
@@ -279,6 +339,57 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       this.accountTypesGridApi.setRowData(accountTypes);
       this.accountTypesGridApi.refreshCells();
     });
+  };
+
+  handleSaveAllAccountTypes = async (isView?, isOwner?) => {
+    let {
+      viewFeatureOwnerSavedSuccess,
+      viewFeatureHelperSavedSuccess,
+      coreFeatureOwnerSavedSuccess,
+      coreFeatureHelperSavedSuccess,
+    } = { ...this.state };
+    const {accountTypes} = {...this.state};
+    if (isOwner) {
+      for(const accountType of accountTypes) {
+        if(accountType.role === RoleType.OWNER) {
+          await AdminService.updateAccountType(accountType);
+        }
+      }
+      if (isView) {
+        viewFeatureOwnerSavedSuccess = true;
+      } else {
+        coreFeatureOwnerSavedSuccess = true;
+      }
+    } else {
+      for(const accountType of accountTypes) {
+        if(accountType.role === RoleType.HELPER) {
+          await AdminService.updateAccountType(accountType);
+        }
+      }
+      if (isView) {
+        viewFeatureHelperSavedSuccess = true;
+      } else {
+        coreFeatureHelperSavedSuccess = true;
+      }
+    }
+    this.setState(
+      {
+        viewFeatureOwnerSavedSuccess,
+        viewFeatureHelperSavedSuccess,
+        coreFeatureOwnerSavedSuccess,
+        coreFeatureHelperSavedSuccess,
+      },
+      () => {
+        window.setTimeout(() => {
+          this.setState({
+            viewFeatureOwnerSavedSuccess: false,
+            viewFeatureHelperSavedSuccess: false,
+            coreFeatureOwnerSavedSuccess: false,
+            coreFeatureHelperSavedSuccess: false,
+          });
+        }, 2000);
+      }
+    );
   };
 
   getAccountTypesViewFeatures = (accountTypes, viewFeatures) => {
@@ -320,7 +431,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         if (
           accountType.coreFeatures.find(
             (accountCoreFeature) =>
-            accountCoreFeature.featureName === coreFeature.featureName
+              accountCoreFeature.featureName === coreFeature.featureName
           )
         ) {
           checkLabelItem.isChecked = true;
@@ -349,6 +460,10 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       documentTypeDeletedSuccess,
       accountTypeSavedSuccess,
       accountTypeDeletedSuccess,
+      viewFeatureOwnerSavedSuccess,
+      viewFeatureHelperSavedSuccess,
+      coreFeatureOwnerSavedSuccess,
+      coreFeatureHelperSavedSuccess,
     } = { ...this.state };
     // const accountTypeViewFeatures = [];
     // const accountTypeCoreFeaturesOwner = [];
@@ -358,12 +473,12 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       viewFeatures
     );
     const accountTypeCoreFeaturesOwner = this.getAccountTypesCoreFeatures(
-      accountTypes.filter(accountType => accountType.role === 'owner'),
-      coreFeatures.filter(coreFeature => coreFeature.featureRole === 'owner')
+      accountTypes.filter((accountType) => accountType.role === 'owner'),
+      coreFeatures.filter((coreFeature) => coreFeature.featureRole === 'owner')
     );
     const accountTypeCoreFeaturesHelper = this.getAccountTypesCoreFeatures(
-      accountTypes.filter(accountType => accountType.role === 'helper'),
-      coreFeatures.filter(coreFeature => coreFeature.featureRole === 'helper')
+      accountTypes.filter((accountType) => accountType.role === 'helper'),
+      coreFeatures.filter((coreFeature) => coreFeature.featureRole === 'helper')
     );
     // debugger;
     return (
@@ -421,7 +536,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         <Alert color="danger" isOpen={accountTypeDeletedSuccess}>
           Successfully Deleted Account Type!
         </Alert>
-        <div className="add-container" style={{width: '650px'}}>
+        <div className="add-container" style={{ width: '650px' }}>
           <AddSvg className="add" onClick={this.handleAddAccountType} />
         </div>
         <div
@@ -439,7 +554,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             rowData={accountTypes}
             frameworkComponents={{
               actionsCellRenderer: ActionsCellRenderer,
-              roleCellRenderer: RoleCellRenderer
+              roleCellRenderer: RoleCellRenderer,
             }}
             defaultColDef={{
               flex: 1,
@@ -456,12 +571,13 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         <br />
         <p>* TBD - needs edit</p>
 
-        <h2 className="view-feature-title">
-          View Features
-        </h2>
+        <h2 className="view-feature-title">View Features</h2>
+        <Alert color="success" isOpen={viewFeatureOwnerSavedSuccess}>
+          Successfully Saved Account Types!
+        </Alert>
         <h3>Owners</h3>
         <div className="save-container">
-          <SaveSvg className="save" onClick={() => {}} />
+          <SaveSvg className="save" onClick={() => this.handleSaveAllAccountTypes(true, true)} />
         </div>
         <div
           className="ag-theme-alpine-dark"
@@ -474,13 +590,15 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           }}
         >
           <AgGridReact
-            columnDefs={accountTypes.filter(accountType => accountType.role === 'owner').map((accountType) => {
-              return {
-                headerName: accountType.accountTypeName,
-                field: accountType.accountTypeName,
-                cellRenderer: 'checkboxNameCellRenderer'
-              };
-            })}
+            columnDefs={accountTypes
+              .filter((accountType) => accountType.role === 'owner')
+              .map((accountType) => {
+                return {
+                  headerName: accountType.accountTypeName,
+                  field: accountType.accountTypeName,
+                  cellRenderer: 'checkboxNameCellRenderer',
+                };
+              })}
             rowData={accountTypeViewFeatures}
             frameworkComponents={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
@@ -491,15 +609,18 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
               resizable: true,
               sortable: true,
             }}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={this.onAccountTypeViewFeatureCellValueChanged}
             animateRows
             onGridReady={() => {}}
             // domLayout="print"
           />
         </div>
         <h3>Helpers</h3>
+        <Alert color="success" isOpen={viewFeatureHelperSavedSuccess}>
+          Successfully Saved Account Types!
+        </Alert>
         <div className="save-container">
-          <SaveSvg className="save" onClick={() => {}} />
+          <SaveSvg className="save" onClick={() => this.handleSaveAllAccountTypes(true, false)} />
         </div>
         <div
           className="ag-theme-alpine-dark"
@@ -512,13 +633,15 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           }}
         >
           <AgGridReact
-            columnDefs={accountTypes.filter(accountType => accountType.role === 'helper').map((accountType) => {
-              return {
-                headerName: accountType.accountTypeName,
-                field: accountType.accountTypeName,
-                cellRenderer: 'checkboxNameCellRenderer'
-              };
-            })}
+            columnDefs={accountTypes
+              .filter((accountType) => accountType.role === 'helper')
+              .map((accountType) => {
+                return {
+                  headerName: accountType.accountTypeName,
+                  field: accountType.accountTypeName,
+                  cellRenderer: 'checkboxNameCellRenderer',
+                };
+              })}
             rowData={accountTypeViewFeatures}
             frameworkComponents={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
@@ -529,7 +652,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
               resizable: true,
               sortable: true,
             }}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={this.onAccountTypeViewFeatureCellValueChanged}
             animateRows
             onGridReady={() => {}}
             // domLayout="print"
@@ -537,31 +660,42 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         </div>
         <br />
         <p>* TBD - needs edit</p>
-        <h2 className="view-feature-title">
-          Core Features
-        </h2>
+        <h2 className="view-feature-title">Core Features</h2>
         <h3>Owners</h3>
+        <Alert color="success" isOpen={coreFeatureOwnerSavedSuccess}>
+          Successfully Saved Account Types!
+        </Alert>
         <div className="save-container">
-          <SaveSvg className="save" onClick={() => {}} />
+          <SaveSvg className="save" onClick={() => this.handleSaveAllAccountTypes(false, true)} />
         </div>
         <div
           className="ag-theme-alpine-dark"
           style={{
             height:
-              coreFeatures.filter(coreFeature => coreFeature.featureRole === 'owner').length > 0
-                ? `${coreFeatures.filter(coreFeature => coreFeature.featureRole === 'owner').length * 42 + 51}px`
+              coreFeatures.filter(
+                (coreFeature) => coreFeature.featureRole === 'owner'
+              ).length > 0
+                ? `${
+                    coreFeatures.filter(
+                      (coreFeature) => coreFeature.featureRole === 'owner'
+                    ).length *
+                      42 +
+                    51
+                  }px`
                 : '300px',
             width: '100%',
           }}
         >
           <AgGridReact
-            columnDefs={accountTypes.filter(accountType => accountType.role === 'owner').map((accountType) => {
-              return {
-                headerName: accountType.accountTypeName,
-                field: accountType.accountTypeName,
-                cellRenderer: 'checkboxNameCellRenderer'
-              };
-            })}
+            columnDefs={accountTypes
+              .filter((accountType) => accountType.role === 'owner')
+              .map((accountType) => {
+                return {
+                  headerName: accountType.accountTypeName,
+                  field: accountType.accountTypeName,
+                  cellRenderer: 'checkboxNameCellRenderer',
+                };
+              })}
             rowData={accountTypeCoreFeaturesOwner}
             frameworkComponents={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
@@ -572,34 +706,47 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
               resizable: true,
               sortable: true,
             }}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={this.onAccountTypeCoreFeatureCellValueChanged}
             animateRows
             onGridReady={() => {}}
             // domLayout="print"
           />
         </div>
         <h3>Helpers</h3>
+        <Alert color="success" isOpen={coreFeatureHelperSavedSuccess}>
+          Successfully Saved Account Types!
+        </Alert>
         <div className="save-container">
-          <SaveSvg className="save" onClick={() => {}} />
+          <SaveSvg className="save" onClick={() => this.handleSaveAllAccountTypes(false, false)} />
         </div>
         <div
           className="ag-theme-alpine-dark"
           style={{
             height:
-              coreFeatures.filter(coreFeature => coreFeature.featureRole === 'helper').length > 0
-                ? `${coreFeatures.filter(coreFeature => coreFeature.featureRole === 'helper').length * 42 + 51}px`
+              coreFeatures.filter(
+                (coreFeature) => coreFeature.featureRole === 'helper'
+              ).length > 0
+                ? `${
+                    coreFeatures.filter(
+                      (coreFeature) => coreFeature.featureRole === 'helper'
+                    ).length *
+                      42 +
+                    51
+                  }px`
                 : '300px',
             width: '100%',
           }}
         >
           <AgGridReact
-            columnDefs={accountTypes.filter(accountType => accountType.role === 'helper').map((accountType) => {
-              return {
-                headerName: accountType.accountTypeName,
-                field: accountType.accountTypeName,
-                cellRenderer: 'checkboxNameCellRenderer'
-              };
-            })}
+            columnDefs={accountTypes
+              .filter((accountType) => accountType.role === 'helper')
+              .map((accountType) => {
+                return {
+                  headerName: accountType.accountTypeName,
+                  field: accountType.accountTypeName,
+                  cellRenderer: 'checkboxNameCellRenderer',
+                };
+              })}
             rowData={accountTypeCoreFeaturesHelper}
             frameworkComponents={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
@@ -610,7 +757,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
               resizable: true,
               sortable: true,
             }}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={this.onAccountTypeCoreFeatureCellValueChanged}
             animateRows
             onGridReady={() => {}}
             // domLayout="print"
