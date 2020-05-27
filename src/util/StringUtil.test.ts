@@ -9,7 +9,7 @@ describe('StringUtil', () => {
 
   it('should create a valid uuid', () => {
     const result = StringUtil.getUuidv4();
-    console.log(result);
+    // console.log(result);
     expect(result).toBeTruthy();
   });
 

@@ -28,6 +28,7 @@
     "/dist/"
   ],
   "setupFiles": [
-    "./src/setupTests.ts"
+    "./src/setupTests.ts",
+    "jest-canvas-mock"
   ]
 }

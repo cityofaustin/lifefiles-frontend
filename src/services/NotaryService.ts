@@ -1,20 +1,24 @@
-import AgentService from "./APIService";
+import AgentService from './APIService';
 
 class NotaryService extends AgentService {
   static generateNewDid() {
-    return super.get("/generate-new-did");
+    return super.get('/generate-new-did');
   }
 
-  static updateDocumentVC(accountForId, documentType, vc) {
-    console.log("route");
-    console.log(`/account/${accountForId}/documents/${documentType}`);
+  static updateDocumentVC(accountForId: string, documentType: string, vcJwt: string) {
     return super.post(`/account/${accountForId}/documents/${documentType}`, {
-      vc: vc,
+      vc: vcJwt,
     });
   }
 
-  static anchorVpToBlockchain(req) {
-    return super.post("/anchor-vp-to-blockchain", req);
+  static updateDocumentVP(accountForId: string, documentType: string, vpJwt: string) {
+    return super.put(`/account/${accountForId}/documents/${documentType}/vp`, {
+      vpJwt
+    });
+  }
+
+  static anchorVpToBlockchain(vpJwt: string) {
+    return super.post('/anchor-vp-to-blockchain', {vpJwt});
   }
 }
 

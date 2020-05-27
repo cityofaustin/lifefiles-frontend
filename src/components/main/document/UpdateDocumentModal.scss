@@ -429,6 +429,14 @@
             }
           }
         }
+        .vc-display {
+          background-color: #ccc;
+          overflow-y: auto;
+          height: 150px;
+          white-space: pre-wrap;
+          padding: 18px;
+          overflow-wrap: break-word;
+        }
       }
       .confirm-delete-container {
         display: none;

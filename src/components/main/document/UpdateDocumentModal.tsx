@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Component, Fragment } from "react";
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
   Button,
   Col,
@@ -15,42 +15,43 @@ import {
   Row,
   TabContent,
   TabPane,
-} from "reactstrap";
+} from 'reactstrap';
 
-import classNames from "classnames";
-import Document from "../../../models/document/Document";
-import "./UpdateDocumentModal.scss";
-import DocumentService from "../../../services/DocumentService";
-import { ReactComponent as DeleteSvg } from "../../../img/delete.svg";
-import { ReactComponent as EditDocSvg } from "../../../img/edit-doc.svg";
-import { ReactComponent as EditDocSmSvg } from "../../../img/edit-doc-sm.svg";
-import { ReactComponent as CrossSvg } from "../../../img/cross2.svg";
-import { ReactComponent as CrossSmSvg } from "../../../img/cross2-sm.svg";
-import FileUploader from "../../common/FileUploader";
-import { ReactComponent as DownloadBtnSvg } from "../../../img/download-btn.svg";
+import classNames from 'classnames';
+import Document from '../../../models/document/Document';
+import './UpdateDocumentModal.scss';
+import DocumentService from '../../../services/DocumentService';
+import { ReactComponent as DeleteSvg } from '../../../img/delete.svg';
+import { ReactComponent as EditDocSvg } from '../../../img/edit-doc.svg';
+import { ReactComponent as EditDocSmSvg } from '../../../img/edit-doc-sm.svg';
+import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
+import { ReactComponent as CrossSmSvg } from '../../../img/cross2-sm.svg';
+import FileUploader from '../../common/FileUploader';
+import { ReactComponent as DownloadBtnSvg } from '../../../img/download-btn.svg';
 // import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
-import { ReactComponent as PrintBtnSvg } from "../../../img/print-btn.svg";
-import { ReactComponent as ZoomBtnSvg } from "../../../img/zoom-btn.svg";
-import { ReactComponent as ZoomBtnSmSvg } from "../../../img/zoom-btn-sm.svg";
-import { ReactComponent as NotSharedDoc } from "../../../img/not-shared-doc.svg";
-import Lightbox from "react-image-lightbox";
-import Account from "../../../models/Account";
-import AccountImpl from "../../../models/AccountImpl";
-import { format } from "date-fns";
-import Select, { OptionTypeBase } from "react-select";
-import ShareRequest from "../../../models/ShareRequest";
-import ShareRequestService from "../../../services/ShareRequestService";
-import UpdateDocumentRequest from "../../../models/document/UpdateDocumentRequest";
-import ShareDocWithContainer from "./ShareDocWithContainer";
-import StringUtil from "../../../util/StringUtil";
-import ZipUtil from "../../../util/ZipUtil";
-import CryptoUtil from "../../../util/CryptoUtil";
-import NotaryUtil from "../../../util/NotaryUtil";
-import ImageWithStatus, { ImageViewTypes } from "../../common/ImageWithStatus";
-import AccountService from "../../../services/AccountService";
-import NotaryService from "../../../services/NotaryService";
-import FileBase64 from "react-file-base64";
-import DatePicker from "react-datepicker";
+import { ReactComponent as PrintBtnSvg } from '../../../img/print-btn.svg';
+import { ReactComponent as ZoomBtnSvg } from '../../../img/zoom-btn.svg';
+import { ReactComponent as ZoomBtnSmSvg } from '../../../img/zoom-btn-sm.svg';
+import { ReactComponent as NotSharedDoc } from '../../../img/not-shared-doc.svg';
+import Lightbox from 'react-image-lightbox';
+import Account from '../../../models/Account';
+import AccountImpl from '../../../models/AccountImpl';
+import { format } from 'date-fns';
+import MSelect from '../../common/MSelect';
+import ShareRequest from '../../../models/ShareRequest';
+import ShareRequestService from '../../../services/ShareRequestService';
+import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
+import ShareDocWithContainer from './ShareDocWithContainer';
+import StringUtil from '../../../util/StringUtil';
+import ZipUtil from '../../../util/ZipUtil';
+import CryptoUtil from '../../../util/CryptoUtil';
+import NotaryUtil from '../../../util/NotaryUtil';
+import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
+import AccountService from '../../../services/AccountService';
+import NotaryService from '../../../services/NotaryService';
+import FileBase64 from 'react-file-base64';
+import DatePicker from 'react-datepicker';
+import { OptionTypeBase } from 'react-select';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -104,17 +105,17 @@ class UpdateDocumentModal extends Component<
       activeTab: props.activeTab,
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: "",
+      deleteConfirmInput: '',
       isZoomed: false,
       showConfirmShare: false,
       base64Image: undefined,
       docType: undefined,
       pendingAccess: false,
-      notaryId: "",
-      notarySealBase64: "",
-      privatePem: "",
-      publicPem: "",
-      notarizationType: "",
+      notaryId: '',
+      notarySealBase64: '',
+      privatePem: '',
+      publicPem: '',
+      notarizationType: '',
       validUntilDate: new Date(),
       vc: undefined,
       vp: undefined,
@@ -151,18 +152,18 @@ class UpdateDocumentModal extends Component<
       this.setState({ docType });
     }
 
-    console.log(this.props.referencedAccount?.didAddress);
-    console.log(this.props.document);
+    // console.log(this.props.referencedAccount?.didAddress);
+    // console.log(this.props.document);
   }
 
   toggleModal = () => {
     // clear state
     const { toggleModal } = { ...this.props };
     this.setState({
-      activeTab: "1",
+      activeTab: '1',
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: "",
+      deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -183,10 +184,10 @@ class UpdateDocumentModal extends Component<
     });
     // clear state
     this.setState({
-      activeTab: "1",
+      activeTab: '1',
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: "",
+      deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -206,10 +207,10 @@ class UpdateDocumentModal extends Component<
     });
     // clear state
     this.setState({
-      activeTab: "1",
+      activeTab: '1',
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: "",
+      deleteConfirmInput: '',
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -228,55 +229,60 @@ class UpdateDocumentModal extends Component<
   };
 
   handleNotaryUploadNewSeal = (file: any) => {
-    let notarySealBase64 = file.base64;
+    const notarySealBase64 = file.base64;
     this.setState({ notarySealBase64 });
   };
 
-  handleNotaryUploadPem = async (e) => {
+  handleNotaryUploadPem = async (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      let privatePem = "" as any;
-      privatePem = e?.target?.result;
+    reader.onload = async (ev) => {
+      let privatePem = '' as any;
+      privatePem = ev?.target?.result;
       const publicPem = NotaryUtil.getPublicKeyFromPrivateKey(privatePem);
       this.setState({ privatePem });
       this.setState({ publicPem });
     };
-    reader.readAsText(e.target.files[0]);
+    if(e.target.files !== null) {
+      reader.readAsText(e.target.files[0]);
+    }
   };
 
-  handleOwnerAcceptNotarization = async (e) => {
-    const vp = await NotaryUtil.createVP(
+  handleOwnerAcceptNotarization = async () => {
+    const vpJwt = await NotaryUtil.createVP(
       this.props.myAccount.didAddress,
-      this.props.privateEncryptionKey,
-      this.props.document?.vcJwt
+      this.props.privateEncryptionKey!,
+      this.props.document?.vcJwt!
     );
 
-    NotaryService.anchorVpToBlockchain(vp);
-    this.setState({ vp });
+    const document = {...this.props.document!};
+    document.vpJwt = vpJwt;
+    NotaryService.updateDocumentVP((document.belongsTo as unknown) as string, document.type, document.vpJwt);
+    NotaryService.anchorVpToBlockchain(vpJwt);
+    this.setState({ vp: vpJwt });
   };
 
   handleNotarizeDocument = async () => {
-    let notarizedDoc = await NotaryUtil.createNotarizedDocument(
+    const notarizedDoc = await NotaryUtil.createNotarizedDocument(
       this.state.notarizationType,
-      this.state.validUntilDate.toISOString(),
-      parseInt(this.state.notaryId),
+      this.state.validUntilDate,
+      parseInt(this.state.notaryId, 10),
       this.props.myAccount.didAddress,
       this.props.privateEncryptionKey === undefined
-        ? ""
+        ? ''
         : this.props.privateEncryptionKey,
       this.state.publicPem,
       this.state.privatePem,
       this.props.referencedAccount?.didAddress === undefined
-        ? ""
+        ? ''
         : this.props.referencedAccount?.didAddress,
-      this.state.base64Image === undefined ? "" : this.state.base64Image,
+      this.state.base64Image === undefined ? '' : this.state.base64Image,
       this.state.notarySealBase64
     );
 
     await NotaryService.updateDocumentVC(
-      this.props.referencedAccount?.id,
-      this.state.docType,
+      this.props.referencedAccount?.id!,
+      this.state.docType!,
       notarizedDoc.vc
     );
 
@@ -293,7 +299,7 @@ class UpdateDocumentModal extends Component<
     try {
       if (selectedContact && base64Image) {
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
-        const file: File = StringUtil.dataURLtoFile(base64Image, "original");
+        const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
         const base64Thumbnail = await StringUtil.fileContentsToThumbnailString(
           file
         );
@@ -307,15 +313,15 @@ class UpdateDocumentModal extends Component<
         );
         const zipped: Blob = await ZipUtil.zip(encryptedString);
         const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
-        const newZippedFile = new File([zipped], "encrypted-image.zip", {
-          type: "application/zip",
+        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+          type: 'application/zip',
           lastModified: Date.now(),
         });
         const newZippedThumbnailFile = new File(
           [zippedThumbnail],
-          "encrypted-image-thumbnail.zip",
+          'encrypted-image-thumbnail.zip',
           {
-            type: "application/zip",
+            type: 'application/zip',
             lastModified: Date.now(),
           }
         );
@@ -397,10 +403,10 @@ class UpdateDocumentModal extends Component<
     try {
       await handleDeleteDocument(document);
       this.setState({
-        activeTab: "1",
+        activeTab: '1',
         showConfirmDeleteSection: false,
         hasConfirmedDelete: false,
-        deleteConfirmInput: "",
+        deleteConfirmInput: '',
         isZoomed: false,
         selectedContact: undefined,
         showConfirmShare: false,
@@ -414,14 +420,14 @@ class UpdateDocumentModal extends Component<
   handleDeleteConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     let hasConfirmedDelete = false;
-    if (value === "DELETE") {
+    if (value === 'DELETE') {
       hasConfirmedDelete = true;
     }
     this.setState({ deleteConfirmInput: value, hasConfirmedDelete });
   };
 
   confirmDelete = () => {
-    this.setState({ activeTab: "0", showConfirmDeleteSection: true });
+    this.setState({ activeTab: '0', showConfirmDeleteSection: true });
   };
 
   setFile = (newFile: File, newThumbnailFile: File) => {
@@ -429,7 +435,7 @@ class UpdateDocumentModal extends Component<
   };
 
   printImg(url: string) {
-    const win = window.open("");
+    const win = window.open('');
     win?.document.write(
       '<img src="' + url + '" onload="window.print();window.close()" />'
     );
@@ -471,79 +477,16 @@ class UpdateDocumentModal extends Component<
   renderNotarizeTab = (base64Image) => {
     const options: OptionTypeBase[] = [];
     options.push({
-      value: "certifiedCopy",
-      label: "Certified Copy",
+      value: 'certifiedCopy',
+      label: 'Certified Copy',
       isDisabled: false,
     });
 
-    const customStyles = {
-      control: (provided: any) => ({
-        ...provided,
-        height: "54.8px",
-      }),
-      option: (provided: any, state: any) => {
-        // if(state.isSelected) {
-        //   console.log(provided);
-        // }
-        const backgroundColor = state.isSelected
-          ? "#2362C7"
-          : provided.backgroundColor;
-        const color = state.isSelected ? "white" : "#3b3b3b";
-        //   label: "option"
-        //   backgroundColor: "#2684FF"
-        //   color: "hsl(0, 0%, 100%)"
-        //   cursor: "default"
-        //   display: "block"
-        //   fontSize: "inherit"
-        //   padding: "8px 12px"
-        //   width: "100%"
-        //   userSelect: "none"
-        //   WebkitTapHighlightColor: "rgba(0, 0, 0, 0)"
-        // :active: {backgroundColor: "#2684FF"}
-        //   boxSizing: "border-box"
-        return {
-          ...provided,
-          backgroundColor,
-          fontFamily: "Montserrat, Arial, sans-serif",
-          fontSize: "25px",
-          color,
-          paddingLeft: "27.5px",
-          paddingTop: "7px",
-          paddingBottom: "7px",
-          opacity: state.isDisabled ? 0.5 : 1,
-          // borderBottom: '1px dotted pink',
-          // color: state.isSelected ? 'red' : 'blue',
-          // padding: 20
-        };
-      },
-      input: (provided: any) => ({
-        ...provided,
-      }),
-      placeholder: (provided: any) => ({
-        ...provided,
-        fontFamily: "Montserrat, Arial, sans-serif",
-        fontSize: "25px",
-        color: "#3b3b3b",
-        paddingLeft: "30px",
-        // marginTop: '12px',
-        // marginBottom: '12px'
-      }),
-      singleValue: (provided: any, state: any) => ({
-        ...provided,
-        fontFamily: "Montserrat, Arial, sans-serif",
-        fontSize: "25px",
-        color: "#3b3b3b",
-        paddingLeft: "30px",
-        opacity: state.isDisabled ? 0.5 : 1,
-        transition: "opacity 300ms",
-      }),
-    };
-
-    if (this.props.myAccount.role === "owner") {
+    if (this.props.myAccount.role === 'owner') {
       return (
         <div>
           <h4>Verifiable Credential</h4>
-          <p>{this.props.document?.vcJwt}</p>
+          <pre className="vc-display">{this.props.document?.vcJwt}</pre>
           <Button
             className="margin-wide"
             color="primary"
@@ -570,12 +513,11 @@ class UpdateDocumentModal extends Component<
               <h4>Notarization Type:</h4>
 
               <div className="select-md">
-                <Select
+                <MSelect
                   options={options}
                   onChange={this.handleNotarizationTypeChange}
                   isSearchable={false}
-                  placeholder={"-Select document-"}
-                  styles={customStyles}
+                  placeholder={'-Select document-'}
                 />
               </div>
 
@@ -594,7 +536,7 @@ class UpdateDocumentModal extends Component<
                 />
 
                 <Label
-                  style={{ paddingRight: "30px" }}
+                  style={{ paddingRight: '30px' }}
                   for="notarySeal"
                   className="other-prompt"
                 >
@@ -607,7 +549,7 @@ class UpdateDocumentModal extends Component<
                 />
 
                 <Label
-                  style={{ paddingRight: "30px" }}
+                  style={{ paddingRight: '30px' }}
                   for="notaryPem"
                   className="other-prompt"
                 >
@@ -624,7 +566,7 @@ class UpdateDocumentModal extends Component<
                   onChange={(date) => {
                     this.setState({ validUntilDate: date });
                   }}
-                  dateFormatCalendar={"MMM yyyy"}
+                  dateFormatCalendar={'MMM yyyy'}
                   peekNextMonth
                   showMonthDropdown
                   showYearDropdown
@@ -650,7 +592,7 @@ class UpdateDocumentModal extends Component<
     return (
       <div>
         <h3>Verifiable Credential</h3>
-        <p>{this.state.vc}</p>
+        <pre className="vc-display">{this.state.vc}</pre>
         <Button
           className="margin-wide"
           color="primary"
@@ -685,7 +627,7 @@ class UpdateDocumentModal extends Component<
       </div>
     );
 
-    let uploadedBy = "N/A";
+    let uploadedBy = 'N/A';
     if (document) {
       const uploadedByAccount = AccountImpl.getAccountByIdAndList(
         [...accounts, myAccount],
@@ -700,8 +642,8 @@ class UpdateDocumentModal extends Component<
       <Modal
         isOpen={showModal}
         toggle={this.toggleModal}
-        backdrop={"static"}
-        size={"xl"}
+        backdrop={'static'}
+        size={'xl'}
         className="update-doc-modal"
       >
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
@@ -717,7 +659,7 @@ class UpdateDocumentModal extends Component<
                 {AccountImpl.getFullName(
                   referencedAccount.firstName,
                   referencedAccount.lastName
-                )}{" "}
+                )}{' '}
                 - {document?.type}
               </span>
             </Fragment>
@@ -739,11 +681,11 @@ class UpdateDocumentModal extends Component<
                   <div className="attr">File</div>
                   <div className="value">{document.type}</div>
                   <div className="attr">Upload Date</div>
-                  <div className="value">{document.updatedAt || "-"}</div>
+                  <div className="value">{document.updatedAt || '-'}</div>
                   <div className="attr">Upload By</div>
-                  <div className="value">{document.uploadedBy || "-"}</div>
+                  <div className="value">{document.uploadedBy || '-'}</div>
                   <div className="attr">Valid Until</div>
-                  <div className="value">{document.validUntilDate || "-"}</div>
+                  <div className="value">{document.validUntilDate || '-'}</div>
                 </div>
               </div>
               <div className="request-access">
@@ -755,8 +697,8 @@ class UpdateDocumentModal extends Component<
                   }
                 >
                   {pendingAccess || document.sharedWithAccountIds.length > 0
-                    ? "Access Pending"
-                    : "Request Access"}
+                    ? 'Access Pending'
+                    : 'Request Access'}
                 </button>
               </div>
             </div>
@@ -766,7 +708,7 @@ class UpdateDocumentModal extends Component<
               {!referencedAccount && (
                 <div
                   className={classNames({
-                    "upload-doc-delete-container": true,
+                    'upload-doc-delete-container': true,
                     active: showConfirmDeleteSection,
                   })}
                 >
@@ -779,9 +721,9 @@ class UpdateDocumentModal extends Component<
               <Nav tabs>
                 <NavItem>
                   <NavLink
-                    className={classNames({ active: activeTab === "1" })}
+                    className={classNames({ active: activeTab === '1' })}
                     onClick={() => {
-                      this.toggleTab("1");
+                      this.toggleTab('1');
                     }}
                   >
                     Preview
@@ -789,9 +731,9 @@ class UpdateDocumentModal extends Component<
                 </NavItem>
                 <NavItem>
                   <NavLink
-                    className={classNames({ active: activeTab === "2" })}
+                    className={classNames({ active: activeTab === '2' })}
                     onClick={() => {
-                      this.toggleTab("2");
+                      this.toggleTab('2');
                     }}
                   >
                     Replace
@@ -801,9 +743,9 @@ class UpdateDocumentModal extends Component<
                 {!referencedAccount && (
                   <NavItem>
                     <NavLink
-                      className={classNames({ active: activeTab === "3" })}
+                      className={classNames({ active: activeTab === '3' })}
                       onClick={() => {
-                        this.toggleTab("3");
+                        this.toggleTab('3');
                       }}
                     >
                       Share
@@ -813,9 +755,9 @@ class UpdateDocumentModal extends Component<
 
                 <NavItem>
                   <NavLink
-                    className={classNames({ active: activeTab === "4" })}
+                    className={classNames({ active: activeTab === '4' })}
                     onClick={() => {
-                      this.toggleTab("4");
+                      this.toggleTab('4');
                     }}
                   >
                     Notarize
@@ -895,9 +837,9 @@ class UpdateDocumentModal extends Component<
                               {document?.updatedAt &&
                                 format(
                                   new Date(document?.updatedAt),
-                                  "MM/dd/yyyy"
+                                  'MM/dd/yyyy'
                                 )}
-                              {!document?.updatedAt && "-"}
+                              {!document?.updatedAt && '-'}
                             </div>
                           </div>
                           <div className="preview-info-item">
@@ -910,9 +852,9 @@ class UpdateDocumentModal extends Component<
                               {document?.validUntilDate &&
                                 format(
                                   new Date(document?.validUntilDate),
-                                  "MM/dd/yyyy"
+                                  'MM/dd/yyyy'
                                 )}
-                              {!document?.validUntilDate && "-"}
+                              {!document?.validUntilDate && '-'}
                             </div>
                           </div>
                         </div>
@@ -929,12 +871,12 @@ class UpdateDocumentModal extends Component<
                         {showConfirmDeleteSection && (
                           <strong>Delete File</strong>
                         )}
-                        {!showConfirmDeleteSection && "Delete File"}
+                        {!showConfirmDeleteSection && 'Delete File'}
                       </button>
                       {showConfirmDeleteSection && (
                         <div className="confirm-delete-sm">
                           <p>
-                            Deleting this file will <strong>permanently</strong>{" "}
+                            Deleting this file will <strong>permanently</strong>{' '}
                             revoke access to all users you have shared this
                             document with.
                           </p>
@@ -1055,7 +997,7 @@ class UpdateDocumentModal extends Component<
                     <div className="delete-info">
                       <div className="delete-info-prompt">
                         <p>
-                          Deleting this file will{" "}
+                          Deleting this file will{' '}
                           <span className="delete-info-danger">
                             permanently revoke access to all users.
                           </span>
@@ -1088,7 +1030,7 @@ class UpdateDocumentModal extends Component<
                       onClick={this.toggleModal}
                     >
                       Cancel
-                    </Button>{" "}
+                    </Button>{' '}
                     <Button
                       className="margin-wide"
                       color="danger"
@@ -1109,7 +1051,7 @@ class UpdateDocumentModal extends Component<
               )}
               <Modal
                 toggle={this.toggleConfirmShare}
-                size={"lg"}
+                size={'lg'}
                 isOpen={showConfirmShare}
               >
                 {/*<ModalHeader>Nested Modal title</ModalHeader>*/}
@@ -1119,7 +1061,7 @@ class UpdateDocumentModal extends Component<
                       <div className="confirm-share-prompt">
                         You're about to share
                         <br />
-                        {document?.type?.toUpperCase()} with{" "}
+                        {document?.type?.toUpperCase()} with{' '}
                         {AccountImpl.getFullName(
                           selectedContact?.firstName,
                           selectedContact?.lastName
@@ -1156,7 +1098,7 @@ class UpdateDocumentModal extends Component<
             </Fragment>
           )}
         </ModalBody>
-        {activeTab === "2" && (
+        {activeTab === '2' && (
           <ModalFooter className="modal-footer-center">
             <Button
               color="primary"

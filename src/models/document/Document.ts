@@ -12,7 +12,7 @@ interface Document {
   vpJwt?: string;
   type: string;
   uploadedBy?: Account | string;
-  belongsTo?: Account;
+  belongsTo?: Account | string;
   sharedWithAccountIds: string[];
   validUntilDate?: Date;
   permanentOrgFileArchiveNumber?: string;

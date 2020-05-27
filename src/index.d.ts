@@ -9,3 +9,5 @@ declare module '*.svg' {
   export const src: string;
   export default content;
 }
+
+declare module 'ethr-did';
