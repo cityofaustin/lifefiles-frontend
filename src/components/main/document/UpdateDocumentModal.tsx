@@ -52,6 +52,8 @@ import NotaryService from '../../../services/NotaryService';
 import FileBase64 from 'react-file-base64';
 import DatePicker from 'react-datepicker';
 import { OptionTypeBase } from 'react-select';
+import ImageUtil from '../../../util/ImageUtil';
+import PdfPreview from '../../common/PdfPreview';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -230,6 +232,7 @@ class UpdateDocumentModal extends Component<
 
   handleNotaryUploadNewSeal = (file: any) => {
     const notarySealBase64 = file.base64;
+    ImageUtil.processImageBase64(notarySealBase64);
     this.setState({ notarySealBase64 });
   };
 
@@ -589,17 +592,31 @@ class UpdateDocumentModal extends Component<
   };
 
   renderNotarizationComplete = () => {
+    const {doc} = {...this.state};
+    // debugger;
+    // if(doc) {
+    //   console.log(doc.output('datauristring'));
+    // }
     return (
       <div>
         <h3>Verifiable Credential</h3>
         <pre className="vc-display">{this.state.vc}</pre>
-        <Button
-          className="margin-wide"
-          color="primary"
-          onClick={() => this.state.doc.save()}
-        >
-          Save Pdf
-        </Button>
+        {doc && (
+          <div className="pdf-display">
+            <PdfPreview fileURL={doc.output('datauristring')} />
+            {/* <object data={doc.output('datauristring')} type="application/pdf">
+                <embed src={doc.output('datauristring')} type="application/pdf" />
+            </object>
+            <iframe src={doc.output('datauristring')} height="297.5" width="421"></iframe> */}
+            <Button
+              className="margin-wide"
+              color="primary"
+              onClick={() => doc.save()}
+            >
+              Save Pdf
+            </Button>
+          </div>
+        )}
       </div>
     );
   };

@@ -4,6 +4,8 @@ import EthrDID from 'ethr-did';
 import NotaryService from '../services/NotaryService';
 import NodeRSA from 'node-rsa';
 import DidJWTVC from 'did-jwt-vc';
+import PDFUtil from './PdfUtil';
+import ImageUtil, { ImageType, ImageDetail } from './ImageUtil';
 
 const createVerifiableCredential = DidJWTVC.createVerifiableCredential;
 const createPresentation = DidJWTVC.createPresentation;
@@ -32,9 +34,11 @@ class NotaryUtil {
     const issuanceDate = now;
     // const expirationDate = new Date(expirationDateString) as any;
 
-    const { pdfArrayBuffer, doc } = await this.stitchTogetherPdf(
-      imageBase64,
-      notaryDigitalSealBase64,
+    const originalImageDetail: ImageDetail = await ImageUtil.processImageBase64(imageBase64);
+    const notarySealImageDetail: ImageDetail = await ImageUtil.processImageBase64(notaryDigitalSealBase64);
+    const { pdfArrayBuffer, doc } = await PDFUtil.stitchTogetherPdf(
+      originalImageDetail,
+      notarySealImageDetail,
       documentDID
     );
 
@@ -56,17 +60,6 @@ class NotaryUtil {
     );
 
     return { vc, doc };
-  }
-
-  static async stitchTogetherPdf(scannedImageBase64: string, notaryDigitalSealBase64: string, documentDID: string) {
-    const doc = new jsPDF();
-
-    doc.addImage(scannedImageBase64, 'PNG', 10, 10, 50, 50);
-    doc.addImage(notaryDigitalSealBase64, 'PNG', 10, 70, 50, 50);
-    doc.text(documentDID, 10, 140);
-
-    const pdfArrayBuffer = doc.output('arraybuffer');
-    return { pdfArrayBuffer, doc };
   }
 
   static async createVC(
