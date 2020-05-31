@@ -429,6 +429,21 @@
             }
           }
         }
+        .vc-display {
+          background-color: #ccc;
+          overflow-y: auto;
+          height: 150px;
+          white-space: pre-wrap;
+          padding: 18px;
+          overflow-wrap: break-word;
+        }
+        .pdf-display {
+          background-color: #ccc;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 18px 0;
+        }
       }
       .confirm-delete-container {
         display: none;

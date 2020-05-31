@@ -1,0 +1,25 @@
+.pdf-container {
+  .react-pdf__Document {
+    .react-pdf__Page {
+      box-shadow: 12px 12px 8px 3px rgba(0, 0, 0, .2);
+    }
+  }
+  .paginate {
+    display: flex;
+    justify-content: center;
+    margin: 26px 0 14px 0;
+    .prev {
+      cursor: pointer;
+      text-transform: capitalize;
+      color: #327495;
+    }
+    .status {
+      margin: 0 10px;
+    }
+    .next {
+      cursor: pointer;
+      text-transform: capitalize;
+      color: #327495;
+    }
+  }
+}

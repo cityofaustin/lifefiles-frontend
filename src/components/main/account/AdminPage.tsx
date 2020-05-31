@@ -670,7 +670,6 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       accountTypes.filter((accountType) => accountType.role === 'helper'),
       coreFeatures.filter((coreFeature) => coreFeature.featureRole === 'helper')
     );
-    // debugger;
     return (
       <div className="admin-content" style={{ marginTop: '20px' }}>
         <h1>Admin Page</h1>

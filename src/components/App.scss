@@ -10,11 +10,12 @@
   }
   .screen-info {
     // display: none;
-    @include themify($themes) {
-      color: themed('buttonTextColor');
-    }
+    // @include themify($themes) {
+    //   color: themed('buttonTextColor');
+    // }
     position: absolute;
     background-color: yellow;
+    color: black;
     &::before {
       @include media-breakpoint-up(xs) {content: "xs";}
       @include media-breakpoint-up(sm) {content: "sm";}
