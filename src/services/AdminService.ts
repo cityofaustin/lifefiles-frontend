@@ -15,7 +15,10 @@ class AdminService extends AgentService {
   }
 
   static async updatedDocumentType(documentType) {
-    return await super.put('/admin-document-types/' + documentType._id, documentType);
+    return await super.put(
+      '/admin-document-types/' + documentType._id,
+      documentType
+    );
   }
 
   static async addAccountType(accountType: AccountType) {
@@ -23,11 +26,26 @@ class AdminService extends AgentService {
   }
 
   static async updateAccountType(accountType: AccountType) {
-    return await super.put('/admin-account-types/' + accountType._id, accountType);
+    return await super.put(
+      '/admin-account-types/' + accountType._id,
+      accountType
+    );
   }
 
   static async deleteAccountType(accountTypeId) {
     return await super.delete('/admin-account-types/' + accountTypeId);
+  }
+
+  static async addAccount(accountReq) {
+    return await super.post('/admin-accounts/', accountReq);
+  }
+
+  static async updateAccount(account) {
+    return await super.put('/admin-accounts/' + account.id, account);
+  }
+
+  static async deleteAccount(accountId) {
+    return await super.delete('/admin-accounts/' + accountId);
   }
 }
 

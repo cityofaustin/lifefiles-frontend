@@ -1,6 +1,7 @@
 import ShareRequest from './ShareRequest';
 import Document from './document/Document';
 import Role from './Role';
+// import AccountType from './admin/AccountType';
 
 interface Account {
   username: string;
@@ -18,6 +19,8 @@ interface Account {
   firstName?: string;
   lastName?: string;
   adminInfo?: any;
+  action?: any;
+  accountType?: string;
 }
 
 export default Account;

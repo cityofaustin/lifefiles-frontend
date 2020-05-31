@@ -35,7 +35,7 @@ import {
   Switch,
   Route,
   Link,
-  Redirect
+  Redirect,
 } from 'react-router-dom';
 import ZipUtil from '../../util/ZipUtil';
 import CryptoUtil from '../../util/CryptoUtil';
@@ -88,7 +88,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       activeTab: '1',
       activeDocumentTab: '1',
       sidebarOpen: false,
-      clientShares: new Map<string, ShareRequest[]>()
+      clientShares: new Map<string, ShareRequest[]>(),
     };
   }
 
@@ -100,7 +100,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({ isLoading: true });
     try {
       documentTypes = (await DocumentTypeService.get()).documentTypes;
-      if (account.role === 'notary') {
+      if (account.role === 'helper') {
         accounts = (await AccountService.getAccounts()).filter(
           (accountItem) => {
             if (accountItem.role === 'owner' && accountItem.id !== account.id) {
@@ -109,14 +109,16 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           }
         );
         for (const otherOwnerAccount of accounts) {
-          const shareRequests = await ShareRequestService.get(otherOwnerAccount.id);
+          const shareRequests = await ShareRequestService.get(
+            otherOwnerAccount.id
+          );
           clientShares.set(otherOwnerAccount.id, shareRequests);
         }
       } else {
         accounts = (await AccountService.getAccounts()).filter(
           (accountItem) => {
             if (
-              accountItem.role === 'notary' &&
+              accountItem.role === 'helper' &&
               accountItem.id !== account.id
             ) {
               return accountItem;
@@ -136,7 +138,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       isLoading: false,
       accounts,
       searchedAccounts: this.sortAccounts(accounts, sortAsc),
-      clientShares
+      clientShares,
     });
   }
 
@@ -165,7 +167,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({
       searchedDocuments,
       searchedAccounts,
-      documentQuery: query
+      documentQuery: query,
     });
   };
 
@@ -206,15 +208,26 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   handleSelectDocument = (document?: Document, goToClaim?: boolean) => {
-    this.setState({ documentSelected: document, activeDocumentTab: goToClaim ? '3' : '1' });
+    this.setState({
+      documentSelected: document,
+      activeDocumentTab: goToClaim ? '3' : '1',
+    });
   };
 
   goToAccount = () => {
-    this.setState({ documentSelected: undefined, isAccount: true, activeDocumentTab: '1' });
+    this.setState({
+      documentSelected: undefined,
+      isAccount: true,
+      activeDocumentTab: '1',
+    });
   };
 
   goBack = () => {
-    this.setState({ documentSelected: undefined, isAccount: false, activeDocumentTab: '1' });
+    this.setState({
+      documentSelected: undefined,
+      isAccount: false,
+      activeDocumentTab: '1',
+    });
   };
 
   handleAddNew = () => {
@@ -252,14 +265,39 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           if (referencedAccount) {
             const caseWorkerFile = newFile;
             const caseWorkerThumbnail = newThumbnailFile;
-            const originalBase64 = await CryptoUtil.getDecryptedString(privateEncryptionKey!, (await ZipUtil.unzip(await StringUtil.fileContentsToString(newFile))));
-            const thumbnailBase64 = await CryptoUtil.getDecryptedString(privateEncryptionKey!, (await ZipUtil.unzip(await StringUtil.fileContentsToString(newThumbnailFile))));
-            const ownerEncrypted = await CryptoUtil.getEncryptedByPublicString(referencedAccount.didPublicEncryptionKey!, originalBase64);
-            const ownerEncryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(referencedAccount.didPublicEncryptionKey!, thumbnailBase64);
+            const originalBase64 = await CryptoUtil.getDecryptedString(
+              privateEncryptionKey!,
+              await ZipUtil.unzip(
+                await StringUtil.fileContentsToString(newFile)
+              )
+            );
+            const thumbnailBase64 = await CryptoUtil.getDecryptedString(
+              privateEncryptionKey!,
+              await ZipUtil.unzip(
+                await StringUtil.fileContentsToString(newThumbnailFile)
+              )
+            );
+            const ownerEncrypted = await CryptoUtil.getEncryptedByPublicString(
+              referencedAccount.didPublicEncryptionKey!,
+              originalBase64
+            );
+            const ownerEncryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(
+              referencedAccount.didPublicEncryptionKey!,
+              thumbnailBase64
+            );
             const ownerZipped: Blob = await ZipUtil.zip(ownerEncrypted);
-            const ownerZippedThumbnail: Blob = await ZipUtil.zip(ownerEncryptedThumbnail);
-            const ownerFile = new File([ownerZipped], 'encrypted-image.zip', { type: 'application/zip', lastModified: Date.now() });
-            const ownerThumbnail = new File([ownerZippedThumbnail], 'encrypted-image-thumbnail.zip', { type: 'application/zip', lastModified: Date.now() });
+            const ownerZippedThumbnail: Blob = await ZipUtil.zip(
+              ownerEncryptedThumbnail
+            );
+            const ownerFile = new File([ownerZipped], 'encrypted-image.zip', {
+              type: 'application/zip',
+              lastModified: Date.now(),
+            });
+            const ownerThumbnail = new File(
+              [ownerZippedThumbnail],
+              'encrypted-image-thumbnail.zip',
+              { type: 'application/zip', lastModified: Date.now() }
+            );
             const response = await DocumentService.uploadDocumentOnBehalfOfUser(
               caseWorkerFile,
               caseWorkerThumbnail,
@@ -321,7 +359,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         showModal: false,
         isLoading: false,
         documentSelected: undefined,
-        activeDocumentTab: '1'
+        activeDocumentTab: '1',
       },
       () => {
         this.handleSearch(documentQuery);
@@ -360,7 +398,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       searchedDocuments,
       isLoading: false,
       documentSelected: undefined,
-      activeDocumentTab: '1'
+      activeDocumentTab: '1',
     });
   };
 
@@ -401,33 +439,40 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             // FIXME: this could be handled more elegantly, but this way works for now, the server should be sending owner's documenturl
             // and not the thumbnail but should instead be sending both as empty strings.
             url: shareRequest.approved ? shareRequest.documentUrl : '',
-            thumbnailUrl: shareRequest.documentThumbnailUrl ? shareRequest.documentThumbnailUrl : '',
-            sharedWithAccountIds: [shareRequest.shareWithAccountId]
+            thumbnailUrl: shareRequest.documentThumbnailUrl
+              ? shareRequest.documentThumbnailUrl
+              : '',
+            sharedWithAccountIds: [shareRequest.shareWithAccountId],
           };
         });
-      const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(otherOwnerAccount.id);
+      const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(
+        otherOwnerAccount.id
+      );
       const notSharedDocuments: Document[] = docTypes
-        .filter(docType => {
-          return !sharedDocuments.some(sharedDocument => sharedDocument.type === docType);
+        .filter((docType) => {
+          return !sharedDocuments.some(
+            (sharedDocument) => sharedDocument.type === docType
+          );
         })
-        .map((docType => {
+        .map((docType) => {
           return {
             type: docType,
             url: '',
             thumbnailUrl: '',
-            sharedWithAccountIds: []
+            sharedWithAccountIds: [],
           };
-        }));
-      documents = [...account.documents, ...sharedDocuments, ...notSharedDocuments];
+        });
+      documents = [
+        ...account.documents,
+        ...sharedDocuments,
+        ...notSharedDocuments,
+      ];
     } catch (err) {
       console.error(err.message);
     }
-    this.setState(
-      { documents, searchedDocuments, isLoading: false },
-      () => {
-        this.handleSearch(documentQuery);
-      }
-    );
+    this.setState({ documents, searchedDocuments, isLoading: false }, () => {
+      this.handleSearch(documentQuery);
+    });
   };
 
   renderAddDocumentModal(props) {
@@ -436,7 +481,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const { id } = props.match.params;
     let referencedAccount;
     if (id) {
-      referencedAccount = accounts.filter(accountItem => accountItem.id === id)[0];
+      referencedAccount = accounts.filter(
+        (accountItem) => accountItem.id === id
+      )[0];
     }
     return (
       <AddDocumentModal
@@ -457,7 +504,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const { id } = props.match.params;
     let referencedAccount;
     if (id) {
-      referencedAccount = accounts.filter(accountItem => accountItem.id === id)[0];
+      referencedAccount = accounts.filter(
+        (accountItem) => accountItem.id === id
+      )[0];
     }
     const shareRequests: ShareRequest[] = account.shareRequests.filter(
       (sharedRequest) => {
@@ -470,7 +519,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       <UpdateDocumentModal
         accounts={accounts}
         showModal={!!documentSelected}
-        toggleModal={() => this.setState({ documentSelected: undefined, activeDocumentTab: '1' })}
+        toggleModal={() =>
+          this.setState({ documentSelected: undefined, activeDocumentTab: '1' })
+        }
         document={documentSelected}
         shareRequests={shareRequests}
         handleUpdateDocument={this.handleUpdateDocument}
@@ -507,7 +558,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       <div>
         <div id="main-top-bar">
           <div id="main-logo" onClick={() => this.setActiveTab('1')}>
-            <Link to={account.role === 'notary' ? '/clients' : '/documents'}>
+            <Link to={account.role === 'helper' ? '/clients' : '/documents'}>
               <Folder />
             </Link>
           </div>
@@ -543,9 +594,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem>
-                  <Link to="/account">
-                    My Account
-                  </Link>
+                  <Link to="/account">My Account</Link>
                 </DropdownItem>
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
@@ -572,7 +621,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMyClients() {
-    const { searchedDocuments, accounts, sortAsc, clientShares } = { ...this.state };
+    const { searchedDocuments, accounts, sortAsc, clientShares } = {
+      ...this.state,
+    };
     const { account, privateEncryptionKey } = { ...this.props };
     return (
       <ClientPage
@@ -598,13 +649,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       sortAsc,
       searchedAccounts,
       activeTab,
-      accounts
+      accounts,
     } = { ...this.state };
     const { account, privateEncryptionKey } = { ...this.props };
     const { id } = props.match.params;
     let referencedAccount;
     if (id) {
-      referencedAccount = accounts.filter(accountItem => accountItem.id === id)[0];
+      referencedAccount = accounts.filter(
+        (accountItem) => accountItem.id === id
+      )[0];
     }
     return (
       <DocumentPage
@@ -633,7 +686,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     return (
       <Router
         hashType="slash"
-      // history={history}
+        // history={history}
       >
         {isLoading && <ProgressIndicator isFullscreen />}
         <div id="main-container">
@@ -647,51 +700,69 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           {this.renderTopBar()}
           {this.renderTopBarSmall()}
           <div className="main-page">
-            {account.role !== 'admin' && (
-              <div className="main-side" />
-            )}
+            {account.role !== 'admin' && <div className="main-side" />}
             <div className="main-section">
               {isAccount && <Redirect push to="/account" />}
               <Switch>
                 <Route exact path="/">
-                  {account.role === 'notary' && <Redirect to="/clients" />}
+                  {account.role === 'helper' && <Redirect to="/clients" />}
                   {account.role === 'owner' && <Redirect to="/documents" />}
                   {account.role === 'admin' && <Redirect to="/admin" />}
                 </Route>
                 <Route exact path="/account">
                   {this.renderAccount()}
                 </Route>
-                <Route exact path="/documents" render={(props) => {
-                  return (
-                    <Fragment>
-                      {account.role === 'notary' && <Redirect push to="/clients" />}
-                      {account.role === 'admin' && <Redirect push to="/admin" />}
-                      {this.renderAddDocumentModal(props)}
-                      {this.renderUpdateDocumentModal(props)}
-                      {this.renderDocumentPage(props)}
-                    </Fragment>
-                  );
-                }} />
-                <Route exact path="/clients">
-                  {account.role === 'owner' && <Redirect push to="/documents" />}
-                  {account.role === 'admin' && <Redirect push to="/admin" />}
-                  {this.renderMyClients()}
-                </Route>
-                <Route exact path="/clients/:id/documents" render={
-                  (props) => {
+                <Route
+                  exact
+                  path="/documents"
+                  render={(props) => {
                     return (
                       <Fragment>
-                        {account.role === 'owner' && <Redirect push to="/documents" />}
-                        {account.role === 'admin' && <Redirect push to="/admin" />}
+                        {account.role === 'helper' && (
+                          <Redirect push to="/clients" />
+                        )}
+                        {account.role === 'admin' && (
+                          <Redirect push to="/admin" />
+                        )}
                         {this.renderAddDocumentModal(props)}
                         {this.renderUpdateDocumentModal(props)}
                         {this.renderDocumentPage(props)}
                       </Fragment>
                     );
-                  }} />>
+                  }}
+                />
+                <Route exact path="/clients">
+                  {account.role === 'owner' && (
+                    <Redirect push to="/documents" />
+                  )}
+                  {account.role === 'admin' && <Redirect push to="/admin" />}
+                  {this.renderMyClients()}
+                </Route>
+                <Route
+                  exact
+                  path="/clients/:id/documents"
+                  render={(props) => {
+                    return (
+                      <Fragment>
+                        {account.role === 'owner' && (
+                          <Redirect push to="/documents" />
+                        )}
+                        {account.role === 'admin' && (
+                          <Redirect push to="/admin" />
+                        )}
+                        {this.renderAddDocumentModal(props)}
+                        {this.renderUpdateDocumentModal(props)}
+                        {this.renderDocumentPage(props)}
+                      </Fragment>
+                    );
+                  }}
+                />
+                >
                 <Route exact path="/admin">
-                  {account.role === 'owner' && <Redirect push to="/documents" />}
-                  {account.role === 'notary' && <Redirect push to="/clients" />}
+                  {account.role === 'owner' && (
+                    <Redirect push to="/documents" />
+                  )}
+                  {account.role === 'helper' && <Redirect push to="/clients" />}
                   {this.renderAdminPage()}
                 </Route>
               </Switch>
