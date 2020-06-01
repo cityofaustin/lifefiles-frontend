@@ -276,7 +276,8 @@ class UpdateDocumentModal extends Component<
     const {document, referencedAccount, myAccount} = {...this.props};
 
     const notarizedDoc = await NotaryUtil.createNotarizedDocument(
-      this.state.notarizationType,
+      'certifiedCopy',
+      // this.state.notarizationType,
       this.state.validUntilDate,
       parseInt(this.state.notaryId, 10),
       this.props.myAccount.didAddress,

@@ -1,5 +1,5 @@
-@import '~bootstrap/scss/bootstrap';
-@import '../../variables.scss';
+@import "~bootstrap/scss/bootstrap";
+@import "../../variables.scss";
 
 @include media-breakpoint-down(sm) {
   .add-doc-modal {
@@ -17,24 +17,26 @@
             margin-right: 16px;
             g > g > path {
               @include themify($themes) {
-                fill: themed('colorPrimary');
+                fill: themed("colorPrimary");
               }
             }
           }
         }
         .modal-close {
           @include themify($themes) {
-            background: themed('colorPrimary');
+            background: themed("colorPrimary");
           }
           &:hover {
             background: white;
             svg g {
               @include themify($themes) {
-                stroke: themed('colorPrimary');
+                stroke: themed("colorPrimary");
               }
             }
           }
-          .lg { display: none; }
+          .lg {
+            display: none;
+          }
         }
       }
       .modal-body {
@@ -50,7 +52,9 @@
               margin-bottom: 16px;
               text-align: center;
             }
-            .select-md { display: none; }
+            .select-md {
+              display: none;
+            }
             .document-type-selected {
               .other-prompt {
                 color: #3b3b3b;
@@ -94,7 +98,7 @@
             margin-right: 30.9px;
             g > g > path {
               @include themify($themes) {
-                fill: themed('colorPrimary');
+                fill: themed("colorPrimary");
               }
             }
           }
@@ -105,17 +109,19 @@
         }
         .modal-close {
           @include themify($themes) {
-            background: themed('colorPrimary');
+            background: themed("colorPrimary");
           }
           &:hover {
             background: white;
             svg g {
               @include themify($themes) {
-                stroke: themed('colorPrimary');
+                stroke: themed("colorPrimary");
               }
             }
           }
-          .sm { display: none; }
+          .sm {
+            display: none;
+          }
         }
       }
       .modal-body {
@@ -129,7 +135,9 @@
               margin-top: 41px;
               margin-bottom: 16px;
             }
-            .select-sm { display: none; }
+            .select-sm {
+              display: none;
+            }
             .document-type-selected {
               .other-prompt {
                 color: #3b3b3b;
@@ -167,8 +175,8 @@
     justify-content: center;
     img {
       width: 100%;
-      width: -moz-available;          /* WebKit-based browsers will ignore this. */
-      width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+      width: -moz-available; /* WebKit-based browsers will ignore this. */
+      width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
       width: fill-available;
       object-fit: contain;
     }
@@ -197,6 +205,41 @@
         font-size: 20px;
         font-weight: 500;
         color: #747474;
+      }
+    }
+  }
+}
+
+.notarize-section {
+  display: flex;
+  flex-direction: row;
+  margin-top: 96px;
+  justify-content: space-evenly;
+  .image-container {
+    width: 35%;
+    display: flex;
+    justify-content: center;
+    img {
+      width: 100%;
+      width: -moz-available; /* WebKit-based browsers will ignore this. */
+      width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+      width: fill-available;
+      object-fit: contain;
+    }
+  }
+  .notary-container {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    .notary-toggle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .prompt {
+        font-size: 25px;
+        color: #484848;
+        text-align: center;
+        margin-bottom: 28px;
       }
     }
   }

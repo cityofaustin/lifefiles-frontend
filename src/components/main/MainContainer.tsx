@@ -255,7 +255,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     documentTypeSelected: string,
     referencedAccount?: Account,
     validUntilDate?: Date
-  ) => {
+  ): Promise<Document> => {
     const { documents, searchedDocuments, documentQuery } = { ...this.state };
     const { account, privateEncryptionKey } = { ...this.props };
     this.setState({ isLoading: true });
@@ -332,11 +332,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       console.error('failed to upload file');
     }
     this.setState(
-      { documents, searchedDocuments, showModal: false, isLoading: false },
+      { documents, searchedDocuments, isLoading: false },
       () => {
         this.handleSearch(documentQuery);
       }
     );
+    return document as any;
   };
 
   handleUpdateDocument = async (request: UpdateDocumentRequest) => {
@@ -477,7 +478,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
   renderAddDocumentModal(props) {
     const { showModal, documentTypes, documents, accounts } = { ...this.state };
-    const { privateEncryptionKey } = { ...this.props };
+    const { privateEncryptionKey, account } = { ...this.props };
     const { id } = props.match.params;
     let referencedAccount;
     if (id) {
@@ -487,6 +488,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     }
     return (
       <AddDocumentModal
+        myAccount={account}
         showModal={showModal}
         toggleModal={this.toggleModal}
         documentTypes={documentTypes}
