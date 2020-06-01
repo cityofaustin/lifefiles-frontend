@@ -36,8 +36,12 @@ class NotaryUtil {
     const issuanceDate = now;
     // const expirationDate = new Date(expirationDateString) as any;
 
-    const originalImageDetail: ImageDetail = await ImageUtil.processImageBase64(imageBase64);
-    const notarySealImageDetail: ImageDetail = await ImageUtil.processImageBase64(notaryDigitalSealBase64);
+    const originalImageDetail: ImageDetail = await ImageUtil.processImageBase64(
+      imageBase64
+    );
+    const notarySealImageDetail: ImageDetail = await ImageUtil.processImageBase64(
+      notaryDigitalSealBase64
+    );
     const { pdfArrayBuffer, doc } = await PDFUtil.stitchTogetherPdf(
       originalImageDetail,
       'Texas',
@@ -130,7 +134,7 @@ class NotaryUtil {
 
   static encryptX509(privateKey: string, data: string) {
     const key = new NodeRSA(privateKey);
-    const encrypted = key.encrypt(data, 'base64');
+    const encrypted = key.encryptPrivate(data, 'base64');
     return encrypted;
   }
 
@@ -149,7 +153,6 @@ class NotaryUtil {
     }
     return buf;
   }
-
 
   static async createVP(address: string, privateKey: string, vcJwt: string) {
     const did = new EthrDID({
