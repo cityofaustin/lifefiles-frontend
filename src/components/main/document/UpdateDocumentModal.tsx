@@ -246,7 +246,7 @@ class UpdateDocumentModal extends Component<
       this.setState({ privatePem });
       this.setState({ publicPem });
     };
-    if(e.target.files !== null) {
+    if (e.target.files !== null) {
       reader.readAsText(e.target.files[0]);
     }
   };
@@ -258,9 +258,15 @@ class UpdateDocumentModal extends Component<
       this.props.document?.vcJwt!
     );
 
-    const document = {...this.props.document!};
+    console.log(vpJwt);
+
+    const document = { ...this.props.document! };
     document.vpJwt = vpJwt;
-    NotaryService.updateDocumentVP((document.belongsTo as unknown) as string, document.type, document.vpJwt);
+    NotaryService.updateDocumentVP(
+      (document.belongsTo as unknown) as string,
+      document.type,
+      document.vpJwt
+    );
     NotaryService.anchorVpToBlockchain(vpJwt);
     this.setState({ vp: vpJwt });
   };
@@ -592,7 +598,7 @@ class UpdateDocumentModal extends Component<
   };
 
   renderNotarizationComplete = () => {
-    const {doc} = {...this.state};
+    const { doc } = { ...this.state };
     // debugger;
     // if(doc) {
     //   console.log(doc.output('datauristring'));
