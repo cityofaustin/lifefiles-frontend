@@ -91,7 +91,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                   {shareRequest && shareRequest.approved && `Share ${document!.type}?`}
                   {shareRequest && !shareRequest.approved && `${selectedContact.firstName} has Requested Access to your Document`}
                 </div>
-                <Checkbox isLarge isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
+                <Checkbox isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
                 <div className="share-status">
                   This file is {(shareRequest && shareRequest.approved) ? '' : 'NOT '}currently shared with
                   {' ' + selectedContact.username}

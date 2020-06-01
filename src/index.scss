@@ -244,10 +244,14 @@ body {
     .nav-link {
       padding: 0;
       margin: 0 0 6.5px 0;
-      color: #90afe2;
+      @include themify($themes) {
+        color: themed("colorDisabled");
+      }
     }
     .nav-link.active {
-      color: $blue;
+      @include themify($themes) {
+        color: themed("colorPrimary");
+      }
     }
   }
 }
@@ -264,11 +268,15 @@ body {
   .nav-link {
     padding: 0;
     margin-right: 30px;
-    color: #90afe2;
+    @include themify($themes) {
+      color: themed("colorDisabled");
+    }
     opacity: 1;
   }
   .nav-link.active {
-   color: $blue;
+    @include themify($themes) {
+      color: themed("colorPrimary");
+    }
   }
 }
 

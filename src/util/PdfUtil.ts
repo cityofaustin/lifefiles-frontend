@@ -10,14 +10,14 @@ export default class PdfUtil {
     notaryDigitalSeal: ImageDetail,
     documentDID: string
   ) {
-    const pageWidth = 632,
-      pageHeight = 446.5,
-      lineHeight = 1.8,
-      margin = 64,
-      maxLineWidth = pageWidth - margin,
-      fontSize = 24,
-      ptsPerInch = 72,
-      oneLineHeight = (fontSize * lineHeight) / ptsPerInch;
+    const pageWidth = 632;
+      // pageHeight = 446.5,
+    const lineHeight = 1.8;
+    const margin = 64;
+    const maxLineWidth = pageWidth - margin;
+      // fontSize = 24,
+      // ptsPerInch = 72;
+      // oneLineHeight = (fontSize * lineHeight) / ptsPerInch;
     const doc = new jsPDF({
       // https://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html
       orientation: 'landscape', // "portrait" or "landscape
