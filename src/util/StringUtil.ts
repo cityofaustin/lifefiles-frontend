@@ -9,6 +9,11 @@ class StringUtil {
     return result;
   }
 
+  static stringPaddedCenter(str, numspace) {
+    const spc = Array(numspace).fill(' ').join('');
+    return spc + str + spc;
+  }
+
   // https://stackoverflow.com/a/2117523
   static getUuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {

@@ -2,19 +2,32 @@ import jsPDF from 'jspdf';
 import { ImageDetail } from './ImageUtil';
 // https://rawgit.com/MrRio/jsPDF/master/fontconverter/fontconverter.html
 import Caveat from '../fonts/Caveat/Caveat-normal';
+import StringUtil from './StringUtil';
+import { format, getDay } from 'date-fns';
 // import AcroFormTextField from 'jspdf';
 
 export default class PdfUtil {
   static async stitchTogetherPdf(
     scannedImage: ImageDetail,
+    stateName: string,
+    county: string,
+    notarizedDate: Date,
+    documentType: string,
+    ownerFullname: string,
     notaryDigitalSeal: ImageDetail,
+    notaryFullname: string,
     documentDID: string
   ) {
+    // const dateString = 'Dec 31, 2021';
+    let dateString = format(notarizedDate, 'MMM d, y');
+    if(getDay(notarizedDate) < 10) {
+      dateString += ' ';
+    }
     const pageWidth = 632;
       // pageHeight = 446.5,
     const lineHeight = 1.8;
     const margin = 64;
-    const maxLineWidth = pageWidth - margin;
+    const maxLineWidth = pageWidth - (margin * 2) + 10;
       // fontSize = 24,
       // ptsPerInch = 72;
       // oneLineHeight = (fontSize * lineHeight) / ptsPerInch;
@@ -26,7 +39,10 @@ export default class PdfUtil {
       lineHeight
     });
     doc.setProperties({ title: 'Notarized Document' });
-
+    // adding some padding to the variable fields
+    county = StringUtil.stringPaddedCenter(county, 14 - county.length);
+    documentType = StringUtil.stringPaddedCenter(documentType, 20 - documentType.length);
+    ownerFullname = StringUtil.stringPaddedCenter(ownerFullname, 30 - ownerFullname.length);
     // console.log(`original width ${scannedImage.width} height ${scannedImage.height}`);
     // newH      x    160*1194/861 for example
     // -----  = -----
@@ -42,6 +58,7 @@ export default class PdfUtil {
     // https://stackoverflow.com/questions/58449153/jspdf-error-font-does-not-exist-in-vfs-vuejs
     doc.addFileToVFS('Caveat-normal.ttf', Caveat);
     doc.addFont('Caveat-normal.ttf', 'Caveat', 'normal');
+    // console.log(doc.getFontList());
 
     doc.addImage(scannedImage.base64, scannedImage.imageType, 223.2, 14, newOrigWidth, newOrigHeight);
 
@@ -50,21 +67,26 @@ export default class PdfUtil {
     doc.text('Certified Copy of a Non-Recordable Document', margin, 157);
 
     doc.setFontSize(4 * 6);
-    doc.text('State of Texas', margin, 194);
+    doc.text(`State of ${stateName}`, margin, 194);
 
-    const text =
-      'County of  Travis .\n' +
-      'On this date,  Jan 1, 2021  , I certify that the preceding of attached document, is a true, exact, complete, and unaltered copy\n' +
-      'made by me of   Insurance Card   , presented to me by the document’s custodian,   Janice Sample  , and that, to the best\n' +
-      'of my knowledge, the photocopied document is neither a public record not a publicly recordable document, certified copies of\n' +
+    const text1 =
+      `County of ${county} .\n` +
+      `On this date, ${dateString} , I certify that the preceding of attached document, is a true, exact, complete, and unaltered copy ` +
+      `made by me of ${documentType} , `;
+    const text2 = `presented to me by the document’s custodian, ${ownerFullname} ,` ;
+    const text3 = `and that, to the best ` +
+      'of my knowledge, the photocopied document is neither a public record not a publicly recordable document, certified copies of ' +
       'which are available from an official source other than a notary.';
-    const textLines = doc.setFont('helvetica', 'neue').setFontSize(2.3 * 6).splitTextToSize(text, maxLineWidth);
-    doc.text(textLines, margin, 220);
+    const textLines1 = doc.setFont('helvetica', 'neue').setFontSize(2.3 * 6).splitTextToSize(text1, maxLineWidth);
+    const textLines2 = doc.setFont('helvetica', 'neue').setFontSize(2.3 * 6).splitTextToSize(text3, maxLineWidth);
+    doc.text(textLines1, margin, 220);
+    doc.text(text2, margin + 170, 220 + 18.5 * 2);
+    doc.text(textLines2, margin, 220 + 18.5 * 3);
     doc.setLineWidth(0.5);
-    doc.line(margin + 45, 222, margin + 80, 222);
+    doc.line(margin + 45, 222, margin + 115, 222);
     doc.line(margin + 55, 222 + 18.5, margin + 110, 222 + 18.5);
-    doc.line(margin + 65, 222 + 18.5 * 2, margin + 140, 222 + 18.5 * 2);
-    doc.line(margin + 338, 222 + 18.5 * 2, margin + 410, 222 + 18.5 * 2);
+    doc.line(margin + 65, 222 + 18.5 * 2, margin + 150, 222 + 18.5 * 2);
+    doc.line(margin + 363, 222 + 18.5 * 2, margin + 515, 222 + 18.5 * 2);
 
     doc.addImage(notaryDigitalSeal.base64, notaryDigitalSeal.imageType, margin, 312, newSealWidth, newSealHeight);
     doc.line(margin, 350, 160, 350);
@@ -73,7 +95,7 @@ export default class PdfUtil {
 
     doc.setFont('Caveat', 'normal');
     doc.setFontSize(4 * 6);
-    doc.text('John Public', 288, 321 + 12);
+    doc.text(notaryFullname, 288, 321 + 12);
     doc.line(288, 350, 384, 350);
     doc.setFont('Helvetica', 'normal');
     doc.setFontSize(2.3 * 6);

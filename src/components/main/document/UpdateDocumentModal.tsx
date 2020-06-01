@@ -273,6 +273,8 @@ class UpdateDocumentModal extends Component<
   };
 
   handleNotarizeDocument = async () => {
+    const {document, referencedAccount, myAccount} = {...this.props};
+
     const notarizedDoc = await NotaryUtil.createNotarizedDocument(
       this.state.notarizationType,
       this.state.validUntilDate,
@@ -287,7 +289,10 @@ class UpdateDocumentModal extends Component<
         ? ''
         : this.props.referencedAccount?.didAddress,
       this.state.base64Image === undefined ? '' : this.state.base64Image,
-      this.state.notarySealBase64
+      this.state.notarySealBase64,
+      document?.type!,
+      AccountImpl.getFullName(referencedAccount?.firstName, referencedAccount?.lastName),
+      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
     );
 
     await NotaryService.updateDocumentVC(

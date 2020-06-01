@@ -22,9 +22,11 @@ class NotaryUtil {
     notaryPrivateKey: string,
     ownerEthAddress: string,
     imageBase64: string,
-    notaryDigitalSealBase64: string
+    notaryDigitalSealBase64: string,
+    documentType: string,
+    ownerFullname: string,
+    caseworkerFullname: string
   ) {
-    // TODO: get original dimensions of images
     const didRes = await NotaryService.generateNewDid();
     const didAddress = didRes.didAddress;
     const documentDID = 'did:ethr:' + didAddress;
@@ -38,7 +40,13 @@ class NotaryUtil {
     const notarySealImageDetail: ImageDetail = await ImageUtil.processImageBase64(notaryDigitalSealBase64);
     const { pdfArrayBuffer, doc } = await PDFUtil.stitchTogetherPdf(
       originalImageDetail,
+      'Texas',
+      'Travis',
+      issuanceDate,
+      documentType,
+      ownerFullname,
       notarySealImageDetail,
+      caseworkerFullname,
       documentDID
     );
 
