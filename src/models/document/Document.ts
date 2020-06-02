@@ -2,6 +2,7 @@ import Account from '../Account';
 
 interface Document {
   _id?: string;
+  id?: string;
   name?: string;
   url: string;
   thumbnailUrl: string;

@@ -27,51 +27,55 @@ class NotaryUtil {
     ownerFullname: string,
     caseworkerFullname: string
   ) {
-    const didRes = await NotaryService.generateNewDid();
-    const didAddress = didRes.didAddress;
-    const documentDID = 'did:ethr:' + didAddress;
+    try {
+      const didRes = await NotaryService.generateNewDid();
+      const didAddress = didRes.didAddress;
+      const documentDID = 'did:ethr:' + didAddress;
 
-    const now = Date.now() as any;
-    const issueTime = Math.floor(now / 1000);
-    const issuanceDate = now;
-    // const expirationDate = new Date(expirationDateString) as any;
+      const now = Date.now() as any;
+      const issueTime = Math.floor(now / 1000);
+      const issuanceDate = now;
+      // const expirationDate = new Date(expirationDateString) as any;
 
-    const originalImageDetail: ImageDetail = await ImageUtil.processImageBase64(
-      imageBase64
-    );
-    const notarySealImageDetail: ImageDetail = await ImageUtil.processImageBase64(
-      notaryDigitalSealBase64
-    );
-    const { pdfArrayBuffer, doc } = await PDFUtil.stitchTogetherPdf(
-      originalImageDetail,
-      'Texas',
-      'Travis',
-      issuanceDate,
-      documentType,
-      ownerFullname,
-      notarySealImageDetail,
-      caseworkerFullname,
-      documentDID
-    );
+      const originalImageDetail: ImageDetail = await ImageUtil.processImageBase64(
+        imageBase64
+      );
+      const notarySealImageDetail: ImageDetail = await ImageUtil.processImageBase64(
+        notaryDigitalSealBase64
+      );
+      const { pdfArrayBuffer, doc } = await PDFUtil.stitchTogetherPdf(
+        originalImageDetail,
+        'Texas',
+        'Travis',
+        issuanceDate,
+        documentType,
+        ownerFullname,
+        notarySealImageDetail,
+        caseworkerFullname,
+        documentDID
+      );
 
-    const documentHash = md5(this.arrayBuffertoBuffer(pdfArrayBuffer));
-    const encryptedHash = this.encryptX509(notaryPrivateKey, documentHash);
+      const documentHash = md5(this.arrayBuffertoBuffer(pdfArrayBuffer));
+      const encryptedHash = this.encryptX509(notaryPrivateKey, documentHash);
 
-    const vc = await this.createVC(
-      notaryEthAddress,
-      notaryEthPrivateKey,
-      ownerEthAddress,
-      documentDID,
-      notaryType,
-      issuanceDate,
-      issueTime,
-      expirationDate,
-      notaryId,
-      notaryPublicKey,
-      encryptedHash
-    );
-
-    return { vc, doc };
+      const vc = await this.createVC(
+        notaryEthAddress,
+        notaryEthPrivateKey,
+        ownerEthAddress,
+        documentDID,
+        notaryType,
+        issuanceDate,
+        issueTime,
+        expirationDate,
+        notaryId,
+        notaryPublicKey,
+        encryptedHash
+      );
+      return { vc, doc };
+    } catch (err) {
+      console.error('Failure in create notarized document');
+      console.error(err);
+    }
   }
 
   static async createVC(

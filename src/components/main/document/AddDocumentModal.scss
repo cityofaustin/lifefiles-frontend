@@ -244,3 +244,14 @@
     }
   }
 }
+
+.notarized-section {
+  .pdf-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .pdf-container {
+      width: fit-content;
+    }
+  }
+}

@@ -30,6 +30,12 @@ import ImageUtil from '../../../util/ImageUtil';
 import NotaryUtil from '../../../util/NotaryUtil';
 import StringUtil from '../../../util/StringUtil';
 import NotaryService from '../../../services/NotaryService';
+import PdfPreview from '../../common/PdfPreview';
+import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
+import jsPDF from 'jspdf';
+import ZipUtil from '../../../util/ZipUtil';
+import CryptoUtil from '../../../util/CryptoUtil';
+import ProgressIndicator from '../../common/ProgressIndicator';
 
 // NOTE: you could use this to add min max date selection
 // import {subMonths, addMonths} from 'date-fns';
@@ -43,6 +49,7 @@ interface AddDocumentModalProps {
   privateEncryptionKey?: string;
   referencedAccount?: Account;
   myAccount: Account;
+  handleUpdateDocument: (request: UpdateDocumentRequest) => void;
 }
 
 enum AddDocumentStep {
@@ -70,7 +77,8 @@ interface AddDocumentModalState {
   privatePem: string;
   publicPem: string;
   vc?: string;
-  doc?: any;
+  doc?: jsPDF;
+  isLoading: boolean;
 }
 
 class AddDocumentModal extends Component<AddDocumentModalProps,
@@ -91,6 +99,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       publicPem: '',
       vc: undefined,
       doc: undefined,
+      isLoading: false
     };
   }
 
@@ -154,6 +163,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       hasValidUntilDate: false,
       validUntilDate: new Date()
     });
+    this.toggleModal();
   };
 
   handleNotaryIdChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -182,36 +192,66 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   };
 
   handleNotarizeDocument = async () => {
-    const { documentType, newFile, validUntilDate, publicPem, privatePem, notarySealBase64 } = { ...this.state };
+    const { documentType, newFile, validUntilDate, publicPem, privatePem, notarySealBase64, notaryId } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
-    const {referencedAccount, myAccount, handleAddNewDocument, privateEncryptionKey} = {...this.props};
-    const document = await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount, validUntilDate);
-    const base64String = await StringUtil.fileContentsToString(newFile!);
-    const notarizedDoc = await NotaryUtil.createNotarizedDocument(
-      'certifiedCopy',
-      validUntilDate,
-      parseInt(this.state.notaryId, 10),
-      myAccount.didAddress,
-      privateEncryptionKey === undefined ? '' : privateEncryptionKey,
-      publicPem,
-      privatePem,
-      referencedAccount?.didAddress === undefined
-        ? ''
-        : referencedAccount?.didAddress,
-      base64String,
-      notarySealBase64,
-      document?.type!,
-      AccountImpl.getFullName(referencedAccount?.firstName, referencedAccount?.lastName),
-      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
-    );
+    const { referencedAccount, myAccount, handleAddNewDocument, privateEncryptionKey } = { ...this.props };
+    try {
+      this.setState({isLoading: true});
+      const zippedString = await StringUtil.fileContentsToString(newFile!);
+      const encryptedString = await ZipUtil.unzip(zippedString);
+      const base64String = await CryptoUtil.getDecryptedString(privateEncryptionKey!, encryptedString);
+      await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount, validUntilDate);
+      const notarizedDoc = await NotaryUtil.createNotarizedDocument(
+        'certifiedCopy',
+        validUntilDate,
+        parseInt(notaryId, 10),
+        myAccount.didAddress,
+        privateEncryptionKey === undefined ? '' : privateEncryptionKey,
+        publicPem,
+        privatePem,
+        referencedAccount?.didAddress === undefined ? '' : referencedAccount?.didAddress,
+        base64String,
+        notarySealBase64,
+        documentType,
+        AccountImpl.getFullName(referencedAccount?.firstName, referencedAccount?.lastName),
+        AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
+      );
 
-    await NotaryService.updateDocumentVC(
-      referencedAccount?.id!,
-      documentType,
-      notarizedDoc.vc
-    );
+      const base64Pdf: string = notarizedDoc!.doc.output('datauristring');
 
-    this.setState({ vc: notarizedDoc.vc, doc: notarizedDoc.doc, addDocumentStep: AddDocumentStep.NOTARIZED });
+      const ownerEncrypted = await CryptoUtil.getEncryptedByPublicString(
+        referencedAccount!.didPublicEncryptionKey!,
+        base64Pdf
+      );
+      const ownerZipped: Blob = await ZipUtil.zip(ownerEncrypted);
+      const ownerFile = new File([ownerZipped], 'encrypted-notary.zip', {
+        type: 'application/zip',
+        lastModified: Date.now(),
+      });
+
+      const helperEncrypted = await CryptoUtil.getEncryptedByPublicString(
+        myAccount.didPublicEncryptionKey!,
+        base64Pdf
+      );
+      const helperZipped: Blob = await ZipUtil.zip(helperEncrypted);
+      const helperFile = new File([helperZipped], 'encrypted-notary.zip', {
+        type: 'application/zip',
+        lastModified: Date.now(),
+      });
+
+      await NotaryService.updateDocumentVC(
+        referencedAccount?.id!,
+        documentType,
+        notarizedDoc!.vc,
+        helperFile,
+        ownerFile
+      );
+
+      this.setState({ vc: notarizedDoc!.vc, doc: notarizedDoc!.doc, addDocumentStep: AddDocumentStep.NOTARIZED, isLoading: false });
+    } catch(err) {
+      console.error('Failure in notarize document');
+      console.error(err);
+    }
   };
 
 
@@ -224,7 +264,9 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       isOther: false,
       documentTypeOption: undefined,
       hasValidUntilDate: false,
-      validUntilDate: new Date()
+      validUntilDate: new Date(),
+      isGoingToNotarize: false,
+      notaryId: ''
     });
     toggleModal();
   };
@@ -406,17 +448,30 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   }
 
   renderNotarizedSection() {
-    // TODO:
+    const {doc} = {...this.state};
     return (
-      <section>
-        TODO
+      <section className="notarized-section">
+        {/* <h3>Verifiable Credential</h3> */}
+        {/* <pre className="vc-display">{this.state.vc}</pre> */}
+        {doc && (
+          <div className="pdf-display">
+            <PdfPreview fileURL={doc.output('datauristring')} />
+            <Button
+              className="margin-wide"
+              color="primary"
+              onClick={() => doc.save('generated.pdf')}
+            >
+              Save Pdf
+            </Button>
+          </div>
+        )}
       </section>
-    )
+    );
   }
 
   render() {
     const { showModal, referencedAccount } = { ...this.props };
-    const { documentType, newFile, addDocumentStep, isGoingToNotarize, hasValidUntilDate } = { ...this.state };
+    const { documentType, newFile, addDocumentStep, isGoingToNotarize, hasValidUntilDate, isLoading } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
         <CrossSvg className="lg" />
@@ -424,13 +479,16 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       </div>
     );
     return (
-      <Modal
+      <Fragment>
+        {isLoading && <ProgressIndicator isFullscreen />}
+        <Modal
         isOpen={showModal}
         toggle={this.toggleModal}
         backdrop={'static'}
         size={'xl'}
         className="add-doc-modal"
       >
+
         <ModalHeader toggle={this.toggleModal} close={closeBtn}>
           {referencedAccount && (
             <Fragment>
@@ -571,6 +629,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
           )}
         </ModalFooter>
       </Modal>
+      </Fragment>
     );
   }
 }

@@ -259,6 +259,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const { documents, searchedDocuments, documentQuery } = { ...this.state };
     const { account, privateEncryptionKey } = { ...this.props };
     this.setState({ isLoading: true });
+    let newDocument;
     try {
       if (newFile) {
         try {
@@ -307,7 +308,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               referencedAccount.id
             );
             this.handleClientSelected(referencedAccount);
-            // const newDocument = response.document;
+            newDocument = response.document;
             // newDocument._id = newDocument.id;
             // documents.push(newDocument);
           } else {
@@ -318,7 +319,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               account.didPublicEncryptionKey!,
               validUntilDate
             );
-            const newDocument = response.document;
+            newDocument = response.document;
             // NOTE: The uploaded by account object is nice but switching to account id to make consistent with the /my-account api call
             newDocument.uploadedBy = newDocument.uploadedBy.id;
             newDocument._id = newDocument.id;
@@ -337,7 +338,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         this.handleSearch(documentQuery);
       }
     );
-    return document as any;
+    return newDocument as any;
   };
 
   handleUpdateDocument = async (request: UpdateDocumentRequest) => {
@@ -496,6 +497,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         handleAddNewDocument={this.handleAddNewDocument}
         privateEncryptionKey={privateEncryptionKey}
         referencedAccount={referencedAccount}
+        // used to put in the pdf over the original image.
+        handleUpdateDocument={this.handleUpdateDocument}
       />
     );
   }

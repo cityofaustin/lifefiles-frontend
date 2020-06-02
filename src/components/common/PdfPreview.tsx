@@ -7,6 +7,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 interface PdfPreviewProps {
   fileURL: string;
+  height?: number;
 }
 
 interface PdfPreviewState {
@@ -15,6 +16,10 @@ interface PdfPreviewState {
 }
 
 class PdfPreview extends Component<PdfPreviewProps, PdfPreviewState> {
+  static defaultProps = {
+    height: 650,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -39,7 +44,7 @@ class PdfPreview extends Component<PdfPreviewProps, PdfPreviewState> {
   };
 
   render() {
-    const { fileURL } = { ...this.props };
+    const { fileURL, height } = { ...this.props };
     const { pageNumber } = { ...this.state };
     return (
       <div className="pdf-container">
@@ -51,7 +56,7 @@ class PdfPreview extends Component<PdfPreviewProps, PdfPreviewState> {
           <Page
             pageNumber={pageNumber}
             // customTextRenderer={({ str, itemIndex }) => { return (<span>{str}</mark>) }}
-            height={650}
+            height={height}
           />
         </Document>
         <div className="paginate">

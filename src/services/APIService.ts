@@ -93,6 +93,26 @@ class APIService {
     }
   }
 
+  static async postDocVC(path, vc, helperFile, ownerFile) {
+    const input = `${MYPASS_API}${path}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`
+    };
+    const formdata = new FormData();
+    formdata.append('img', helperFile, helperFile.name);
+    formdata.append('img', ownerFile, ownerFile.name);
+    formdata.append('vc', vc);
+    const init = {
+      method: 'POST',
+      headers,
+      body: formdata
+    };
+    const response = await fetch(input, init, 60000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
   static async postDocument(file: File, thumbnailFile: File, documentType: string, encryptionPubKey: string, validUntilDate?: Date) {
     const path = '/documents';
     const input = `${MYPASS_API}${path}`;

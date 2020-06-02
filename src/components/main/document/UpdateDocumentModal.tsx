@@ -55,6 +55,7 @@ import { OptionTypeBase } from 'react-select';
 import ImageUtil from '../../../util/ImageUtil';
 import PdfPreview from '../../common/PdfPreview';
 import ProgressIndicator from '../../common/ProgressIndicator';
+import APIService from '../../../services/APIService';
 
 interface UpdateDocumentModalProps {
   showModal: boolean;
@@ -84,6 +85,8 @@ interface UpdateDocumentModalState {
   newFile?: File;
   newThumbnailFile?: File;
   base64Image?: string;
+  base64Thumbnail?: string;
+  base64Pdf?: string;
   docType?: string;
   pendingAccess: boolean;
   notaryId: string;
@@ -113,6 +116,8 @@ class UpdateDocumentModal extends Component<
       isZoomed: false,
       showConfirmShare: false,
       base64Image: undefined,
+      base64Thumbnail: undefined,
+      base64Pdf: undefined,
       docType: undefined,
       pendingAccess: false,
       notaryId: '',
@@ -137,24 +142,39 @@ class UpdateDocumentModal extends Component<
       this.props.document &&
       this.props.privateEncryptionKey
     ) {
+
+      let base64Pdf: string | undefined;
       let base64Image: string | undefined;
+      let base64Thumbnail: string | undefined;
       let docType: string | undefined;
       if (this.props.document.url.length > 0) {
         try {
+          const encryptedThumbnail = await ZipUtil.unzip(
+            DocumentService.getDocumentURL(this.props.document.thumbnailUrl)
+          );
+          base64Thumbnail = await CryptoUtil.getDecryptedString(
+            this.props.privateEncryptionKey,
+            encryptedThumbnail
+          );
+          this.setState({base64Thumbnail}); // do this since it's much quicker than the pdf.
           docType = this.props.document.type;
           const encryptedString = await ZipUtil.unzip(
             DocumentService.getDocumentURL(this.props.document.url)
           );
-          base64Image = await CryptoUtil.getDecryptedString(
+          const base64 = await CryptoUtil.getDecryptedString(
             this.props.privateEncryptionKey,
             encryptedString
           );
+          if(base64.startsWith('data:application/pdf')) {
+            base64Pdf = base64;
+          } else {
+            base64Image = base64;
+          }
         } catch (err) {
           console.error(err);
         }
       }
-      this.setState({ base64Image });
-      this.setState({ docType });
+      this.setState({ base64Image, docType, base64Pdf, base64Thumbnail });
     }
 
     // console.log(this.props.referencedAccount?.didAddress);
@@ -173,6 +193,7 @@ class UpdateDocumentModal extends Component<
       selectedContact: undefined,
       showConfirmShare: false,
       base64Image: undefined,
+      base64Pdf: undefined,
       pendingAccess: false,
     });
     toggleModal();
@@ -182,7 +203,8 @@ class UpdateDocumentModal extends Component<
     const { newFile, newThumbnailFile } = { ...this.state };
     const { handleUpdateDocument, document } = { ...this.props };
     handleUpdateDocument({
-      id: document!._id!,
+      id: '5ed6aa532f74186d6238bf47',
+      // id: document!._id!,
       img: newFile,
       thumbnail: newThumbnailFile,
       validUntilDate: undefined, // FIXME: add expired at form somewhere
@@ -200,8 +222,13 @@ class UpdateDocumentModal extends Component<
     });
   };
 
-  handleClaim = () => {
+  handleClaim = async () => {
     const { handleUpdateDocument, document } = { ...this.props };
+
+    if(document?.vcJwt) {
+      // TODO: I'm pretty sure you have to set this in parent
+      this.handleOwnerAcceptNotarization();
+    }
 
     handleUpdateDocument({
       id: document!._id!,
@@ -296,14 +323,14 @@ class UpdateDocumentModal extends Component<
       AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
     );
 
-    await NotaryService.updateDocumentVC(
-      this.props.referencedAccount?.id!,
-      this.state.docType!,
-      notarizedDoc.vc
-    );
+    // await NotaryService.updateDocumentVC(
+    //   this.props.referencedAccount?.id!,
+    //   this.state.docType!,
+    //   notarizedDoc!.vc
+    // );
 
-    this.setState({ vc: notarizedDoc.vc });
-    this.setState({ doc: notarizedDoc.doc });
+    this.setState({ vc: notarizedDoc!.vc });
+    this.setState({ doc: notarizedDoc!.doc });
   };
 
   handleShareDocWithContact = async () => {
@@ -495,7 +522,7 @@ class UpdateDocumentModal extends Component<
     this.setState({ pendingAccess: true });
   };
 
-  renderNotarizeTab = (base64Image) => {
+  renderNotarizeTab = (base64Thumbnail) => {
     const options: OptionTypeBase[] = [];
     options.push({
       value: 'certifiedCopy',
@@ -524,7 +551,7 @@ class UpdateDocumentModal extends Component<
             <div className="col-6">
               <div className="img-container">
                 <ImageWithStatus
-                  imageUrl={base64Image}
+                  imageUrl={base64Thumbnail}
                   imageViewType={ImageViewTypes.PREVIEW}
                 />
               </div>
@@ -653,6 +680,8 @@ class UpdateDocumentModal extends Component<
       showConfirmShare,
       newFile,
       base64Image,
+      base64Thumbnail,
+      base64Pdf,
       pendingAccess,
       isLoading
     } = { ...this.state };
@@ -793,7 +822,7 @@ class UpdateDocumentModal extends Component<
                     </NavItem>
                   )}
 
-                  <NavItem>
+                  {/* <NavItem>
                     <NavLink
                       className={classNames({ active: activeTab === '4' })}
                       onClick={() => {
@@ -802,7 +831,7 @@ class UpdateDocumentModal extends Component<
                     >
                       Notarize
                     </NavLink>
-                  </NavItem>
+                  </NavItem> */}
                 </Nav>
                 <TabContent activeTab={activeTab}>
                   <TabPane tabId="1">
@@ -815,10 +844,20 @@ class UpdateDocumentModal extends Component<
                               {/*<FlipDocBtnSvg className="pointer"/>*/}
                             </div>
                             <div className="img-container">
-                              <ImageWithStatus
-                                imageUrl={base64Image}
-                                imageViewType={ImageViewTypes.PREVIEW}
-                              />
+                              {!base64Image && !base64Pdf && (
+                                <div>Loading...</div>
+                              )}
+                              {base64Pdf && (
+                                <div className="pdf-display">
+                                  <PdfPreview fileURL={base64Pdf} height={400} />
+                                </div>
+                              )}
+                              {base64Image && (
+                                <ImageWithStatus
+                                  imageUrl={base64Image}
+                                  imageViewType={ImageViewTypes.PREVIEW}
+                                />
+                              )}
                               {/* <img
                           className="doc-image"
                           // src={DocumentService.getDocumentURL(document!.url)}
@@ -989,7 +1028,7 @@ class UpdateDocumentModal extends Component<
                             </div>
                             <div className="doc">
                               <ImageWithStatus
-                                imageUrl={base64Image}
+                                imageUrl={base64Thumbnail}
                                 imageViewType={ImageViewTypes.PREVIEW}
                               />
                               <div className="doc-info">
@@ -1020,7 +1059,7 @@ class UpdateDocumentModal extends Component<
                   </TabPane>
                   <TabPane tabId="4">
                     {this.state.vc === undefined
-                      ? this.renderNotarizeTab(base64Image)
+                      ? this.renderNotarizeTab(base64Thumbnail)
                       : this.renderNotarizationComplete()}
                   </TabPane>
                 </TabContent>
@@ -1034,7 +1073,7 @@ class UpdateDocumentModal extends Component<
                         {document && (
                           <img
                             className="delete-image"
-                            src={base64Image}
+                            src={base64Thumbnail}
                             alt="doc missing"
                           />
                         )}

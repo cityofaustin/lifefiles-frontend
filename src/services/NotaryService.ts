@@ -5,10 +5,12 @@ class NotaryService extends AgentService {
     return super.get('/generate-new-did');
   }
 
-  static updateDocumentVC(accountForId: string, documentType: string, vcJwt: string) {
-    return super.post(`/account/${accountForId}/documents/${documentType}`, {
-      vc: vcJwt,
-    });
+  static updateDocumentVC(accountForId: string, documentType: string, vcJwt: string, helperFile: File, ownerFile: File) {
+    return super.postDocVC(`/account/${accountForId}/documents/${documentType}`,
+      vcJwt,
+      helperFile,
+      ownerFile
+    );
   }
 
   static updateDocumentVP(accountForId: string, documentType: string, vpJwt: string) {

@@ -19,7 +19,7 @@ export default class PdfUtil {
     documentDID: string
   ) {
     // const dateString = 'Dec 31, 2021';
-    let dateString = format(notarizedDate, 'MMM d, y');
+    let dateString = format(notarizedDate, 'MMM dd, y');
     if(getDay(notarizedDate) < 10) {
       dateString += ' ';
     }
@@ -31,7 +31,7 @@ export default class PdfUtil {
       // fontSize = 24,
       // ptsPerInch = 72;
       // oneLineHeight = (fontSize * lineHeight) / ptsPerInch;
-    const doc = new jsPDF({
+    const doc: jsPDF = new jsPDF({
       // https://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html
       orientation: 'landscape', // "portrait" or "landscape
       unit: 'px', // "mm", "cm", "m", "in" or "px"
@@ -71,22 +71,22 @@ export default class PdfUtil {
 
     const text1 =
       `County of ${county} .\n` +
-      `On this date, ${dateString} , I certify that the preceding of attached document, is a true, exact, complete, and unaltered copy ` +
-      `made by me of ${documentType} , `;
-    const text2 = `presented to me by the document’s custodian, ${ownerFullname} ,` ;
+      `On this date,  ${dateString} , I certify that the preceding of attached document, is a true, exact, complete, and unaltered copy ` +
+      `made by me of ${documentType}`;
+    const text2 = `, presented to me by the document’s custodian, ${ownerFullname} ,` ;
     const text3 = `and that, to the best ` +
       'of my knowledge, the photocopied document is neither a public record not a publicly recordable document, certified copies of ' +
       'which are available from an official source other than a notary.';
-    const textLines1 = doc.setFont('helvetica', 'neue').setFontSize(2.3 * 6).splitTextToSize(text1, maxLineWidth);
-    const textLines2 = doc.setFont('helvetica', 'neue').setFontSize(2.3 * 6).splitTextToSize(text3, maxLineWidth);
+    const textLines1 = doc.setFont('Times', 'normal').setFontSize(2.3 * 6).splitTextToSize(text1, maxLineWidth);
+    const textLines2 = doc.setFont('Times', 'normal').setFontSize(2.3 * 6).splitTextToSize(text3, maxLineWidth);
     doc.text(textLines1, margin, 220);
     doc.text(text2, margin + 170, 220 + 18.5 * 2);
     doc.text(textLines2, margin, 220 + 18.5 * 3);
     doc.setLineWidth(0.5);
-    doc.line(margin + 45, 222, margin + 115, 222);
-    doc.line(margin + 55, 222 + 18.5, margin + 110, 222 + 18.5);
-    doc.line(margin + 65, 222 + 18.5 * 2, margin + 150, 222 + 18.5 * 2);
-    doc.line(margin + 363, 222 + 18.5 * 2, margin + 515, 222 + 18.5 * 2);
+    doc.line(margin + 45, 222, margin + 115, 222); // county
+    doc.line(margin + 55, 222 + 18.5, margin + 115, 222 + 18.5); // date
+    doc.line(margin + 65, 222 + 18.5 * 2, margin + 165, 222 + 18.5 * 2); // doc type
+    doc.line(margin + 368, 222 + 18.5 * 2, margin + 515, 222 + 18.5 * 2); // owner
 
     doc.addImage(notaryDigitalSeal.base64, notaryDigitalSeal.imageType, margin, 312, newSealWidth, newSealHeight);
     doc.line(margin, 350, 160, 350);
