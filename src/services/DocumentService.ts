@@ -13,7 +13,7 @@ class DocumentService extends AgentService {
 
   static getDocumentURL(filename: string) {
     const result = super.getAPIEndpoint() +
-      `${PATH}/${filename}/${AuthService.getAccessToken()}`;
+      `${PATH}/${filename}?access_token=${AuthService.getAccessToken()}`;
     return result;
   }
 

@@ -35,11 +35,10 @@ class App extends Component<{}, AppState> {
     this.setState({isLoading: true});
     const code = UrlUtil.getQueryVariable('code');
     if (code) {
-      // TODO
       const response = await AccountService.getToken(code);
-      AuthService.logIn(response.access_token);
-      // debugger;
-      // window.location.replace(location.origin);
+      AuthService.logIn(response.access_token, response.refresh_token);
+      window.location.replace(location.origin);
+      return;
     }
     if (AuthService.isLoggedIn()) {
       try {
@@ -57,23 +56,23 @@ class App extends Component<{}, AppState> {
     this.setState({account, theme, isLoading: false, privateEncryptionKey});
   }
 
-  handleLogin = async (response: any): Promise<void> => {
-    let {account, theme, privateEncryptionKey} = {...this.state};
-    this.setState({isLoading: true});
-    try {
-      const loginResponse: LoginResponse = response as LoginResponse;
-      ({account} = {...loginResponse});
-      theme = account?.role;
-      document.body.classList.remove('theme-helper', 'theme-owner', 'theme-admin');
-      document.body.classList.add(`theme-${theme}`);
-      AuthService.logIn(account?.token);
-      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
-      privateEncryptionKey = encryptionKeyResponse.encryptionKey;
-    } catch (err) {
-      console.error('failed to login.');
-    }
-    this.setState({account, theme, isLoading: false, privateEncryptionKey});
-  };
+  // handleLogin = async (response: any): Promise<void> => {
+  //   let {account, theme, privateEncryptionKey} = {...this.state};
+  //   this.setState({isLoading: true});
+  //   try {
+  //     const loginResponse: LoginResponse = response as LoginResponse;
+  //     ({account} = {...loginResponse});
+  //     theme = account?.role;
+  //     document.body.classList.remove('theme-helper', 'theme-owner', 'theme-admin');
+  //     document.body.classList.add(`theme-${theme}`);
+  //     AuthService.logIn(account?.token);
+  //     const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
+  //     privateEncryptionKey = encryptionKeyResponse.encryptionKey;
+  //   } catch (err) {
+  //     console.error('failed to login.');
+  //   }
+  //   this.setState({account, theme, isLoading: false, privateEncryptionKey});
+  // };
 
   handleLogout = () => {
     AuthService.logOut();
@@ -87,7 +86,7 @@ class App extends Component<{}, AppState> {
   };
 
   render() {
-    const {account, isLoading, theme, privateEncryptionKey} = {
+    const {account, isLoading, privateEncryptionKey} = {
       ...this.state
     };
     return (
@@ -104,7 +103,7 @@ class App extends Component<{}, AppState> {
                 privateEncryptionKey={privateEncryptionKey}
               />
             )}
-            {!account && <LoginPage handleLogin={this.handleLogin}/>}
+            {!account && <LoginPage />}/>}
           </div>
         )}
       </div>

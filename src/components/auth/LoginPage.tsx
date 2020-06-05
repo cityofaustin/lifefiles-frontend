@@ -15,9 +15,9 @@ import './LoginPage.scss';
 import APIError from '../../services/APIError';
 import HttpStatusCode from '../../models/HttpStatusCode';
 
-export interface LoginProps {
-  handleLogin: (loginResponse: any) => Promise<void>;
-}
+// export interface LoginProps {
+//   handleLogin: (loginResponse: any) => Promise<void>;
+// }
 
 export interface LoginState {
   email: string;
@@ -25,9 +25,9 @@ export interface LoginState {
   errorMessage: string;
 }
 
-class LoginPage extends Component<LoginProps, LoginState> {
+class LoginPage extends Component<{}, LoginState> {
 
-  constructor(props: LoginProps) {
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -49,7 +49,7 @@ class LoginPage extends Component<LoginProps, LoginState> {
   handleLogin = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    const { handleLogin } = { ...this.props };
+    // const { handleLogin } = { ...this.props };
     const { email, password } = { ...this.state };
     let { errorMessage } = { ...this.state };
 

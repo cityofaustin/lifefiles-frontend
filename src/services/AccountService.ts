@@ -85,7 +85,7 @@ class AccountService extends AgentService {
   static getProfileURL(filename: string) {
     return (
       super.getAPIEndpoint() +
-      `/profile-image/${filename}/${AuthService.getAccessToken()}`
+      `/profile-image/${filename}?access_token=${AuthService.getAccessToken()}`
     );
   }
 
