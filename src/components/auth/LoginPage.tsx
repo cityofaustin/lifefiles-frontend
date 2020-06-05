@@ -54,11 +54,11 @@ class LoginPage extends Component<LoginProps, LoginState> {
     let { errorMessage } = { ...this.state };
 
     try {
-      const loginResponse = await AccountService.login({ account: { email, password } });
-      if(loginResponse === undefined) {
-        throw(new Error('Server unavailable.'));
-      }
-      await handleLogin(loginResponse);
+      await AccountService.login({ account: { email, password } });
+      // if(loginResponse === undefined) {
+        // throw(new Error('Server unavailable.'));
+      // }
+      // await handleLogin(loginResponse);
       return;
     } catch (err) {
       if (err &&

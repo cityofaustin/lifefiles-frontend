@@ -10,6 +10,7 @@ import './App.scss';
 import Role from '../models/Role';
 import ShareRequest from '../models/ShareRequest';
 import EncryptionKeyResponse from '../models/EncryptionKeyResponse';
+import UrlUtil from '../util/UrlUtil';
 
 interface AppState {
   account?: Account;
@@ -32,6 +33,14 @@ class App extends Component<{}, AppState> {
   async componentDidMount(): Promise<void> {
     let {account, theme, privateEncryptionKey} = {...this.state};
     this.setState({isLoading: true});
+    const code = UrlUtil.getQueryVariable('code');
+    if (code) {
+      // TODO
+      const response = await AccountService.getToken(code);
+      AuthService.logIn(response.access_token);
+      // debugger;
+      // window.location.replace(location.origin);
+    }
     if (AuthService.isLoggedIn()) {
       try {
         const loginResponse = await AccountService.getMyAccount();

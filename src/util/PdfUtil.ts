@@ -91,6 +91,7 @@ export default class PdfUtil {
     doc.addImage(notaryDigitalSeal.base64, notaryDigitalSeal.imageType, margin, 312, newSealWidth, newSealHeight);
     doc.line(margin, 350, 160, 350);
     doc.setFontSize(2.5 * 6);
+    doc.setFont('Helvetica', 'normal');
     doc.text('Notary Seal', margin, 364);
 
     doc.setFont('Caveat', 'normal');
