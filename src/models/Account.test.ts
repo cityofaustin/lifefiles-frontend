@@ -2,6 +2,7 @@ import Account from './Account';
 import Role from './Role';
 import AccountImpl from './AccountImpl';
 
+
 describe('Account', () => {
   it('should get full name based on first and last name', () => {
     const account1: Account = {
