@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import LoginPage from './auth/LoginPage';
+// import LoginPage from './auth/LoginPage';
 import MainContainer from './main/MainContainer';
 import Account from '../models/Account';
 import AuthService from '../services/AuthService';
@@ -35,12 +35,14 @@ class App extends Component<{}, AppState> {
     this.setState({isLoading: true});
     const code = UrlUtil.getQueryVariable('code');
     if (code) {
+      // they are in the process of logging in, need to exchange auth code for access token
       const response = await AccountService.getToken(code);
       AuthService.logIn(response.access_token, response.refresh_token);
       window.location.replace(location.origin);
       return;
     }
     if (AuthService.isLoggedIn()) {
+      // they have a jwt access token, use app as normal
       try {
         const loginResponse = await AccountService.getMyAccount();
         const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
@@ -52,6 +54,11 @@ class App extends Component<{}, AppState> {
       } catch (err) {
         console.error(err.message);
       }
+    } else {
+      // redirect to login page with all of the query string params
+      const scope = '';
+      const state = '';
+      window.location.replace(process.env.AUTH_API + `/login?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}&scope=${scope}&state=${state}`);
     }
     this.setState({account, theme, isLoading: false, privateEncryptionKey});
   }
@@ -103,7 +110,8 @@ class App extends Component<{}, AppState> {
                 privateEncryptionKey={privateEncryptionKey}
               />
             )}
-            {!account && <LoginPage />}/>}
+            {/* {!account && <LoginPage />}/>} */}
+            {!account && <ProgressIndicator isFullscreen />}
           </div>
         )}
       </div>
