@@ -3,6 +3,10 @@ orbs:
   slack: circleci/slack@3.4.2
 jobs:
   build:
+    filters:
+      branches:
+        only:
+          - master
     docker:
       - image: circleci/node:latest
     steps:
