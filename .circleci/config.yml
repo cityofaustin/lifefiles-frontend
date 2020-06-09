@@ -5,9 +5,6 @@ jobs:
   build:
     docker:
       - image: circleci/node:latest
-    branches:
-      only:
-        - master
     steps:
       - checkout
       - run: npm install
@@ -32,4 +29,8 @@ workflows:
   build-and-test:
     jobs:
       - build
+          filters:
+            branches:
+              only:
+                - master
   version: 2.1
