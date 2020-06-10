@@ -21,16 +21,16 @@ jobs:
       - slack/status:
           webhook: ${SLACK_WEBHOOK}
           success_message: >
-            🎉 mypass frontend has deployed!
+            mypass frontend has deployed!
           failure_message: >
-            🔴 mypass frontend deploy has failed!
+            mypass frontend deploy has failed!
           only_for_branches: master
 workflows:
   version: 2
-    build:
-      jobs:
-        - test:
-            filters:
-              branches:
-                only:
-                  - master
+  build:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only:
+                - master
