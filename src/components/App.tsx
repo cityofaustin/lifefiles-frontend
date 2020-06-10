@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 // import LoginPage from './auth/LoginPage';
 import MainContainer from './main/MainContainer';
 import Account from '../models/Account';
@@ -26,13 +26,13 @@ class App extends Component<{}, AppState> {
     this.state = {
       account: undefined,
       isLoading: false,
-      theme: Role.owner
+      theme: Role.owner,
     };
   }
 
   async componentDidMount(): Promise<void> {
-    let {account, theme, privateEncryptionKey} = {...this.state};
-    this.setState({isLoading: true});
+    let { account, theme, privateEncryptionKey } = { ...this.state };
+    this.setState({ isLoading: true });
     const code = UrlUtil.getQueryVariable('code');
     if (code) {
       // they are in the process of logging in, need to exchange auth code for access token
@@ -47,7 +47,7 @@ class App extends Component<{}, AppState> {
         const loginResponse = await AccountService.getMyAccount();
         const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
         privateEncryptionKey = encryptionKeyResponse.encryptionKey;
-        ({account} = {...loginResponse});
+        ({ account } = { ...loginResponse });
         theme = account?.role;
         document.body.classList.remove('theme-helper', 'theme-owner');
         document.body.classList.add(`theme-${theme}`);
@@ -58,9 +58,12 @@ class App extends Component<{}, AppState> {
       // redirect to login page with all of the query string params
       const scope = '';
       const state = '';
-      window.location.replace(process.env.AUTH_API + `/login?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}&scope=${scope}&state=${state}`);
+      window.location.replace(
+        process.env.AUTH_API +
+          `/login?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}&scope=${scope}&state=${state}`
+      );
     }
-    this.setState({account, theme, isLoading: false, privateEncryptionKey});
+    this.setState({ account, theme, isLoading: false, privateEncryptionKey });
   }
 
   // handleLogin = async (response: any): Promise<void> => {
@@ -83,23 +86,25 @@ class App extends Component<{}, AppState> {
 
   handleLogout = () => {
     AuthService.logOut();
-    this.setState({account: undefined});
+    this.setState({ account: undefined });
   };
 
   updateAccountShareRequests = (requests: ShareRequest[]) => {
-    const {account} = {...this.state};
+    const { account } = { ...this.state };
     account!.shareRequests = requests;
-    this.setState({account});
+    this.setState({ account });
   };
 
   render() {
-    const {account, isLoading, privateEncryptionKey} = {
-      ...this.state
+    const { account, isLoading, privateEncryptionKey } = {
+      ...this.state,
     };
     return (
       <div className="app-container">
-        {process.env.NODE_ENV === 'development' && <div className="screen-info" />}
-        {isLoading && <ProgressIndicator isFullscreen/>}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="screen-info" />
+        )}
+        {isLoading && <ProgressIndicator isFullscreen />}
         {!isLoading && (
           <div className="page-container">
             {account && (

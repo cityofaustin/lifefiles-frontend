@@ -6,33 +6,62 @@ import Document from '../models/document/Document';
 const PATH = '/documents';
 
 class DocumentService extends AgentService {
-
   static async get(): Promise<any> {
     return await super.get(PATH);
   }
 
   static getDocumentURL(filename: string) {
-    const result = super.getAPIEndpoint() +
-      `${PATH}/${filename}?access_token=${AuthService.getAccessToken()}`;
+    const result =
+      super.getAPIEndpoint() +
+      `${PATH}/${filename}/${AuthService.getAccessToken()}`;
     return result;
   }
 
-  static async addDocument(newFile: File, newThumbnailFile: File, documentType: string, encryptionPubKey: string, validUntilDate?: Date): Promise<any> {
-    return await super.postDocument(newFile, newThumbnailFile, documentType, encryptionPubKey, validUntilDate);
+  static async addDocument(
+    newFile: File,
+    newThumbnailFile: File,
+    documentType: string,
+    encryptionPubKey: string,
+    validUntilDate?: Date
+  ): Promise<any> {
+    return await super.postDocument(
+      newFile,
+      newThumbnailFile,
+      documentType,
+      encryptionPubKey,
+      validUntilDate
+    );
   }
 
-  static async uplooadDocumentOnBehalfOfUser(newCaseworkerFile: File, newCaseworkerThumbnail: File, newOwnerFile: File, newOwnerThumbnail: File, documentType: string, ownerId: string) {
-    return await super.uploadDocumentOnBehalfOfUser(newCaseworkerFile, newCaseworkerThumbnail, newOwnerFile, newOwnerThumbnail, documentType, ownerId);
+  static async uplooadDocumentOnBehalfOfUser(
+    newCaseworkerFile: File,
+    newCaseworkerThumbnail: File,
+    newOwnerFile: File,
+    newOwnerThumbnail: File,
+    documentType: string,
+    ownerId: string
+  ) {
+    return await super.uploadDocumentOnBehalfOfUser(
+      newCaseworkerFile,
+      newCaseworkerThumbnail,
+      newOwnerFile,
+      newOwnerThumbnail,
+      documentType,
+      ownerId
+    );
   }
 
-  static async updateDocument(request: UpdateDocumentRequest): Promise<Document> {
+  static async updateDocument(
+    request: UpdateDocumentRequest
+  ): Promise<Document> {
     return (await super.updateDocument(request)).updatedDocument;
   }
 
   static async deleteDocument(filename: string) {
-    return await super.delete(`${PATH}/${filename}/${AuthService.getAccessToken()}`);
+    return await super.delete(
+      `${PATH}/${filename}/${AuthService.getAccessToken()}`
+    );
   }
-
 }
 
 export default DocumentService;
