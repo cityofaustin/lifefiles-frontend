@@ -3,7 +3,9 @@
 
 .document-summary-container {
   @include media-breakpoint-down(sm) {
-    margin: 0 51px;
+    // overflowed page when no documents
+    // margin: 0 51px;
+    margin: 0;
     .document-item {
       min-height: 255px;
       padding: 19px 0;
