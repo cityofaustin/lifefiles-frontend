@@ -60,7 +60,7 @@ class App extends Component<{}, AppState> {
       const state = '';
       window.location.replace(
         process.env.AUTH_API +
-          `/login?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}&scope=${scope}&state=${state}`
+          `/login?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}/index.html&scope=${scope}&state=${state}`
       );
     }
     this.setState({ account, theme, isLoading: false, privateEncryptionKey });
