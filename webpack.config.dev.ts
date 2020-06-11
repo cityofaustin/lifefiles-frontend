@@ -26,6 +26,11 @@ const config: webpack.Configuration = {
     // to get private IP addresses to work to test on emulators
     host: '0.0.0.0',
     disableHostCheck: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
+    },
     historyApiFallback: {
       rewrites: [
         {from: /^\/$/, to: '/index.html'},
