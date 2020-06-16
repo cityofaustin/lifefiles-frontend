@@ -50,7 +50,7 @@ class AccountService extends AgentService {
       code,
       client_id: CLIENT_ID,
       grant_type: 'authorization_code',
-      redirect_uri: location.origin,
+      redirect_uri: `${location.origin}/index.html`,
     };
     const body = Object.keys(params)
       .map((key) => {
@@ -58,6 +58,7 @@ class AccountService extends AgentService {
       })
       .join('&');
     const input = `${AUTH_API}/token`;
+    // const input = `http://localhost:5001/token`;
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
     };
@@ -67,12 +68,23 @@ class AccountService extends AgentService {
       headers,
       body,
     };
+
+    console.log('START OUTPUT');
+
+    console.log(headers);
+    console.log(params);
+    console.log(body);
+    console.log(input);
     try {
       const response = await fetch(input, init);
+      console.log(response);
+
       const responseJson = await response.json();
       // this.handleErrorStatusCodes(response.status, responseJson);
       return responseJson;
     } catch (err) {
+      console.log('POST TOKEN ERROR!:');
+      console.log(err);
       console.error(err.message);
     }
   }

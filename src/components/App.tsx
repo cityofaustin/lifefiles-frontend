@@ -34,6 +34,8 @@ class App extends Component<{}, AppState> {
     let { account, theme, privateEncryptionKey } = { ...this.state };
     this.setState({ isLoading: true });
     const code = UrlUtil.getQueryVariable('code');
+    console.log('HAVE CODE IN URL');
+    console.log(code);
     if (code) {
       // they are in the process of logging in, need to exchange auth code for access token
       const response = await AccountService.getToken(code);
