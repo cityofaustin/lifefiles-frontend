@@ -24,7 +24,7 @@ jobs:
             mypass frontend has deployed!
           failure_message: >
             mypass frontend deploy has failed!
-          only_for_branches: master
+          only_for_branches: main
 workflows:
   version: 2.0
   build:
@@ -33,4 +33,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
