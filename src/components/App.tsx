@@ -40,7 +40,7 @@ class App extends Component<{}, AppState> {
       // they are in the process of logging in, need to exchange auth code for access token
       const response = await AccountService.getToken(code);
       AuthService.logIn(response.access_token, response.refresh_token);
-      window.location.replace(location.origin);
+      window.location.replace(`${location.origin}/index.html`);
       return;
     }
     if (AuthService.isLoggedIn()) {
