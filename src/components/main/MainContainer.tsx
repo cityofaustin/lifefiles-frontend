@@ -332,12 +332,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     } catch (err) {
       console.error('failed to upload file');
     }
-    this.setState(
-      { documents, searchedDocuments, isLoading: false },
-      () => {
-        this.handleSearch(documentQuery);
-      }
-    );
+    this.setState({ documents, searchedDocuments, isLoading: false }, () => {
+      this.handleSearch(documentQuery);
+    });
     return newDocument as any;
   };
 
@@ -763,6 +760,13 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   }}
                 />
                 >
+                <Route exact path="/admin">
+                  {account.role === 'owner' && (
+                    <Redirect push to="/documents" />
+                  )}
+                  {account.role === 'helper' && <Redirect push to="/clients" />}
+                  {this.renderAdminPage()}
+                </Route>
                 <Route exact path="/admin">
                   {account.role === 'owner' && (
                     <Redirect push to="/documents" />

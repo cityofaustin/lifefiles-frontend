@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import LoginPage from './auth/LoginPage';
+import LoginPage from './auth/LoginPage';
 import MainContainer from './main/MainContainer';
 import Account from '../models/Account';
 import AuthService from '../services/AuthService';
@@ -15,6 +15,7 @@ import UrlUtil from '../util/UrlUtil';
 interface AppState {
   account?: Account;
   isLoading: boolean;
+  helperLogin: boolean;
   theme: string;
   privateEncryptionKey?: string;
 }
@@ -26,6 +27,7 @@ class App extends Component<{}, AppState> {
     this.state = {
       account: undefined,
       isLoading: false,
+      helperLogin: false,
       theme: Role.owner,
     };
   }
@@ -34,8 +36,7 @@ class App extends Component<{}, AppState> {
     let { account, theme, privateEncryptionKey } = { ...this.state };
     this.setState({ isLoading: true });
     const code = UrlUtil.getQueryVariable('code');
-    console.log('HAVE CODE IN URL');
-    console.log(code);
+
     if (code) {
       // they are in the process of logging in, need to exchange auth code for access token
       const response = await AccountService.getToken(code);
@@ -57,34 +58,43 @@ class App extends Component<{}, AppState> {
         console.error(err.message);
       }
     } else {
-      // redirect to login page with all of the query string params
-      const scope = '';
-      const state = '';
-      window.location.replace(
-        process.env.AUTH_API +
-          `/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}/index.html&scope=${scope}&state=${state}`
-      );
+      // Stop flow and allow helper to login
+      if (window.location.href.indexOf('helper-login') > -1) {
+        this.setState({ helperLogin: true });
+      } else {
+        // redirect to login page with all of the query string params
+        const scope = '';
+        const state = '';
+        window.location.replace(
+          process.env.AUTH_API +
+            `/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}/index.html&scope=${scope}&state=${state}`
+        );
+      }
     }
     this.setState({ account, theme, isLoading: false, privateEncryptionKey });
   }
 
-  // handleLogin = async (response: any): Promise<void> => {
-  //   let {account, theme, privateEncryptionKey} = {...this.state};
-  //   this.setState({isLoading: true});
-  //   try {
-  //     const loginResponse: LoginResponse = response as LoginResponse;
-  //     ({account} = {...loginResponse});
-  //     theme = account?.role;
-  //     document.body.classList.remove('theme-helper', 'theme-owner', 'theme-admin');
-  //     document.body.classList.add(`theme-${theme}`);
-  //     AuthService.logIn(account?.token);
-  //     const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
-  //     privateEncryptionKey = encryptionKeyResponse.encryptionKey;
-  //   } catch (err) {
-  //     console.error('failed to login.');
-  //   }
-  //   this.setState({account, theme, isLoading: false, privateEncryptionKey});
-  // };
+  handleLogin = async (response: any): Promise<void> => {
+    let { account, theme, privateEncryptionKey } = { ...this.state };
+    this.setState({ isLoading: true });
+    try {
+      const loginResponse: LoginResponse = response as LoginResponse;
+      ({ account } = { ...loginResponse });
+      theme = account?.role;
+      document.body.classList.remove(
+        'theme-helper',
+        'theme-owner',
+        'theme-admin'
+      );
+      document.body.classList.add(`theme-${theme}`);
+      AuthService.logIn(account?.token, '');
+      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
+      privateEncryptionKey = encryptionKeyResponse.encryptionKey;
+    } catch (err) {
+      console.error('failed to login.');
+    }
+    this.setState({ account, theme, isLoading: false, privateEncryptionKey });
+  };
 
   handleLogout = () => {
     AuthService.logOut();
@@ -98,9 +108,16 @@ class App extends Component<{}, AppState> {
   };
 
   render() {
-    const { account, isLoading, privateEncryptionKey } = {
+    const { account, isLoading, privateEncryptionKey, helperLogin } = {
       ...this.state,
     };
+
+    let pageToRender = <ProgressIndicator isFullscreen />;
+
+    if (helperLogin) {
+      pageToRender = <LoginPage handleLogin={this.handleLogin} />;
+    }
+
     return (
       <div className="app-container">
         {process.env.NODE_ENV === 'development' && (
@@ -117,8 +134,7 @@ class App extends Component<{}, AppState> {
                 privateEncryptionKey={privateEncryptionKey}
               />
             )}
-            {/* {!account && <LoginPage />}/>} */}
-            {!account && <ProgressIndicator isFullscreen />}
+            {!account && pageToRender}
           </div>
         )}
       </div>
