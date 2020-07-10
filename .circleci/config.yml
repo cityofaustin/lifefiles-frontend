@@ -2,6 +2,22 @@ version: 2.1
 orbs:
   slack: circleci/slack@3.4.2
 jobs:
+  build-and-test:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm install
+  deploy-staging:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-128-18-201.us-east-2.compute.amazonaws.com "bash -s" < deployStaging.sh
   test:
     docker:
       - image: circleci/node:latest
@@ -27,6 +43,12 @@ jobs:
           only_for_branches: main
 workflows:
   version: 2.0
+  test-and-deploy:
+    jobs:
+      - build-and-test
+      - deploy-staging:
+          requires:
+            - build-and-test
   build:
     jobs:
       - test:
