@@ -21,6 +21,7 @@ interface Account {
   adminInfo?: any;
   action?: any;
   accountType?: string;
+  canAddOtherAccounts: boolean;
 }
 
 export default Account;

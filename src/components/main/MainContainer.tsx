@@ -552,7 +552,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     );
   }
 
-  renderTopBar() {
+  renderTopBar(adminLogin) {
     const { account, handleLogout } = { ...this.props };
     const { isAccountMenuOpen } = { ...this.state };
 
@@ -564,7 +564,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               <Folder />
             </Link>
           </div>
-          {account.role !== 'admin' && (
+          {account.role !== 'admin' && adminLogin !== true && (
             <Row id="main-search">
               <Col style={{ display: 'flex' }}>
                 <SearchInput handleSearch={this.handleSearch} />
@@ -685,6 +685,28 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   render() {
     const { account, handleLogout } = { ...this.props };
     const { isLoading, isAccount, sidebarOpen } = { ...this.state };
+
+    let adminLogin = false;
+
+    if (
+      (window.location.href.indexOf('admin-login') > -1 &&
+        account.canAddOtherAccounts) ||
+      account.role === 'admin'
+    ) {
+      adminLogin = true;
+    }
+
+    if (adminLogin) {
+      return (
+        <Router hashType="slash">
+          <div id="main-container">
+            {this.renderTopBar(false)}
+            <div className="main-section">{this.renderAdminPage()}</div>
+          </div>
+        </Router>
+      );
+    }
+
     return (
       <Router
         hashType="slash"
@@ -699,7 +721,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             isOpen={!!sidebarOpen}
             setOpen={this.setSidebarOpen}
           />
-          {this.renderTopBar()}
+          {this.renderTopBar(false)}
           {this.renderTopBarSmall()}
           <div className="main-page">
             {account.role !== 'admin' && <div className="main-side" />}

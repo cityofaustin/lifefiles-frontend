@@ -40,8 +40,8 @@ class AdminService extends AgentService {
     return await super.post('/admin-accounts/', accountReq);
   }
 
-  static async updateAccount(account) {
-    return await super.put('/admin-accounts/' + account.id, account);
+  static async updateAccount(accountId, accountReq) {
+    return await super.put('/admin-accounts/' + accountId, accountReq);
   }
 
   static async deleteAccount(accountId) {

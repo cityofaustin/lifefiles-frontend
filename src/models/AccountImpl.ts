@@ -15,6 +15,7 @@ class AccountImpl implements Account {
   shareRequests: ShareRequest[];
   token: string;
   username: string;
+  canAddOtherAccounts: boolean;
 
   public static getFullName(firstName?: string, lastName?: string) {
     firstName = firstName ? firstName : '';
@@ -25,18 +26,21 @@ class AccountImpl implements Account {
     if (lastName.length > 0 && firstName.length <= 0) {
       return lastName;
     }
-    return ((firstName + lastName).length > 0) ? `${firstName} ${lastName}` : '-';
+    return (firstName + lastName).length > 0 ? `${firstName} ${lastName}` : '-';
   }
 
   public static getProfileURLByIdAndList(accounts: Account[], accountId: any) {
     const account = this.getAccountByIdAndList(accounts, accountId);
-    if(account) {
+    if (account) {
       return AccountService.getProfileURL(account.profileImageUrl!);
     }
   }
 
-  public static getAccountByIdAndList(accounts: Account[], accountId: any): Account | undefined {
-    return accounts.find(accountItem => accountItem.id === accountId);
+  public static getAccountByIdAndList(
+    accounts: Account[],
+    accountId: any
+  ): Account | undefined {
+    return accounts.find((accountItem) => accountItem.id === accountId);
   }
 }
 

@@ -51,6 +51,10 @@ class AccountService extends AgentService {
     return await super.post(`${PATH}/login`, request);
   }
 
+  static async loginAdminAccount(request: LoginRequest) {
+    return await super.post(`${PATH}/admin-login`, request);
+  }
+
   static async getMyAccount(): Promise<LoginResponse> {
     return await super.get('/my-account');
   }

@@ -126,12 +126,6 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           editable: true,
         },
         {
-          headerName: 'Role',
-          field: 'role',
-          filter: true,
-          editable: false,
-        },
-        {
           headerName: 'Actions',
           field: 'action',
           sortable: false,
@@ -175,11 +169,15 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
 
   async componentDidMount() {
     const { account } = { ...this.props };
-    if (account.role === 'admin') {
+
+    if (account.role === 'admin' || account.canAddOtherAccounts) {
       const adminResponse = await AdminService.getAdminInfo();
+
       const accountTypes = adminResponse.account.adminInfo.accountTypes
         .filter((accountType) => accountType.role !== 'admin')
         .map((accountType) => ({ ...accountType, action: '' }));
+
+      let accountsColumnDefs = this.state.accountsColumnDefs;
 
       let toAdd = {
         headerName: 'Account Type',
@@ -192,8 +190,17 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         editable: true,
       };
 
-      let accountsColumnDefs = this.state.accountsColumnDefs;
       accountsColumnDefs.unshift(toAdd);
+
+      if (account.role === 'admin') {
+        let toAddTwo = {
+          headerName: 'CanAddOtherAccounts',
+          field: 'canAddOtherAccounts',
+          cellRenderer: 'checkboxCellRenderer',
+        };
+        accountsColumnDefs.unshift(toAddTwo);
+      }
+
       this.accountsGridApi.setColumnDefs(accountsColumnDefs);
 
       this.setState({ accountsColumnDefs });
@@ -361,6 +368,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       reqObjectSub['email'] = baseAccount.email;
       reqObjectSub['firstname'] = baseAccount.firstName;
       reqObjectSub['lastname'] = baseAccount.lastName;
+      reqObjectSub['canAddOtherAccounts'] = baseAccount.canAddOtherAccounts;
 
       // TODO: Change to be dynamic based off selection!
       reqObjectSub['accounttype'] = baseAccount.accountType;
@@ -370,7 +378,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       const reqObject = { account: reqObjectSub };
 
       if (params.data.id !== '-') {
-        await AdminService.updateAccount(reqObject);
+        await AdminService.updateAccount(params.data.id, reqObject);
       } else {
         const newAccount = await AdminService.addAccount(reqObject);
         for (let i = 0; i < accounts.length; i++) {
@@ -500,6 +508,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       organization: 'Org',
       firstName: 'First Name',
       lastName: 'Last Name',
+      canAddOtherAccounts: false,
       adminInfo: '-',
       action: '',
     });
@@ -655,6 +664,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       coreFeatureOwnerSavedSuccess,
       coreFeatureHelperSavedSuccess,
     } = { ...this.state };
+
     // const accountTypeViewFeatures = [];
     // const accountTypeCoreFeaturesOwner = [];
     // const accountTypeCoreFeaturesHelper = [];
@@ -699,6 +709,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
               actionsCellRenderer: ActionsCellRenderer,
               accountTypeCellRenderer: AccountTypeCellRenderer,
               roleCellRenderer: RoleCellRenderer,
+              checkboxCellRenderer: CheckboxCellRenderer,
             }}
             defaultColDef={{
               flex: 1,

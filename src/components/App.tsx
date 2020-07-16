@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import LoginPage from './auth/LoginPage';
+import AdminLoginPage from './auth/AdminLoginPage';
 import MainContainer from './main/MainContainer';
 import Account from '../models/Account';
 import AuthService from '../services/AuthService';
@@ -16,6 +17,7 @@ interface AppState {
   account?: Account;
   isLoading: boolean;
   helperLogin: boolean;
+  adminLogin: boolean;
   theme: string;
   privateEncryptionKey?: string;
 }
@@ -28,6 +30,7 @@ class App extends Component<{}, AppState> {
       account: undefined,
       isLoading: false,
       helperLogin: false,
+      adminLogin: false,
       theme: Role.owner,
     };
   }
@@ -61,6 +64,8 @@ class App extends Component<{}, AppState> {
       // Stop flow and allow helper to login
       if (window.location.href.indexOf('helper-login') > -1) {
         this.setState({ helperLogin: true });
+      } else if (window.location.href.indexOf('admin-login') > -1) {
+        this.setState({ adminLogin: true });
       } else {
         // redirect to login page with all of the query string params
         const scope = '';
@@ -75,23 +80,33 @@ class App extends Component<{}, AppState> {
   }
 
   handleLogin = async (response: any): Promise<void> => {
-    let { account, theme, privateEncryptionKey } = { ...this.state };
+    let { account, theme, privateEncryptionKey, adminLogin } = {
+      ...this.state,
+    };
     this.setState({ isLoading: true });
     try {
       const loginResponse: LoginResponse = response as LoginResponse;
+
       ({ account } = { ...loginResponse });
       theme = account?.role;
+
+      if (adminLogin) {
+        theme = 'admin';
+      }
+
       document.body.classList.remove(
         'theme-helper',
         'theme-owner',
         'theme-admin'
       );
       document.body.classList.add(`theme-${theme}`);
+
       AuthService.logIn(account?.token, '');
       const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
       privateEncryptionKey = encryptionKeyResponse.encryptionKey;
     } catch (err) {
       console.error('failed to login.');
+      console.error(err);
     }
     this.setState({ account, theme, isLoading: false, privateEncryptionKey });
   };
@@ -108,7 +123,13 @@ class App extends Component<{}, AppState> {
   };
 
   render() {
-    const { account, isLoading, privateEncryptionKey, helperLogin } = {
+    const {
+      account,
+      isLoading,
+      privateEncryptionKey,
+      helperLogin,
+      adminLogin,
+    } = {
       ...this.state,
     };
 
@@ -116,6 +137,10 @@ class App extends Component<{}, AppState> {
 
     if (helperLogin) {
       pageToRender = <LoginPage handleLogin={this.handleLogin} />;
+    }
+
+    if (adminLogin) {
+      pageToRender = <AdminLoginPage handleLogin={this.handleLogin} />;
     }
 
     return (

@@ -3,7 +3,10 @@ class AuthService {
   private static REFRESH_TOKEN: string = 'refreshToken';
 
   static isLoggedIn(): boolean {
-    return (!!localStorage.getItem(this.ACCESS_TOKEN) && localStorage.getItem(this.ACCESS_TOKEN) !== 'undefined');
+    return (
+      !!localStorage.getItem(this.ACCESS_TOKEN) &&
+      localStorage.getItem(this.ACCESS_TOKEN) !== 'undefined'
+    );
   }
 
   static getAccessToken(): string {
@@ -12,7 +15,7 @@ class AuthService {
 
   static isNonAuthPath(path: string) {
     const nonAuthPaths = ['/document-types'];
-    nonAuthPaths.some(nonAuthPath => path.indexOf(nonAuthPath) > -1);
+    nonAuthPaths.some((nonAuthPath) => path.indexOf(nonAuthPath) > -1);
   }
 
   static logIn(accessToken: string, refreshToken: string) {
