@@ -15,7 +15,6 @@ class AccountImpl implements Account {
   shareRequests: ShareRequest[];
   token: string;
   username: string;
-  canAddOtherAccounts: boolean;
 
   public static getFullName(firstName?: string, lastName?: string) {
     firstName = firstName ? firstName : '';
