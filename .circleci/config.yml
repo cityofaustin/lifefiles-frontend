@@ -67,7 +67,7 @@ workflows:
       - deploy-staging:
           requires:
             - build-and-test
-      - chrome_version
+      - chrome_version:
           requires:
             - deploy-staging
   build:
