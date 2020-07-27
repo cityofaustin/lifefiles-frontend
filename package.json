@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx webpack-dev-server --mode=development --colors --config webpack.config.dev.ts",
     "install:e2e": "sudo npm install -g selenium-side-runner webdriver-manager",
-    "test:e2e_single_file": "selenium-side-runner ./tests/google.side ",
+    "test:e2e_single_file": "selenium-side-runner ./tests/MypassEndToEndTesting.side ",
     "build": "npm run clean-dist && npx webpack --mode production --config webpack.config.prod.ts",
     "deploy": "npm run build && aws s3 sync dist/ s3://mypass-atx --delete --acl public-read",
     "test": "npx jest --config=jest.config.json",
