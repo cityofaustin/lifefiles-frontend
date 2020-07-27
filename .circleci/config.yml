@@ -19,6 +19,26 @@ jobs:
       - node/with-cache:
           steps:
             - run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-128-18-201.us-east-2.compute.amazonaws.com "bash -s" < deployStaging.sh
+  chrome_version:
+    docker:
+      - image: circleci/node:11-browsers
+    working_directory: ~/repo
+    steps:
+      - run: google-chrome --product-version
+  test_e2e:
+    docker:
+      - image: circleci/node:11-browsers
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: yarn install:e2e
+      - run:
+          name: set var
+          command: echo "export CHROME_VER=`google-chrome --product-version`" >> $BASH_ENV
+      - run: echo "$CHROME_VER"
+      - run: sudo webdriver-manager update --versions.chrome=$CHROME_VER
+      - run: yarn test:e2e_single_file
+
   test:
     docker:
       - image: circleci/node:latest
@@ -58,3 +78,5 @@ workflows:
             branches:
               only:
                 - main
+      - chrome_version
+      - test_e2e:
