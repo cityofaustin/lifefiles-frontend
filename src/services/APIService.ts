@@ -4,19 +4,16 @@ import fetch from '../util/fetchWithTimeout';
 import APIError from './APIError';
 import HttpStatusCode from '../models/HttpStatusCode';
 import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
-import {format} from 'date-fns';
+import { format } from 'date-fns';
 import UpdateDocumentResponse from '../models/document/UpdateDocumentResponse';
 
-const MYPASS_API = process.env.MYPASS_API;
-
 class APIService {
-
   static getHeaders(): HeadersInit {
-      const headers: HeadersInit = {'Content-Type': 'application/json'};
-      if(AuthService.isLoggedIn()) {
-        headers.Authorization = `Bearer ${AuthService.getAccessToken()}`;
-      }
-      return headers;
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (AuthService.isLoggedIn()) {
+      headers.Authorization = `Bearer ${AuthService.getAccessToken()}`;
+    }
+    return headers;
   }
 
   static handleErrorStatusCodes(responseStatus: number, responseJson: any) {
@@ -26,23 +23,23 @@ class APIService {
       HttpStatusCode.FORBIDDEN,
       HttpStatusCode.UNPROCESSABLE_ENTITY,
       // 5xx Server errors
-      HttpStatusCode.INTERNAL_SERVER_ERROR
+      HttpStatusCode.INTERNAL_SERVER_ERROR,
     ];
     if (errorStatusCodes.includes(responseStatus)) {
-      throw new APIError(responseStatus+'', responseJson);
+      throw new APIError(responseStatus + '', responseJson);
     }
   }
 
   static getAPIEndpoint() {
-    return MYPASS_API;
+    return process.env.MYPASS_API;
   }
 
   static async get(path: string) {
-    const input: RequestInfo = `${MYPASS_API}${path}`;
+    const input: RequestInfo = `${process.env.MYPASS_API}${path}`;
     const headers: HeadersInit = await this.getHeaders();
     const init: RequestInit = {
       method: 'GET',
-      headers
+      headers,
     };
     try {
       const response = await fetch(input, init);
@@ -61,7 +58,7 @@ class APIService {
     const headers: HeadersInit = await this.getHeaders();
     const init: RequestInit = {
       method: 'GET',
-      headers
+      headers,
     };
     try {
       const response = await fetch(input, init);
@@ -76,12 +73,12 @@ class APIService {
   }
 
   static async post(path: any, entity: any) {
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = await this.getHeaders();
     const init = {
       method: 'POST',
       headers,
-      body: JSON.stringify(entity)
+      body: JSON.stringify(entity),
     };
     try {
       const response = await fetch(input, init);
@@ -94,9 +91,9 @@ class APIService {
   }
 
   static async postDocVC(path, vc, helperFile, ownerFile) {
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = {
-      Authorization: `Bearer ${AuthService.getAccessToken()}`
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
     const formdata = new FormData();
     formdata.append('img', helperFile, helperFile.name);
@@ -105,7 +102,7 @@ class APIService {
     const init = {
       method: 'POST',
       headers,
-      body: formdata
+      body: formdata,
     };
     const response = await fetch(input, init, 60000);
     const responseJson = await response.json();
@@ -113,11 +110,17 @@ class APIService {
     return responseJson;
   }
 
-  static async postDocument(file: File, thumbnailFile: File, documentType: string, encryptionPubKey: string, validUntilDate?: Date) {
+  static async postDocument(
+    file: File,
+    thumbnailFile: File,
+    documentType: string,
+    encryptionPubKey: string,
+    validUntilDate?: Date
+  ) {
     const path = '/documents';
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = {
-      Authorization: `Bearer ${AuthService.getAccessToken()}`
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
     const formdata = new FormData();
     formdata.append('img', file, file.name);
@@ -130,7 +133,7 @@ class APIService {
     const init = {
       method: 'POST',
       headers,
-      body: formdata
+      body: formdata,
     };
     // NOTE: putting a longer timeout over here since uploading files can take longer.
     const response = await fetch(input, init, 60000);
@@ -139,11 +142,18 @@ class APIService {
     return responseJson;
   }
 
-  static async uploadDocumentOnBehalfOfUser(newCaseworkerFile: File, newCaseworkerThumbnail: File, newOwnerFile: File, newOwnerThumbnail: File, documentType: string, ownerId: string) {
+  static async uploadDocumentOnBehalfOfUser(
+    newCaseworkerFile: File,
+    newCaseworkerThumbnail: File,
+    newOwnerFile: File,
+    newOwnerThumbnail: File,
+    documentType: string,
+    ownerId: string
+  ) {
     const path = '/upload-document-on-behalf-of-user';
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = {
-      Authorization: `Bearer ${AuthService.getAccessToken()}`
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
     const formdata = new FormData();
     formdata.append('img', newCaseworkerFile, newCaseworkerFile.name);
@@ -155,7 +165,7 @@ class APIService {
     const init = {
       method: 'POST',
       headers,
-      body: formdata
+      body: formdata,
     };
     // NOTE: putting a longer timeout over here since uploading files can take longer.
     const response = await fetch(input, init, 60000);
@@ -164,17 +174,23 @@ class APIService {
     return responseJson;
   }
 
-  static async postShareRequestFile(file: File | undefined, thumbnailFile: File | undefined, documentType: string, fromAccountId: string, toAccountId: string) {
+  static async postShareRequestFile(
+    file: File | undefined,
+    thumbnailFile: File | undefined,
+    documentType: string,
+    fromAccountId: string,
+    toAccountId: string
+  ) {
     const path = '/share-requests';
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = {
-      Authorization: `Bearer ${AuthService.getAccessToken()}`
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
     const formdata = new FormData();
-    if(file) {
+    if (file) {
       formdata.append('img', file, file.name);
     }
-    if(thumbnailFile) {
+    if (thumbnailFile) {
       formdata.append('img', thumbnailFile, thumbnailFile.name);
     }
     formdata.append('fromAccountId', fromAccountId);
@@ -184,7 +200,7 @@ class APIService {
     const init = {
       method: 'POST',
       headers,
-      body: formdata
+      body: formdata,
     };
     // NOTE: putting a longer timeout over here since uploading files can take longer.
     const response = await fetch(input, init, 20000);
@@ -194,22 +210,22 @@ class APIService {
   }
 
   static async putShareRequestFile(path, file: File, thumbnailFile: File) {
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = {
-      Authorization: `Bearer ${AuthService.getAccessToken()}`
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
     const formdata = new FormData();
-    if(file) {
+    if (file) {
       formdata.append('img', file, file.name);
     }
-    if(thumbnailFile) {
+    if (thumbnailFile) {
       formdata.append('img', thumbnailFile, thumbnailFile.name);
     }
     formdata.append('approved', 'true');
     const init = {
       method: 'PUT',
       headers,
-      body: formdata
+      body: formdata,
     };
     // NOTE: putting a longer timeout over here since uploading files can take longer.
     const response = await fetch(input, init, 20000);
@@ -220,25 +236,28 @@ class APIService {
 
   static async updateDocument(request: UpdateDocumentRequest): Promise<any> {
     const path = '/documents';
-    const input = `${MYPASS_API}${path}/${request.id}`;
+    const input = `${process.env.MYPASS_API}${path}/${request.id}`;
     const headers = {
-      Authorization: `Bearer ${AuthService.getAccessToken()}`
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
     const formdata = new FormData();
-    if(request.img && request.thumbnail) {
+    if (request.img && request.thumbnail) {
       formdata.append('img', request.img, request.img.name);
       formdata.append('img', request.thumbnail, request.thumbnail.name);
     }
-    if(request.validUntilDate) {
-      formdata.append('validuntildate', format(request.validUntilDate, 'yyyy/dd/MM'));
+    if (request.validUntilDate) {
+      formdata.append(
+        'validuntildate',
+        format(request.validUntilDate, 'yyyy/dd/MM')
+      );
     }
-    if(request.claimed) {
+    if (request.claimed) {
       formdata.append('claimed', request.claimed + '');
     }
     const init = {
       method: 'PUT',
       headers,
-      body: formdata
+      body: formdata,
     };
     // NOTE: putting a longer timeout over here since uploading files can take longer.
     const response = await fetch(input, init, 20000);
@@ -248,12 +267,12 @@ class APIService {
   }
 
   static async put(path: any, entity: any) {
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = await this.getHeaders();
     const init = {
       method: 'PUT',
       headers,
-      body: JSON.stringify(entity)
+      body: JSON.stringify(entity),
     };
     const response = await fetch(input, init);
     const responseJson = await response.json();
@@ -262,11 +281,11 @@ class APIService {
   }
 
   static async delete(path: any) {
-    const input = `${MYPASS_API}${path}`;
+    const input = `${process.env.MYPASS_API}${path}`;
     const headers = await this.getHeaders();
     const init = {
       method: 'DELETE',
-      headers
+      headers,
     };
     const response = await fetch(input, init);
     const responseJson = await response.json();

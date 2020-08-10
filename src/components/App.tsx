@@ -6,6 +6,7 @@ import Account from '../models/Account';
 import AuthService from '../services/AuthService';
 import LoginResponse from '../models/auth/LoginResponse';
 import AccountService from '../services/AccountService';
+import ApiService from '../services/APIService';
 import ProgressIndicator from './common/ProgressIndicator';
 import './App.scss';
 import Role from '../models/Role';
@@ -36,6 +37,19 @@ class App extends Component<{}, AppState> {
   }
 
   async componentDidMount(): Promise<void> {
+    if (process.env.MYPASS_API === undefined) {
+      if (window.location.href.indexOf('localhost') > -1) {
+        process.env.MYPASS_API = 'http://localhost:5000/api';
+      } else {
+        process.env.MYPASS_API = location.origin + '/api';
+      }
+    }
+
+    if (process.env.AUTH_API === undefined) {
+      const response = await AccountService.getOauthEndpoint();
+      process.env.AUTH_API = response.url;
+    }
+
     let { account, theme, privateEncryptionKey } = { ...this.state };
     this.setState({ isLoading: true });
     const code = UrlUtil.getQueryVariable('code');

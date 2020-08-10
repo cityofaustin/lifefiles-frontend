@@ -1,18 +1,25 @@
 import AgentService from './APIService';
 import LoginRequest from '../models/auth/LoginRequest';
 import LoginResponse from '../models/auth/LoginResponse';
+import OauthUrlResponse from '../models/auth/OauthUrlResponse';
 import Account from '../models/Account';
 import AuthService from './AuthService';
 
 const PATH = '/accounts';
-const MYPASS_API = process.env.MYPASS_API;
-const AUTH_API = process.env.AUTH_API;
-const CLIENT_ID = process.env.CLIENT_ID;
+
 class AccountService extends AgentService {
+  static async getOauthEndpoint(): Promise<OauthUrlResponse> {
+    console.log('get url before');
+    const url = await super.get('/oauth-url');
+    console.log('get url after');
+    console.log(url);
+    return url;
+  }
+
   static async getToken(code) {
     const params = {
       code,
-      client_id: CLIENT_ID,
+      client_id: process.env.CLIENT_ID,
       grant_type: 'authorization_code',
       redirect_uri: `${location.origin}/index.html`,
       // redirect_uri: location.origin,
@@ -22,7 +29,7 @@ class AccountService extends AgentService {
         return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
       })
       .join('&');
-    const input = `${AUTH_API}/token`;
+    const input = `${process.env.AUTH_API}/token`;
     // const input = `http://localhost:5001/token`;
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
