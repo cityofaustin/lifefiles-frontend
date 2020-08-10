@@ -28,7 +28,7 @@ class AccountService extends AgentService {
       code,
       client_id: process.env.CLIENT_ID,
       grant_type: 'authorization_code',
-      redirect_uri: `${location.origin}/index.html`,
+      redirect_uri: `${location.origin}${location.pathname}`,
       // redirect_uri: location.origin,
     };
     const body = Object.keys(params)

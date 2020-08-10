@@ -62,7 +62,7 @@ class App extends Component<{}, AppState> {
       // they are in the process of logging in, need to exchange auth code for access token
       const response = await AccountService.getToken(code);
       AuthService.logIn(response.access_token, response.refresh_token);
-      window.location.replace(`${location.origin}/index.html`);
+      window.location.replace(`${location.origin}${location.pathname}`);
       return;
     }
     if (AuthService.isLoggedIn()) {
@@ -90,7 +90,7 @@ class App extends Component<{}, AppState> {
         const state = '';
         window.location.replace(
           AccountService.getAuthApi() +
-            `/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}/index.html&scope=${scope}&state=${state}`
+            `/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
         );
       }
     }
