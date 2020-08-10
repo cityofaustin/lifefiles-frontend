@@ -39,15 +39,19 @@ class App extends Component<{}, AppState> {
   async componentDidMount(): Promise<void> {
     if (process.env.MYPASS_API === undefined) {
       if (window.location.href.indexOf('localhost') > -1) {
-        process.env.MYPASS_API = 'http://localhost:5000/api';
+        ApiService.setApiEndpoint('http://localhost:5000/api');
       } else {
-        process.env.MYPASS_API = location.origin + '/api';
+        ApiService.setApiEndpoint(location.origin + '/api');
       }
+    } else {
+      ApiService.setApiEndpoint(process.env.MYPASS_API);
     }
 
     if (process.env.AUTH_API === undefined) {
       const response = await AccountService.getOauthEndpoint();
-      process.env.AUTH_API = response.url;
+      AccountService.setAuthApi(response.url);
+    } else {
+      AccountService.setAuthApi(process.env.AUTH_API);
     }
 
     let { account, theme, privateEncryptionKey } = { ...this.state };
@@ -85,7 +89,7 @@ class App extends Component<{}, AppState> {
         const scope = '';
         const state = '';
         window.location.replace(
-          process.env.AUTH_API +
+          AccountService.getAuthApi() +
             `/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}/index.html&scope=${scope}&state=${state}`
         );
       }

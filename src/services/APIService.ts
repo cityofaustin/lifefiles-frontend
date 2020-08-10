@@ -7,6 +7,8 @@ import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
 import { format } from 'date-fns';
 import UpdateDocumentResponse from '../models/document/UpdateDocumentResponse';
 
+let API_ENDPOINT = undefined;
+
 class APIService {
   static getHeaders(): HeadersInit {
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -30,12 +32,16 @@ class APIService {
     }
   }
 
+  static setApiEndpoint(apiEndpoint) {
+    API_ENDPOINT = apiEndpoint;
+  }
+
   static getAPIEndpoint() {
-    return process.env.MYPASS_API;
+    return API_ENDPOINT;
   }
 
   static async get(path: string) {
-    const input: RequestInfo = `${process.env.MYPASS_API}${path}`;
+    const input: RequestInfo = `${API_ENDPOINT}${path}`;
     const headers: HeadersInit = await this.getHeaders();
     const init: RequestInit = {
       method: 'GET',
@@ -73,7 +79,7 @@ class APIService {
   }
 
   static async post(path: any, entity: any) {
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = await this.getHeaders();
     const init = {
       method: 'POST',
@@ -91,7 +97,7 @@ class APIService {
   }
 
   static async postDocVC(path, vc, helperFile, ownerFile) {
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
@@ -118,7 +124,7 @@ class APIService {
     validUntilDate?: Date
   ) {
     const path = '/documents';
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
@@ -151,7 +157,7 @@ class APIService {
     ownerId: string
   ) {
     const path = '/upload-document-on-behalf-of-user';
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
@@ -182,7 +188,7 @@ class APIService {
     toAccountId: string
   ) {
     const path = '/share-requests';
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
@@ -210,7 +216,7 @@ class APIService {
   }
 
   static async putShareRequestFile(path, file: File, thumbnailFile: File) {
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
@@ -236,7 +242,7 @@ class APIService {
 
   static async updateDocument(request: UpdateDocumentRequest): Promise<any> {
     const path = '/documents';
-    const input = `${process.env.MYPASS_API}${path}/${request.id}`;
+    const input = `${API_ENDPOINT}${path}/${request.id}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
@@ -267,7 +273,7 @@ class APIService {
   }
 
   static async put(path: any, entity: any) {
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = await this.getHeaders();
     const init = {
       method: 'PUT',
@@ -281,7 +287,7 @@ class APIService {
   }
 
   static async delete(path: any) {
-    const input = `${process.env.MYPASS_API}${path}`;
+    const input = `${API_ENDPOINT}${path}`;
     const headers = await this.getHeaders();
     const init = {
       method: 'DELETE',

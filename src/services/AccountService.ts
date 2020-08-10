@@ -7,13 +7,20 @@ import AuthService from './AuthService';
 
 const PATH = '/accounts';
 
+let AUTH_API = undefined;
+
 class AccountService extends AgentService {
   static async getOauthEndpoint(): Promise<OauthUrlResponse> {
-    console.log('get url before');
     const url = await super.get('/oauth-url');
-    console.log('get url after');
-    console.log(url);
     return url;
+  }
+
+  static setAuthApi(authApi) {
+    AUTH_API = authApi;
+  }
+
+  static getAuthApi() {
+    return AUTH_API;
   }
 
   static async getToken(code) {
@@ -29,7 +36,8 @@ class AccountService extends AgentService {
         return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
       })
       .join('&');
-    const input = `${process.env.AUTH_API}/token`;
+
+    const input = `${AUTH_API}/token`;
     // const input = `http://localhost:5001/token`;
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
