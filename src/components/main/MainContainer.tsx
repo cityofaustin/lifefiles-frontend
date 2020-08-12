@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import './MainContainer.scss';
 import AccountPage from './account/AccountPage';
+import BringYourKeyPage from './account/BringYourKeyPage';
 import AdminPage from './account/AdminPage';
 import SearchInput from '../common/SearchInput';
 import Account from '../../models/Account';
@@ -65,6 +66,7 @@ interface MainContainerProps {
   handleLogout: () => void;
   updateAccountShareRequests: (requests: ShareRequest[]) => void;
   privateEncryptionKey?: string;
+  setBringYourOwnEncryptionKey: (key) => void;
 }
 
 class MainContainer extends Component<MainContainerProps, MainContainerState> {
@@ -617,6 +619,18 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     // return <Fragment />;
   }
 
+  renderBringYourKeyPage() {
+    const { account } = { ...this.props };
+
+    return (
+      <BringYourKeyPage
+        goBack={this.goBack}
+        account={account}
+        setBringYourOwnEncryptionKey={this.props.setBringYourOwnEncryptionKey}
+      />
+    );
+  }
+
   renderAdminPage() {
     const { account, privateEncryptionKey } = { ...this.props };
     return <AdminPage goBack={this.goBack} account={account} />;
@@ -735,6 +749,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 </Route>
                 <Route exact path="/account">
                   {this.renderAccount()}
+                </Route>
+                <Route exact path="/bring-your-key">
+                  {this.renderBringYourKeyPage()}
                 </Route>
                 <Route
                   exact

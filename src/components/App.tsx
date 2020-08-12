@@ -54,7 +54,7 @@ class App extends Component<{}, AppState> {
       AccountService.setAuthApi(process.env.AUTH_API);
     }
 
-    let { account, theme, privateEncryptionKey } = { ...this.state };
+    let { account, theme } = { ...this.state };
     this.setState({ isLoading: true });
     const code = UrlUtil.getQueryVariable('code');
 
@@ -69,8 +69,9 @@ class App extends Component<{}, AppState> {
       // they have a jwt access token, use app as normal
       try {
         const loginResponse = await AccountService.getMyAccount();
-        const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
-        privateEncryptionKey = encryptionKeyResponse.encryptionKey;
+
+        await this.handleEncryptionKey();
+
         ({ account } = { ...loginResponse });
         theme = account?.role;
         document.body.classList.remove('theme-helper', 'theme-owner');
@@ -94,11 +95,18 @@ class App extends Component<{}, AppState> {
         );
       }
     }
-    this.setState({ account, theme, isLoading: false, privateEncryptionKey });
+    this.setState({ account, theme, isLoading: false });
   }
 
+  setBringYourOwnEncryptionKey = (key) => {
+    let { privateEncryptionKey } = { ...this.state };
+    privateEncryptionKey = key;
+    this.setState({ privateEncryptionKey });
+    window.sessionStorage.setItem('bring-your-own-key', key);
+  };
+
   handleLogin = async (response: any): Promise<void> => {
-    let { account, theme, privateEncryptionKey, adminLogin } = {
+    let { account, theme, adminLogin } = {
       ...this.state,
     };
     this.setState({ isLoading: true });
@@ -120,17 +128,29 @@ class App extends Component<{}, AppState> {
       document.body.classList.add(`theme-${theme}`);
 
       AuthService.logIn(account?.token, '');
-      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
-      privateEncryptionKey = encryptionKeyResponse.encryptionKey;
+
+      await this.handleEncryptionKey();
     } catch (err) {
       console.error('failed to login.');
       console.error(err);
     }
-    this.setState({ account, theme, isLoading: false, privateEncryptionKey });
+    this.setState({ account, theme, isLoading: false });
+  };
+
+  handleEncryptionKey = async () => {
+    if (window.sessionStorage.getItem('bring-your-own-key') === null) {
+      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
+      let key = encryptionKeyResponse.encryptionKey;
+      this.setState({ privateEncryptionKey: key });
+    } else {
+      let key = window.sessionStorage.getItem('bring-your-own-key');
+      this.setState({ privateEncryptionKey: key! });
+    }
   };
 
   handleLogout = () => {
     AuthService.logOut();
+    window.sessionStorage.removeItem('bring-your-own-key');
     this.setState({ account: undefined });
   };
 
@@ -175,6 +195,7 @@ class App extends Component<{}, AppState> {
                 handleLogout={this.handleLogout}
                 updateAccountShareRequests={this.updateAccountShareRequests}
                 privateEncryptionKey={privateEncryptionKey}
+                setBringYourOwnEncryptionKey={this.setBringYourOwnEncryptionKey}
               />
             )}
             {!account && pageToRender}
