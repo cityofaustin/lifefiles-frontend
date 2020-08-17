@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import LoginPage from './auth/LoginPage';
 import AdminLoginPage from './auth/AdminLoginPage';
 import MainContainer from './main/MainContainer';
@@ -13,6 +13,7 @@ import Role from '../models/Role';
 import ShareRequest from '../models/ShareRequest';
 import EncryptionKeyResponse from '../models/EncryptionKeyResponse';
 import UrlUtil from '../util/UrlUtil';
+import LogoSvg from './svg/logo-svg';
 
 interface AppState {
   account?: Account;
@@ -37,6 +38,12 @@ class App extends Component<{}, AppState> {
   }
 
   async componentDidMount(): Promise<void> {
+    setTimeout(() => {
+      document.getElementById('splash')!.style.animation = 'fadeout 1s';
+      document.getElementById('splash')!.style.opacity = '0';
+      document.getElementById('main')!.style.animation = 'fadein 1s';
+      document.getElementById('main')!.style.opacity = '1';
+    }, 500);
     if (process.env.MYPASS_API === undefined) {
       if (window.location.href.indexOf('localhost') > -1) {
         ApiService.setApiEndpoint('http://localhost:5000/api');
@@ -182,26 +189,41 @@ class App extends Component<{}, AppState> {
     }
 
     return (
-      <div className="app-container">
-        {process.env.NODE_ENV === 'development' && (
-          <div className="screen-info" />
-        )}
-        {isLoading && <ProgressIndicator isFullscreen />}
-        {!isLoading && (
-          <div className="page-container">
-            {account && (
-              <MainContainer
-                account={account}
-                handleLogout={this.handleLogout}
-                updateAccountShareRequests={this.updateAccountShareRequests}
-                privateEncryptionKey={privateEncryptionKey}
-                setBringYourOwnEncryptionKey={this.setBringYourOwnEncryptionKey}
-              />
-            )}
-            {!account && pageToRender}
-          </div>
-        )}
-      </div>
+      <Fragment>
+        <div
+          id="splash"
+          style={{
+            backgroundColor: '#2362c7',
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100vw'
+          }}
+        >
+          <LogoSvg />
+        </div>
+        <div id="main" className="app-container">
+          {process.env.NODE_ENV === 'development' && (
+            <div className="screen-info" />
+          )}
+          {isLoading && <ProgressIndicator isFullscreen />}
+          {!isLoading && (
+            <div className="page-container">
+              {account && (
+                <MainContainer
+                  account={account}
+                  handleLogout={this.handleLogout}
+                  updateAccountShareRequests={this.updateAccountShareRequests}
+                  privateEncryptionKey={privateEncryptionKey}
+                  setBringYourOwnEncryptionKey={this.setBringYourOwnEncryptionKey}
+                />
+              )}
+              {!account && pageToRender}
+            </div>
+          )}
+        </div>
+      </Fragment>
     );
   }
 }
