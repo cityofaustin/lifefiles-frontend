@@ -10,6 +10,7 @@ import {
 import './MainContainer.scss';
 import AccountPage from './account/AccountPage';
 import BringYourKeyPage from './account/BringYourKeyPage';
+import CheckoutPage from './account/CheckoutPage';
 import AdminPage from './account/AdminPage';
 import SearchInput from '../common/SearchInput';
 import Account from '../../models/Account';
@@ -631,6 +632,18 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     );
   }
 
+  renderCheckoutPage() {
+    const { account, privateEncryptionKey } = { ...this.props };
+
+    return (
+      <CheckoutPage
+        privateEncryptionKey={privateEncryptionKey}
+        goBack={this.goBack}
+        account={account}
+      />
+    );
+  }
+
   renderAdminPage() {
     const { account, privateEncryptionKey } = { ...this.props };
     return <AdminPage goBack={this.goBack} account={account} />;
@@ -752,6 +765,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 </Route>
                 <Route exact path="/bring-your-key">
                   {this.renderBringYourKeyPage()}
+                </Route>
+                <Route exact path="/checkout">
+                  {this.renderCheckoutPage()}
                 </Route>
                 <Route
                   exact

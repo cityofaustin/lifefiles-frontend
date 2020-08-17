@@ -36,6 +36,7 @@
     "did-jwt-vc": "^0.2.0",
     "eth-crypto": "^1.5.2",
     "ethr-did": "^1.1.0",
+    "file-saver": "^2.0.2",
     "jspdf": "^1.5.3",
     "jszip": "^3.3.0",
     "jszip-utils": "^0.1.0",

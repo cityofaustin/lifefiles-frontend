@@ -105,6 +105,17 @@ class App extends Component<{}, AppState> {
     window.sessionStorage.setItem('bring-your-own-key', key);
   };
 
+  handleEncryptionKey = async () => {
+    if (window.sessionStorage.getItem('bring-your-own-key') === null) {
+      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
+      let key = encryptionKeyResponse.encryptionKey;
+      this.setState({ privateEncryptionKey: key });
+    } else {
+      let key = window.sessionStorage.getItem('bring-your-own-key');
+      this.setState({ privateEncryptionKey: key! });
+    }
+  };
+
   handleLogin = async (response: any): Promise<void> => {
     let { account, theme, adminLogin } = {
       ...this.state,
@@ -135,17 +146,6 @@ class App extends Component<{}, AppState> {
       console.error(err);
     }
     this.setState({ account, theme, isLoading: false });
-  };
-
-  handleEncryptionKey = async () => {
-    if (window.sessionStorage.getItem('bring-your-own-key') === null) {
-      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
-      let key = encryptionKeyResponse.encryptionKey;
-      this.setState({ privateEncryptionKey: key });
-    } else {
-      let key = window.sessionStorage.getItem('bring-your-own-key');
-      this.setState({ privateEncryptionKey: key! });
-    }
   };
 
   handleLogout = () => {

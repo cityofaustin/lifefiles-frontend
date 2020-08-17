@@ -1,5 +1,6 @@
 import AgentService from './APIService';
 import LoginRequest from '../models/auth/LoginRequest';
+import RegisterRequest from '../models/auth/RegisterRequest';
 import LoginResponse from '../models/auth/LoginResponse';
 import OauthUrlResponse from '../models/auth/OauthUrlResponse';
 import Account from '../models/Account';
@@ -60,6 +61,14 @@ class AccountService extends AgentService {
       console.log(err);
       console.error(err.message);
     }
+  }
+
+  static async registerHelperAccount(request) {
+    return await super.post(`/helper-accounts`, request);
+  }
+
+  static async secureLoginHelperAccount(request) {
+    return await super.post(`${PATH}/secure-login`, request);
   }
 
   static async loginHelperAccount(request: LoginRequest) {
