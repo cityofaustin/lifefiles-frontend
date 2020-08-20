@@ -262,6 +262,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const { documents, searchedDocuments, documentQuery } = { ...this.state };
     const { account, privateEncryptionKey } = { ...this.props };
     this.setState({ isLoading: true });
+
     let newDocument;
     try {
       if (newFile) {

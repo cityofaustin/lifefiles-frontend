@@ -77,12 +77,12 @@ class App extends Component<{}, AppState> {
       try {
         const loginResponse = await AccountService.getMyAccount();
 
-        await this.handleEncryptionKey();
-
         ({ account } = { ...loginResponse });
+
         theme = account?.role;
         document.body.classList.remove('theme-helper', 'theme-owner');
         document.body.classList.add(`theme-${theme}`);
+        await this.handleEncryptionKey(account?.role);
       } catch (err) {
         console.error(err.message);
       }
@@ -112,9 +112,15 @@ class App extends Component<{}, AppState> {
     window.sessionStorage.setItem('bring-your-own-key', key);
   };
 
-  handleEncryptionKey = async () => {
+  handleEncryptionKey = async (role) => {
     if (window.sessionStorage.getItem('bring-your-own-key') === null) {
-      const encryptionKeyResponse: EncryptionKeyResponse = await AccountService.getEncryptionKey();
+      // If the user did not provider their own key we will provide one
+      let encryptionKeyResponse: EncryptionKeyResponse;
+      if (role === 'owner') {
+        encryptionKeyResponse = await AccountService.getEncryptionKey();
+      } else {
+        encryptionKeyResponse = await AccountService.getHelperEncryptionKey();
+      }
       let key = encryptionKeyResponse.encryptionKey;
       this.setState({ privateEncryptionKey: key });
     } else {
@@ -147,7 +153,9 @@ class App extends Component<{}, AppState> {
 
       AuthService.logIn(account?.token, '');
 
-      await this.handleEncryptionKey();
+      console.log('account??');
+      console.log(account);
+      await this.handleEncryptionKey(account?.role);
     } catch (err) {
       console.error('failed to login.');
       console.error(err);
@@ -198,7 +206,7 @@ class App extends Component<{}, AppState> {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '100vw'
+            width: '100vw',
           }}
         >
           <LogoSvg />
@@ -216,7 +224,9 @@ class App extends Component<{}, AppState> {
                   handleLogout={this.handleLogout}
                   updateAccountShareRequests={this.updateAccountShareRequests}
                   privateEncryptionKey={privateEncryptionKey}
-                  setBringYourOwnEncryptionKey={this.setBringYourOwnEncryptionKey}
+                  setBringYourOwnEncryptionKey={
+                    this.setBringYourOwnEncryptionKey
+                  }
                 />
               )}
               {!account && pageToRender}

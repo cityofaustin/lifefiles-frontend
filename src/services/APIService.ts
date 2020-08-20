@@ -41,7 +41,11 @@ class APIService {
   }
 
   static async get(path: string) {
-    const input: RequestInfo = `${API_ENDPOINT}${path}`;
+    return await this.getWithEndpoint(API_ENDPOINT, path);
+  }
+
+  static async getWithEndpoint(endpoint, path: string) {
+    const input: RequestInfo = `${endpoint}${path}`;
     const headers: HeadersInit = await this.getHeaders();
     const init: RequestInit = {
       method: 'GET',

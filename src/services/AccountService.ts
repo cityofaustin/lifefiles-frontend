@@ -94,7 +94,11 @@ class AccountService extends AgentService {
     );
   }
 
-  static getEncryptionKey() {
+  static async getEncryptionKey() {
+    return super.getWithEndpoint(AUTH_API, '/get-encryption-key');
+  }
+
+  static async getHelperEncryptionKey() {
     return super.get('/get-encryption-key');
   }
 }
