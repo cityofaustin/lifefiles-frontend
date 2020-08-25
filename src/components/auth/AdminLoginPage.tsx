@@ -11,9 +11,9 @@ import {
 import folderImage from '../../img/folder.png';
 import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
 import AccountService from '../../services/AccountService';
-import './AdminLoginPage.scss';
 import APIError from '../../services/APIError';
 import HttpStatusCode from '../../models/HttpStatusCode';
+import './AdminLoginPage.scss';
 
 export interface AdminLoginProps {
   handleLogin: (loginResponse: any) => Promise<void>;
@@ -25,7 +25,7 @@ export interface AdminLoginState {
   errorMessage: string;
 }
 
-class LoginPage extends Component<AdminLoginProps> {
+class AdminLoginPage extends Component<AdminLoginProps> {
   state = {
     email: '',
     password: '',
@@ -125,4 +125,4 @@ class LoginPage extends Component<AdminLoginProps> {
   }
 }
 
-export default LoginPage;
+export default AdminLoginPage;

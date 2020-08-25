@@ -1,0 +1,10 @@
+.go-back {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  .name {
+    margin-left: 16px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}

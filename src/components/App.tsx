@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import LoginPage from './auth/LoginPage';
+import HelperLoginPage from './auth/HelperLoginPage';
 import AdminLoginPage from './auth/AdminLoginPage';
 import MainContainer from './main/MainContainer';
 import Account from '../models/Account';
@@ -189,7 +189,7 @@ class App extends Component<{}, AppState> {
     let pageToRender = <ProgressIndicator isFullscreen />;
 
     if (helperLogin) {
-      pageToRender = <LoginPage handleLogin={this.handleLogin} />;
+      pageToRender = <HelperLoginPage handleLogin={this.handleLogin} />;
     }
 
     if (adminLogin) {
