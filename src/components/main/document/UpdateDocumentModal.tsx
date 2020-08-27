@@ -97,6 +97,7 @@ interface UpdateDocumentModalState {
   validUntilDate: Date;
   vc?: string;
   vp?: string;
+  approvedVpUrl?: string;
   doc?: any;
   isLoading: boolean;
 }
@@ -142,7 +143,6 @@ class UpdateDocumentModal extends Component<
       this.props.document &&
       this.props.privateEncryptionKey
     ) {
-
       let base64Pdf: string | undefined;
       let base64Image: string | undefined;
       let base64Thumbnail: string | undefined;
@@ -156,7 +156,7 @@ class UpdateDocumentModal extends Component<
             this.props.privateEncryptionKey,
             encryptedThumbnail
           );
-          this.setState({base64Thumbnail}); // do this since it's much quicker than the pdf.
+          this.setState({ base64Thumbnail }); // do this since it's much quicker than the pdf.
           docType = this.props.document.type;
           const encryptedString = await ZipUtil.unzip(
             DocumentService.getDocumentURL(this.props.document.url)
@@ -165,7 +165,7 @@ class UpdateDocumentModal extends Component<
             this.props.privateEncryptionKey,
             encryptedString
           );
-          if(base64.startsWith('data:application/pdf')) {
+          if (base64.startsWith('data:application/pdf')) {
             base64Pdf = base64;
           } else {
             base64Image = base64;
@@ -225,9 +225,9 @@ class UpdateDocumentModal extends Component<
   handleClaim = async () => {
     const { handleUpdateDocument, document } = { ...this.props };
 
-    if(document?.vcJwt) {
+    if (document?.vcJwt) {
       // TODO: I'm pretty sure you have to set this in parent
-      this.handleOwnerAcceptNotarization();
+      // this.handleOwnerAcceptNotarization();
     }
 
     handleUpdateDocument({
@@ -295,12 +295,14 @@ class UpdateDocumentModal extends Component<
       document.type,
       document.vpJwt
     );
-    NotaryService.anchorVpToBlockchain(vpJwt);
+    const receipt = await NotaryService.anchorVpToBlockchain(vpJwt);
+    console.log({ receipt });
+    this.setState({ approvedVpUrl: receipt.didStatus });
     this.setState({ vp: vpJwt });
   };
 
   handleNotarizeDocument = async () => {
-    const {document, referencedAccount, myAccount} = {...this.props};
+    const { document, referencedAccount, myAccount } = { ...this.props };
 
     const notarizedDoc = await NotaryUtil.createNotarizedDocument(
       'certifiedCopy',
@@ -319,7 +321,10 @@ class UpdateDocumentModal extends Component<
       this.state.base64Image === undefined ? '' : this.state.base64Image,
       this.state.notarySealBase64,
       document?.type!,
-      AccountImpl.getFullName(referencedAccount?.firstName, referencedAccount?.lastName),
+      AccountImpl.getFullName(
+        referencedAccount?.firstName,
+        referencedAccount?.lastName
+      ),
       AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
     );
 
@@ -535,6 +540,8 @@ class UpdateDocumentModal extends Component<
         <div>
           <h4>Verifiable Credential</h4>
           <pre className="vc-display">{this.props.document?.vcJwt}</pre>
+          <pre className="vc-display">{this.state.approvedVpUrl}</pre>
+
           <Button
             className="margin-wide"
             color="primary"
@@ -645,7 +652,7 @@ class UpdateDocumentModal extends Component<
     return (
       <div>
         <h3>Verifiable Credential</h3>
-        <pre className="vc-display">{this.state.vc}</pre>
+        <pre className="vc-display">{this.props.document?.vcJwt}</pre>
         {doc && (
           <div className="pdf-display">
             <PdfPreview fileURL={doc.output('datauristring')} />
@@ -683,7 +690,7 @@ class UpdateDocumentModal extends Component<
       base64Thumbnail,
       base64Pdf,
       pendingAccess,
-      isLoading
+      isLoading,
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -822,16 +829,19 @@ class UpdateDocumentModal extends Component<
                     </NavItem>
                   )}
 
-                  {/* <NavItem>
-                    <NavLink
-                      className={classNames({ active: activeTab === '4' })}
-                      onClick={() => {
-                        this.toggleTab('4');
-                      }}
-                    >
-                      Notarize
-                    </NavLink>
-                  </NavItem> */}
+                  {this.props.myAccount.role === 'owner' &&
+                    this.props.document?.vcJwt! && (
+                      <NavItem>
+                        <NavLink
+                          className={classNames({ active: activeTab === '4' })}
+                          onClick={() => {
+                            this.toggleTab('4');
+                          }}
+                        >
+                          Notarize
+                        </NavLink>
+                      </NavItem>
+                    )}
                 </Nav>
                 <TabContent activeTab={activeTab}>
                   <TabPane tabId="1">
@@ -849,7 +859,10 @@ class UpdateDocumentModal extends Component<
                               )}
                               {base64Pdf && (
                                 <div className="pdf-display">
-                                  <PdfPreview fileURL={base64Pdf} height={400} />
+                                  <PdfPreview
+                                    fileURL={base64Pdf}
+                                    height={400}
+                                  />
                                 </div>
                               )}
                               {base64Image && (
