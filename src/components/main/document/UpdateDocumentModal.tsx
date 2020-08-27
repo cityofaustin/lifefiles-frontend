@@ -344,7 +344,7 @@ class UpdateDocumentModal extends Component<
       if (selectedContact && base64Image) {
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
         const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
-        const base64Thumbnail = await StringUtil.fileContentsToThumbnailString(
+        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(
           file
         );
         const encryptedString = await CryptoUtil.getEncryptedByPublicString(

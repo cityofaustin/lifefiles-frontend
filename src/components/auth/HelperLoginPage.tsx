@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Component, FormEvent } from 'react';
+import React, { ChangeEvent, Component, FormEvent, Fragment } from 'react';
 import {
   Button,
   Card,
@@ -16,10 +16,12 @@ import { ReactComponent as PasswordBtnSvg } from '../../img/password-btn.svg';
 import { ReactComponent as PrivateKeyBtnSvg } from '../../img/private-key-btn.svg';
 import { ReactComponent as LoginSvg } from '../../img/login.svg';
 import { ReactComponent as PrivateKeyLongBtnSvg } from '../../img/private-key-long-btn.svg';
+import { ReactComponent as PasswordLongBtnSvg } from '../../img/password-long-btn.svg';
 import AccountService from '../../services/AccountService';
 // import APIError from '../../services/APIError';
 import HttpStatusCode from '../../models/HttpStatusCode';
 import Checkbox from '../common/Checkbox';
+import HelperRegister from './helper-register/HelperRegister';
 import GoBackSvg from '../svg/GoBackSvg';
 import img from '../../img/document-file.png';
 import './HelperLoginPage.scss';
@@ -43,7 +45,8 @@ class HelperLoginPage extends Component<HelperLoginProps> {
     password: '',
     errorMessage: '',
     secureAccount: false,
-    passwordSelected: true,
+    isRegistering: true,
+    passwordSelected: false,
     privateKeySelected: false,
   };
   constructor(props: HelperLoginProps) {
@@ -66,20 +69,41 @@ class HelperLoginPage extends Component<HelperLoginProps> {
     e: FormEvent<HTMLFormElement> | React.MouseEvent<HTMLInputElement>
   ): Promise<void> => {
     e.preventDefault();
-    // const { handleLogin } = { ...this.props };
-    const { email, password, secureAccount } = { ...this.state };
+    const { email, password, secureAccount, privateKeySelected } = {
+      ...this.state,
+    };
     let { errorMessage } = { ...this.state };
 
-    if (secureAccount) {
-      window.sessionStorage.setItem('bring-your-own-key', password);
-      const publicKey = EthCrypto.publicKeyByPrivateKey('0x' + password);
-      const address = EthCrypto.publicKey.toAddress(publicKey);
-      const messageToSignResponse = await AccountService.secureLoginHelperAccount(
-        {
+    if (secureAccount || privateKeySelected) {
+      let messageToSignResponse;
+      let address;
+      try {
+        window.sessionStorage.setItem('bring-your-own-key', password);
+        const publicKey = EthCrypto.publicKeyByPrivateKey('0x' + password);
+        address = EthCrypto.publicKey.toAddress(publicKey);
+        messageToSignResponse = await AccountService.secureLoginHelperAccount({
           account: { username: address },
+        });
+        if (messageToSignResponse.msg === 'Account not found') {
+          throw new Error(String(HttpStatusCode.UNPROCESSABLE_ENTITY));
         }
-      );
-
+      } catch (err) {
+        if (
+          err.message.includes('Cannot convert string to buffer') ||
+          err.message === 'private key length is invalid'
+        ) {
+          errorMessage = 'Invalid key, must be 64 hex characters.';
+        } else if (
+          HttpStatusCode.UNPROCESSABLE_ENTITY === Number(err.message)
+        ) {
+          errorMessage = 'Unable to log in with provided credentials.';
+        } else {
+          errorMessage =
+            'Oops, something went wrong. Please try again in a few minutes.';
+        }
+        this.setState({ errorMessage });
+        return;
+      }
       const message = messageToSignResponse.messageToSign;
       const messageHash = EthCrypto.hash.keccak256(message);
       const signature = EthCrypto.sign(
@@ -88,7 +112,7 @@ class HelperLoginPage extends Component<HelperLoginProps> {
       );
 
       const loginResponse = await AccountService.secureLoginHelperAccount({
-        account: { username: address, signature: signature },
+        account: { username: address, signature },
       });
 
       await this.props.handleLogin(loginResponse);
@@ -100,6 +124,9 @@ class HelperLoginPage extends Component<HelperLoginProps> {
         });
         if (loginResponse === undefined) {
           throw new Error('Server unavailable.');
+        }
+        if (loginResponse.errors && loginResponse.errors['email or password']) {
+          throw new Error('422');
         }
         await this.props.handleLogin(loginResponse);
         return;
@@ -246,24 +273,93 @@ class HelperLoginPage extends Component<HelperLoginProps> {
     );
   }
 
-  renderLoginPassword() {
-    const { password, email } = { ...this.state };
+  renderLoginPrivateKey() {
+    const { password, errorMessage } = { ...this.state };
     return (
       <section className="container">
-        <div
-          ref="section"
-          id="section-1-owner"
-          className="section"
-          // className={getSectionClassName(this.props.position)}
-        >
+        <div ref="section" id="section-1-owner" className="section">
           <div className="section-contents">
             <div className="title1">Document Helper</div>
             <div className="subtitle">Help us find your account</div>
             <div className="card owner1">
-              {/* <div className="card-title">
-          To create and setup your account you need to follow these 3 simple
-          steps:
-        </div> */}
+              <div className="card-body">
+                <div className="card-body-section" style={{ marginTop: 0 }}>
+                  <LoginSvg />
+                  <div className="helper-login">Helper Login</div>
+                  <div className="helper-excerpt" style={{ padding: '0 10px' }}>
+                    Advanced users that registered their account with a private
+                    key may use it to login
+                  </div>
+                </div>
+                <div
+                  className="card-body-section1"
+                  style={{ marginTop: '23px' }}
+                >
+                  {errorMessage && <div className="error">{errorMessage}</div>}
+                  <div className="form-control1">
+                    <label>Private Encryption Key</label>
+                    <input
+                      className="username-input"
+                      name="password"
+                      type="text"
+                      value={password}
+                      onChange={(e) =>
+                        this.setState({ password: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="card-body-section1">
+                  <div>
+                    <span className="or">or </span>
+                    <span className="advanced">(regular user)</span>
+                  </div>
+                  <div
+                    className="private-key-lng"
+                    onClick={() =>
+                      this.setState({
+                        passwordSelected: true,
+                        privateKeySelected: false,
+                        errorMessage: '',
+                      })
+                    }
+                  >
+                    <PasswordLongBtnSvg />
+                  </div>
+                </div>
+                <div className="bottom">
+                  <input
+                    style={{ width: '210px', marginTop: '27px' }}
+                    type="button"
+                    value="Login"
+                    disabled={password.length < 1}
+                    onClick={this.handleLogin}
+                  />
+                  <div className="bottom-excerpt">Forgot your username?</div>
+                </div>
+              </div>
+            </div>
+            <GoBackSvg
+              color="#4BA9D9"
+              goBack={() =>
+                this.setState({ privateKeySelected: false, errorMessage: '' })
+              }
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  renderLoginPassword() {
+    const { password, email, errorMessage } = { ...this.state };
+    return (
+      <section className="container">
+        <div ref="section" id="section-1-owner" className="section">
+          <div className="section-contents">
+            <div className="title1">Document Helper</div>
+            <div className="subtitle">Help us find your account</div>
+            <div className="card owner1">
               <div className="card-body">
                 <div className="card-body-section" style={{ marginTop: 0 }}>
                   <LoginSvg />
@@ -272,7 +368,11 @@ class HelperLoginPage extends Component<HelperLoginProps> {
                     Please enter your credentials below...
                   </div>
                 </div>
-                <div className="card-body-section1">
+                <div
+                  className="card-body-section1"
+                  style={{ marginTop: '23px' }}
+                >
+                  {errorMessage && <div className="error">{errorMessage}</div>}
                   <div className="form-control1">
                     <label>E-mail</label>
                     <input
@@ -284,7 +384,7 @@ class HelperLoginPage extends Component<HelperLoginProps> {
                       onChange={(e) => this.setState({ email: e.target.value })}
                     />
                   </div>
-                  <div className="form-control1">
+                  <div className="form-control1" style={{ marginTop: '10px' }}>
                     <label>Password</label>
                     <input
                       name="password"
@@ -298,17 +398,28 @@ class HelperLoginPage extends Component<HelperLoginProps> {
                 </div>
                 <div className="card-body-section1">
                   <div>
-                    <span>or </span>
-                    <span>(advanced user)</span>
+                    <span className="or">or </span>
+                    <span className="advanced">(advanced user)</span>
                   </div>
-                  <PrivateKeyLongBtnSvg />
+                  <div
+                    className="private-key-lng"
+                    onClick={() =>
+                      this.setState({
+                        passwordSelected: false,
+                        privateKeySelected: true,
+                        errorMessage: '',
+                      })
+                    }
+                  >
+                    <PrivateKeyLongBtnSvg />
+                  </div>
                 </div>
                 <div className="bottom">
                   <input
                     style={{ width: '210px', marginTop: '27px' }}
                     type="button"
                     value="Login"
-                    disabled={false}
+                    disabled={password.length < 1 || email.length < 1}
                     onClick={this.handleLogin}
                   />
                   <div className="bottom-excerpt">Forgot your username?</div>
@@ -317,7 +428,9 @@ class HelperLoginPage extends Component<HelperLoginProps> {
             </div>
             <GoBackSvg
               color="#4BA9D9"
-              goBack={() => this.setState({ passwordSelected: false })}
+              goBack={() =>
+                this.setState({ passwordSelected: false, errorMessage: '' })
+              }
             />
           </div>
         </div>
@@ -341,7 +454,10 @@ class HelperLoginPage extends Component<HelperLoginProps> {
               Choose your login method
             </div>
             <div className="login-options">
-              <div className="login-option">
+              <div
+                className="login-option"
+                onClick={() => this.setState({ privateKeySelected: true })}
+              >
                 <PrivateKeyBtnSvg />
               </div>
               <div
@@ -352,10 +468,12 @@ class HelperLoginPage extends Component<HelperLoginProps> {
               </div>
             </div>
             <div className="or">or</div>
-            {/* <form method="GET" action="register"> */}
-            {/* {this.renderHiddenInputs()} */}
-            <input className="sign-up" type="button" value="Create Account" />
-            {/* </form> */}
+            <input
+              className="sign-up"
+              type="button"
+              value="Create Account"
+              onClick={() => this.setState({ isRegistering: true })}
+            />
           </div>
         </div>
       </section>
@@ -363,14 +481,27 @@ class HelperLoginPage extends Component<HelperLoginProps> {
   }
 
   render() {
-    const { passwordSelected, privateKeySelected } = { ...this.state };
+    const { passwordSelected, privateKeySelected, isRegistering } = {
+      ...this.state,
+    };
     return (
       <main id="helper-login">
         <section className="wave-container">
           <WaveSvg />
         </section>
-        {passwordSelected && this.renderLoginPassword()}
-        {!passwordSelected && !privateKeySelected && this.renderWelcome()}
+        {!isRegistering && (
+          <Fragment>
+            {passwordSelected && this.renderLoginPassword()}
+            {privateKeySelected && this.renderLoginPrivateKey()}
+            {!passwordSelected && !privateKeySelected && this.renderWelcome()}
+          </Fragment>
+        )}
+        {isRegistering && (
+          <HelperRegister
+            goBack={() => this.setState({ isRegistering: false })}
+          />
+        )}
+        {/* {this.renderOriginalLogin()} */}
       </main>
     );
   }

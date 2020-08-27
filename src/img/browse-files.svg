@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="42" viewBox="0 0 170 42">
+  <g id="Group_2538" data-name="Group 2538" transform="translate(-95 -366)">
+    <g id="Rectangle_1359" data-name="Rectangle 1359" transform="translate(95 366)" fill="#fff" stroke="#76b3ef" stroke-width="2">
+      <rect width="170" height="42" rx="5" stroke="none"/>
+      <rect x="1" y="1" width="168" height="40" rx="4" fill="none"/>
+    </g>
+    <text id="Browse_my_files" data-name="Browse my files" transform="translate(180 392)" fill="#76b3ef" font-size="14" font-family="Montserrat-Bold, Montserrat" font-weight="700"><tspan x="-58.464" y="0">Browse my files</tspan></text>
+  </g>
+</svg>

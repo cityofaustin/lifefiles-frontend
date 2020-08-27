@@ -2,6 +2,13 @@
 @import '../variables.scss';
 
 #helper-login {
+  .error {
+    padding: 0 10px;
+    line-height: 1.2em;
+    margin-bottom: 8px;
+    font-size: 12px;
+    text-align: center;
+  }
   input[type="button"] {
     font-size: 25px;
     color: #fff;
@@ -9,6 +16,9 @@
     border-radius: 9px;
     font-weight: 500;
     height: 50px;
+    &:disabled {
+      background-color: #9A9A9A;
+    }
   }
   input[type="text"] {
     width: 210px;
@@ -287,6 +297,8 @@
                 color: #5AB6E5;
               }
               .helper-excerpt {
+                line-height: 1.2em;
+                text-align: center;
                 margin-top: 8px;
                 font-size: 13px;
                 color: #484848;
@@ -313,6 +325,18 @@
                 text-align: left;
               }
             }
+            .or {
+              font-size: 15px;
+              font-weight: 500;
+              color: #9A9A9A;
+            }
+            .advanced {
+              font-size: 10px;
+              color: #9A9A9A;
+            }
+          }
+          .private-key-lng {
+            cursor: pointer;
           }
         }
       }

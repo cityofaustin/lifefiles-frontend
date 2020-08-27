@@ -53,7 +53,10 @@ class StringUtil {
     return new File([u8arr], filename, { type: mime });
   }
 
-  static fileContentsToThumbnailString(file: File): Promise<string> {
+  static fileContentsToThumbnail(
+    file: File,
+    outputType = 'base64'
+  ): Promise<string> {
     return new Promise((resolve) => {
       Resizer.imageFileResizer(
         file, // is the file of the new image that can now be uploaded...
@@ -64,8 +67,8 @@ class StringUtil {
         0, // is the rotatoion of the new image
         (data) => {
           resolve(data);
-        },  // is the callBack function of the new image URI
-        'base64'  // is the output type of the new image
+        }, // is the callBack function of the new image URI
+        outputType // is the output type of the new image base64 or blob.
       );
     });
   }

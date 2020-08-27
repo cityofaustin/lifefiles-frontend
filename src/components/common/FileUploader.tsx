@@ -41,22 +41,31 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
       })
     );
     const [oneFile] = [...acceptedFiles];
-    const base64String = await StringUtil.fileContentsToString(oneFile);
-    const base64Thumbnail = await StringUtil.fileContentsToThumbnailString(oneFile);
-    const encryptedString = await CryptoUtil.getEncryptedString(privateEncryptionKey!, base64String);
-    const encryptedThumbnail = await CryptoUtil.getEncryptedString(privateEncryptionKey!, base64Thumbnail);
-    const zipped: Blob = await ZipUtil.zip(encryptedString);
-    const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
-    const newZippedFile = new File([zipped], 'encrypted-image.zip', {
-      type: 'application/zip',
-      lastModified: Date.now()
-    });
-    const newZippedThumbnailFile = new File([zippedThumbnail], 'encrypted-image-thumbnail.zip', {
-      type: 'application/zip',
-      lastModified: Date.now()
-    });
+    if(privateEncryptionKey) {
+      const base64String = await StringUtil.fileContentsToString(oneFile);
+      const base64Thumbnail = await StringUtil.fileContentsToThumbnail(oneFile);
+      const encryptedString = await CryptoUtil.getEncryptedString(privateEncryptionKey!, base64String);
+      const encryptedThumbnail = await CryptoUtil.getEncryptedString(privateEncryptionKey!, base64Thumbnail);
+      const zipped: Blob = await ZipUtil.zip(encryptedString);
+      const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
+      const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+        type: 'application/zip',
+        lastModified: Date.now()
+      });
+      const newZippedThumbnailFile = new File([zippedThumbnail], 'encrypted-image-thumbnail.zip', {
+        type: 'application/zip',
+        lastModified: Date.now()
+      });
+      setFile(newZippedFile, newZippedThumbnailFile, (oneFile as any).preview);
+    } else {
+      const base64Thumbnail = await StringUtil.fileContentsToThumbnail(oneFile, 'blob');
+      const thumbnailFile = new File([base64Thumbnail], 'thumbnail.jpg', {
+        type: 'image/jpeg',
+        lastModified: Date.now()
+      });
+      setFile(oneFile, thumbnailFile, (oneFile as any).preview);
+    }
     this.setState({ files: acceptedFiles });
-    setFile(newZippedFile, newZippedThumbnailFile, (oneFile as any).preview);
   };
 
   renderFiles(files: File[]) {

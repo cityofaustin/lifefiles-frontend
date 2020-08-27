@@ -90,13 +90,15 @@ class APIService {
       headers,
       body: JSON.stringify(entity),
     };
+    let responseJson;
     try {
       const response = await fetch(input, init);
-      const responseJson = await response.json();
+      responseJson = await response.json();
       this.handleErrorStatusCodes(response.status, responseJson);
       return responseJson;
     } catch (err) {
       console.error(err.message);
+      return responseJson;
     }
   }
 
