@@ -29,6 +29,13 @@
           }
         }
       }
+      .setup-nav {
+        display: flex;
+        justify-content: space-between;
+        div {
+          cursor: pointer;
+        }
+      }
     }
   }
 }

@@ -9,6 +9,7 @@ interface HelperEmailProps {
   fullname: string;
   goBack: () => void;
   goForward: (prevCardState: HelperEmailState) => void;
+  errorMessage: string;
 }
 export default class HelperEmail extends Component<
   HelperEmailProps,
@@ -21,7 +22,7 @@ export default class HelperEmail extends Component<
   }
   render() {
     const { email, fullname } = { ...this.state };
-    const { goBack, goForward } = { ...this.props };
+    const { goBack, goForward, errorMessage } = { ...this.props };
     return (
       <section id="helper-register" className="container">
         <div ref="section" id="section-1-owner" className="section">
@@ -38,6 +39,7 @@ export default class HelperEmail extends Component<
                   </div>
                 </div>
                 <div className="card-body-section1">
+                  {errorMessage && <div className="error">{errorMessage}</div>}
                   <div className="form-control1">
                     <label>Full Name</label>
                     <input

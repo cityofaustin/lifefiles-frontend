@@ -23,7 +23,7 @@ import HttpStatusCode from '../../models/HttpStatusCode';
 import Checkbox from '../common/Checkbox';
 import HelperRegister from './helper-register/HelperRegister';
 import GoBackSvg from '../svg/GoBackSvg';
-import img from '../../img/document-file.png';
+// import img from '../../img/document-file.png';
 import './HelperLoginPage.scss';
 
 import EthCrypto from 'eth-crypto';
@@ -151,9 +151,8 @@ class HelperLoginPage extends Component<HelperLoginProps> {
   handleRegister = async () => {
     const { email, password, secureAccount } = { ...this.state };
     let { errorMessage } = { ...this.state };
-    let username = this.state.email.split('@')[0];
-
-    let accountBody = { email, password, username };
+    const username = this.state.email.split('@')[0];
+    const accountBody = { email, password, username };
     let secureAccountbody;
 
     if (secureAccount) {
@@ -498,6 +497,7 @@ class HelperLoginPage extends Component<HelperLoginProps> {
         )}
         {isRegistering && (
           <HelperRegister
+            handleLogin={this.props.handleLogin}
             goBack={() => this.setState({ isRegistering: false })}
           />
         )}
