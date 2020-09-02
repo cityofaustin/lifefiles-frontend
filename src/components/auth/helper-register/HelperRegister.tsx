@@ -39,7 +39,7 @@ export default class HelperRegister extends Component<
     email: '',
     fullname: '',
     step: 0,
-    // step: 1,
+    // step: 2,
     previewURL: '',
     // selectedOption: undefined as any,
     selectedOption: LoginOption.PrivateKey as any,
@@ -252,6 +252,8 @@ export default class HelperRegister extends Component<
       case 1:
         section = (
           <HelperProfile
+            email={email}
+            fullname={fullname}
             previewURL={previewURL}
             goBack={this.goBack}
             goForward={this.goForward}

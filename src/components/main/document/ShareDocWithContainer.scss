@@ -199,6 +199,11 @@
             border-radius: 50%;
           }
           .contact-name {
+            text-align: center;
+            width: 94%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
             font-size: 16px;
             color: #484848;
           }
@@ -237,6 +242,11 @@
               border-radius: 50%;
             }
             .contact-name {
+              text-align: center;
+              width: 94%;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
               font-size: 16px;
               color: #484848;
             }

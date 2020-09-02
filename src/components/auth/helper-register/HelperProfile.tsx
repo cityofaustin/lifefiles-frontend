@@ -1,8 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import GoBackSvg from '../../svg/GoBackSvg';
-import FileUploader from '../../common/FileUploader';
-import StringUtil from '../../../util/StringUtil';
+import FileUploader, { FileUploaderThemeEnum } from '../../common/FileUploader';
+import { ReactComponent as ChangePictureBtnSvg } from '../../../img/change-picture.svg';
+
 interface HelperProfileProps {
+  email: string;
+  fullname: string;
   previewURL: string;
   goBack: () => void;
   goForward: (prevCardState: HelperProfileState) => void;
@@ -31,7 +34,7 @@ export default class HelperProfile extends Component<
 
   render() {
     const { previewURL } = { ...this.state };
-    const { goBack, goForward } = { ...this.props };
+    const { goBack, goForward, email, fullname } = { ...this.props };
     return (
       <section id="helper-register" className="container">
         <div ref="section" id="section-1-owner" className="section">
@@ -49,7 +52,11 @@ export default class HelperProfile extends Component<
                 </div>
                 <div className="card-body-section1">
                   <div style={{ display: !previewURL ? 'block' : 'none' }}>
-                    <FileUploader setFile={this.setFile} />
+                    <FileUploader
+                      ref="fileUploader"
+                      theme={FileUploaderThemeEnum.Profile}
+                      setFile={this.setFile}
+                    />
                     <div className="comment">
                       Please make sure your photo shows your face clearly
                     </div>
@@ -63,6 +70,30 @@ export default class HelperProfile extends Component<
                     />
                   )}
                 </div>
+                {previewURL && (
+                  <Fragment>
+                    <div className="profile-section">
+                      <div className="fullname">{fullname}</div>
+                      <div className="profile-email-section">
+                        <div className="email-label">E-mail</div>
+                        <div className="email-value">{email}</div>
+                      </div>
+                    </div>
+                    <div className="profile-section">
+                      <div className="change-picture-label">
+                        Not quite right?
+                      </div>
+                      <div
+                        onClick={() => {
+                          (this.refs
+                            .fileUploader as FileUploader).reuploadFiles();
+                        }}
+                      >
+                        <ChangePictureBtnSvg />
+                      </div>
+                    </div>
+                  </Fragment>
+                )}
                 <div className="bottom">
                   <input
                     style={{ width: '210px', marginTop: '27px' }}

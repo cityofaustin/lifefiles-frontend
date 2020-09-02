@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { ReactComponent as InfoTooltipSvg } from '../../../img/info-tooltip.svg';
+import { ReactComponent as EmailPopupSvg } from '../../../img/email-popup.svg';
 import GoBackSvg from '../../svg/GoBackSvg';
 export interface HelperEmailState {
   email: string;
@@ -53,7 +55,13 @@ export default class HelperEmail extends Component<
                     />
                   </div>
                   <div className="form-control1" style={{ marginTop: '10px' }}>
-                    <label>E-mail</label>
+                    <div className="info-section">
+                      <label>E-mail</label>
+                      <div className="tooltip1">
+                        <EmailPopupSvg />
+                        <InfoTooltipSvg />
+                      </div>
+                    </div>
                     <input
                       name="email"
                       type="text"

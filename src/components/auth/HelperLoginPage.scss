@@ -1,5 +1,5 @@
 @import "~bootstrap/scss/bootstrap.scss";
-@import '../variables.scss';
+@import "../variables.scss";
 
 #helper-login {
   .error {
@@ -12,18 +12,18 @@
   input[type="button"] {
     font-size: 25px;
     color: #fff;
-    background-color: #5AB6E5;
+    background-color: #5ab6e5;
     border-radius: 9px;
     font-weight: 500;
     height: 50px;
     &:disabled {
-      background-color: #9A9A9A;
+      background-color: #9a9a9a;
     }
   }
   input[type="text"] {
     width: 210px;
     height: 35px;
-    line-height:35px;
+    line-height: 35px;
     border-radius: 8px;
     border: solid 1px rgba(112, 112, 112, 0.27);
     background-color: #e8f0fe;
@@ -45,7 +45,7 @@
   overflow: hidden;
   line-height: 1.5em;
   // background: red;
-  background-image: linear-gradient(#5AB6E5 50%, white 50%);
+  background-image: linear-gradient(#5ab6e5 50%, white 50%);
   background-size: 100% 100%;
   background-repeat: no-repeat;
   height: 100vh;
@@ -98,13 +98,13 @@
           margin-top: 12px;
           font-size: 15px;
           font-weight: 500;
-          color: #76B3EF;
+          color: #76b3ef;
         }
 
         .or {
           font-size: 15px;
           font-weight: 500;
-          color: #76B3EF;
+          color: #76b3ef;
         }
 
         input[type="button"],
@@ -129,7 +129,7 @@
           padding: 11px 15px;
           width: 210px !important;
           font-size: 23px !important;
-          background-color: #5AB6E5;
+          background-color: #5ab6e5;
         }
 
         .login-options {
@@ -155,7 +155,7 @@
     position: relative;
     width: 310px;
     .display-none {
-      display: none!important;
+      display: none !important;
     }
     .section {
       height: 100vh;
@@ -269,7 +269,7 @@
           align-items: center;
           .bottom-excerpt {
             font-size: 15px;
-            color: #9A9A9A;
+            color: #9a9a9a;
           }
         }
       }
@@ -294,7 +294,7 @@
                 margin-top: 13px;
                 font-size: 25px;
                 font-weight: bold;
-                color: #5AB6E5;
+                color: #5ab6e5;
               }
               .helper-excerpt {
                 line-height: 1.2em;
@@ -327,6 +327,27 @@
                 margin-bottom: 0px;
                 text-align: left;
               }
+              .info-section {
+                label {
+                  margin-right: 6px;
+                }
+                display: flex;
+                align-items: center;
+                .tooltip1 {
+                  &:hover {
+                    svg:nth-child(1) {
+                      display: block;
+                    }
+                  }
+                  position: relative;
+                  svg:nth-child(1) {
+                    display: none;
+                    position: absolute;
+                    bottom: 20px;
+                    left: -64px;
+                  }
+                }
+              }
             }
             .form-control-double {
               display: flex;
@@ -351,11 +372,48 @@
             .or {
               font-size: 15px;
               font-weight: 500;
-              color: #9A9A9A;
+              color: #9a9a9a;
             }
             .advanced {
               font-size: 10px;
-              color: #9A9A9A;
+              color: #9a9a9a;
+            }
+          }
+          .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            .fullname {
+              font-size: 16px;
+              font-weight: bold;
+              color: #645857;
+            }
+            .profile-email-section {
+              display: flex;
+              justify-content: space-between;
+              width: 220px;
+              .email-label {
+                width: 54px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #0e232c;
+              }
+              .email-value {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                font-size: 13px;
+                color: #464646;
+                opacity: 0.78;
+              }
+            }
+            .change-picture-label {
+              font-size: 12px;
+              font-weight: 500;
+              color: #9a9a9a;
+            }
+            svg {
+              cursor: pointer;
             }
           }
           .private-key-lng {
