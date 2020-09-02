@@ -39,6 +39,17 @@ class StringUtil {
     });
   }
 
+  static fileToText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }
+
   static dataURLtoFile(dataurl: string, filename: string): File {
     const arr: string[] = dataurl.split(',');
     const mime: string = arr[0].match(/:(.*?);/)![1];

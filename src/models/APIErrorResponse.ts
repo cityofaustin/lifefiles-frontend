@@ -1,7 +1,8 @@
 // TODO: need to hash this out more...
 
 interface APIErrorResponse {
-  errors: any;
+  errors?: any; // sometimes the 500 json response starts with errors
+  msg?: any; // sometimes the 500 json response start with msg
 }
 
 // interface Error
@@ -9,6 +10,8 @@ interface APIErrorResponse {
 export default APIErrorResponse;
 
 // Reference errors I've seen
+// 500
+// {"msg":{"errors":{"username":{"message":"is already taken.","name":"ValidatorError","properties":{"message":"is already taken.","type":"unique","path":"username","value":"carnagey.adam"},"kind":"unique","path":"username","value":"carnagey.adam"},"email":{"message":"is already taken.","name":"ValidatorError","properties":{"message":"is already taken.","type":"unique","path":"email","value":"carnagey.adam@gmail.com"},"kind":"unique","path":"email","value":"carnagey.adam@gmail.com"}},"_message":"Account validation failed","message":"Account validation failed: username: is already taken., email: is already taken.","name":"ValidationError"}}
 // 500
 // {
 //   "errors": {

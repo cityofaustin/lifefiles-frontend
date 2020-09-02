@@ -3,6 +3,7 @@ import LoginRequest from '../models/auth/LoginRequest';
 import RegisterRequest from '../models/auth/RegisterRequest';
 import LoginResponse from '../models/auth/LoginResponse';
 import OauthUrlResponse from '../models/auth/OauthUrlResponse';
+import HelperRegisterRequest from '../models/auth/HelperRegisterRequest';
 import Account from '../models/Account';
 import AuthService from './AuthService';
 
@@ -63,8 +64,9 @@ class AccountService extends AgentService {
     }
   }
 
-  static async registerHelperAccount(request) {
-    return await super.post(`/helper-accounts`, request);
+  static async registerHelperAccount(request: HelperRegisterRequest) {
+    // return await super.post(`/helper-accounts`, request);
+    return await super.registerHelper(request);
   }
 
   static async secureLoginHelperAccount(request) {

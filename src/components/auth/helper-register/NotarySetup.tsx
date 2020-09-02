@@ -12,20 +12,18 @@ interface NotarySetupProps {
 export interface NotarySetupState {
   notaryState: string;
   notaryId: string;
-  notaryName: string;
 }
 export default class NotarySetup extends Component<
   NotarySetupProps,
   NotarySetupState
 > {
   state = {
-    notaryName: '',
     notaryId: '',
     notaryState: '',
   };
   render() {
     const { goBack, goForward } = { ...this.props };
-    const { notaryName, notaryId, notaryState } = { ...this.state };
+    const { notaryId, notaryState } = { ...this.state };
     let options: OptionTypeBase[] = [];
     const usStates = new UsStates();
     options = usStates.states.map((usState: UsState) => {
@@ -60,7 +58,7 @@ export default class NotarySetup extends Component<
                   style={{ marginTop: '23px' }}
                 >
                   {/* {errorMessage && <div className="error">{errorMessage}</div>} */}
-                  <div className="form-control1">
+                  {/* <div className="form-control1">
                     <label>Notary name</label>
                     <input
                       name="notaryName"
@@ -70,7 +68,7 @@ export default class NotarySetup extends Component<
                         this.setState({ notaryName: e.target.value })
                       }
                     />
-                  </div>
+                  </div> */}
                   <div className="form-control-double">
                     <div className="form-control2">
                       <label>Notary #</label>
@@ -108,7 +106,7 @@ export default class NotarySetup extends Component<
                     style={{ width: '210px', marginTop: '27px' }}
                     type="button"
                     value="Next"
-                    disabled={!notaryName || !notaryId || !notaryState}
+                    disabled={!notaryId || !notaryState}
                     onClick={() => goForward(this.state)}
                   />
                 </div>

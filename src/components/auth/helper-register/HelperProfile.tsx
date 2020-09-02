@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import GoBackSvg from '../../svg/GoBackSvg';
 import FileUploader from '../../common/FileUploader';
+import StringUtil from '../../../util/StringUtil';
 interface HelperProfileProps {
   previewURL: string;
   goBack: () => void;
@@ -8,6 +9,8 @@ interface HelperProfileProps {
 }
 export interface HelperProfileState {
   previewURL?: string;
+  file?: File;
+  thumbnailFile?: File;
 }
 export default class HelperProfile extends Component<
   HelperProfileProps,
@@ -18,10 +21,12 @@ export default class HelperProfile extends Component<
     const { previewURL } = { ...this.props };
     this.state = {
       previewURL,
+      file: undefined,
+      thumbnailFile: undefined,
     };
   }
-  setFile = (file?: File, thumbnailFile?: File, previewURL?: string) => {
-    this.setState({ previewURL });
+  setFile = async (file?: File, thumbnailFile?: File, previewURL?: string) => {
+    this.setState({ previewURL, file, thumbnailFile });
   };
 
   render() {
@@ -43,16 +48,19 @@ export default class HelperProfile extends Component<
                   </div>
                 </div>
                 <div className="card-body-section1">
-                  {!previewURL && (
-                    <Fragment>
-                      <FileUploader setFile={this.setFile} />
-                      <div className="comment">
-                        Please make sure your photo shows your face clearly
-                      </div>
-                    </Fragment>
-                  )}
+                  <div style={{ display: !previewURL ? 'block' : 'none' }}>
+                    <FileUploader setFile={this.setFile} />
+                    <div className="comment">
+                      Please make sure your photo shows your face clearly
+                    </div>
+                  </div>
                   {previewURL && (
-                    <img src={previewURL} width="125" height="125" />
+                    <img
+                      className="profile-img"
+                      src={previewURL}
+                      width="125"
+                      height="125"
+                    />
                   )}
                 </div>
                 <div className="bottom">
