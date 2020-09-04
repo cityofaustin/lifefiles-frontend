@@ -2,6 +2,15 @@
 @import "../variables.scss";
 
 #helper-login {
+  overflow: hidden;
+  line-height: 1.5em;
+  // background: red;
+  background-image: linear-gradient(#5ab6e5 50%, white 50%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
   .error {
     padding: 0 10px;
     line-height: 1.2em;
@@ -42,21 +51,15 @@
     font-size: 30px;
     color: rgba(72, 72, 72, 0.77);
   }
-  overflow: hidden;
-  line-height: 1.5em;
-  // background: red;
-  background-image: linear-gradient(#5ab6e5 50%, white 50%);
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  height: 100vh;
-  width: 100vw;
-  position: relative;
   .wave-container {
     position: absolute;
     z-index: 0;
     top: calc(50% - 145px);
     // width: 100vw;
     // overflow-x: visible;
+    transition: transform 1.5s ease-out;
+    // transform: translateX(-360px);
+    will-change: transform;
   }
   .welcome-container {
     z-index: 1;
@@ -158,14 +161,11 @@
       display: none !important;
     }
     .section {
+      position: absolute;
       height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      // border: 1px solid black;
-      // background-color: black;
-      position: absolute;
-      // overflow-y: auto;
       width: 300px;
       .section-contents {
         padding: 40px 0;
@@ -283,6 +283,14 @@
         }
         .card-body {
           padding: 0 0 0 0;
+          .skip-excerpt {
+            font-size: 15px;
+            color: #484848;
+            opacity: 0.77;
+            font-weight: 500;
+            text-align: center;
+            line-height: 19px;
+          }
           .card-body-section {
             margin-top: 26px;
             display: flex;
@@ -327,6 +335,14 @@
                 margin-bottom: 0px;
                 text-align: left;
               }
+              .key-container {
+                position: relative;
+                .copy-paste {
+                  cursor: pointer;
+                  position: absolute;
+                  right: 0px;
+                }
+              }
               .info-section {
                 label {
                   margin-right: 6px;
@@ -351,6 +367,7 @@
             }
             .form-control-double {
               display: flex;
+              margin: 12px 0;
               .form-control2 {
                 display: flex;
                 flex-direction: column;
@@ -369,6 +386,7 @@
                 }
               }
             }
+
             .or {
               font-size: 15px;
               font-weight: 500;

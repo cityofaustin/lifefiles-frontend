@@ -13,8 +13,13 @@ import CryptoUtil from '../../../util/CryptoUtil';
 import './HelperRegister.scss';
 import { HelperAccountRequest } from '../../../models/auth/HelperRegisterRequest';
 import APIError from '../../../services/APIError';
+import RegisterAndLogin from './RegisterAndLogin';
+import delay from '../../../util/delay';
+import { ANIMATION_TIMEOUT } from '../../../util/animation-util';
 
 interface HelperRegisterState {
+  isAnimatingForward: boolean;
+  isAnimatingBackward: boolean;
   email: string;
   fullname: string;
   step: number;
@@ -36,10 +41,12 @@ export default class HelperRegister extends Component<
   HelperRegisterState
 > {
   state = {
+    isAnimatingForward: false,
+    isAnimatingBackward: false,
     email: '',
     fullname: '',
     step: 0,
-    // step: 2,
+    // step: 6,
     previewURL: '',
     // selectedOption: undefined as any,
     selectedOption: LoginOption.PrivateKey as any,
@@ -147,21 +154,36 @@ export default class HelperRegister extends Component<
           'Oops, something went wrong. Please try again in a few minutes.';
       }
     }
-    this.setState({ errorMessage, step: 0 });
+    this.setState({ errorMessage, step: 0 }, async () => {
+      await delay(ANIMATION_TIMEOUT);
+      const elObj = this.getElObj();
+      elObj.wave.style.transition = 'none';
+      elObj.wave.style.transform = 'translateX(0px)';
+      await delay(ANIMATION_TIMEOUT);
+      elObj.wave.style.transition = '';
+    });
   };
 
-  goBack = () => {
+  goBack = async () => {
     let { step } = { ...this.state };
     const { goBack } = { ...this.props };
     if (step === 0) {
       goBack();
       return;
     }
+    this.setState({ isAnimatingBackward: true });
+    await delay(100);
+    const elObj = this.getElObj();
+    // debugger;
+    elObj.helper[step]!.style.transform = `translateX(360px)`;
+    elObj.helper[step]!.style.opacity = '0';
     step--;
-    this.setState({ step });
+    (elObj.wave as any).style.transform = `translateX(-${step * 360}px)`;
+    await delay(1500);
+    this.setState({ step, isAnimatingBackward: false });
   };
 
-  goForward = (prevCardState?: any) => {
+  goForward = async (prevCardState?: any) => {
     let {
       step,
       email,
@@ -202,37 +224,63 @@ export default class HelperRegister extends Component<
         }
         break;
     }
+    await delay(ANIMATION_TIMEOUT);
+    const elObj = this.getElObj();
+    elObj.helper[step]!.style.transform = 'translateX(-360px)';
+    elObj.helper[step]!.style.opacity = '0';
     step++;
-    this.setState(
-      {
-        step,
-        email,
-        fullname,
-        previewURL,
-        file,
-        thumbnailFile,
-        selectedOption,
-        password,
-        notaryId,
-        notaryState,
-      },
-      () => {
-        if (this.state.step === 6) {
-          this.handleRegister();
-        }
+    (elObj.wave as any).style.transform = `translateX(-${step * 360}px)`;
+    this.setState({
+      step,
+      email,
+      fullname,
+      previewURL,
+      file,
+      thumbnailFile,
+      selectedOption,
+      password,
+      notaryId,
+      notaryState,
+      isAnimatingForward: true,
+    });
+    await delay(1500);
+    this.setState({ isAnimatingForward: false }, () => {
+      if (this.state.step === 6) {
+        this.handleRegister();
       }
-    );
+    });
   };
+
+  getElObj() {
+    return {
+      body: document.body,
+      wave: document.getElementsByClassName('wave-container')[0] as HTMLElement,
+      helper: [
+        document.getElementById('section-0-helper'),
+        document.getElementById('section-1-helper'),
+        document.getElementById('section-2-helper'),
+        document.getElementById('section-3-helper'),
+        document.getElementById('section-4-helper'),
+        document.getElementById('section-5-helper'),
+        document.getElementById('section-6-helper'),
+      ],
+    };
+  }
 
   render() {
     const {
       email,
       fullname,
       previewURL,
+      file,
       step,
       selectedOption,
       password,
       errorMessage,
+      notaryId,
+      notaryState,
+      isAnimatingForward,
+      isAnimatingBackward,
     } = {
       ...this.state,
     };
@@ -250,44 +298,247 @@ export default class HelperRegister extends Component<
         );
         break;
       case 1:
-        section = (
-          <HelperProfile
-            email={email}
-            fullname={fullname}
-            previewURL={previewURL}
-            goBack={this.goBack}
-            goForward={this.goForward}
-          />
-        );
+        if (isAnimatingForward) {
+          section = (
+            <Fragment>
+              <HelperEmail
+                errorMessage={errorMessage}
+                email={email}
+                fullname={fullname}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+              <HelperProfile
+                email={email}
+                fullname={fullname}
+                previewURL={previewURL}
+                file={file}
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="right"
+              />
+            </Fragment>
+          );
+        } else if (isAnimatingBackward) {
+          section = (
+            <Fragment>
+              <HelperEmail
+                position="left"
+                errorMessage={errorMessage}
+                email={email}
+                fullname={fullname}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+              <HelperProfile
+                email={email}
+                fullname={fullname}
+                previewURL={previewURL}
+                file={file}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+            </Fragment>
+          );
+        } else {
+          section = (
+            <HelperProfile
+              email={email}
+              fullname={fullname}
+              previewURL={previewURL}
+              file={file}
+              goBack={this.goBack}
+              goForward={this.goForward}
+            />
+          );
+        }
         break;
       case 2:
-        section = (
-          <HelperOverview goBack={this.goBack} goForward={this.goForward} />
-        );
+        if (isAnimatingForward) {
+          section = (
+            <Fragment>
+              <HelperProfile
+                email={email}
+                fullname={fullname}
+                previewURL={previewURL}
+                file={file}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+              <HelperOverview
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="right"
+              />
+            </Fragment>
+          );
+        } else if (isAnimatingBackward) {
+          section = (
+            <Fragment>
+              <HelperProfile
+                email={email}
+                fullname={fullname}
+                previewURL={previewURL}
+                file={file}
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="left"
+              />
+              <HelperOverview goBack={this.goBack} goForward={this.goForward} />
+            </Fragment>
+          );
+        } else {
+          section = (
+            <HelperOverview goBack={this.goBack} goForward={this.goForward} />
+          );
+        }
         break;
       case 3:
-        section = (
-          <HelperLoginMethod goBack={this.goBack} goForward={this.goForward} />
-        );
+        if (isAnimatingForward) {
+          section = (
+            <Fragment>
+              <HelperOverview goBack={this.goBack} goForward={this.goForward} />
+              <HelperLoginMethod
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="right"
+              />
+            </Fragment>
+          );
+        } else if (isAnimatingBackward) {
+          section = (
+            <Fragment>
+              <HelperOverview
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="left"
+              />
+              <HelperLoginMethod
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+            </Fragment>
+          );
+        } else {
+          section = (
+            <HelperLoginMethod
+              goBack={this.goBack}
+              goForward={this.goForward}
+            />
+          );
+        }
         break;
       case 4:
-        section = (
-          <HelperLoginSetup
-            password={password}
-            selectedOption={selectedOption}
-            goBack={this.goBack}
-            goForward={this.goForward}
-          />
-        );
+        if (isAnimatingForward) {
+          section = (
+            <Fragment>
+              <HelperLoginMethod
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+              <HelperLoginSetup
+                password={password}
+                selectedOption={selectedOption}
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="right"
+              />
+            </Fragment>
+          );
+        } else if (isAnimatingBackward) {
+          section = (
+            <Fragment>
+              <HelperLoginMethod
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="left"
+              />
+              <HelperLoginSetup
+                password={password}
+                selectedOption={selectedOption}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+            </Fragment>
+          );
+        } else {
+          section = (
+            <HelperLoginSetup
+              password={password}
+              selectedOption={selectedOption}
+              goBack={this.goBack}
+              goForward={this.goForward}
+            />
+          );
+        }
         break;
       case 5:
-        section = (
-          <NotarySetup goBack={this.goBack} goForward={this.goForward} />
-        );
+        if (isAnimatingForward) {
+          section = (
+            <Fragment>
+              <HelperLoginSetup
+                password={password}
+                selectedOption={selectedOption}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+              <NotarySetup
+                notaryId={notaryId}
+                notaryState={notaryState}
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="right"
+              />
+            </Fragment>
+          );
+        } else if (isAnimatingBackward) {
+          section = (
+            <Fragment>
+              <HelperLoginSetup
+                password={password}
+                selectedOption={selectedOption}
+                goBack={this.goBack}
+                goForward={this.goForward}
+                position="left"
+              />
+              <NotarySetup
+                notaryId={notaryId}
+                notaryState={notaryState}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+            </Fragment>
+          );
+        } else {
+          section = (
+            <NotarySetup
+              notaryId={notaryId}
+              notaryState={notaryState}
+              goBack={this.goBack}
+              goForward={this.goForward}
+            />
+          );
+        }
         break;
+      case 6:
+        if (isAnimatingForward) {
+          section = (
+            <Fragment>
+              <NotarySetup
+                notaryId={notaryId}
+                notaryState={notaryState}
+                goBack={this.goBack}
+                goForward={this.goForward}
+              />
+              <RegisterAndLogin position="right" />
+            </Fragment>
+          );
+        } else {
+          section = <RegisterAndLogin />;
+        }
       default:
         break;
     }
-    return section;
+    return <section className="helper-register container">{section}</section>;
   }
 }
