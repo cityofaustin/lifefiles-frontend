@@ -41,6 +41,7 @@ import {
 } from 'react-router-dom';
 import ZipUtil from '../../util/ZipUtil';
 import CryptoUtil from '../../util/CryptoUtil';
+import AppSetting from '../../models/AppSetting';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -63,6 +64,8 @@ interface MainContainerState {
 }
 
 interface MainContainerProps {
+  appSettings: AppSetting[];
+  saveAppSettings: (title: string, logo?: File) => Promise<void>;
   account: Account;
   handleLogout: () => void;
   updateAccountShareRequests: (requests: ShareRequest[]) => void;
@@ -646,8 +649,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderAdminPage() {
-    const { account, privateEncryptionKey } = { ...this.props };
-    return <AdminPage goBack={this.goBack} account={account} />;
+    const { account, privateEncryptionKey, appSettings, saveAppSettings } = { ...this.props };
+    return <AdminPage goBack={this.goBack} account={account} appSettings={appSettings} saveAppSettings={saveAppSettings} />;
   }
 
   renderMyClients() {

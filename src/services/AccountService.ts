@@ -96,6 +96,10 @@ class AccountService extends AgentService {
     );
   }
 
+  static getImageURL(filename: string) {
+    return super.getAPIEndpoint() + `/image/${filename}`;
+  }
+
   static async getEncryptionKey() {
     return super.getWithEndpoint(AUTH_API, '/get-encryption-key');
   }

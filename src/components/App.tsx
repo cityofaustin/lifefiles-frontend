@@ -14,14 +14,18 @@ import ShareRequest from '../models/ShareRequest';
 import EncryptionKeyResponse from '../models/EncryptionKeyResponse';
 import UrlUtil from '../util/UrlUtil';
 import LogoSvg from './svg/logo-svg';
+import AppSetting, { SettingNameEnum } from '../models/AppSetting';
+import AdminService from '../services/AdminService';
 
 interface AppState {
   account?: Account;
+  logoFile?: File;
   isLoading: boolean;
   helperLogin: boolean;
   adminLogin: boolean;
   theme: string;
   privateEncryptionKey?: string;
+  appSettings: AppSetting[];
 }
 
 class App extends Component<{}, AppState> {
@@ -29,6 +33,8 @@ class App extends Component<{}, AppState> {
     super(props);
 
     this.state = {
+      appSettings: [],
+      logoFile: undefined,
       account: undefined,
       isLoading: false,
       helperLogin: false,
@@ -38,6 +44,7 @@ class App extends Component<{}, AppState> {
   }
 
   async componentDidMount(): Promise<void> {
+    let { appSettings } = { ...this.state };
     setTimeout(() => {
       document.getElementById('splash')!.style.animation = 'fadeout 1s';
       document.getElementById('splash')!.style.opacity = '0';
@@ -102,7 +109,20 @@ class App extends Component<{}, AppState> {
         );
       }
     }
-    this.setState({ account, theme, isLoading: false });
+    try {
+      appSettings = (await AdminService.getAppSettings()).map((a) => {
+        return { settingName: a.settingName, settingValue: a.settingValue };
+      });
+      const titleSetting = appSettings.find(
+        (a) => a.settingName === SettingNameEnum.TITLE
+      );
+      if (titleSetting) {
+        document.title = titleSetting.settingValue;
+      }
+    } catch (err) {
+      console.error('failed to get app settings.');
+    }
+    this.setState({ account, theme, appSettings, isLoading: false });
   }
 
   setBringYourOwnEncryptionKey = (key) => {
@@ -175,6 +195,24 @@ class App extends Component<{}, AppState> {
     this.setState({ account });
   };
 
+  saveAppSettings = async (title: string, logoImage?: File) => {
+    const { appSettings } = { ...this.state };
+    const savedAppSettings = await AdminService.saveAppSettings(
+      title,
+      logoImage
+    );
+    appSettings.map((a) => {
+      const matchedSavedSetting = savedAppSettings.find(
+        (s) => s.settingName === a.settingName
+      );
+      if (matchedSavedSetting) {
+        a.settingValue = matchedSavedSetting.settingValue;
+      }
+      return a;
+    });
+    this.setState({ appSettings });
+  };
+
   render() {
     const {
       account,
@@ -182,6 +220,7 @@ class App extends Component<{}, AppState> {
       privateEncryptionKey,
       helperLogin,
       adminLogin,
+      appSettings,
     } = {
       ...this.state,
     };
@@ -193,7 +232,7 @@ class App extends Component<{}, AppState> {
     }
 
     if (adminLogin) {
-      pageToRender = <AdminLoginPage handleLogin={this.handleLogin} />;
+      pageToRender = <AdminLoginPage appSettings={appSettings} handleLogin={this.handleLogin} />;
     }
 
     return (
@@ -220,6 +259,8 @@ class App extends Component<{}, AppState> {
             <div className="page-container">
               {account && (
                 <MainContainer
+                  appSettings={appSettings}
+                  saveAppSettings={this.saveAppSettings}
                   account={account}
                   handleLogout={this.handleLogout}
                   updateAccountShareRequests={this.updateAccountShareRequests}

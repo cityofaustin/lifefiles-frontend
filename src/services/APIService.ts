@@ -122,6 +122,28 @@ class APIService {
     return responseJson;
   }
 
+  static async saveAppSettings(title: string, logoImage?: File) {
+    const path = '/admin/app-settings';
+    const input = `${API_ENDPOINT}${path}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
+    };
+    const formdata = new FormData();
+    if (logoImage) {
+      formdata.append('img', logoImage, logoImage.name);
+    }
+    formdata.append('title', title);
+    const init = {
+      method: 'POST',
+      headers,
+      body: formdata,
+    };
+    const response = await fetch(input, init, 60000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
   static async registerHelper(request: HelperRegisterRequest) {
     const path = '/helper-accounts';
     const input = `${API_ENDPOINT}${path}`;
@@ -129,7 +151,7 @@ class APIService {
       // Authorization: `Bearer ${AuthService.getAccessToken()}`,
     };
     const formdata = new FormData();
-    const blob = await StringUtil.fileToText(request.file!);
+    // const blob = await StringUtil.fileToText(request.file!);
     // const base64String2 = await StringUtil.fileContentsToString(thumbnailFile!);
     formdata.append('img', request.file, request.file.name);
     formdata.append('email', request.account.email);
@@ -137,13 +159,16 @@ class APIService {
     formdata.append('username', request.account.username);
     formdata.append('firstname', request.account.firstname);
     formdata.append('lastname', request.account.lastname);
-    if(request.account.publicEncryptionKey) {
-      formdata.append('publicEncryptionKey', request.account.publicEncryptionKey);
+    if (request.account.publicEncryptionKey) {
+      formdata.append(
+        'publicEncryptionKey',
+        request.account.publicEncryptionKey
+      );
     }
-    if(request.account.notaryId) {
+    if (request.account.notaryId) {
       formdata.append('notaryId', request.account.notaryId);
     }
-    if(request.account.notaryState) {
+    if (request.account.notaryState) {
       formdata.append('notaryState', request.account.notaryState);
     }
     const init = {

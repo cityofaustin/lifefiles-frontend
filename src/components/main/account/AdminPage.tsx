@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import AdminDocumentType from '../../admin/AdminDocumentType';
 import AdminService from '../../../services/AdminService';
@@ -27,13 +27,21 @@ import ViewFeature from '../../../models/admin/ViewFeature';
 import DocumentType from '../../../models/DocumentType';
 import RoleType from '../../../models/admin/RoleType';
 import Role from '../../../models/Role';
+import FileUploader from '../../common/FileUploader';
+import AppSetting, { SettingNameEnum } from '../../../models/AppSetting';
+import AccountService from '../../../services/AccountService';
 
 interface AdminPageProps {
   account: Account;
+  appSettings: AppSetting[];
+  saveAppSettings: (title: string, logo?: File) => Promise<void>;
   goBack: () => void;
 }
 
 interface AdminPageState {
+  titleSetting: AppSetting;
+  logoSetting: AppSetting;
+  logoFile?: File;
   documentTypes: DocumentType[];
   accounts: Account[];
   viewFeatures: ViewFeature[];
@@ -64,7 +72,20 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
 
   constructor(props: Readonly<AdminPageProps>) {
     super(props);
+    const titleSetting = props.appSettings.find(
+      (a) => a.settingName === SettingNameEnum.TITLE
+    )
+      ? props.appSettings.find((a) => a.settingName === SettingNameEnum.TITLE)!
+      : { settingName: SettingNameEnum.TITLE, settingValue: '' };
+    const logoSetting = props.appSettings.find(
+      (a) => a.settingName === SettingNameEnum.LOGO
+    )
+      ? props.appSettings.find((a) => a.settingName === SettingNameEnum.LOGO)!
+      : { settingName: SettingNameEnum.LOGO, settingValue: '' };
     this.state = {
+      logoFile: undefined,
+      titleSetting,
+      logoSetting,
       documentTypes: [],
       accounts: [],
       viewFeatures: [],
@@ -643,6 +664,70 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     return accountTypeCoreFeatures;
   };
 
+  renderAppSettings() {
+    const { logoSetting, titleSetting, logoFile } = { ...this.state };
+    const { saveAppSettings } = { ...this.props };
+    return (
+      <Fragment>
+        <h2>App Settings</h2>
+        <h3>Logo</h3>
+        {logoSetting.settingValue.length > 0 && (
+          <div>
+            <img
+              style={{ height: '200px' }}
+              // className="shared-with-image-single"
+              src={AccountService.getProfileURL(logoSetting.settingValue)}
+              alt="Profile"
+            />
+            <br />
+            <input
+              type="button"
+              value="Change Logo"
+              onClick={() => {
+                this.setState({
+                  logoSetting: {
+                    settingName: SettingNameEnum.LOGO,
+                    settingValue: '',
+                  },
+                });
+              }}
+            />
+          </div>
+        )}
+        {logoSetting.settingValue.length < 1 && (
+          <FileUploader
+            setFile={(file?: File) => {
+              this.setState({ logoFile: file });
+            }}
+          />
+        )}
+        <h3>Title</h3>
+        <input
+          type="text"
+          value={titleSetting.settingValue}
+          onChange={(e) => {
+            const settingValue = e.target.value;
+            this.setState({
+              titleSetting: {
+                settingName: SettingNameEnum.TITLE,
+                settingValue,
+              },
+            });
+          }}
+        />
+        <br />
+        <br />
+        <input
+          type="button"
+          value="Save App Settings"
+          onClick={() => saveAppSettings(titleSetting.settingValue, logoFile)}
+        />
+        <br />
+        <br />
+      </Fragment>
+    );
+  }
+
   render() {
     const {
       accounts,
@@ -683,7 +768,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     return (
       <div className="admin-content" style={{ marginTop: '20px' }}>
         <h1>Admin Page</h1>
-
+        {this.renderAppSettings()}
         <h2>Accounts</h2>
         <Alert color="success" isOpen={accountSavedSuccess}>
           Successfully Saved Account!
