@@ -2,6 +2,14 @@ import AgentService from './APIService';
 import AccountType from '../models/admin/AccountType';
 
 class AdminService extends AgentService {
+  static async saveAppSettings(title: string, logoImage?: File) {
+    return await super.saveAppSettings(title, logoImage);
+  }
+
+  static async getAppSettings() {
+    return await super.get('/admin/app-settings');
+  }
+
   static async getAdminInfo() {
     return await super.get('/my-admin-account');
   }

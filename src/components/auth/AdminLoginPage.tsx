@@ -9,13 +9,15 @@ import {
   Label,
 } from 'reactstrap';
 import folderImage from '../../img/folder.png';
-import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
+// import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
 import AccountService from '../../services/AccountService';
-import './AdminLoginPage.scss';
 import APIError from '../../services/APIError';
 import HttpStatusCode from '../../models/HttpStatusCode';
+import './AdminLoginPage.scss';
+import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 
 export interface AdminLoginProps {
+  appSettings: AppSetting[];
   handleLogin: (loginResponse: any) => Promise<void>;
 }
 
@@ -25,7 +27,7 @@ export interface AdminLoginState {
   errorMessage: string;
 }
 
-class LoginPage extends Component<AdminLoginProps> {
+class AdminLoginPage extends Component<AdminLoginProps> {
   state = {
     email: '',
     password: '',
@@ -81,13 +83,24 @@ class LoginPage extends Component<AdminLoginProps> {
   };
 
   render() {
+    const { appSettings } = { ...this.props };
     const { email, password, errorMessage } = { ...this.state };
+    const logoSetting = appSettings.find(
+      (a) => a.settingName === SettingNameEnum.LOGO
+    );
     return (
       <div className="admin-login-background">
         <div className="admin-login-container">
           <Card className="admin-login-card">
             <CardBody className="admin-card-body">
-              <MyPassLogoSvg />
+              {logoSetting && (
+                <img
+                  style={{ height: '130px' }}
+                  // className="shared-with-image-single"
+                  src={AccountService.getImageURL(logoSetting.settingValue)}
+                  alt="Profile"
+                />
+              )}
               <div className="login-subtitle">Login</div>
               <Form onSubmit={this.handleLogin}>
                 {errorMessage && <div className="error">{errorMessage}</div>}
@@ -125,4 +138,4 @@ class LoginPage extends Component<AdminLoginProps> {
   }
 }
 
-export default LoginPage;
+export default AdminLoginPage;

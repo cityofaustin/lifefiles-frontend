@@ -30,7 +30,10 @@ export default class AccountTypeCellRenderer extends Component<
 
     for (let accountType of this.props.accountTypes) {
       options.push(
-        <option value={accountType.accountTypeName}>
+        <option
+          key={accountType.accountTypeName}
+          value={accountType.accountTypeName}
+        >
           {accountType.accountTypeName}
         </option>
       );

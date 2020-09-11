@@ -1,7 +1,7 @@
 import APIErrorResponse from '../models/APIErrorResponse';
 
 class APIError extends Error {
-  private response: APIErrorResponse;
+  response: APIErrorResponse;
 
   constructor(message: string, response: APIErrorResponse) {
     super(message);

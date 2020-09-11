@@ -10,11 +10,12 @@ import { ReactComponent as Contact } from '../../img/contact.svg';
 import { ReactComponent as ContactGroup } from '../../img/contact-grp.svg';
 import { ReactComponent as Cog } from '../../img/cog.svg';
 import { ReactComponent as Help } from '../../img/help.svg';
-import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
+// import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
 import { Link } from 'react-router-dom';
-
+import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 
 interface SidebarProps {
+  appSettings: AppSetting[];
   goToAccount: () => void;
   handleLogout: () => void;
   isOpen: boolean;
@@ -23,7 +24,6 @@ interface SidebarProps {
 }
 
 class SideBar extends Component<SidebarProps> {
-
   handleLogout = () => {
     const { handleLogout, setOpen } = { ...this.props };
     setOpen(false);
@@ -37,7 +37,10 @@ class SideBar extends Component<SidebarProps> {
   };
 
   render() {
-    const { isOpen, setOpen, account } = { ...this.props };
+    const { isOpen, setOpen, account, appSettings } = { ...this.props };
+    const logoSetting = appSettings.find(
+      (a) => a.settingName === SettingNameEnum.LOGO
+    );
     return (
       <div className="sidebar">
         <Swipeable
@@ -47,48 +50,87 @@ class SideBar extends Component<SidebarProps> {
         />
         <div>
           <div
-            className={classNames({ 'bm-overlay': true, 'opened': isOpen })}
+            className={classNames({ 'bm-overlay': true, opened: isOpen })}
             onClick={() => setOpen(false)}
           />
-          <Swipeable
-            onSwipedLeft={() => setOpen(false)}
-            trackMouse
-          >
-            <div className={classNames({ 'bm-menu-wrap': true, 'opened': isOpen })}>
+          <Swipeable onSwipedLeft={() => setOpen(false)} trackMouse>
+            <div
+              className={classNames({ 'bm-menu-wrap': true, opened: isOpen })}
+            >
               <div className="bm-menu">
                 <div className="top-section">
                   <div className="img-container">
                     <img
                       className="profile-img"
-                      src={AccountService.getProfileURL(account.profileImageUrl!)}
+                      src={AccountService.getProfileURL(
+                        account.profileImageUrl!
+                      )}
                       alt="Profile"
                     />
                   </div>
-                  <div className="fullname">{AccountImpl.getFullName(account.firstName, account.lastName)}</div>
+                  <div className="fullname">
+                    {AccountImpl.getFullName(
+                      account.firstName,
+                      account.lastName
+                    )}
+                  </div>
                   <div className="email">{account.email}</div>
-                  <div className="edit"><span>edit profile</span><EditSvg /></div>
+                  <div className="edit">
+                    <span>edit profile</span>
+                    <EditSvg />
+                  </div>
                 </div>
                 <div className="bottom-section">
                   <nav className="bm-item-list">
-                    <span className="bm-item menu-item" onClick={() => setOpen(false)}>
-                        <span><Contact /></span><Link to="/account"><span>My Profile</span>
+                    <span
+                      className="bm-item menu-item"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span>
+                        <Contact />
+                      </span>
+                      <Link to="/account">
+                        <span>My Profile</span>
                       </Link>
                     </span>
                     <span className="bm-item menu-item">
-                      <span><ContactGroup /></span><span>My Network</span>
+                      <span>
+                        <ContactGroup />
+                      </span>
+                      <span>My Network</span>
                     </span>
                     <span className="bm-item menu-item">
-                      <span><Cog /></span><span>My Settings</span>
+                      <span>
+                        <Cog />
+                      </span>
+                      <span>My Settings</span>
                     </span>
                     <span className="bm-item menu-item">
-                      <span><Help /></span><span>Help</span>
+                      <span>
+                        <Help />
+                      </span>
+                      <span>Help</span>
                     </span>
-                    <span className="bm-item menu-item" onClick={this.handleLogout}>
-                      <span /><span>Logout</span>
+                    <span
+                      className="bm-item menu-item"
+                      onClick={this.handleLogout}
+                    >
+                      <span />
+                      <span>Logout</span>
                     </span>
                   </nav>
                   <div className="sidemenu-footer">
-                    <MyPassLogoSvg />
+                    {logoSetting && (
+                      <img
+                        style={{ height: '56px' }}
+                        // className="shared-with-image-single"
+                        src={AccountService.getImageURL(
+                          logoSetting.settingValue
+                        )}
+                        alt="Profile"
+                      />
+                    )}
+                    {/* <MyPassLogoSvg /> */}
                     <ul>
                       <li>About</li>
                       <li>Privacy Notice</li>

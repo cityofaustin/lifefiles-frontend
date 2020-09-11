@@ -1,0 +1,108 @@
+.helper-register {
+  .section-center {
+    transition-property: transform, opacity;
+    transition-duration: 1.5s;
+    transition-timing-function: ease-out;
+    transform: translateX(0px);
+    will-change: transform;
+    opacity: 1;
+  }
+  .section-right {
+    transition-property: transform, opacity;
+    transition-duration: 1.5s;
+    transition-timing-function: ease-out;
+    transform: translateX(360px);
+    will-change: transform, opacity;
+    opacity: 0;
+  }
+  .section-left {
+    transition-property: transform, opacity;
+    transition-duration: 1.5s;
+    transition-timing-function: ease-out;
+    transform: translateX(-360px);
+    will-change: transform, opacity;
+    opacity: 0;
+  }
+  .section {
+    .section-contents {
+      .no-card {
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+        margin-top: 100px;
+        .account-title {
+          font-size: 33px;
+          font-weight: bold;
+          color: #4BA9D9;
+        }
+        .helper-excerpt {
+          line-height: 1.2em;
+          text-align: center;
+          margin-top: 8px;
+          font-size: 13px;
+          color: #484848;
+          opacity: 0.77;
+        }
+        .rotate {
+          animation: rotation 1.5s infinite linear;
+        }
+      }
+      .card {
+        min-height: 454px;
+        .toast-center {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+        }
+        .card-body {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          .card-body-section {
+            .helper-login {
+              text-align: center;
+            }
+          }
+          .comment {
+            margin-top: 10px;
+            padding: 0 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #cecece;
+            line-height: 1.2em;
+            text-align: center;
+          }
+          .profile-img {
+            margin-top: 12px;
+            border-radius: 50%;
+            border: 1px solid #707070;
+          }
+          .login-options {
+            svg {
+              cursor: pointer;
+              margin-top: 10px;
+            }
+          }
+        }
+      }
+      .setup-nav {
+        display: flex;
+        justify-content: space-between;
+        div {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}

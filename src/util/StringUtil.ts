@@ -39,6 +39,17 @@ class StringUtil {
     });
   }
 
+  static fileToText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }
+
   static dataURLtoFile(dataurl: string, filename: string): File {
     const arr: string[] = dataurl.split(',');
     const mime: string = arr[0].match(/:(.*?);/)![1];
@@ -53,7 +64,10 @@ class StringUtil {
     return new File([u8arr], filename, { type: mime });
   }
 
-  static fileContentsToThumbnailString(file: File): Promise<string> {
+  static fileContentsToThumbnail(
+    file: File,
+    outputType = 'base64'
+  ): Promise<string> {
     return new Promise((resolve) => {
       Resizer.imageFileResizer(
         file, // is the file of the new image that can now be uploaded...
@@ -64,8 +78,8 @@ class StringUtil {
         0, // is the rotatoion of the new image
         (data) => {
           resolve(data);
-        },  // is the callBack function of the new image URI
-        'base64'  // is the output type of the new image
+        }, // is the callBack function of the new image URI
+        outputType // is the output type of the new image base64 or blob.
       );
     });
   }

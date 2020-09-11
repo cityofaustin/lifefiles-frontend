@@ -365,3 +365,11 @@ button {
   background-color: #693237;
   border-color: #693237;
 }
+
+input[type="button"], input[type="submit"] {
+  border: none
+}
+
+.button {
+  border: none
+}

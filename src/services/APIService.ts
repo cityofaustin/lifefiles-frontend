@@ -5,9 +5,9 @@ import APIError from './APIError';
 import HttpStatusCode from '../models/HttpStatusCode';
 import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
 import { format } from 'date-fns';
-import UpdateDocumentResponse from '../models/document/UpdateDocumentResponse';
+import HelperRegisterRequest from '../models/auth/HelperRegisterRequest';
 
-let API_ENDPOINT = undefined;
+let API_ENDPOINT;
 
 class APIService {
   static getHeaders(): HeadersInit {
@@ -90,13 +90,15 @@ class APIService {
       headers,
       body: JSON.stringify(entity),
     };
+    let responseJson;
     try {
       const response = await fetch(input, init);
-      const responseJson = await response.json();
+      responseJson = await response.json();
       this.handleErrorStatusCodes(response.status, responseJson);
       return responseJson;
     } catch (err) {
       console.error(err.message);
+      return responseJson;
     }
   }
 
@@ -114,6 +116,67 @@ class APIService {
       headers,
       body: formdata,
     };
+    const response = await fetch(input, init, 60000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
+  static async saveAppSettings(title: string, logoImage?: File) {
+    const path = '/admin/app-settings';
+    const input = `${API_ENDPOINT}${path}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
+    };
+    const formdata = new FormData();
+    if (logoImage) {
+      formdata.append('img', logoImage, logoImage.name);
+    }
+    formdata.append('title', title);
+    const init = {
+      method: 'POST',
+      headers,
+      body: formdata,
+    };
+    const response = await fetch(input, init, 60000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
+  static async registerHelper(request: HelperRegisterRequest) {
+    const path = '/helper-accounts';
+    const input = `${API_ENDPOINT}${path}`;
+    const headers = {
+      // Authorization: `Bearer ${AuthService.getAccessToken()}`,
+    };
+    const formdata = new FormData();
+    // const blob = await StringUtil.fileToText(request.file!);
+    // const base64String2 = await StringUtil.fileContentsToString(thumbnailFile!);
+    formdata.append('img', request.file, request.file.name);
+    formdata.append('email', request.account.email);
+    formdata.append('password', request.account.password);
+    formdata.append('username', request.account.username);
+    formdata.append('firstname', request.account.firstname);
+    formdata.append('lastname', request.account.lastname);
+    if (request.account.publicEncryptionKey) {
+      formdata.append(
+        'publicEncryptionKey',
+        request.account.publicEncryptionKey
+      );
+    }
+    if (request.account.notaryId) {
+      formdata.append('notaryId', request.account.notaryId);
+    }
+    if (request.account.notaryState) {
+      formdata.append('notaryState', request.account.notaryState);
+    }
+    const init = {
+      method: 'POST',
+      headers,
+      body: formdata,
+    };
+    // NOTE: putting a longer timeout over here since uploading files can take longer.
     const response = await fetch(input, init, 60000);
     const responseJson = await response.json();
     this.handleErrorStatusCodes(response.status, responseJson);

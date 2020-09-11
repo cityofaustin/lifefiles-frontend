@@ -41,6 +41,7 @@ import {
 } from 'react-router-dom';
 import ZipUtil from '../../util/ZipUtil';
 import CryptoUtil from '../../util/CryptoUtil';
+import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -63,6 +64,8 @@ interface MainContainerState {
 }
 
 interface MainContainerProps {
+  appSettings: AppSetting[];
+  saveAppSettings: (title: string, logo?: File) => Promise<void>;
   account: Account;
   handleLogout: () => void;
   updateAccountShareRequests: (requests: ShareRequest[]) => void;
@@ -557,15 +560,25 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderTopBar(adminLogin) {
-    const { account, handleLogout } = { ...this.props };
+    const { account, handleLogout, appSettings } = { ...this.props };
     const { isAccountMenuOpen } = { ...this.state };
-
+    const logoSetting = appSettings.find(
+      (a) => a.settingName === SettingNameEnum.LOGO
+    );
     return (
       <div>
         <div id="main-top-bar">
           <div id="main-logo" onClick={() => this.setActiveTab('1')}>
             <Link to={account.role === 'helper' ? '/clients' : '/documents'}>
-              <Folder />
+            {logoSetting && (
+                <img
+                  style={{ height: '130px' }}
+                  // className="shared-with-image-single"
+                  src={AccountService.getImageURL(logoSetting.settingValue)}
+                  alt="Profile"
+                />
+              )}
+              {!logoSetting && <Folder />}
             </Link>
           </div>
           {account.role !== 'admin' && adminLogin !== true && (
@@ -646,8 +659,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderAdminPage() {
-    const { account, privateEncryptionKey } = { ...this.props };
-    return <AdminPage goBack={this.goBack} account={account} />;
+    const { account, privateEncryptionKey, appSettings, saveAppSettings } = { ...this.props };
+    return <AdminPage goBack={this.goBack} account={account} appSettings={appSettings} saveAppSettings={saveAppSettings} />;
   }
 
   renderMyClients() {
@@ -711,7 +724,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   render() {
-    const { account, handleLogout } = { ...this.props };
+    const { account, handleLogout, appSettings } = { ...this.props };
     const { isLoading, isAccount, sidebarOpen } = { ...this.state };
 
     let adminLogin = false;
@@ -743,6 +756,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         {isLoading && <ProgressIndicator isFullscreen />}
         <div id="main-container">
           <Sidebar
+            appSettings={appSettings}
             account={account}
             handleLogout={handleLogout}
             goToAccount={this.goToAccount}
@@ -815,7 +829,6 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     );
                   }}
                 />
-                >
                 <Route exact path="/admin">
                   {account.role === 'owner' && (
                     <Redirect push to="/documents" />
