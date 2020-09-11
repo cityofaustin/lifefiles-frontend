@@ -285,7 +285,8 @@ class UpdateDocumentModal extends Component<
     const vpJwt = await NotaryUtil.createVP(
       this.props.myAccount.didAddress,
       this.props.privateEncryptionKey!,
-      this.props.document?.vcJwt!
+      this.props.document?.vcJwt!,
+      this.props.document?.vpDocumentDidAddress!
     );
 
     const document = { ...this.props.document! };

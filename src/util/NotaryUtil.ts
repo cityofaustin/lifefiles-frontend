@@ -32,6 +32,10 @@ class NotaryUtil {
       const didAddress = didRes.didAddress;
       const documentDID = 'did:ethr:' + didAddress;
 
+      const vpDidRes = await NotaryService.generateNewDid();
+      const vpDidAddress = vpDidRes.didAddress;
+      const vpDocumentDid = 'did:ethr:' + vpDidAddress;
+
       const now = Date.now() as any;
       const issueTime = Math.floor(now / 1000);
       const issuanceDate = now;
@@ -63,6 +67,7 @@ class NotaryUtil {
         notaryEthPrivateKey,
         ownerEthAddress,
         documentDID,
+        vpDocumentDid,
         notaryType,
         issuanceDate,
         issueTime,
@@ -83,6 +88,7 @@ class NotaryUtil {
     issuerPrivateKey,
     ownerAddress,
     documentDID,
+    vpDocumentDid,
     notaryType,
     issuanceDate,
     issueTime,
@@ -119,6 +125,10 @@ class NotaryUtil {
 
         issuanceDate,
         expirationDate,
+
+        verifiablePresentationReference: {
+          id: vpDocumentDid,
+        },
 
         credentialSubject: {
           id: ownerDID,
@@ -158,7 +168,12 @@ class NotaryUtil {
     return buf;
   }
 
-  static async createVP(address: string, privateKey: string, vcJwt: string) {
+  static async createVP(
+    address: string,
+    privateKey: string,
+    vcJwt: string,
+    vpDocumentDidAddress: string
+  ) {
     const did = new EthrDID({
       address,
       privateKey,
@@ -166,6 +181,7 @@ class NotaryUtil {
 
     const vpPayload = {
       vp: {
+        id: 'did:ethr:' + vpDocumentDidAddress,
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         type: ['VerifiablePresentation'],
         verifiableCredential: [vcJwt],

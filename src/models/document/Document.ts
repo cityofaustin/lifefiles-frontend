@@ -11,6 +11,7 @@ interface Document {
   hash?: string;
   vcJwt?: string;
   vpJwt?: string;
+  vpDocumentDidAddress?: string;
   type: string;
   uploadedBy?: Account | string;
   belongsTo?: Account | string;
