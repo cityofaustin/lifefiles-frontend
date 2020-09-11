@@ -211,6 +211,7 @@ class App extends Component<{}, AppState> {
       return a;
     });
     this.setState({ appSettings });
+    alert('Successfully saved settings.');
   };
 
   render() {
@@ -228,7 +229,7 @@ class App extends Component<{}, AppState> {
     let pageToRender = <ProgressIndicator isFullscreen />;
 
     if (helperLogin) {
-      pageToRender = <HelperLoginPage handleLogin={this.handleLogin} />;
+      pageToRender = <HelperLoginPage appSettings={appSettings} handleLogin={this.handleLogin} />;
     }
 
     if (adminLogin) {

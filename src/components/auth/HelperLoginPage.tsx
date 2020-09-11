@@ -27,9 +27,11 @@ import GoBackSvg from '../svg/GoBackSvg';
 import './HelperLoginPage.scss';
 
 import EthCrypto from 'eth-crypto';
+import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 // import { add } from 'date-fns';
 
 export interface HelperLoginProps {
+  appSettings: AppSetting[];
   handleLogin: (loginResponse: any) => Promise<void>;
 }
 
@@ -450,12 +452,19 @@ class HelperLoginPage extends Component<HelperLoginProps> {
   }
 
   renderWelcome() {
+    const { appSettings } = { ...this.props };
+    const titleSetting = appSettings.find(
+      (a) => a.settingName === SettingNameEnum.TITLE
+    );
+    const title = titleSetting?.settingValue
+      ? titleSetting.settingValue
+      : 'This';
     return (
       <section className="welcome-container">
         <div className="section">
           <div className="title">Welcome!</div>
           <div className="subtitle">
-            MyPass is a secure &amp; private document storage solution.
+            {title} is a secure &amp; private document storage solution.
           </div>
           <div className="sub-section">
             <HelperWelcomeSvg />
@@ -495,6 +504,7 @@ class HelperLoginPage extends Component<HelperLoginProps> {
     const { passwordSelected, privateKeySelected, isRegistering } = {
       ...this.state,
     };
+    const { appSettings } = { ...this.props };
     return (
       <main id="helper-login">
         <section className="wave-container">
@@ -509,6 +519,7 @@ class HelperLoginPage extends Component<HelperLoginProps> {
         )}
         {isRegistering && (
           <HelperRegister
+            appSettings={appSettings}
             handleLogin={this.props.handleLogin}
             goBack={() => this.setState({ isRegistering: false })}
           />

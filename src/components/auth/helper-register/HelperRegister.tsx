@@ -16,6 +16,7 @@ import APIError from '../../../services/APIError';
 import RegisterAndLogin from './RegisterAndLogin';
 import delay from '../../../util/delay';
 import { ANIMATION_TIMEOUT } from '../../../util/animation-util';
+import AppSetting from '../../../models/AppSetting';
 
 interface HelperRegisterState {
   isAnimatingForward: boolean;
@@ -33,6 +34,7 @@ interface HelperRegisterState {
   notaryState: string;
 }
 interface HelperRegisterProps {
+  appSettings: AppSetting[];
   handleLogin: (loginResponse: any) => Promise<void>;
   goBack: () => void;
 }
@@ -284,6 +286,7 @@ export default class HelperRegister extends Component<
     } = {
       ...this.state,
     };
+    const {appSettings} = {...this.props};
     let section = <Fragment />;
     switch (step) {
       case 0:
@@ -530,11 +533,11 @@ export default class HelperRegister extends Component<
                 goBack={this.goBack}
                 goForward={this.goForward}
               />
-              <RegisterAndLogin position="right" />
+              <RegisterAndLogin appSettings={appSettings} position="right" />
             </Fragment>
           );
         } else {
-          section = <RegisterAndLogin />;
+          section = <RegisterAndLogin appSettings={appSettings} />;
         }
       default:
         break;
