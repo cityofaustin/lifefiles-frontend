@@ -27,7 +27,7 @@ class AuthService {
     localStorage.removeItem(this.ACCESS_TOKEN);
     localStorage.removeItem(this.REFRESH_TOKEN);
     // redirect to auth server
-    window.location.replace(location.origin + location.pathname);
+    window.location.replace(location.origin + location.pathname + location.hash);
   }
 }
 

@@ -532,7 +532,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             {referencedAccount && (
               <Fragment>
                 <div className="big-title bt-breadcrumb">
-                  <Link to="/clients">
+                  <Link to="/helper-login/clients">
                     My Clients
               </Link>
                   <ChevronRight />

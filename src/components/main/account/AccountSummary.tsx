@@ -60,7 +60,7 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
     const numberOfShares = (shareRequests) ? shareRequests.length : 0;
     return (
       <div className="network-item" onClick={this.handleAccountSummaryClick}>
-        { goToClientDocuments && <Redirect push to={`/clients/${account.id}/documents`}/> }
+        { goToClientDocuments && <Redirect push to={`clients/${account.id}/documents`}/> }
         <AccountShareModal
           showModal={showAccountShareModal}
           toggleModal={() => this.setState({ showAccountShareModal: !showAccountShareModal })}

@@ -570,7 +570,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         <div id="main-top-bar">
           <div id="main-logo" onClick={() => this.setActiveTab('1')}>
             <Link to={account.role === 'helper' ? '/clients' : '/documents'}>
-            {logoSetting && (
+              {logoSetting && (
                 <img
                   style={{ height: '130px' }}
                   // className="shared-with-image-single"
@@ -659,8 +659,17 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderAdminPage() {
-    const { account, privateEncryptionKey, appSettings, saveAppSettings } = { ...this.props };
-    return <AdminPage goBack={this.goBack} account={account} appSettings={appSettings} saveAppSettings={saveAppSettings} />;
+    const { account, privateEncryptionKey, appSettings, saveAppSettings } = {
+      ...this.props,
+    };
+    return (
+      <AdminPage
+        goBack={this.goBack}
+        account={account}
+        appSettings={appSettings}
+        saveAppSettings={saveAppSettings}
+      />
+    );
   }
 
   renderMyClients() {
@@ -770,10 +779,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             <div className="main-section">
               {isAccount && <Redirect push to="/account" />}
               <Switch>
+                <Route exact path="/helper-login">
+                  <Redirect to="/helper-login/clients" />
+                </Route>
                 <Route exact path="/">
-                  {account.role === 'helper' && <Redirect to="/clients" />}
+                  {account.role === 'helper' && (
+                    <Redirect to="/helper-login/clients" />
+                  )}
                   {account.role === 'owner' && <Redirect to="/documents" />}
-                  {account.role === 'admin' && <Redirect to="/admin" />}
+                  {account.role === 'admin' && <Redirect to="/admin-login" />}
                 </Route>
                 <Route exact path="/account">
                   {this.renderAccount()}
@@ -791,7 +805,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     return (
                       <Fragment>
                         {account.role === 'helper' && (
-                          <Redirect push to="/clients" />
+                          <Redirect push to="/helper-login/clients" />
                         )}
                         {account.role === 'admin' && (
                           <Redirect push to="/admin" />
@@ -803,7 +817,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     );
                   }}
                 />
-                <Route exact path="/clients">
+                <Route exact path="/helper-login/clients">
                   {account.role === 'owner' && (
                     <Redirect push to="/documents" />
                   )}
@@ -812,7 +826,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 </Route>
                 <Route
                   exact
-                  path="/clients/:id/documents"
+                  path="/helper-login/clients/:id/documents"
                   render={(props) => {
                     return (
                       <Fragment>
@@ -833,14 +847,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   {account.role === 'owner' && (
                     <Redirect push to="/documents" />
                   )}
-                  {account.role === 'helper' && <Redirect push to="/clients" />}
+                  {account.role === 'helper' && <Redirect push to="/helper-login/clients" />}
                   {this.renderAdminPage()}
                 </Route>
                 <Route exact path="/admin">
                   {account.role === 'owner' && (
                     <Redirect push to="/documents" />
                   )}
-                  {account.role === 'helper' && <Redirect push to="/clients" />}
+                  {account.role === 'helper' && <Redirect push to="/helper-login/clients" />}
                   {this.renderAdminPage()}
                 </Route>
               </Switch>
