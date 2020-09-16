@@ -34,7 +34,11 @@ import { ReactComponent as FabAdd } from '../../img/fab-add.svg';
 import { ReactComponent as ChevronLeft } from '../../img/chevron-left.svg';
 import { ReactComponent as ChevronRight } from '../../img/chevron-right.svg';
 import { ReactComponent as NotSharedDoc } from '../../img/not-shared-doc.svg';
+import { ReactComponent as NewContactSvg } from '../../img/new-contact.svg';
 import Badge from '../common/Badge';
+import AddContactModal from './account/AddContactModal';
+import HelperContact from '../../models/HelperContact';
+import { HelperContactRequest } from '../../services/HelperContactService';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -45,7 +49,10 @@ interface DocumentPageProps {
   referencedAccount?: Account;
   goBack?: () => void;
   shareRequests: ShareRequest[];
-  searchedAccounts: Account[];
+  accounts: Account[];
+  addHelperContact: (req: HelperContactRequest) => Promise<void>;
+  helperContacts: HelperContact[];
+  searchedHelperContacts: HelperContact[];
   activeTab: string;
   setActiveTab: (activeTab: string) => void;
   myAccount: Account;
@@ -57,25 +64,30 @@ interface DocumentPageProps {
 
 interface MainPageState {
   isLayoutGrid: boolean;
+  showAddContactModal: boolean;
 }
 
 class DocumentPage extends Component<DocumentPageProps, MainPageState> {
-
   static defaultProps = {
-    handleClientSelected: () => { }
+    handleClientSelected: () => {},
   };
 
   constructor(props: Readonly<DocumentPageProps>) {
     super(props);
     this.state = {
-      isLayoutGrid: UserPreferenceUtil.getIsLayoutGrid()
+      isLayoutGrid: UserPreferenceUtil.getIsLayoutGrid(),
+      showAddContactModal: true,
     };
   }
 
   async componentDidUpdate(prevProps: Readonly<DocumentPageProps>) {
     if (this.props.referencedAccount) {
-      if (prevProps.referencedAccount === undefined
-        || (this.props.referencedAccount && prevProps.referencedAccount && this.props.referencedAccount.id !== prevProps.referencedAccount.id)) {
+      if (
+        prevProps.referencedAccount === undefined ||
+        (this.props.referencedAccount &&
+          prevProps.referencedAccount &&
+          this.props.referencedAccount.id !== prevProps.referencedAccount.id)
+      ) {
         // if there is a client that is selected that is new, then refetch the documents
         this.props.handleClientSelected(this.props.referencedAccount);
       }
@@ -84,21 +96,23 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
 
   getSharedAccounts = (
     document: Document,
-    searchedAccounts: Account[],
+    searchedHelperContacts: HelperContact[],
     shareRequests: ShareRequest[]
   ): Account[] => {
-    return searchedAccounts.filter((sharedAccount: Account) => {
-      const matchedShareRequest = shareRequests.find((shareRequest) => {
-        return (
-          shareRequest.shareWithAccountId === sharedAccount.id &&
-          shareRequest.documentType === document.type &&
-          shareRequest.approved
-        );
-      });
-      if (matchedShareRequest) {
-        return sharedAccount;
-      }
-    });
+    return searchedHelperContacts
+      .filter((h: HelperContact) => {
+        const matchedShareRequest = shareRequests.find((shareRequest) => {
+          return (
+            shareRequest.shareWithAccountId === h.helperAccount.id &&
+            shareRequest.documentType === document.type &&
+            shareRequest.approved
+          );
+        });
+        if (matchedShareRequest) {
+          return h;
+        }
+      })
+      .map((s) => s.helperAccount);
   };
 
   toggleLayout = () => {
@@ -153,9 +167,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       handleAddNew,
       searchedDocuments,
       handleSelectDocument,
-      searchedAccounts,
+      searchedHelperContacts,
       shareRequests,
-      privateEncryptionKey
+      privateEncryptionKey,
     } = { ...this.props };
     return (
       <Fragment>
@@ -177,7 +191,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   display: 'flex',
                   height: '100%',
                   justifyContent: 'center',
-                  alignItems: 'center'
+                  alignItems: 'center',
                 }}
               >
                 <h4>No Documents.</h4>
@@ -187,10 +201,12 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
           {searchedDocuments.map((document, idx) => {
             const sharedAccounts: Account[] = this.getSharedAccounts(
               document,
-              searchedAccounts,
+              searchedHelperContacts,
               shareRequests
             );
-            const matchedShareRequests: ShareRequest[] = shareRequests.filter(shareRequest => shareRequest.documentType === document.type);
+            const matchedShareRequests: ShareRequest[] = shareRequests.filter(
+              (shareRequest) => shareRequest.documentType === document.type
+            );
             return (
               <Col
                 key={idx}
@@ -218,8 +234,16 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                       <NotSharedDoc />
                       <div className="title">{document.type}</div>
                       <div className="subtitle">not shared</div>
-                      {document.sharedWithAccountIds.length === 0 && <div className="request-action"><button className="button btn-rounder">Request Access</button></div>}
-                      {document.sharedWithAccountIds.length > 0 && <div className="caption">Access Pending</div>}
+                      {document.sharedWithAccountIds.length === 0 && (
+                        <div className="request-action">
+                          <button className="button btn-rounder">
+                            Request Access
+                          </button>
+                        </div>
+                      )}
+                      {document.sharedWithAccountIds.length > 0 && (
+                        <div className="caption">Access Pending</div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -238,11 +262,11 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       handleAddNew,
       searchedDocuments,
       handleSelectDocument,
-      searchedAccounts,
+      searchedHelperContacts,
       shareRequests,
       myAccount,
       privateEncryptionKey,
-      referencedAccount
+      referencedAccount,
     } = { ...this.props };
     return (
       <div>
@@ -280,15 +304,21 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             {searchedDocuments.map((document, idx) => {
               const sharedAccounts: Account[] = this.getSharedAccounts(
                 document,
-                searchedAccounts,
+                searchedHelperContacts,
                 shareRequests
               );
               const accountProfileURL = AccountImpl.getProfileURLByIdAndList(
-                [myAccount, ...searchedAccounts],
+                [
+                  myAccount,
+                  ...searchedHelperContacts.map((s) => s.helperAccount),
+                ],
                 document.uploadedBy
               );
               const matchedAccount = AccountImpl.getAccountByIdAndList(
-                [myAccount, ...searchedAccounts],
+                [
+                  myAccount,
+                  ...searchedHelperContacts.map((s) => s.helperAccount),
+                ],
                 document.uploadedBy
               );
               return (
@@ -302,7 +332,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                         <div className="image-container">
                           <ImageWithStatus
                             imageViewType={ImageViewTypes.LIST_LAYOUT}
-                            imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
+                            imageUrl={DocumentService.getDocumentURL(
+                              document.thumbnailUrl
+                            )}
                             encrypted
                             privateEncryptionKey={privateEncryptionKey}
                           />
@@ -313,26 +345,51 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                           )}
                         </div>
                       )}
-                      {document.thumbnailUrl === '' && (<NotSharedDoc />)}
+                      {document.thumbnailUrl === '' && <NotSharedDoc />}
                       <div className="doc-info">
                         <div className="doc-type">{document.type}</div>
-                        <div className="doc-upd">{document.updatedAt && format(new Date(document.updatedAt), 'MMM d, y')}</div>
+                        <div className="doc-upd">
+                          {document.updatedAt &&
+                            format(new Date(document.updatedAt), 'MMM d, y')}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td>
                     <div className="doc-share-cell">
-                      {referencedAccount && document.thumbnailUrl !== '' && <div className="subtitle">shared</div>}
+                      {referencedAccount && document.thumbnailUrl !== '' && (
+                        <div className="subtitle">shared</div>
+                      )}
                       {referencedAccount && document.thumbnailUrl === '' && (
                         <Fragment>
-                          {document.sharedWithAccountIds.length === 0 && <div className="request-action"><button className="button btn-rounder">Request Access</button></div>}
-                          {document.sharedWithAccountIds.length > 0 && <div className="caption">Access Pending</div>}
+                          {document.sharedWithAccountIds.length === 0 && (
+                            <div className="request-action">
+                              <button className="button btn-rounder">
+                                Request Access
+                              </button>
+                            </div>
+                          )}
+                          {document.sharedWithAccountIds.length > 0 && (
+                            <div className="caption">Access Pending</div>
+                          )}
                         </Fragment>
                       )}
-                      {document.claimed !== undefined && document.claimed === false && sharedAccounts.length > 0 && (
-                        <button className="button" onClick={(e) => {e.stopPropagation();handleSelectDocument(document, true);}}>Claim</button>
+                      {document.claimed !== undefined &&
+                        document.claimed === false &&
+                        sharedAccounts.length > 0 && (
+                          <button
+                            className="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectDocument(document, true);
+                            }}
+                          >
+                            Claim
+                          </button>
+                        )}
+                      {document.claimed && sharedAccounts.length > 0 && (
+                        <SharedWith sharedAccounts={sharedAccounts} />
                       )}
-                      {document.claimed && sharedAccounts.length > 0 && <SharedWith sharedAccounts={sharedAccounts} />}
                     </div>
                   </td>
                   <td>
@@ -344,28 +401,29 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                             src={accountProfileURL}
                             alt=""
                           />
-                          {document.claimed !== undefined && document.claimed === false && sharedAccounts.length > 0 && <Badge />}
+                          {document.claimed !== undefined &&
+                            document.claimed === false &&
+                            sharedAccounts.length > 0 && <Badge />}
                         </div>
                       )}
                       {!accountProfileURL && (
                         <div className="account-circle">
-                          {(matchedAccount && StringUtil.getFirstUppercase(
-                            matchedAccount!.username
-                          ))}
+                          {matchedAccount &&
+                            StringUtil.getFirstUppercase(
+                              matchedAccount!.username
+                            )}
                         </div>
                       )}
                       <div>
-                        {document.updatedAt && format(new Date(document.updatedAt), 'MMM d, y')}
+                        {document.updatedAt &&
+                          format(new Date(document.updatedAt), 'MMM d, y')}
                       </div>
                     </div>
                   </td>
                   <td>
                     <div className="doc-valid-cell">
                       {document.validUntilDate
-                        ? format(
-                          new Date(document.validUntilDate),
-                          'MMM d, y'
-                        )
+                        ? format(new Date(document.validUntilDate), 'MMM d, y')
                         : 'N/A'}
                     </div>
                   </td>
@@ -382,7 +440,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 display: 'flex',
                 height: '100%',
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <h4>No Documents.</h4>
@@ -395,34 +453,49 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
 
   containsBadge(documentType) {
     const { shareRequests } = { ...this.props };
-    const pendingShareRequest = shareRequests.find(shareRequest => shareRequest.approved === false && shareRequest.documentType === documentType);
+    const pendingShareRequest = shareRequests.find(
+      (shareRequest) =>
+        shareRequest.approved === false &&
+        shareRequest.documentType === documentType
+    );
     return pendingShareRequest;
   }
 
   renderNetworkGridView() {
     const {
       searchedDocuments,
-      searchedAccounts,
+      searchedHelperContacts,
       shareRequests,
       myAccount,
       addShareRequest,
       removeShareRequest,
-      privateEncryptionKey
+      privateEncryptionKey,
     } = { ...this.props };
     return (
       <Fragment>
         {this.renderGridSort()}
         <Row className="network-row">
-          {searchedAccounts.length <= 0 && (
+          {/* {searchedAccounts.length <= 0 && (
             <div className="no-network">There are no contacts.</div>
-          )}
-          {searchedAccounts.map((account) => {
+          )} */}
+          <Col sm="12" md="6" lg="6" xl="4" className="network-container">
+            <div
+              className="network-item"
+              onClick={() => {
+                this.setState({ showAddContactModal: true });
+              }}
+            >
+              <NewContactSvg />
+            </div>
+          </Col>
+          {searchedHelperContacts.map((s) => {
             const matchedShareRequests = shareRequests.filter(
-              (shareRequest) => shareRequest.shareWithAccountId === account.id
+              (shareRequest) =>
+                shareRequest.shareWithAccountId === s.helperAccount.id
             );
             return (
               <Col
-                key={account.id}
+                key={s.helperAccount._id}
                 sm="12"
                 md="6"
                 lg="6"
@@ -430,7 +503,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 className="network-container"
               >
                 <AccountSummary
-                  account={account}
+                  account={s.helperAccount}
                   shareRequests={matchedShareRequests}
                   searchedDocuments={searchedDocuments}
                   myAccount={myAccount}
@@ -512,19 +585,35 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
           {isLayoutGrid && this.renderDocumentGridView()}
           {!isLayoutGrid && this.renderDocumentListView()}
         </TabPane>
-        <TabPane tabId="2">
-          {this.renderNetworkGridView()}
-        </TabPane>
+        <TabPane tabId="2">{this.renderNetworkGridView()}</TabPane>
       </TabContent>
     );
   }
 
   render() {
-    const { activeTab, handleAddNew, referencedAccount } = { ...this.props };
-    const { isLayoutGrid } = { ...this.state };
+    const {
+      activeTab,
+      handleAddNew,
+      referencedAccount,
+      accounts,
+      helperContacts,
+      addHelperContact,
+    } = {
+      ...this.props,
+    };
+    const { isLayoutGrid, showAddContactModal } = { ...this.state };
 
     return (
       <div className="main-content">
+        <AddContactModal
+          addHelperContact={addHelperContact}
+          helperContacts={helperContacts}
+          accounts={accounts}
+          showModal={showAddContactModal}
+          toggleModal={() =>
+            this.setState({ showAddContactModal: !showAddContactModal })
+          }
+        />
         <Fragment>
           {!referencedAccount && this.renderNavSmall()}
           <div className="document-header">
@@ -532,15 +621,17 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             {referencedAccount && (
               <Fragment>
                 <div className="big-title bt-breadcrumb">
-                  <Link to="/helper-login/clients">
-                    My Clients
-              </Link>
+                  <Link to="/helper-login/clients">My Clients</Link>
                   <ChevronRight />
-                  <span>{AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}</span>
+                  <span>
+                    {AccountImpl.getFullName(
+                      referencedAccount.firstName,
+                      referencedAccount.lastName
+                    )}
+                  </span>
                 </div>
               </Fragment>
             )}
-
             <div className="document-toolbar">
               {activeTab === '1' && isLayoutGrid && (
                 <SvgButton
@@ -563,17 +654,27 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             <div className="client-documents">
               <div className="header">
                 <div className="client-section">
-                  <ChevronLeft />
-                  <img src={AccountService.getProfileURL(referencedAccount.profileImageUrl!)} alt="" />
-                  <span>{AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}</span>
+                  <Link to="/helper-login/clients">
+                    <ChevronLeft />
+                  </Link>
+                  <img
+                    src={AccountService.getProfileURL(
+                      referencedAccount.profileImageUrl!
+                    )}
+                    alt=""
+                  />
+                  <span>
+                    {AccountImpl.getFullName(
+                      referencedAccount.firstName,
+                      referencedAccount.lastName
+                    )}
+                  </span>
                 </div>
                 <div className="permission-section">
                   <span className="title">permissions</span>
                 </div>
               </div>
-              <div className="documents-section">
-                {this.renderTabContent()}
-              </div>
+              <div className="documents-section">{this.renderTabContent()}</div>
             </div>
           )}
 

@@ -1,0 +1,161 @@
+@import "../../variables.scss";
+
+.helper-accounts-container {
+  display: flex;
+  min-height: 611px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  .helper-name-lg {
+    font-size: 25px;
+    font-weight: bold;
+    color: $greyish-brown;
+  }
+  .permission-container {
+    .helper-permission-title {
+      font-size: 25px;
+      font-weight: bold;
+      color: $dark-blue-grey;
+      text-align: left;
+    }
+    .helper-permission-subtitle {
+      margin-bottom: 10px;
+      margin-top: -5px;
+      font-size: 14px;
+      font-weight: 500;
+      color: $dark-blue-grey;
+      opacity: 0.5;
+      text-align: left;
+    }
+    .helper-permission {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      width: 100%;
+      margin-bottom: 17px;
+      .permission-title {
+        color: #484848;
+        font-size: 20px;
+        font-weight: 500;
+        width: 142px;
+        text-align: center;
+        line-height: 1.2;
+      }
+    }
+  }
+  .helper-title {
+    line-height: 1.2;
+    font-size: 20px;
+    text-align: center;
+    color: #484848;
+    opacity: 0.75;
+  }
+  .profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .profile-img {
+      height: 130px;
+      width: 130px;
+      border-radius: 50%;
+      background-color: #999;
+    }
+  }
+  input[type="button"] {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #1473e6;
+    &:disabled {
+      background-color: #818181;
+    }
+  }
+  .take-back {
+    cursor: pointer;
+    color: #9a9a9a;
+    font-size: 18px;
+  }
+  padding: 0 !important;
+  background-color: #f6f6f6;
+  .search-helper-container {
+    height: 99px;
+    .search-input {
+      .search-container-sm {
+        margin: 21px 26px;
+      }
+    }
+    .sort-container {
+      display: flex;
+      align-items: center;
+      margin-left: 26px;
+      font-size: 17px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #90afe2;
+      cursor: pointer;
+      span {
+        margin-left: 5.7px;
+      }
+    }
+  }
+  .helper-account {
+    background-color: white;
+    border-radius: 5px;
+    border: solid 1px $silver;
+    height: 379px;
+    width: 100%;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    .profile-img {
+      border-radius: 50%;
+      height: 130px;
+      width: 130px;
+      background-color: #999;
+    }
+    .helper-name {
+      font-size: 17px;
+      font-weight: bold;
+      color: $greyish-brown;
+    }
+    .helper-details {
+      .helper-attr {
+        display: flex;
+        justify-content: space-between;
+        .helper-key {
+          font-size: 13px;
+          font-weight: 500;
+          color: $dark-blue-grey;
+        }
+        .helper-val {
+          font-size: 12px;
+          color: $greyish-brown-78;
+          text-align: right;
+          width: 150px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}
+
+.add-contact-confirm-modal {
+  .modal-content {
+    border-radius: 15px !important;
+    .modal-body {
+      border-radius: 15px;
+      margin-bottom: 0 !important;
+      padding: 14px 0 !important;
+      .button-lg {
+        font-size: 22px;
+        padding: 13px 35px;
+      }
+    }
+  }
+}

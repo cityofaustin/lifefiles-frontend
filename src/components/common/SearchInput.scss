@@ -28,7 +28,7 @@ form.search-container {
     font-size: 20px;
     font-weight: 500;
     &::placeholder {
-      color: $silver;
+      color: $THISsilver;
       opacity: 0.5;
     }
     &::-webkit-search-cancel-button {
@@ -73,7 +73,7 @@ form.search-container-sm {
     height: 26px;
     &::placeholder {
       color: $silver;
-      opacity: 0.5;
+      opacity: 1;
     }
   }
   svg {

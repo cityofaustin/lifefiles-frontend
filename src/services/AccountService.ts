@@ -9,7 +9,7 @@ import AuthService from './AuthService';
 
 const PATH = '/accounts';
 
-let AUTH_API = undefined;
+let AUTH_API;
 
 class AccountService extends AgentService {
   static async getOauthEndpoint(): Promise<OauthUrlResponse> {

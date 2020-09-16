@@ -47,7 +47,7 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
       handleSelectDocument,
     } = { ...this.props };
 
-    console.log(sharedAccounts);
+    // console.log(sharedAccounts);
     return (
       <div className="document-item">
         {document && (

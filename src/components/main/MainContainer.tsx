@@ -24,6 +24,7 @@ import DocumentTypeService from '../../services/DocumentTypeService';
 import AddDocumentModal from './document/AddDocumentModal';
 import UpdateDocumentModal from './document/UpdateDocumentModal';
 import AccountService from '../../services/AccountService';
+import HelperContactService from '../../services/HelperContactService';
 import DocumentPage from './DocumentPage';
 import ClientPage from './account/ClientPage';
 import ShareRequest from '../../models/ShareRequest';
@@ -42,6 +43,8 @@ import {
 import ZipUtil from '../../util/ZipUtil';
 import CryptoUtil from '../../util/CryptoUtil';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
+import HelperContact from '../../models/HelperContact';
+import Role from '../../models/Role';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -56,7 +59,8 @@ interface MainContainerState {
   isLoading: boolean;
   documentQuery: string;
   accounts: Account[];
-  searchedAccounts: Account[];
+  helperContacts: HelperContact[];
+  searchedHelperContacts: HelperContact[];
   activeTab: string;
   activeDocumentTab: string;
   sidebarOpen?: boolean;
@@ -90,8 +94,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       isLoading: false,
       documentQuery: '',
       accounts: [],
-      searchedAccounts: [],
-      activeTab: '1',
+      helperContacts: [],
+      searchedHelperContacts: [],
+      // activeTab: '1',
+      activeTab: '2',
       activeDocumentTab: '1',
       sidebarOpen: false,
       clientShares: new Map<string, ShareRequest[]>(),
@@ -101,15 +107,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   async componentDidMount() {
     const { account } = { ...this.props };
     const { sortAsc, clientShares } = { ...this.state };
-    let { documentTypes, accounts } = { ...this.state };
+    let { documentTypes, accounts, helperContacts } = { ...this.state };
     const documents: Document[] = account.documents;
     this.setState({ isLoading: true });
     try {
       documentTypes = (await DocumentTypeService.get()).documentTypes;
-      if (account.role === 'helper') {
+      if (account.role === Role.helper) {
         accounts = (await AccountService.getAccounts()).filter(
           (accountItem) => {
-            if (accountItem.role === 'owner' && accountItem.id !== account.id) {
+            if (accountItem.role === Role.owner && accountItem.id !== account.id) {
               return accountItem;
             }
           }
@@ -124,7 +130,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         accounts = (await AccountService.getAccounts()).filter(
           (accountItem) => {
             if (
-              accountItem.role === 'helper' &&
+              accountItem.role === Role.helper &&
               accountItem.id !== account.id
             ) {
               return accountItem;
@@ -132,8 +138,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           }
         );
       }
+
+      helperContacts = await HelperContactService.getHelperContacts();
       // NOTE: since not paging yet, preventing from getting too big for layout
-      accounts = accounts.length > 8 ? accounts.slice(0, 8) : accounts;
+      // accounts = accounts.length > 8 ? accounts.slice(0, 8) : accounts;
     } catch (err) {
       console.error('failed to fetch main data');
     }
@@ -143,36 +151,57 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       searchedDocuments: this.sortDocuments(documents, sortAsc),
       isLoading: false,
       accounts,
-      searchedAccounts: this.sortAccounts(accounts, sortAsc),
+      helperContacts,
+      searchedHelperContacts: this.sortHelperContacts(
+        helperContacts,
+        sortAsc,
+        account.role
+      ),
       clientShares,
     });
   }
 
+  addHelperContact = async (helperContactReq) => {
+    const { helperContacts } = {...this.state};
+    const newHelperContact = await HelperContactService.addHelperContact(helperContactReq);
+    helperContacts.push(newHelperContact);
+    this.setState({helperContacts});
+  };
+
   handleSearch = (query: string) => {
-    const { documents, accounts, sortAsc } = { ...this.state };
+    const { documents, helperContacts, sortAsc } = { ...this.state };
+    const { account } = { ...this.props };
     let searchedDocuments = documents.filter((document) => {
       return (
         document.type &&
         document.type.toLowerCase().indexOf(query.toLowerCase()) !== -1
       );
     });
-    let searchedAccounts = accounts.filter((account) => {
+    let searchedHelperContacts = helperContacts.filter((helperContact) => {
+      const a =
+        account.role === Role.owner
+          ? helperContact.helperAccount
+          : helperContact.ownerAccount;
       return (
-        AccountImpl.getFullName(account?.firstName, account?.lastName) &&
-        AccountImpl.getFullName(account?.firstName, account?.lastName)
+        AccountImpl.getFullName(a?.firstName, a?.lastName) &&
+        AccountImpl.getFullName(a?.firstName, a?.lastName)
           .toLowerCase()
           .indexOf(query.toLowerCase()) !== -1
       );
     });
     if (query.length === 0) {
       searchedDocuments = documents;
-      searchedAccounts = accounts;
+      searchedHelperContacts = helperContacts;
     }
     searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
-    searchedAccounts = this.sortAccounts(searchedAccounts, sortAsc);
+    searchedHelperContacts = this.sortHelperContacts(
+      searchedHelperContacts,
+      sortAsc,
+      account.role
+    );
     this.setState({
       searchedDocuments,
-      searchedAccounts,
+      searchedHelperContacts,
       documentQuery: query,
     });
   };
@@ -182,11 +211,18 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   };
 
   toggleSort = () => {
-    let { sortAsc, searchedDocuments, searchedAccounts } = { ...this.state };
+    let { sortAsc, searchedDocuments, searchedHelperContacts } = {
+      ...this.state,
+    };
+    const { account } = { ...this.props };
     sortAsc = !sortAsc;
     searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
-    searchedAccounts = this.sortAccounts(searchedAccounts, sortAsc);
-    this.setState({ sortAsc, searchedDocuments, searchedAccounts });
+    searchedHelperContacts = this.sortHelperContacts(
+      searchedHelperContacts,
+      sortAsc,
+      account.role
+    );
+    this.setState({ sortAsc, searchedDocuments, searchedHelperContacts });
   };
 
   sortDocuments(documents: Document[], sortAsc: boolean) {
@@ -201,12 +237,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     });
   }
 
-  sortAccounts(accounts: Account[], sortAsc: boolean) {
-    return accounts.sort((acctA: Account, acctB: Account) => {
-      if (acctA.firstName! < acctB.firstName!) {
+  sortHelperContacts(accounts: HelperContact[], sortAsc: boolean, role) {
+    return accounts.sort((a1: HelperContact, b1: HelperContact) => {
+      const a = role === Role.owner ? a1.helperAccount : a1.ownerAccount;
+      const b = role === Role.owner ? b1.helperAccount : b1.ownerAccount;
+      if (a.firstName! < b.firstName!) {
         return sortAsc ? -1 : 1;
       }
-      if (acctA.firstName! > acctB.firstName!) {
+      if (a.firstName! > b.firstName!) {
         return sortAsc ? 1 : -1;
       }
       return 0;
@@ -699,7 +737,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     const {
       searchedDocuments,
       sortAsc,
-      searchedAccounts,
+      helperContacts,
+      searchedHelperContacts,
       activeTab,
       accounts,
     } = { ...this.state };
@@ -718,7 +757,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         handleAddNew={this.handleAddNew}
         searchedDocuments={searchedDocuments}
         handleSelectDocument={this.handleSelectDocument}
-        searchedAccounts={searchedAccounts}
+        addHelperContact={this.addHelperContact}
+        helperContacts={helperContacts}
+        searchedHelperContacts={searchedHelperContacts}
+        accounts={accounts}
         shareRequests={account.shareRequests}
         activeTab={activeTab}
         setActiveTab={this.setActiveTab}
@@ -741,7 +783,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     if (
       (window.location.href.indexOf('admin-login') > -1 &&
         account.canAddOtherAccounts) ||
-      account.role === 'admin'
+      account.role === Role.admin
     ) {
       adminLogin = true;
     }
@@ -775,7 +817,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           {this.renderTopBar(false)}
           {this.renderTopBarSmall()}
           <div className="main-page">
-            {account.role !== 'admin' && <div className="main-side" />}
+            {account.role !== Role.admin && <div className="main-side" />}
             <div className="main-section">
               {isAccount && <Redirect push to="/account" />}
               <Switch>
@@ -783,11 +825,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   <Redirect to="/helper-login/clients" />
                 </Route>
                 <Route exact path="/">
-                  {account.role === 'helper' && (
+                  {account.role === Role.helper && (
                     <Redirect to="/helper-login/clients" />
                   )}
-                  {account.role === 'owner' && <Redirect to="/documents" />}
-                  {account.role === 'admin' && <Redirect to="/admin-login" />}
+                  {account.role === Role.owner && <Redirect to="/documents" />}
+                  {account.role === Role.admin && <Redirect to="/admin-login" />}
                 </Route>
                 <Route exact path="/account">
                   {this.renderAccount()}
@@ -804,10 +846,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   render={(props) => {
                     return (
                       <Fragment>
-                        {account.role === 'helper' && (
+                        {account.role === Role.helper && (
                           <Redirect push to="/helper-login/clients" />
                         )}
-                        {account.role === 'admin' && (
+                        {account.role === Role.admin && (
                           <Redirect push to="/admin" />
                         )}
                         {this.renderAddDocumentModal(props)}
@@ -818,10 +860,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   }}
                 />
                 <Route exact path="/helper-login/clients">
-                  {account.role === 'owner' && (
+                  {account.role === Role.owner && (
                     <Redirect push to="/documents" />
                   )}
-                  {account.role === 'admin' && <Redirect push to="/admin" />}
+                  {account.role === Role.admin && <Redirect push to="/admin" />}
                   {this.renderMyClients()}
                 </Route>
                 <Route
@@ -830,10 +872,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   render={(props) => {
                     return (
                       <Fragment>
-                        {account.role === 'owner' && (
+                        {account.role === Role.owner && (
                           <Redirect push to="/documents" />
                         )}
-                        {account.role === 'admin' && (
+                        {account.role === Role.admin && (
                           <Redirect push to="/admin" />
                         )}
                         {this.renderAddDocumentModal(props)}
@@ -844,17 +886,21 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   }}
                 />
                 <Route exact path="/admin">
-                  {account.role === 'owner' && (
+                  {account.role === Role.owner && (
                     <Redirect push to="/documents" />
                   )}
-                  {account.role === 'helper' && <Redirect push to="/helper-login/clients" />}
+                  {account.role === Role.helper && (
+                    <Redirect push to="/helper-login/clients" />
+                  )}
                   {this.renderAdminPage()}
                 </Route>
                 <Route exact path="/admin">
-                  {account.role === 'owner' && (
+                  {account.role === Role.owner && (
                     <Redirect push to="/documents" />
                   )}
-                  {account.role === 'helper' && <Redirect push to="/helper-login/clients" />}
+                  {account.role === Role.helper && (
+                    <Redirect push to="/helper-login/clients" />
+                  )}
                   {this.renderAdminPage()}
                 </Route>
               </Switch>

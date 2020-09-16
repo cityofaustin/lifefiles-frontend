@@ -5,6 +5,7 @@ import Role from './Role';
 
 interface Account {
   username: string;
+  _id?: string;
   id: string;
   email: string;
   role: Role;
