@@ -1,11 +1,29 @@
+@import '~bootstrap/scss/bootstrap';
 @import "../../variables.scss";
 
 .helper-accounts-container {
+  .modal-close {
+    @include media-breakpoint-down(sm) {
+      width: 30px;
+      height: 30px;
+      padding: 2px 8px;
+    }
+    svg {
+      @include media-breakpoint-down(sm) {
+        width: 15px !important;
+        height: 14.52px !important;
+      }
+    }
+  }
+  border-radius: 17px;
   display: flex;
   min-height: 611px;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
+  @include media-breakpoint-up(md) {
+    min-height: 733px;
+  }
   .helper-name-lg {
     font-size: 25px;
     font-weight: bold;
@@ -17,6 +35,9 @@
       font-weight: bold;
       color: $dark-blue-grey;
       text-align: left;
+      @include media-breakpoint-up(md) {
+        font-size: 32px;
+      }
     }
     .helper-permission-subtitle {
       margin-bottom: 10px;
@@ -26,6 +47,9 @@
       color: $dark-blue-grey;
       opacity: 0.5;
       text-align: left;
+      @include media-breakpoint-up(md) {
+        font-size: 21px;
+      }
     }
     .helper-permission {
       display: flex;
@@ -40,6 +64,21 @@
         width: 142px;
         text-align: center;
         line-height: 1.2;
+        @include media-breakpoint-up(md) {
+          font-size: 25px;
+        }
+      }
+      .toggle {
+        @include media-breakpoint-up(md) {
+          display: none;
+        }
+        display: block;
+      }
+      .toggle-lg {
+        @include media-breakpoint-up(md) {
+          display: block;
+        }
+        display: none;
       }
     }
   }
@@ -49,6 +88,9 @@
     text-align: center;
     color: #484848;
     opacity: 0.75;
+    @include media-breakpoint-up(md) {
+      font-size: 30px;
+    }
   }
   .profile-container {
     display: flex;
@@ -59,6 +101,10 @@
       width: 130px;
       border-radius: 50%;
       background-color: #999;
+      @include media-breakpoint-up(md) {
+        height: 175px;
+        width: 175px
+      }
     }
   }
   input[type="button"] {
@@ -71,6 +117,9 @@
     &:disabled {
       background-color: #818181;
     }
+    @include media-breakpoint-up(md) {
+      font-size: 25px;
+    }
   }
   .take-back {
     cursor: pointer;
@@ -81,13 +130,31 @@
   background-color: #f6f6f6;
   .search-helper-container {
     height: 99px;
+    @include media-breakpoint-up(sm) {
+      height: 131px;
+      margin-top: 28px;
+      width: 100%;
+      padding: 0 24px;
+    }
+    @include media-breakpoint-up(lg) {
+      padding: 0 74.5px;
+    }
     .search-input {
       .search-container-sm {
         margin: 21px 26px;
       }
     }
-    .sort-container {
+    .sort-container-lg {
+      @include media-breakpoint-down(sm) {
+        display: none;
+      }
       display: flex;
+    }
+    .sort-container {
+      @include media-breakpoint-down(sm) {
+        display: flex;
+      }
+      display: none;
       align-items: center;
       margin-left: 26px;
       font-size: 17px;
@@ -100,27 +167,49 @@
       }
     }
   }
+  .contacts-grid {
+    @include media-breakpoint-up(sm) {
+      margin: 0 24px;
+    }
+    @include media-breakpoint-up(lg) {
+      margin: 0 74.5px;
+    }
+  }
   .helper-account {
     background-color: white;
     border-radius: 5px;
     border: solid 1px $silver;
     height: 379px;
-    width: 100%;
-    margin-bottom: 5px;
+    // width: 100%;
+    // margin: 0 15px;
+    // margin-bottom: 5px;
+    margin-bottom: 44px;
+    // margin-left: 12.5px;
+    // margin-right: 12.5px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
+    @include media-breakpoint-up(md) {
+      height: 448px;
+    }
     .profile-img {
       border-radius: 50%;
       height: 130px;
       width: 130px;
+      @include media-breakpoint-up(md) {
+        height: 175px;
+        width: 175px
+      }
       background-color: #999;
     }
     .helper-name {
       font-size: 17px;
       font-weight: bold;
       color: $greyish-brown;
+      @include media-breakpoint-up(md) {
+        font-size: 25px;
+      }
     }
     .helper-details {
       .helper-attr {
@@ -130,6 +219,9 @@
           font-size: 13px;
           font-weight: 500;
           color: $dark-blue-grey;
+          @include media-breakpoint-up(md) {
+            font-size: 18px;
+          }
         }
         .helper-val {
           font-size: 12px;
@@ -139,6 +231,9 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          @include media-breakpoint-up(md) {
+            font-size: 18px;
+          }
         }
       }
     }

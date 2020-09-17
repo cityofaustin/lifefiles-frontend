@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Modal, ModalBody, ModalHeader } from 'reactstrap';
+import { Col, Modal, ModalBody, ModalHeader, Row } from 'reactstrap';
 import {
   ReactComponent as CrossSvg,
   ReactComponent,
@@ -16,6 +16,7 @@ import { HelperContactRequest } from '../../../services/HelperContactService';
 import SearchInput from '../../common/SearchInput';
 import SortArrow from '../../common/SortArrow';
 import Toggle from '../../common/Toggle';
+import Chevron from '../../common/Chevron';
 
 interface AddContactModalProps {
   addHelperContact: (req: HelperContactRequest) => Promise<void>;
@@ -41,26 +42,10 @@ export default class AddContactModal extends Component<
   state = {
     query: '',
     isAscending: true,
-    // selectedAccount: undefined,
-    selectedAccount: {
-      accountType: '5f441fca3e34622ffea5bac3',
-      canAddOtherAccounts: false,
-      didAddress: '0x2a6F1D5083fb19b9f2C653B598abCb5705eD0439',
-      didPublicEncryptionKey:
-        '325c9be575a341edb837f0c89981844bd5a4fce79dd82f99d886c0928ee435499ef3109773053a37fb5634901f043dd425a7fdde42b8dbe45f3be50f1c8ad291',
-      email: 'caseworker@caseworker.com',
-      firstName: 'Billy',
-      id: '5f441fcb3e34622ffea5bb41',
-      lastName: 'Caseworker',
-      organization: 'Banana Org',
-      phoneNumber: '555-555-5555',
-      profileImageUrl: 'billy.png',
-      role: 'helper',
-      username: 'caseworker',
-    },
+    selectedAccount: undefined,
     isSocialAttestationEnabled: true,
     canAddNewDocuments: true,
-    showContactModal: true,
+    showContactModal: false,
   };
 
   renderHelperAccount(a: Account) {
@@ -69,38 +54,40 @@ export default class AddContactModal extends Component<
       (hc) => hc.helperAccount.email === a.email
     );
     return (
-      <div key={a.id} className="helper-account">
-        <img
-          className="profile-img"
-          src={AccountService.getProfileURL(a.profileImageUrl!)}
-          alt="Profile"
-        />
-        <div className="helper-name">
-          {AccountImpl.getFullName(a.firstName, a.lastName)}
+      <Col sm="12" md="12" lg="6" xl="4" key={a.id}>
+        <div className="helper-account">
+          <img
+            className="profile-img"
+            src={AccountService.getProfileURL(a.profileImageUrl!)}
+            alt="Profile"
+          />
+          <div className="helper-name">
+            {AccountImpl.getFullName(a.firstName, a.lastName)}
+          </div>
+          <div className="helper-details">
+            <div className="helper-attr">
+              <div className="helper-key">Organization</div>
+              <div className="helper-val">{a.organization}</div>
+            </div>
+            <div className="helper-attr">
+              <div className="helper-key">Role</div>
+              <div className="helper-val">{a.role}</div>
+            </div>
+            <div className="helper-attr">
+              <div className="helper-key">E-mail</div>
+              <div className="helper-val">{a.email}</div>
+            </div>
+          </div>
+          <input
+            type="button"
+            value={isContact ? 'Contact Added' : 'Add Contact'}
+            onClick={() =>
+              this.setState({ showContactModal: true, selectedAccount: a })
+            }
+            disabled={isContact}
+          />
         </div>
-        <div className="helper-details">
-          <div className="helper-attr">
-            <div className="helper-key">Organization</div>
-            <div className="helper-val">{a.organization}</div>
-          </div>
-          <div className="helper-attr">
-            <div className="helper-key">Role</div>
-            <div className="helper-val">{a.role}</div>
-          </div>
-          <div className="helper-attr">
-            <div className="helper-key">E-mail</div>
-            <div className="helper-val">{a.email}</div>
-          </div>
-        </div>
-        <input
-          type="button"
-          value={isContact ? 'Contact Added' : 'Add Contact'}
-          onClick={() =>
-            this.setState({ showContactModal: true, selectedAccount: a })
-          }
-          disabled={isContact}
-        />
-      </div>
+      </Col>
     );
   }
   render() {
@@ -158,78 +145,106 @@ export default class AddContactModal extends Component<
           <Modal
             isOpen={showContactModal}
             backdrop={'static'}
-            size={'xl'}
+            size={'md'}
             className="add-contact-confirm-modal"
           >
-            <ModalBody className="helper-accounts-container">
-              <div className="helper-title">
-                Add this contact to your network?
-              </div>
-              <div className="profile-container">
-                <img
-                  className="profile-img"
-                  src={AccountService.getProfileURL(
-                    selectedAccount.profileImageUrl!
-                  )}
-                  alt="Profile"
+            {selectedAccount && (
+              <ModalBody className="helper-accounts-container">
+                <div className="helper-title">
+                  Add this contact to your network?
+                </div>
+                <div className="profile-container">
+                  <img
+                    className="profile-img"
+                    src={AccountService.getProfileURL(
+                      (selectedAccount as any).profileImageUrl!
+                    )}
+                    alt="Profile"
+                  />
+                  <div className="helper-name-lg">
+                    {AccountImpl.getFullName(
+                      (selectedAccount as any).firstName,
+                      (selectedAccount as any).lastName
+                    )}
+                  </div>
+                </div>
+                <div className="permission-container">
+                  <div className="helper-permission-title">Permissions</div>
+                  <div className="helper-permission-subtitle">
+                    What can this contact help me with?
+                  </div>
+                  <div className="helper-permission">
+                    <LoginSvg />
+                    <div className="permission-title">Help me login</div>
+                    <div className="toggle">
+                      <Toggle
+                        value={isSocialAttestationEnabled}
+                        onToggle={() =>
+                          this.setState({
+                            isSocialAttestationEnabled: !isSocialAttestationEnabled,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="toggle-lg">
+                      <Toggle
+                        isLarge
+                        value={isSocialAttestationEnabled}
+                        onToggle={() =>
+                          this.setState({
+                            isSocialAttestationEnabled: !isSocialAttestationEnabled,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="helper-permission">
+                    <AddDocSvg />
+                    <div className="permission-title">Add new documents</div>
+                    <div className="toggle">
+                      <Toggle
+                        value={canAddNewDocuments}
+                        onToggle={() =>
+                          this.setState({
+                            canAddNewDocuments: !canAddNewDocuments,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="toggle-lg">
+                      <Toggle
+                        isLarge
+                        value={canAddNewDocuments}
+                        onToggle={() =>
+                          this.setState({
+                            canAddNewDocuments: !canAddNewDocuments,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+                <input
+                  className="button-lg"
+                  type="button"
+                  value="Add Contact"
+                  onClick={async () => {
+                    await addHelperContact({
+                      helperAccountId: (selectedAccount as any).id,
+                      canAddNewDocuments,
+                      isSocialAttestationEnabled,
+                    });
+                    this.setState({ showContactModal: false });
+                  }}
                 />
-                <div className="helper-name-lg">
-                  {AccountImpl.getFullName(
-                    selectedAccount.firstName,
-                    selectedAccount.lastName
-                  )}
+                <div
+                  className="take-back"
+                  onClick={() => this.setState({ showContactModal: false })}
+                >
+                  No, take me back
                 </div>
-              </div>
-              <div className="permission-container">
-                <div className="helper-permission-title">Permissions</div>
-                <div className="helper-permission-subtitle">
-                  What can this contact help me with?
-                </div>
-                <div className="helper-permission">
-                  <LoginSvg />
-                  <div className="permission-title">Help me login</div>
-                  <Toggle
-                    value={isSocialAttestationEnabled}
-                    onToggle={() =>
-                      this.setState({
-                        isSocialAttestationEnabled: !isSocialAttestationEnabled,
-                      })
-                    }
-                  />
-                </div>
-                <div className="helper-permission">
-                  <AddDocSvg />
-                  <div className="permission-title">Add new documents</div>
-                  <Toggle
-                    value={canAddNewDocuments}
-                    onToggle={() =>
-                      this.setState({
-                        canAddNewDocuments: !canAddNewDocuments,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <input
-                className="button-lg"
-                type="button"
-                value="Add Contact"
-                onClick={async () => {
-                  await addHelperContact({
-                    helperAccountId: (selectedAccount as any).id,
-                    canAddNewDocuments,
-                    isSocialAttestationEnabled,
-                  });
-                  this.setState({ showContactModal: false });
-                }}
-              />
-              <div
-                className="take-back"
-                onClick={() => this.setState({ showContactModal: false })}
-              >
-                No, take me back
-              </div>
-            </ModalBody>
+              </ModalBody>
+            )}
           </Modal>
           <div className="search-helper-container">
             <div className="search-input">
@@ -244,8 +259,26 @@ export default class AddContactModal extends Component<
               <SortArrow isAscending={isAscending} />
               <span>Name</span>
             </div>
+
+            <div className="sort-container-lg">
+              <div className="subtitle">Sort by</div>
+              <div
+                className="subtitle subtitle-key"
+                onClick={() => this.setState({ isAscending: !isAscending })}
+              >
+                NAME
+              </div>
+              <Chevron
+                isAscending={isAscending}
+                onClick={() => this.setState({ isAscending: !isAscending })}
+              />
+            </div>
           </div>
-          {displayedAccounts.map((a) => this.renderHelperAccount(a))}
+          <div className="contacts-grid">
+            <Row>
+              {displayedAccounts.map((a) => this.renderHelperAccount(a))}
+            </Row>
+          </div>
         </ModalBody>
       </Modal>
     );

@@ -2,6 +2,7 @@
 @import '../variables.scss';
 
 form.search-container {
+  position: relative;
   @include media-breakpoint-down(sm) { display: none; }
   width: 100%;
   display: flex;

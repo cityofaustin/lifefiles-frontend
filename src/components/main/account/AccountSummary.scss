@@ -9,6 +9,9 @@
   margin: 14px auto 14px auto;
   padding: 20px 0 34px 0;
   max-width: 389px;
+  @include media-breakpoint-up(sm) {
+    min-height: 542px;
+  }
   &:hover {
     background: #e9f8ff;
     border-radius: 30px;
@@ -54,8 +57,10 @@
       }
       .item-value {
         color: rgba(70, 70, 70, 0.78);
-        word-break: break-all;
         width: 170px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         text-align: right;
         @include media-breakpoint-down(sm) {
           font-size: 20px;

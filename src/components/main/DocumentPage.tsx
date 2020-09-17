@@ -76,7 +76,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     super(props);
     this.state = {
       isLayoutGrid: UserPreferenceUtil.getIsLayoutGrid(),
-      showAddContactModal: true,
+      showAddContactModal: false,
     };
   }
 
