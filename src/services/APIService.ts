@@ -102,7 +102,7 @@ class APIService {
     }
   }
 
-  static async postDocVC(path, vc, helperFile, ownerFile) {
+  static async postDocVC(path, vc, helperFile, ownerFile, network) {
     const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
@@ -111,6 +111,7 @@ class APIService {
     formdata.append('img', helperFile, helperFile.name);
     formdata.append('img', ownerFile, ownerFile.name);
     formdata.append('vc', vc);
+    formdata.append('network', network);
     const init = {
       method: 'POST',
       headers,

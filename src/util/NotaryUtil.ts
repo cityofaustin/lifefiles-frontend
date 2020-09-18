@@ -193,8 +193,8 @@ class NotaryUtil {
   }
 
   // To be called by the owner
-  static anchorVpToBlockchain(vpJwt: string) {
-    NotaryService.anchorVpToBlockchain(vpJwt);
+  static anchorVpToBlockchain(vpJwt: string, network: string) {
+    NotaryService.anchorVpToBlockchain(vpJwt, network);
   }
 }
 

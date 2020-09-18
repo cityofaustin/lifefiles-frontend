@@ -76,7 +76,7 @@ class CheckoutPage extends Component<CheckoutPageProps> {
       let fileName = 'document-' + counter;
       let base64String = base64Image.split(',')[1];
       let fileType = base64Image.split(',')[0].split('/')[1].split(';')[0];
-      img.file(fileName + '.' + fileType, base64String, {
+      img!.file(fileName + '.' + fileType, base64String, {
         base64: true,
       });
     }

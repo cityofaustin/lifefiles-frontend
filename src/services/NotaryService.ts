@@ -5,22 +5,71 @@ class NotaryService extends AgentService {
     return super.get('/generate-new-did');
   }
 
-  static updateDocumentVC(accountForId: string, documentType: string, vcJwt: string, helperFile: File, ownerFile: File) {
-    return super.postDocVC(`/account/${accountForId}/documents/${documentType}`,
+  static getAdminPublicKey() {
+    return super.get('/admin-crypto-public-key');
+  }
+
+  static async getCoinPrice(coin) {
+    let responseJson;
+    try {
+      const response = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin%2Cethereum&vs_currencies=USD'
+      );
+
+      responseJson = await response.json();
+    } catch (error) {
+      console.error('Error getting coin prices');
+      return 0;
+    }
+    return responseJson[coin].usd;
+  }
+
+  static async getEthGasPrice() {
+    let responseJson;
+    try {
+      const response = await fetch(
+        'https://ethgasstation.info/api/ethgasAPI.json'
+      );
+
+      responseJson = await response.json();
+    } catch (error) {
+      console.error('Error getting coin prices');
+      return 0;
+    }
+
+    return responseJson.safeLow;
+  }
+
+  static updateDocumentVC(
+    accountForId: string,
+    documentType: string,
+    vcJwt: string,
+    helperFile: File,
+    ownerFile: File,
+    network: string
+  ) {
+    return super.postDocVC(
+      `/account/${accountForId}/documents/${documentType}`,
       vcJwt,
       helperFile,
-      ownerFile
+      ownerFile,
+      network
     );
   }
 
-  static updateDocumentVP(accountForId: string, documentType: string, vpJwt: string) {
+  static updateDocumentVP(
+    accountForId: string,
+    documentType: string,
+    vpJwt: string
+  ) {
     return super.put(`/account/${accountForId}/documents/${documentType}/vp`, {
-      vpJwt
+      vpJwt,
     });
   }
 
-  static anchorVpToBlockchain(vpJwt: string) {
-    return super.post('/anchor-vp-to-blockchain', {vpJwt});
+  static anchorVpToBlockchain(vpJwt: string, network: string) {
+    let json = { vpJwt: vpJwt, network: network };
+    return super.post('/anchor-vp-to-blockchain', json);
   }
 }
 

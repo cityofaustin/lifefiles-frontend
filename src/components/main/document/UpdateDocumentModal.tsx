@@ -57,6 +57,18 @@ import PdfPreview from '../../common/PdfPreview';
 import ProgressIndicator from '../../common/ProgressIndicator';
 import APIService from '../../../services/APIService';
 
+import rskapi from 'rskapi';
+import Web3 from 'web3';
+import QRCode from 'qrcode.react';
+
+const CONTRACT_DEFAULT_GAS = 300000;
+const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(
+    'https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08'
+  )
+);
+
 interface UpdateDocumentModalProps {
   showModal: boolean;
   toggleModal: () => void;
@@ -75,6 +87,12 @@ interface UpdateDocumentModalProps {
 }
 
 interface UpdateDocumentModalState {
+  rskGasPrice: number;
+  ethGasPrice: number;
+  adminPublicKey: string;
+  currentBtcPrice: number;
+  currentEthPrice: number;
+  networkSelect: string;
   activeTab: string;
   showConfirmDeleteSection: boolean;
   hasConfirmedDelete: boolean;
@@ -110,6 +128,12 @@ class UpdateDocumentModal extends Component<
     super(props);
 
     this.state = {
+      rskGasPrice: 1000000000,
+      ethGasPrice: 1000000000,
+      adminPublicKey: '',
+      currentBtcPrice: 0,
+      currentEthPrice: 0,
+      networkSelect: 's3',
       activeTab: props.activeTab,
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
@@ -133,6 +157,26 @@ class UpdateDocumentModal extends Component<
       isLoading: false,
     };
   }
+
+  componentDidMount = async () => {
+    if (this.state.adminPublicKey === '') {
+      let rskGasPrice = await rskClient.host().getGasPrice();
+      let ethGasPrice = web3.utils.toWei(
+        '' + (await NotaryService.getEthGasPrice()) / 10,
+        'gwei'
+      );
+
+      let adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
+      let currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
+      let currentEthPrice = await NotaryService.getCoinPrice('ethereum');
+
+      this.setState({ ethGasPrice: parseInt(ethGasPrice) });
+      this.setState({ rskGasPrice });
+      this.setState({ adminPublicKey: adminPublicKeyResponse.adminPublicKey });
+      this.setState({ currentBtcPrice });
+      this.setState({ currentEthPrice });
+    }
+  };
 
   async componentDidUpdate(prevProps: Readonly<UpdateDocumentModalProps>) {
     if (prevProps.activeTab !== this.props.activeTab) {
@@ -197,6 +241,10 @@ class UpdateDocumentModal extends Component<
       pendingAccess: false,
     });
     toggleModal();
+  };
+
+  handleChangeNetworkSelect = (e) => {
+    this.setState({ networkSelect: e.target.value });
   };
 
   handleUpdateDocument = () => {
@@ -296,7 +344,10 @@ class UpdateDocumentModal extends Component<
       document.type,
       document.vpJwt
     );
-    const receipt = await NotaryService.anchorVpToBlockchain(vpJwt);
+    const receipt = await NotaryService.anchorVpToBlockchain(
+      vpJwt,
+      this.state.networkSelect
+    );
     console.log({ receipt });
     this.setState({ approvedVpUrl: receipt.didStatus });
     this.setState({ vp: vpJwt });
@@ -350,9 +401,7 @@ class UpdateDocumentModal extends Component<
       if (selectedContact && base64Image) {
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
         const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
-        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(
-          file
-        );
+        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(file);
         const encryptedString = await CryptoUtil.getEncryptedByPublicString(
           encryptionPublicKey!,
           base64Image
@@ -537,11 +586,91 @@ class UpdateDocumentModal extends Component<
     });
 
     if (this.props.myAccount.role === 'owner') {
+      let fundNetworkSection;
+
+      if (this.state.networkSelect === 'rsk') {
+        let rskTotalCostToSend = web3.utils.fromWei(
+          '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
+          'ether'
+        );
+
+        let dollarAmount =
+          Math.round(
+            parseFloat(rskTotalCostToSend) * this.state.currentBtcPrice * 1000
+          ) / 1000;
+
+        fundNetworkSection = (
+          <div>
+            {' '}
+            <Label
+              style={{ paddingRight: '30px' }}
+              for="network"
+              className="other-prompt"
+            >
+              Please Send Funds:
+            </Label>
+            <p>
+              {rskTotalCostToSend} RSK (${dollarAmount})
+            </p>
+            <QRCode value={this.state.adminPublicKey} size="256" />
+            <p>{this.state.adminPublicKey}</p>
+          </div>
+        );
+      } else if (this.state.networkSelect === 'eth') {
+        let ethTotalCostToSend = web3.utils.fromWei(
+          '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
+          'ether'
+        );
+
+        let dollarAmount =
+          Math.round(
+            parseFloat(ethTotalCostToSend) * this.state.currentEthPrice * 1000
+          ) / 1000;
+
+        fundNetworkSection = (
+          <div>
+            {' '}
+            <Label
+              style={{ paddingRight: '30px' }}
+              for="network"
+              className="other-prompt"
+            >
+              Please Send Funds:
+            </Label>
+            <p>
+              {ethTotalCostToSend} ETH (${dollarAmount})
+            </p>
+            <QRCode value={this.state.adminPublicKey} size="256" />
+            <p>{this.state.adminPublicKey}</p>
+          </div>
+        );
+      }
+
       return (
         <div>
           <h4>Verifiable Credential</h4>
           <pre className="vc-display">{this.props.document?.vcJwt}</pre>
           <pre className="vc-display">{this.state.approvedVpUrl}</pre>
+
+          <Label
+            style={{ paddingRight: '30px' }}
+            for="network"
+            className="other-prompt"
+          >
+            Notarization Destination
+          </Label>
+          <select
+            value={this.state.networkSelect}
+            onChange={this.handleChangeNetworkSelect}
+          >
+            <option value="eth">Ethereum Network</option>
+            <option value="rsk">RSK Network</option>
+            <option selected value="s3">
+              Amazon S3
+            </option>
+          </select>
+
+          {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
 
           <Button
             className="margin-wide"

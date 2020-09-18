@@ -36,6 +36,17 @@ import jsPDF from 'jspdf';
 import ZipUtil from '../../../util/ZipUtil';
 import CryptoUtil from '../../../util/CryptoUtil';
 import ProgressIndicator from '../../common/ProgressIndicator';
+import rskapi from 'rskapi';
+import Web3 from 'web3';
+import QRCode from 'qrcode.react';
+
+const CONTRACT_DEFAULT_GAS = 300000;
+const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(
+    'https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08'
+  )
+);
 
 // NOTE: you could use this to add min max date selection
 // import {subMonths, addMonths} from 'date-fns';
@@ -45,7 +56,13 @@ interface AddDocumentModalProps {
   toggleModal: () => void;
   documentTypes: DocumentType[];
   documents: Document[];
-  handleAddNewDocument: (newFile: File, newThumbnailFile: File, documentType: string, referencedAccount?: Account, validUntilDate?: Date) => Promise<Document>;
+  handleAddNewDocument: (
+    newFile: File,
+    newThumbnailFile: File,
+    documentType: string,
+    referencedAccount?: Account,
+    validUntilDate?: Date
+  ) => Promise<Document>;
   privateEncryptionKey?: string;
   referencedAccount?: Account;
   myAccount: Account;
@@ -57,10 +74,16 @@ enum AddDocumentStep {
   FILE_SELECTION,
   EXPIRATION,
   NOTARIZATION,
-  NOTARIZED
+  NOTARIZED,
 }
 
 interface AddDocumentModalState {
+  rskGasPrice: number;
+  ethGasPrice: number;
+  adminPublicKey: string;
+  currentBtcPrice: number;
+  currentEthPrice: number;
+  networkSelect: string;
   documentType: string;
   newFile?: File;
   newThumbnailFile?: File;
@@ -81,12 +104,20 @@ interface AddDocumentModalState {
   isLoading: boolean;
 }
 
-class AddDocumentModal extends Component<AddDocumentModalProps,
-  AddDocumentModalState> {
+class AddDocumentModal extends Component<
+  AddDocumentModalProps,
+  AddDocumentModalState
+> {
   constructor(props: Readonly<AddDocumentModalProps>) {
     super(props);
 
     this.state = {
+      rskGasPrice: 1000000000,
+      ethGasPrice: 1000000000,
+      adminPublicKey: '',
+      currentBtcPrice: 0,
+      currentEthPrice: 0,
+      networkSelect: 's3',
       addDocumentStep: AddDocumentStep.TYPE_SELECTION,
       documentType: '',
       isOther: false,
@@ -99,9 +130,33 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       publicPem: '',
       vc: undefined,
       doc: undefined,
-      isLoading: false
+      isLoading: false,
     };
   }
+
+  componentDidMount = async () => {
+    if (this.state.adminPublicKey === '') {
+      let rskGasPrice = await rskClient.host().getGasPrice();
+      let ethGasPrice = web3.utils.toWei(
+        '' + (await NotaryService.getEthGasPrice()) / 10,
+        'gwei'
+      );
+
+      let adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
+      let currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
+      let currentEthPrice = await NotaryService.getCoinPrice('ethereum');
+
+      this.setState({ ethGasPrice: parseInt(ethGasPrice) });
+      this.setState({ rskGasPrice });
+      this.setState({ adminPublicKey: adminPublicKeyResponse.adminPublicKey });
+      this.setState({ currentBtcPrice });
+      this.setState({ currentEthPrice });
+    }
+  };
+
+  handleChangeNetworkSelect = (e) => {
+    this.setState({ networkSelect: e.target.value });
+  };
 
   setFile = (newFile: File, newThumbnailFile: File, previewURL: string) => {
     this.setState({ newFile, newThumbnailFile, previewURL });
@@ -120,7 +175,9 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   };
 
   handleAddNewDocument = async () => {
-    const { handleAddNewDocument, documents, referencedAccount } = { ...this.props };
+    const { handleAddNewDocument, documents, referencedAccount } = {
+      ...this.props,
+    };
     let { documentType, newFile, errorMessage, isOther } = { ...this.state };
     const { hasValidUntilDate, validUntilDate } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
@@ -139,9 +196,21 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
           validDate = validUntilDate;
         }
         if (referencedAccount) {
-          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount, validDate);
+          await handleAddNewDocument(
+            newFile!,
+            newThumbnailFile!,
+            documentType!,
+            referencedAccount,
+            validDate
+          );
         } else {
-          await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, undefined, validDate);
+          await handleAddNewDocument(
+            newFile!,
+            newThumbnailFile!,
+            documentType!,
+            undefined,
+            validDate
+          );
         }
         // reset the field since success
         errorMessage = undefined;
@@ -161,7 +230,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       newFile,
       errorMessage,
       hasValidUntilDate: false,
-      validUntilDate: new Date()
+      validUntilDate: new Date(),
     });
     this.toggleModal();
   };
@@ -192,15 +261,37 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   };
 
   handleNotarizeDocument = async () => {
-    const { documentType, newFile, validUntilDate, publicPem, privatePem, notarySealBase64, notaryId } = { ...this.state };
+    const {
+      documentType,
+      newFile,
+      validUntilDate,
+      publicPem,
+      privatePem,
+      notarySealBase64,
+      notaryId,
+    } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
-    const { referencedAccount, myAccount, handleAddNewDocument, privateEncryptionKey } = { ...this.props };
+    const {
+      referencedAccount,
+      myAccount,
+      handleAddNewDocument,
+      privateEncryptionKey,
+    } = { ...this.props };
     try {
-      this.setState({isLoading: true});
+      this.setState({ isLoading: true });
       const zippedString = await StringUtil.fileContentsToString(newFile!);
       const encryptedString = await ZipUtil.unzip(zippedString);
-      const base64String = await CryptoUtil.getDecryptedString(privateEncryptionKey!, encryptedString);
-      await handleAddNewDocument(newFile!, newThumbnailFile!, documentType!, referencedAccount, validUntilDate);
+      const base64String = await CryptoUtil.getDecryptedString(
+        privateEncryptionKey!,
+        encryptedString
+      );
+      await handleAddNewDocument(
+        newFile!,
+        newThumbnailFile!,
+        documentType!,
+        referencedAccount,
+        validUntilDate
+      );
       const notarizedDoc = await NotaryUtil.createNotarizedDocument(
         'certifiedCopy',
         validUntilDate,
@@ -209,11 +300,16 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
         privateEncryptionKey === undefined ? '' : privateEncryptionKey,
         publicPem,
         privatePem,
-        referencedAccount?.didAddress === undefined ? '' : referencedAccount?.didAddress,
+        referencedAccount?.didAddress === undefined
+          ? ''
+          : referencedAccount?.didAddress,
         base64String,
         notarySealBase64,
         documentType,
-        AccountImpl.getFullName(referencedAccount?.firstName, referencedAccount?.lastName),
+        AccountImpl.getFullName(
+          referencedAccount?.firstName,
+          referencedAccount?.lastName
+        ),
         AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
       );
 
@@ -244,16 +340,21 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
         documentType,
         notarizedDoc!.vc,
         helperFile,
-        ownerFile
+        ownerFile,
+        this.state.networkSelect
       );
 
-      this.setState({ vc: notarizedDoc!.vc, doc: notarizedDoc!.doc, addDocumentStep: AddDocumentStep.NOTARIZED, isLoading: false });
-    } catch(err) {
+      this.setState({
+        vc: notarizedDoc!.vc,
+        doc: notarizedDoc!.doc,
+        addDocumentStep: AddDocumentStep.NOTARIZED,
+        isLoading: false,
+      });
+    } catch (err) {
       console.error('Failure in notarize document');
       console.error(err);
     }
   };
-
 
   toggleModal = () => {
     // clear state
@@ -266,7 +367,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       hasValidUntilDate: false,
       validUntilDate: new Date(),
       isGoingToNotarize: false,
-      notaryId: ''
+      notaryId: '',
     });
     toggleModal();
   };
@@ -274,7 +375,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   renderDocumentTypeSection() {
     const { documentTypes, documents } = { ...this.props };
     const { documentType, isOther, errorMessage, documentTypeOption } = {
-      ...this.state
+      ...this.state,
     };
 
     const options: OptionTypeBase[] = documentTypes.map((documentTypeItem) => ({
@@ -283,7 +384,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       isDisabled: DocumentTypeService.findDocumentTypeMatchInDocuments(
         documentTypeItem.name,
         documents
-      )
+      ),
     }));
     options.push({ value: 'Other', label: 'Other', isDisabled: false });
     return (
@@ -344,26 +445,33 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   }
 
   renderExpirationDateSection() {
-    const {previewURL, hasValidUntilDate, validUntilDate} = {...this.state};
+    const { previewURL, hasValidUntilDate, validUntilDate } = { ...this.state };
     return (
       <section className="expiration-date-section">
         <div className="image-container">
-          <img
-              src={previewURL}
-              alt=""
-          />
+          <img src={previewURL} alt="" />
         </div>
         <div className="expiration-date-container">
           <div className="expiration-toggle">
-            <div className="prompt">Does this document have an expiration date?</div>
-            <Toggle isLarge value={hasValidUntilDate} onToggle={() => this.setState({hasValidUntilDate: !hasValidUntilDate})} />
+            <div className="prompt">
+              Does this document have an expiration date?
+            </div>
+            <Toggle
+              isLarge
+              value={hasValidUntilDate}
+              onToggle={() =>
+                this.setState({ hasValidUntilDate: !hasValidUntilDate })
+              }
+            />
           </div>
           {hasValidUntilDate && (
             <div className="date-picker">
               <div className="label">EXPIRATION DATE</div>
               <DatePicker
                 selected={validUntilDate}
-                onChange={date => {this.setState({validUntilDate: date});}}
+                onChange={(date) => {
+                  this.setState({ validUntilDate: date });
+                }}
                 dateFormatCalendar={'MMM yyyy'}
                 peekNextMonth
                 showMonthDropdown
@@ -378,19 +486,83 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   }
 
   renderNotarizeSection() {
-    const {previewURL, isGoingToNotarize, notaryId} = {...this.state};
+    const { previewURL, isGoingToNotarize, notaryId } = { ...this.state };
+
+    let fundNetworkSection;
+
+    if (this.state.networkSelect === 'rsk') {
+      let rskTotalCostToSend = web3.utils.fromWei(
+        '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
+        'ether'
+      );
+
+      let dollarAmount =
+        Math.round(
+          parseFloat(rskTotalCostToSend) * this.state.currentBtcPrice * 1000
+        ) / 1000;
+
+      fundNetworkSection = (
+        <div>
+          {' '}
+          <Label
+            style={{ paddingRight: '30px' }}
+            for="network"
+            className="other-prompt"
+          >
+            Please Send Funds:
+          </Label>
+          <p>
+            {rskTotalCostToSend} RSK (${dollarAmount})
+          </p>
+          <QRCode value={this.state.adminPublicKey} size="256" />
+          <p>{this.state.adminPublicKey}</p>
+        </div>
+      );
+    } else if (this.state.networkSelect === 'eth') {
+      let ethTotalCostToSend = web3.utils.fromWei(
+        '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
+        'ether'
+      );
+
+      let dollarAmount =
+        Math.round(
+          parseFloat(ethTotalCostToSend) * this.state.currentEthPrice * 1000
+        ) / 1000;
+
+      fundNetworkSection = (
+        <div>
+          {' '}
+          <Label
+            style={{ paddingRight: '30px' }}
+            for="network"
+            className="other-prompt"
+          >
+            Please Send Funds:
+          </Label>
+          <p>
+            {ethTotalCostToSend} ETH (${dollarAmount})
+          </p>
+          <QRCode value={this.state.adminPublicKey} size="256" />
+          <p>{this.state.adminPublicKey}</p>
+        </div>
+      );
+    }
+
     return (
       <section className="notarize-section">
         <div className="image-container">
-          <img
-              src={previewURL}
-              alt=""
-          />
+          <img src={previewURL} alt="" />
         </div>
         <div className="notary-container">
           <div className="notary-toggle">
             <div className="prompt">Are you going to notarize?</div>
-            <Toggle isLarge value={isGoingToNotarize} onToggle={() => this.setState({isGoingToNotarize: !isGoingToNotarize})} />
+            <Toggle
+              isLarge
+              value={isGoingToNotarize}
+              onToggle={() =>
+                this.setState({ isGoingToNotarize: !isGoingToNotarize })
+              }
+            />
           </div>
           {/* TODO: */}
           {isGoingToNotarize && (
@@ -403,9 +575,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
               </div> */}
               <div className="form-line">
                 <div className="input-section">
-                  <Label for="notaryId">
-                    Notary #
-                  </Label>
+                  <Label for="notaryId">Notary #</Label>
                   <Input
                     type="text"
                     name="notaryId"
@@ -427,7 +597,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
                   />
                 </div>
                 <div className="input-section">
-                <Label
+                  <Label
                     style={{ paddingRight: '30px' }}
                     for="notarySeal"
                     className="other-prompt"
@@ -438,6 +608,26 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
                     multiple={false}
                     onDone={this.handleNotaryUploadNewSeal}
                   />
+
+                  <Label
+                    style={{ paddingRight: '30px' }}
+                    for="network"
+                    className="other-prompt"
+                  >
+                    Notarization Destination
+                  </Label>
+                  <select
+                    value={this.state.networkSelect}
+                    onChange={this.handleChangeNetworkSelect}
+                  >
+                    <option value="eth">Ethereum Network</option>
+                    <option value="rsk">RSK Network</option>
+                    <option selected value="s3">
+                      Amazon S3
+                    </option>
+                  </select>
+
+                  {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
                 </div>
               </div>
             </div>
@@ -448,7 +638,7 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
   }
 
   renderNotarizedSection() {
-    const {doc} = {...this.state};
+    const { doc } = { ...this.state };
     return (
       <section className="notarized-section">
         {/* <h3>Verifiable Credential</h3> */}
@@ -471,7 +661,14 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
 
   render() {
     const { showModal, referencedAccount } = { ...this.props };
-    const { documentType, newFile, addDocumentStep, isGoingToNotarize, hasValidUntilDate, isLoading } = { ...this.state };
+    const {
+      documentType,
+      newFile,
+      addDocumentStep,
+      isGoingToNotarize,
+      hasValidUntilDate,
+      isLoading,
+    } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
         <CrossSvg className="lg" />
@@ -482,153 +679,190 @@ class AddDocumentModal extends Component<AddDocumentModalProps,
       <Fragment>
         {isLoading && <ProgressIndicator isFullscreen />}
         <Modal
-        isOpen={showModal}
-        toggle={this.toggleModal}
-        backdrop={'static'}
-        size={'xl'}
-        className="add-doc-modal"
-      >
-
-        <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-          {referencedAccount && (
-            <Fragment>
-              <img src={AccountService.getProfileURL(referencedAccount.profileImageUrl!)} alt="" />
-              <span>{AccountImpl.getFullName(referencedAccount.firstName, referencedAccount.lastName)}</span>
-            </Fragment>
-          )}
-          {!referencedAccount && (
-            <Fragment>
-              <NewDocSvg />
-              <NewDocSmSvg />
-              <span>New Document</span>
-            </Fragment>
-          )}
-        </ModalHeader>
-        <ModalBody>
-          <div className="document-type-container">
-            {[AddDocumentStep.TYPE_SELECTION].includes(addDocumentStep) && this.renderDocumentTypeSection()}
-            {AddDocumentStep.FILE_SELECTION === addDocumentStep && this.renderDocumentFileSection()}
-            {AddDocumentStep.EXPIRATION === addDocumentStep && this.renderExpirationDateSection()}
-            {AddDocumentStep.NOTARIZATION === addDocumentStep && this.renderNotarizeSection()}
-            {AddDocumentStep.NOTARIZED === addDocumentStep && this.renderNotarizedSection()}
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          {AddDocumentStep.TYPE_SELECTION === addDocumentStep && (
-            <Fragment>
-              <Button
-                className="margin-wide"
-                outline
-                color="secondary"
-                onClick={this.toggleModal}
-              >
-                Cancel
-              </Button>{' '}
-              <Button
-                className="margin-wide"
-                color="primary"
-                disabled={!documentType}
-                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.FILE_SELECTION })}
-              >
-                Next
-              </Button>
-            </Fragment>
-          )}
-          {AddDocumentStep.FILE_SELECTION === addDocumentStep && (
-            <Fragment>
-              <Button
-                className="margin-wide"
-                outline
-                color="secondary"
-                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.TYPE_SELECTION })}
-              >
-                Go Back
-              </Button>{' '}
-              <Button
-                className="margin-wide"
-                color="primary"
-                disabled={!newFile || !documentType}
-                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.EXPIRATION })}
-              >
-                Next
-              </Button>
-            </Fragment>
-          )}
-          {AddDocumentStep.EXPIRATION === addDocumentStep && (
-            <Fragment>
-              <Button
-                className="margin-wide"
-                outline
-                color="secondary"
-                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.FILE_SELECTION })}
-              >
-                Go Back
-              </Button>{' '}
-              {hasValidUntilDate && referencedAccount && (
+          isOpen={showModal}
+          toggle={this.toggleModal}
+          backdrop={'static'}
+          size={'xl'}
+          className="add-doc-modal"
+        >
+          <ModalHeader toggle={this.toggleModal} close={closeBtn}>
+            {referencedAccount && (
+              <Fragment>
+                <img
+                  src={AccountService.getProfileURL(
+                    referencedAccount.profileImageUrl!
+                  )}
+                  alt=""
+                />
+                <span>
+                  {AccountImpl.getFullName(
+                    referencedAccount.firstName,
+                    referencedAccount.lastName
+                  )}
+                </span>
+              </Fragment>
+            )}
+            {!referencedAccount && (
+              <Fragment>
+                <NewDocSvg />
+                <NewDocSmSvg />
+                <span>New Document</span>
+              </Fragment>
+            )}
+          </ModalHeader>
+          <ModalBody>
+            <div className="document-type-container">
+              {[AddDocumentStep.TYPE_SELECTION].includes(addDocumentStep) &&
+                this.renderDocumentTypeSection()}
+              {AddDocumentStep.FILE_SELECTION === addDocumentStep &&
+                this.renderDocumentFileSection()}
+              {AddDocumentStep.EXPIRATION === addDocumentStep &&
+                this.renderExpirationDateSection()}
+              {AddDocumentStep.NOTARIZATION === addDocumentStep &&
+                this.renderNotarizeSection()}
+              {AddDocumentStep.NOTARIZED === addDocumentStep &&
+                this.renderNotarizedSection()}
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            {AddDocumentStep.TYPE_SELECTION === addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={this.toggleModal}
+                >
+                  Cancel
+                </Button>{' '}
                 <Button
                   className="margin-wide"
                   color="primary"
-                  onClick={() => this.setState({ addDocumentStep: AddDocumentStep.NOTARIZATION })}
+                  disabled={!documentType}
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.FILE_SELECTION,
+                    })
+                  }
                 >
                   Next
                 </Button>
-              )}
-              {(!hasValidUntilDate || !referencedAccount) && (
+              </Fragment>
+            )}
+            {AddDocumentStep.FILE_SELECTION === addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.TYPE_SELECTION,
+                    })
+                  }
+                >
+                  Go Back
+                </Button>{' '}
                 <Button
                   className="margin-wide"
                   color="primary"
-                  onClick={this.handleAddNewDocument}
+                  disabled={!newFile || !documentType}
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.EXPIRATION,
+                    })
+                  }
                 >
-                  Add File
+                  Next
                 </Button>
-              )}
-            </Fragment>
-          )}
-          {AddDocumentStep.NOTARIZATION === addDocumentStep && (
-            <Fragment>
-              <Button
-                className="margin-wide"
-                outline
-                color="secondary"
-                onClick={() => this.setState({ addDocumentStep: AddDocumentStep.EXPIRATION })}
-              >
-                Go Back
-              </Button>{' '}
-              {isGoingToNotarize && (
-              <Button
-                className="margin-wide"
-                color="primary"
-                // onClick={() => this.setState({ addDocumentStep: AddDocumentStep.NOTARIZED })}
-                onClick={this.handleNotarizeDocument}
-              >
-                Notarize
-              </Button>
-              )}
-              {!isGoingToNotarize && (
-              <Button
-                className="margin-wide"
-                color="primary"
-                onClick={this.handleAddNewDocument}
-              >
-                Add File
-              </Button>
-              )}
-
-            </Fragment>
-          )}
-          {AddDocumentStep.NOTARIZED === addDocumentStep && (
-            <Fragment>
-              <Button
-                className="margin-wide"
-                color="primary"
-                onClick={this.toggleModal}
-              >
-                Close
-              </Button>
-            </Fragment>
-          )}
-        </ModalFooter>
-      </Modal>
+              </Fragment>
+            )}
+            {AddDocumentStep.EXPIRATION === addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.FILE_SELECTION,
+                    })
+                  }
+                >
+                  Go Back
+                </Button>{' '}
+                {hasValidUntilDate && referencedAccount && (
+                  <Button
+                    className="margin-wide"
+                    color="primary"
+                    onClick={() =>
+                      this.setState({
+                        addDocumentStep: AddDocumentStep.NOTARIZATION,
+                      })
+                    }
+                  >
+                    Next
+                  </Button>
+                )}
+                {(!hasValidUntilDate || !referencedAccount) && (
+                  <Button
+                    className="margin-wide"
+                    color="primary"
+                    onClick={this.handleAddNewDocument}
+                  >
+                    Add File
+                  </Button>
+                )}
+              </Fragment>
+            )}
+            {AddDocumentStep.NOTARIZATION === addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.EXPIRATION,
+                    })
+                  }
+                >
+                  Go Back
+                </Button>{' '}
+                {isGoingToNotarize && (
+                  <Button
+                    className="margin-wide"
+                    color="primary"
+                    // onClick={() => this.setState({ addDocumentStep: AddDocumentStep.NOTARIZED })}
+                    onClick={this.handleNotarizeDocument}
+                  >
+                    Notarize
+                  </Button>
+                )}
+                {!isGoingToNotarize && (
+                  <Button
+                    className="margin-wide"
+                    color="primary"
+                    onClick={this.handleAddNewDocument}
+                  >
+                    Add File
+                  </Button>
+                )}
+              </Fragment>
+            )}
+            {AddDocumentStep.NOTARIZED === addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  color="primary"
+                  onClick={this.toggleModal}
+                >
+                  Close
+                </Button>
+              </Fragment>
+            )}
+          </ModalFooter>
+        </Modal>
       </Fragment>
     );
   }

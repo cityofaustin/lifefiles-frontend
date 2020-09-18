@@ -22,6 +22,10 @@ class AdminService extends AgentService {
     return await super.post('/admin-document-types/', docTypeReq);
   }
 
+  static async updateAdminPrivateKey(privateKey) {
+    return await super.post('/admin-crypto-private-key', { privateKey });
+  }
+
   static async updatedDocumentType(documentType) {
     return await super.put(
       '/admin-document-types/' + documentType._id,
