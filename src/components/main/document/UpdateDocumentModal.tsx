@@ -339,7 +339,7 @@ class UpdateDocumentModal extends Component<
     this.setState({ doc: notarizedDoc!.doc });
   };
 
-  handleShareDocWithContact = async () => {
+  handleShareDocWithContact = async (permissions) => {
     const { document, addShareRequest, myAccount, removeShareRequest } = {
       ...this.props,
     };
@@ -350,9 +350,7 @@ class UpdateDocumentModal extends Component<
       if (selectedContact && base64Image) {
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
         const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
-        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(
-          file
-        );
+        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(file);
         const encryptedString = await CryptoUtil.getEncryptedByPublicString(
           encryptionPublicKey!,
           base64Image
@@ -382,7 +380,8 @@ class UpdateDocumentModal extends Component<
           const approvedShareRequest = await ShareRequestService.approveShareRequestFile(
             newZippedFile,
             newZippedThumbnailFile,
-            this.getDocumentSharedWithContact(selectedContact)!._id!
+            this.getDocumentSharedWithContact(selectedContact)!._id!,
+            permissions
           );
           // update the existing shareRequest with this approved one.
           removeShareRequest(
@@ -395,7 +394,8 @@ class UpdateDocumentModal extends Component<
             newZippedThumbnailFile,
             document?.type!,
             myAccount.id,
-            selectedContact?.id!
+            selectedContact?.id!,
+            permissions
           );
           addShareRequest(newShareRequest);
         }
@@ -412,7 +412,7 @@ class UpdateDocumentModal extends Component<
     });
   };
 
-  handleShareDocCheck = async () => {
+  handleShareDocCheck = async (permissions) => {
     const { removeShareRequest } = { ...this.props };
     const { selectedContact } = { ...this.state };
     let showConfirmShare = false;
@@ -421,20 +421,27 @@ class UpdateDocumentModal extends Component<
       this.getDocumentSharedWithContact(selectedContact!)?.approved
     ) {
       try {
-        await ShareRequestService.deleteShareRequest(
-          this.getDocumentSharedWithContact(selectedContact!)!._id!
-        );
-        removeShareRequest(
-          this.getDocumentSharedWithContact(selectedContact!)!
-        );
+
+        // NOTE: we don't delete share requests anymore, just unapprove them or change permissions
+        // await ShareRequestService.deleteShareRequest(
+        //   this.getDocumentSharedWithContact(selectedContact!)!._id!
+        // );
+        // removeShareRequest(
+        //   this.getDocumentSharedWithContact(selectedContact!)!
+        // );
       } catch (err) {
         console.error(err.message);
       }
     } else {
+      // TODO:
+      this.handleShareDocWithContact(permissions);
       // show prompt
-      showConfirmShare = true;
+      // showConfirmShare = true;
     }
-    this.setState({ selectedContact, showConfirmShare });
+    this.setState({
+      selectedContact,
+      // showConfirmShare
+    });
   };
 
   toggleConfirmShare = () => {
@@ -521,7 +528,8 @@ class UpdateDocumentModal extends Component<
       undefined,
       document!.type,
       referencedAccount!.id,
-      myAccount.id
+      myAccount.id,
+      {canView: false, canReplace: false, canDownload: false}
     );
     // set this in main container
     handleClientSelected(referencedAccount!);
@@ -675,7 +683,14 @@ class UpdateDocumentModal extends Component<
   };
 
   render() {
-    const { showModal, document, accounts, myAccount, referencedAccount } = {
+    const {
+      showModal,
+      document,
+      accounts,
+      myAccount,
+      referencedAccount,
+      shareRequests,
+    } = {
       ...this.props,
     };
     const {
@@ -1024,6 +1039,7 @@ class UpdateDocumentModal extends Component<
                       {document.claimed && (
                         <ShareDocWithContainer
                           accounts={accounts}
+                          shareRequests={shareRequests}
                           getDocumentSharedWithContact={
                             this.getDocumentSharedWithContact
                           }

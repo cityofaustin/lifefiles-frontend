@@ -115,7 +115,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       if (account.role === Role.helper) {
         accounts = (await AccountService.getAccounts()).filter(
           (accountItem) => {
-            if (accountItem.role === Role.owner && accountItem.id !== account.id) {
+            if (
+              accountItem.role === Role.owner &&
+              accountItem.id !== account.id
+            ) {
               return accountItem;
             }
           }
@@ -162,10 +165,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   addHelperContact = async (helperContactReq) => {
-    const { helperContacts } = {...this.state};
-    const newHelperContact = await HelperContactService.addHelperContact(helperContactReq);
+    const { helperContacts } = { ...this.state };
+    const newHelperContact = await HelperContactService.addHelperContact(
+      helperContactReq
+    );
     helperContacts.push(newHelperContact);
-    this.setState({helperContacts});
+    this.setState({ helperContacts });
   };
 
   handleSearch = (query: string) => {
@@ -546,7 +551,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal(props) {
-    const { documentSelected, accounts, activeDocumentTab } = { ...this.state };
+    const { documentSelected, accounts, activeDocumentTab, helperContacts } = {
+      ...this.state,
+    };
     const { account } = { ...this.props };
     const { id } = props.match.params;
     let referencedAccount;
@@ -562,9 +569,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         }
       }
     );
+    const helperContactAccounts = accounts.filter((a) =>
+      helperContacts.find((hc) => hc.helperAccount.email === a.email)
+    );
     return (
       <UpdateDocumentModal
-        accounts={accounts}
+        accounts={helperContactAccounts}
         showModal={!!documentSelected}
         toggleModal={() =>
           this.setState({ documentSelected: undefined, activeDocumentTab: '1' })
@@ -829,7 +839,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     <Redirect to="/helper-login/clients" />
                   )}
                   {account.role === Role.owner && <Redirect to="/documents" />}
-                  {account.role === Role.admin && <Redirect to="/admin-login" />}
+                  {account.role === Role.admin && (
+                    <Redirect to="/admin-login" />
+                  )}
                 </Route>
                 <Route exact path="/account">
                   {this.renderAccount()}

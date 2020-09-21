@@ -252,7 +252,8 @@ class APIService {
     thumbnailFile: File | undefined,
     documentType: string,
     fromAccountId: string,
-    toAccountId: string
+    toAccountId: string,
+    permissions: any
   ) {
     const path = '/share-requests';
     const input = `${API_ENDPOINT}${path}`;
