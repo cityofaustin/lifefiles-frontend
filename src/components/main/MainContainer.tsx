@@ -711,9 +711,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMyClients() {
-    const { searchedDocuments, accounts, sortAsc, clientShares } = {
+    const { searchedDocuments, sortAsc, clientShares, helperContacts } = {
       ...this.state,
     };
+    const accounts = helperContacts.map(hc => hc.ownerAccount);
     const { account, privateEncryptionKey } = { ...this.props };
     return (
       <ClientPage
