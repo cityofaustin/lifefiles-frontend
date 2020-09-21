@@ -154,12 +154,19 @@ class APIService {
     const formdata = new FormData();
     // const blob = await StringUtil.fileToText(request.file!);
     // const base64String2 = await StringUtil.fileContentsToString(thumbnailFile!);
+    let lastname = request.account.lastname;
+
+    if (lastname === '' || lastname === undefined) {
+      lastname = '-';
+    }
+
     formdata.append('img', request.file, request.file.name);
     formdata.append('email', request.account.email);
     formdata.append('password', request.account.password);
     formdata.append('username', request.account.username);
     formdata.append('firstname', request.account.firstname);
-    formdata.append('lastname', request.account.lastname);
+    formdata.append('lastname', lastname);
+
     if (request.account.publicEncryptionKey) {
       formdata.append(
         'publicEncryptionKey',
