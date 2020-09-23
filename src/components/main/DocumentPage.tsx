@@ -645,7 +645,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   onClick={this.toggleLayout}
                 />
               )}
-              <SvgButton buttonType={SvgButtonTypes.INFO} />
+              {/* <SvgButton buttonType={SvgButtonTypes.INFO} /> */}
             </div>
           </div>
 
