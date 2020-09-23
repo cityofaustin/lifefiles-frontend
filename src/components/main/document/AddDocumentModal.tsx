@@ -148,7 +148,17 @@ class AddDocumentModal extends Component<
 
       this.setState({ ethGasPrice: parseInt(ethGasPrice) });
       this.setState({ rskGasPrice });
-      this.setState({ adminPublicKey: adminPublicKeyResponse.adminPublicKey });
+
+      if (
+        adminPublicKeyResponse == undefined ||
+        adminPublicKeyResponse == null
+      ) {
+        this.setState({ adminPublicKey: '-' });
+      } else {
+        this.setState({
+          adminPublicKey: adminPublicKeyResponse.adminPublicKey,
+        });
+      }
       this.setState({ currentBtcPrice });
       this.setState({ currentEthPrice });
     }
