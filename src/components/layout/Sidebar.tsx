@@ -10,6 +10,7 @@ import { ReactComponent as Contact } from '../../img/contact.svg';
 import { ReactComponent as ContactGroup } from '../../img/contact-grp.svg';
 import { ReactComponent as Cog } from '../../img/cog.svg';
 import { ReactComponent as Help } from '../../img/help.svg';
+import { ReactComponent as LogoutSvg } from '../../img/logout.svg';
 // import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
 import { Link } from 'react-router-dom';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
@@ -115,7 +116,7 @@ class SideBar extends Component<SidebarProps> {
                       className="bm-item menu-item"
                       onClick={this.handleLogout}
                     >
-                      <span />
+                      <span><LogoutSvg /></span>
                       <span>Logout</span>
                     </span>
                   </nav>
