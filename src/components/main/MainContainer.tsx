@@ -651,7 +651,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem>
-                  <Link to="/account">My Account</Link>
+                  <Link to="./account">My Account</Link>
                 </DropdownItem>
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
@@ -819,7 +819,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           <div className="main-page">
             {account.role !== Role.admin && <div className="main-side" />}
             <div className="main-section">
-              {isAccount && <Redirect push to="/account" />}
+              {isAccount && <Redirect push to="**/account" />}
               <Switch>
                 <Route exact path="/helper-login">
                   <Redirect to="/helper-login/clients" />
@@ -831,7 +831,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   {account.role === Role.owner && <Redirect to="/documents" />}
                   {account.role === Role.admin && <Redirect to="/admin-login" />}
                 </Route>
-                <Route exact path="/account">
+                <Route exact path="**/account">
                   {this.renderAccount()}
                 </Route>
                 <Route exact path="/bring-your-key">

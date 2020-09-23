@@ -22,7 +22,7 @@ class AccountPage extends Component<AccountPageProps> {
       <div className="main-content" style={{ marginTop: '20px' }}>
         <Breadcrumb>
           <BreadcrumbItem className="breadcrumb-link">
-            <Link to={account.role === 'owner' ? '/documents' : '/clients'}>
+            <Link to={account.role === 'owner' ? '/documents' : './clients'}>
               {account.role === 'owner' ? 'My Documents' : 'My Clients'}
             </Link>
           </BreadcrumbItem>

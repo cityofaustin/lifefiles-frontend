@@ -89,7 +89,7 @@ class SideBar extends Component<SidebarProps> {
                       <span>
                         <Contact />
                       </span>
-                      <Link to="/account">
+                      <Link to="./account">
                         <span>My Profile</span>
                       </Link>
                     </span>
