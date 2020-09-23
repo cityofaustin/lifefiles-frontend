@@ -212,7 +212,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   async componentDidMount() {
     const { account } = { ...this.props };
 
-    if (account.role === 'admin' || account.canAddOtherAccounts) {
+    if (account.role === 'admin') {
       const adminResponse = await AdminService.getAdminInfo();
 
       const accountTypes = adminResponse.account.adminInfo.accountTypes
@@ -234,14 +234,14 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
 
       accountsColumnDefs.unshift(toAdd);
 
-      if (account.role === 'admin') {
-        let toAddTwo = {
-          headerName: 'CanAddOtherAccounts',
-          field: 'canAddOtherAccounts',
-          cellRenderer: 'checkboxCellRenderer',
-        };
-        accountsColumnDefs.unshift(toAddTwo);
-      }
+      // if (account.role === 'admin') {
+      //   let toAddTwo = {
+      //     headerName: 'CanAddOtherAccounts',
+      //     field: 'canAddOtherAccounts',
+      //     cellRenderer: 'checkboxCellRenderer',
+      //   };
+      //   accountsColumnDefs.unshift(toAddTwo);
+      // }
 
       this.accountsGridApi.setColumnDefs(accountsColumnDefs);
 
@@ -436,7 +436,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       reqObjectSub['email'] = baseAccount.email;
       reqObjectSub['firstname'] = baseAccount.firstName;
       reqObjectSub['lastname'] = baseAccount.lastName;
-      reqObjectSub['canAddOtherAccounts'] = baseAccount.canAddOtherAccounts;
+      // reqObjectSub['canAddOtherAccounts'] = baseAccount.canAddOtherAccounts;
 
       // TODO: Change to be dynamic based off selection!
       reqObjectSub['accounttype'] = baseAccount.accountType;
@@ -576,7 +576,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       organization: 'Org',
       firstName: 'First Name',
       lastName: 'Last Name',
-      canAddOtherAccounts: false,
+      // canAddOtherAccounts: false,
       adminInfo: '-',
       action: '',
     });
