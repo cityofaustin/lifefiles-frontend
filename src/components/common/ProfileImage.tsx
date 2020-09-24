@@ -1,26 +1,27 @@
 import React, { Component, Fragment } from 'react';
 import Account from '../../models/Account';
+import AccountImpl from '../../models/AccountImpl';
 import AccountService from '../../services/AccountService';
 import StringUtil from '../../util/StringUtil';
 
 interface ProfileImageProps {
   account: Account;
+  size: ProfileImageSizeEnum;
+}
+
+export enum ProfileImageSizeEnum {
+  SMALL='sm',
+  MEDIUM='md',
+  LARGE='lg'
 }
 
 export default class ProfileImage extends Component<ProfileImageProps> {
-  hasNameSet(account) {
-    return (
-      account.firstName &&
-      account.firstName.length > 0 &&
-      account.firstName !== '-' &&
-      account.lastName &&
-      account.lastName.length > 0 &&
-      account.lastName !== '-'
-    );
-  }
+  static defaultProps = {
+    size: ProfileImageSizeEnum.MEDIUM
+  };
 
   render() {
-    const { account } = { ...this.props };
+    const { account, size } = { ...this.props };
     return (
       <Fragment>
         {account.profileImageUrl && (
@@ -31,11 +32,11 @@ export default class ProfileImage extends Component<ProfileImageProps> {
           />
         )}
         {!account.profileImageUrl && (
-          <div className="account-circle">
-            {this.hasNameSet(account) &&
+          <div className={'account-circle ' + size}>
+            {AccountImpl.hasNameSet(account) &&
               StringUtil.getFirstUppercase(account.firstName!) +
                 StringUtil.getFirstUppercase(account.lastName!)}
-            {!this.hasNameSet(account) &&
+            {!AccountImpl.hasNameSet(account) &&
               StringUtil.getFirstUppercase(account.username) +
                 StringUtil.getSecondLowercase(account.username)}
           </div>

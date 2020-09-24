@@ -14,6 +14,7 @@ import { ReactComponent as LogoutSvg } from '../../img/logout.svg';
 // import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
 import { Link } from 'react-router-dom';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
+import ProfileImage from '../common/ProfileImage';
 
 interface SidebarProps {
   appSettings: AppSetting[];
@@ -61,13 +62,7 @@ class SideBar extends Component<SidebarProps> {
               <div className="bm-menu">
                 <div className="top-section">
                   <div className="img-container">
-                    <img
-                      className="profile-img"
-                      src={AccountService.getProfileURL(
-                        account.profileImageUrl!
-                      )}
-                      alt="Profile"
-                    />
+                    <ProfileImage account={account} />
                   </div>
                   <div className="fullname">
                     {AccountImpl.getFullName(

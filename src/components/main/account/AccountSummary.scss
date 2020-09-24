@@ -33,6 +33,11 @@
     color: #645857;
     text-align: center;
     margin-bottom: 9px;
+
+    width: 94%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
   .contact-info {
     width: 100%;

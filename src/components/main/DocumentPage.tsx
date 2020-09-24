@@ -39,6 +39,7 @@ import Badge from '../common/Badge';
 import AddContactModal from './account/AddContactModal';
 import HelperContact from '../../models/HelperContact';
 import { HelperContactRequest } from '../../services/HelperContactService';
+import ProfileImage, { ProfileImageSizeEnum } from '../common/ProfileImage';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -624,10 +625,13 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <Link to="/helper-login/clients">My Clients</Link>
                   <ChevronRight />
                   <span>
-                    {AccountImpl.getFullName(
-                      referencedAccount.firstName,
-                      referencedAccount.lastName
-                    )}
+                    {AccountImpl.hasNameSet(referencedAccount) &&
+                      AccountImpl.getFullName(
+                        referencedAccount.firstName,
+                        referencedAccount.lastName
+                      )}
+                    {!AccountImpl.hasNameSet(referencedAccount) &&
+                      referencedAccount.username}
                   </span>
                 </div>
               </Fragment>
@@ -657,17 +661,19 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <Link to="/helper-login/clients">
                     <ChevronLeft />
                   </Link>
-                  <img
+                  <ProfileImage account={referencedAccount} size={ProfileImageSizeEnum.SMALL} />
+                  {/* <img
                     src={AccountService.getProfileURL(
                       referencedAccount.profileImageUrl!
                     )}
                     alt=""
-                  />
+                  /> */}
                   <span>
-                    {AccountImpl.getFullName(
+                    {AccountImpl.hasNameSet(referencedAccount) && AccountImpl.getFullName(
                       referencedAccount.firstName,
                       referencedAccount.lastName
                     )}
+                    {!AccountImpl.hasNameSet(referencedAccount) && referencedAccount.username}
                   </span>
                 </div>
                 <div className="permission-section">

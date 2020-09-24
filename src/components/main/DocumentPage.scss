@@ -19,7 +19,7 @@
   display: flex;
   // justify-content: space-evenly;
   justify-content: flex-end;
-  width: 136px;
+  // width: 136px;
 }
 
 .document-tabs {
@@ -109,6 +109,9 @@
       background-color: themed("colorPrimary");
     }
     .client-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       font-size: 20px;
       font-weight: 500;
       svg {
@@ -121,6 +124,15 @@
         margin: 0 23px;
         background-color: #f8f8f8;
       }
+      .account-circle {
+        margin: 0 23px;
+      }
+      // span {
+      //   width: 200px;
+      //   text-overflow: ellipsis;
+      //   white-space: nowrap;
+      //   overflow: hidden;
+      // }
     }
     .permission-section {
       font-size: 25px;
