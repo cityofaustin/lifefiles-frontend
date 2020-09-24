@@ -57,7 +57,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                   <Checkbox isLarge isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
                   <div className="share-status">
                     This file is {(shareRequest && shareRequest.approved) ? '' : 'NOT '}currently shared with
-                    {' ' + selectedContact.username}
+                    {' ' + AccountImpl.getFullName(selectedContact.firstName, selectedContact.lastName)}
                   </div>
                 </div>
               </div>
@@ -94,7 +94,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                 <Checkbox isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
                 <div className="share-status">
                   This file is {(shareRequest && shareRequest.approved) ? '' : 'NOT '}currently shared with
-                  {' ' + selectedContact.username}
+                  {' ' + AccountImpl.getFullName(selectedContact.firstName, selectedContact.lastName)}
                 </div>
               </div>
             </div>
@@ -117,7 +117,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                   <img className="contact-image"
                        src={AccountService.getProfileURL(account.profileImageUrl!)}
                        alt="Profile"/>
-                  <div className="contact-name">{account.username}</div>
+                  <div className="contact-name">{AccountImpl.getFullName(account.firstName, account.lastName)}</div>
                   <div className="share-status">{this.getShareStatus(getDocumentSharedWithContact(account))}</div>
                 </div>
               ))}
@@ -144,7 +144,7 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                     <img className="contact-image"
                          src={AccountService.getProfileURL(account.profileImageUrl!)}
                          alt="Profile"/>
-                    <div className="contact-name">{account.username}</div>
+                    <div className="contact-name">{AccountImpl.getFullName(account.firstName, account.lastName)}</div>
                     <div className="share-status">{this.getShareStatus(getDocumentSharedWithContact(account))}</div>
                   </div>
                 ))}

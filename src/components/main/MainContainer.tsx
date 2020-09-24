@@ -556,7 +556,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal(props) {
-    const { documentSelected, accounts, activeDocumentTab } = { ...this.state };
+    const { documentSelected, activeDocumentTab, accounts, helperContacts } = {
+      ...this.state,
+    };
     const { account } = { ...this.props };
     const { id } = props.match.params;
     let referencedAccount;
@@ -572,9 +574,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         }
       }
     );
+    const contactAccounts = accounts.filter((a) =>
+      helperContacts.find((hc) => a.username === hc.helperAccount.username)
+    );
     return (
       <UpdateDocumentModal
-        accounts={accounts}
+        accounts={contactAccounts}
         showModal={!!documentSelected}
         toggleModal={() =>
           this.setState({ documentSelected: undefined, activeDocumentTab: '1' })
