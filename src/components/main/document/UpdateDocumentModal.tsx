@@ -262,8 +262,8 @@ class UpdateDocumentModal extends Component<
     const { newFile, newThumbnailFile } = { ...this.state };
     const { handleUpdateDocument, document } = { ...this.props };
     handleUpdateDocument({
-      id: '5ed6aa532f74186d6238bf47',
-      // id: document!._id!,
+      // id: '5ed6aa532f74186d6238bf47',
+      id: document!._id!,
       img: newFile,
       thumbnail: newThumbnailFile,
       validUntilDate: undefined, // FIXME: add expired at form somewhere
