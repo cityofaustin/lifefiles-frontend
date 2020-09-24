@@ -887,7 +887,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     <Redirect push to="/documents" />
                   )}
                   {account.role === Role.admin && <Redirect push to="/admin" />}
-                  {this.renderMyClients()}
+                  {account.role === Role.helper && this.renderMyClients()}
                 </Route>
                 <Route
                   exact
