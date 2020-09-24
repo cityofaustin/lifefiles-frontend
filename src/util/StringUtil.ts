@@ -8,6 +8,13 @@ class StringUtil {
     }
     return result;
   }
+  static getSecondLowercase(input: string): string {
+    let result = '';
+    if (input.length > 1) {
+      result = input.substr(1, 1).toLowerCase();
+    }
+    return result;
+  }
 
   static stringPaddedCenter(str, numspace) {
     const spc = Array(numspace).fill(' ').join('');

@@ -45,6 +45,7 @@ import CryptoUtil from '../../util/CryptoUtil';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 import HelperContact from '../../models/HelperContact';
 import Role from '../../models/Role';
+import ProfileImage from '../common/ProfileImage';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -645,18 +646,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 data-toggle="dropdown"
                 aria-expanded={isAccountMenuOpen}
               >
-                {account.profileImageUrl && (
-                  <img
-                    className="shared-with-image-single"
-                    src={AccountService.getProfileURL(account.profileImageUrl)}
-                    alt="Profile"
-                  />
-                )}
-                {!account.profileImageUrl && (
-                  <div className="account-circle">
-                    {StringUtil.getFirstUppercase(account.username)}
-                  </div>
-                )}
+                <ProfileImage account={account} />
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem>
