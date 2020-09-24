@@ -115,7 +115,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       if (account.role === Role.helper) {
         accounts = (await AccountService.getAccounts()).filter(
           (accountItem) => {
-            if (accountItem.role === Role.owner && accountItem.id !== account.id) {
+            if (
+              accountItem.role === Role.owner &&
+              accountItem.id !== account.id
+            ) {
               return accountItem;
             }
           }
@@ -162,10 +165,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   addHelperContact = async (helperContactReq) => {
-    const { helperContacts } = {...this.state};
-    const newHelperContact = await HelperContactService.addHelperContact(helperContactReq);
+    const { helperContacts } = { ...this.state };
+    const newHelperContact = await HelperContactService.addHelperContact(
+      helperContactReq
+    );
     helperContacts.push(newHelperContact);
-    this.setState({helperContacts});
+    this.setState({ helperContacts });
   };
 
   handleSearch = (query: string) => {
@@ -183,10 +188,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           ? helperContact.helperAccount
           : helperContact.ownerAccount;
       return (
-        AccountImpl.getFullName(a?.firstName, a?.lastName) &&
-        AccountImpl.getFullName(a?.firstName, a?.lastName)
-          .toLowerCase()
-          .indexOf(query.toLowerCase()) !== -1
+        (AccountImpl.getFullName(a?.firstName, a?.lastName) &&
+          AccountImpl.getFullName(a?.firstName, a?.lastName)
+            .toLowerCase()
+            .indexOf(query.toLowerCase()) !== -1) ||
+        (a.email &&
+          a.email.toLowerCase().indexOf(query.toLowerCase()) !== -1) ||
+        (a.username &&
+          a.username.toLowerCase().indexOf(query.toLowerCase()) !== -1)
       );
     });
     if (query.length === 0) {
@@ -711,13 +720,25 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMyClients() {
-    const { searchedDocuments, accounts, sortAsc, clientShares } = {
+    const {
+      searchedDocuments,
+      sortAsc,
+      clientShares,
+      searchedHelperContacts,
+      accounts,
+    } = {
       ...this.state,
     };
     const { account, privateEncryptionKey } = { ...this.props };
+    const contactAccounts = searchedHelperContacts.map((hc) => {
+      const item = hc.ownerAccount;
+      item.id = accounts.find((a) => a.email === item.email)!.id;
+      item._id = accounts.find((a) => a.email === item.email)!._id;
+      return item;
+    });
     return (
       <ClientPage
-        otherOwnerAccounts={accounts}
+        otherOwnerAccounts={contactAccounts}
         handleAddNew={this.handleAddNew}
         handleSelectDocument={this.handleSelectDocument}
         searchedDocuments={searchedDocuments}
@@ -829,7 +850,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     <Redirect to="/helper-login/clients" />
                   )}
                   {account.role === Role.owner && <Redirect to="/documents" />}
-                  {account.role === Role.admin && <Redirect to="/admin-login" />}
+                  {account.role === Role.admin && (
+                    <Redirect to="/admin-login" />
+                  )}
                 </Route>
                 <Route exact path="**/account">
                   {this.renderAccount()}
