@@ -29,7 +29,10 @@
       display: none;
     }
     @include media-breakpoint-up(md) {
-      display: table;
+      // display: table;
+      justify-content: space-between;
+      display: flex;
+      align-items: center;
     }
     width: 100%;
     padding-left: 10px;
@@ -48,6 +51,8 @@
       @include media-breakpoint-up(lg) {
         margin: 0 127px 0 80px;
       }
+      height: 56px;
+      flex: 1;
       position: relative;
       top: 4px;
     }
