@@ -647,7 +647,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               toggle={this.toggleAccountMenu}
             >
               <DropdownToggle
-                tag="span"
+                tag="div"
                 data-toggle="dropdown"
                 aria-expanded={isAccountMenuOpen}
               >

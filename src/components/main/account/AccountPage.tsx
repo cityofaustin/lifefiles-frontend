@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
-import { Breadcrumb, BreadcrumbItem, DropdownToggle, ListGroup, ListGroupItem } from 'reactstrap';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  DropdownToggle,
+  ListGroup,
+  ListGroupItem,
+} from 'reactstrap';
 import Account from '../../../models/Account';
 import StringUtil from '../../../util/StringUtil';
 import AccountService from '../../../services/AccountService';
 import { Link } from 'react-router-dom';
+import ProfileImage from '../../common/ProfileImage';
 
 interface AccountPageProps {
   account: Account;
@@ -30,21 +37,24 @@ class AccountPage extends Component<AccountPageProps> {
         </Breadcrumb>
         <ListGroup>
           <ListGroupItem className="justify-content-between">
+            <div style={{display: 'flex', alignItems: 'center'}}>
+              <ProfileImage account={account} />
+              <div style={{ marginLeft: '24px', display: 'inline-block' }}>
+                {/*{`${account.firstName} ${account.lastName}`}*/}
+                {account.username}
+              </div>
+            </div>
             {/*<img className="shared-with-image-single"*/}
             {/*     src={account.profileimgUrl}*/}
             {/*     alt="profile"*/}
             {/*/>*/}
-            {account.profileImageUrl && (
+            {/* {account.profileImageUrl && (
               <img className="shared-with-image-single" src={AccountService.getProfileURL(account.profileImageUrl)}
                 alt="Profile" />
             )}
             {!account.profileImageUrl && (
               <div className="account-circle">{StringUtil.getFirstUppercase(account.username)}</div>
-            )}
-            <div style={{ marginLeft: '24px', display: 'inline-block' }}>
-              {/*{`${account.firstName} ${account.lastName}`}*/}
-              {account.username}
-            </div>
+            )} */}
           </ListGroupItem>
         </ListGroup>
       </div>
