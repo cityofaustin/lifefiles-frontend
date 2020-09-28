@@ -80,6 +80,9 @@ interface UpdateDocumentModalProps {
   removeShareRequest: (request: ShareRequest) => void;
   myAccount: Account;
   handleUpdateDocument: (request: UpdateDocumentRequest) => void;
+  handleUpdateDocumentAndUpdateShareRequests: (
+    request: UpdateDocumentRequest
+  ) => void;
   privateEncryptionKey?: string;
   referencedAccount?: Account;
   handleClientSelected: (otherOwnerAccount: Account) => void; // to refresh the share request data
@@ -118,6 +121,8 @@ interface UpdateDocumentModalState {
   approvedVpUrl?: string;
   doc?: any;
   isLoading: boolean;
+  updatedBase64Image?: string;
+  gotNotarizationInfo: boolean;
 }
 
 class UpdateDocumentModal extends Component<
@@ -155,37 +160,43 @@ class UpdateDocumentModal extends Component<
       vp: undefined,
       doc: undefined,
       isLoading: false,
+      updatedBase64Image: undefined,
+      gotNotarizationInfo: false,
     };
   }
 
-  componentDidMount = async () => {
-    if (this.state.adminPublicKey === '') {
-      let rskGasPrice = await rskClient.host().getGasPrice();
-      let ethGasPrice = web3.utils.toWei(
-        '' + (await NotaryService.getEthGasPrice()) / 10,
-        'gwei'
-      );
+  getNotarizationInfo = async () => {
+    if (this.state.gotNotarizationInfo == false) {
+      this.setState({ gotNotarizationInfo: true });
 
-      let adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
-      let currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
-      let currentEthPrice = await NotaryService.getCoinPrice('ethereum');
+      if (this.state.adminPublicKey === '') {
+        let rskGasPrice = await rskClient.host().getGasPrice();
+        let ethGasPrice = web3.utils.toWei(
+          '' + (await NotaryService.getEthGasPrice()) / 10,
+          'gwei'
+        );
 
-      this.setState({ ethGasPrice: parseInt(ethGasPrice) });
-      this.setState({ rskGasPrice });
+        let adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
+        let currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
+        let currentEthPrice = await NotaryService.getCoinPrice('ethereum');
 
-      if (
-        adminPublicKeyResponse == undefined ||
-        adminPublicKeyResponse == null
-      ) {
-        this.setState({ adminPublicKey: '-' });
-      } else {
-        this.setState({
-          adminPublicKey: adminPublicKeyResponse.adminPublicKey,
-        });
+        this.setState({ ethGasPrice: parseInt(ethGasPrice) });
+        this.setState({ rskGasPrice });
+
+        if (
+          adminPublicKeyResponse == undefined ||
+          adminPublicKeyResponse == null
+        ) {
+          this.setState({ adminPublicKey: '-' });
+        } else {
+          this.setState({
+            adminPublicKey: adminPublicKeyResponse.adminPublicKey,
+          });
+        }
+
+        this.setState({ currentBtcPrice });
+        this.setState({ currentEthPrice });
       }
-
-      this.setState({ currentBtcPrice });
-      this.setState({ currentEthPrice });
     }
   };
 
@@ -259,15 +270,19 @@ class UpdateDocumentModal extends Component<
   };
 
   handleUpdateDocument = () => {
-    const { newFile, newThumbnailFile } = { ...this.state };
-    const { handleUpdateDocument, document } = { ...this.props };
-    handleUpdateDocument({
-      // id: '5ed6aa532f74186d6238bf47',
+    const { newFile, newThumbnailFile, updatedBase64Image } = { ...this.state };
+    const { handleUpdateDocumentAndUpdateShareRequests, document } = {
+      ...this.props,
+    };
+
+    handleUpdateDocumentAndUpdateShareRequests({
       id: document!._id!,
       img: newFile,
       thumbnail: newThumbnailFile,
       validUntilDate: undefined, // FIXME: add expired at form somewhere
+      base64Image: updatedBase64Image!,
     });
+
     // clear state
     this.setState({
       activeTab: '1',
@@ -548,6 +563,10 @@ class UpdateDocumentModal extends Component<
     this.setState({ newFile, newThumbnailFile });
   };
 
+  setUpdatedBase64Image = (updatedBase64Image) => {
+    this.setState({ updatedBase64Image });
+  };
+
   printImg(url: string) {
     const win = window.open('');
     win?.document.write(
@@ -590,6 +609,7 @@ class UpdateDocumentModal extends Component<
 
   renderNotarizeTab = (base64Thumbnail) => {
     const options: OptionTypeBase[] = [];
+    // this.getNotarizationInfo();
     options.push({
       value: 'certifiedCopy',
       label: 'Certified Copy',
@@ -977,6 +997,7 @@ class UpdateDocumentModal extends Component<
                           className={classNames({ active: activeTab === '4' })}
                           onClick={() => {
                             this.toggleTab('4');
+                            this.getNotarizationInfo();
                           }}
                         >
                           Notarize
@@ -1155,6 +1176,7 @@ class UpdateDocumentModal extends Component<
                     <div className="update-doc-tab-spacing">
                       <FileUploader
                         setFile={this.setFile}
+                        setUpdatedBase64Image={this.setUpdatedBase64Image}
                         privateEncryptionKey={this.props.privateEncryptionKey}
                       />
                     </div>

@@ -21,6 +21,7 @@ export enum FileUploaderThemeEnum {
 
 interface FileUploaderProps {
   setFile: (file?: File, thumbnailFile?: File, previewURL?: string) => void;
+  setUpdatedBase64Image?: (updatedBase64Image) => void;
   documentType?: string;
   privateEncryptionKey?: string;
   theme: FileUploaderThemeEnum;
@@ -46,7 +47,9 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
   };
 
   handleOnDrop = async (acceptedFiles: File[]) => {
-    const { setFile, privateEncryptionKey } = { ...this.props };
+    const { setFile, setUpdatedBase64Image, privateEncryptionKey } = {
+      ...this.props,
+    };
     acceptedFiles = acceptedFiles.map((file) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file),
@@ -78,6 +81,11 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
           lastModified: Date.now(),
         }
       );
+
+      if (setUpdatedBase64Image != undefined) {
+        setUpdatedBase64Image(base64String);
+      }
+
       setFile(newZippedFile, newZippedThumbnailFile, (oneFile as any).preview);
     } else {
       const base64Thumbnail = await StringUtil.fileContentsToThumbnail(
