@@ -421,6 +421,115 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     );
   };
 
+  handleUpdateDocumentAndUpdateShareRequests = async (
+    request: UpdateDocumentRequest
+  ) => {
+    const { account } = { ...this.props };
+    let { documents, accounts } = { ...this.state };
+    const { documentQuery } = { ...this.state };
+    this.setState({ isLoading: true });
+
+    let updatedDoc;
+    try {
+      updatedDoc = await DocumentService.updateDocument(request);
+      // FIXME: get API call to return updatedAt
+      updatedDoc.updatedAt = new Date();
+      documents = documents.map((doc) =>
+        doc.type === updatedDoc.type ? updatedDoc : doc
+      );
+    } catch (err) {
+      console.error('failed to upload file');
+    }
+
+    const matchedShareRequests = account.shareRequests.filter(
+      (shareRequest) => {
+        return shareRequest.documentType === updatedDoc.type;
+      }
+    );
+
+    // remove existing share requests
+    try {
+      for (let i = 0; i < matchedShareRequests.length; i++) {
+        await ShareRequestService.deleteShareRequest(
+          matchedShareRequests[i]!._id!
+        );
+        // remove share requests from UI
+        this.removeShareRequest(matchedShareRequests[i]);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+
+    // create new share requests
+    try {
+      for (let i = 0; i < matchedShareRequests.length; i++) {
+        let selectedContact;
+
+        for (let j = 0; j < accounts.length; j++) {
+          if (accounts[j].id == matchedShareRequests[i].shareWithAccountId!) {
+            selectedContact = accounts[j];
+            break;
+          }
+        }
+
+        // START FILE ENCYRPTION
+        const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
+        const file: File = StringUtil.dataURLtoFile(
+          request.base64Image!,
+          'original'
+        );
+        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(file);
+        const encryptedString = await CryptoUtil.getEncryptedByPublicString(
+          encryptionPublicKey!,
+          request.base64Image!
+        );
+        const encryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(
+          encryptionPublicKey!,
+          base64Thumbnail
+        );
+        const zipped: Blob = await ZipUtil.zip(encryptedString);
+        const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
+        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+          type: 'application/zip',
+          lastModified: Date.now(),
+        });
+        const newZippedThumbnailFile = new File(
+          [zippedThumbnail],
+          'encrypted-image-thumbnail.zip',
+          {
+            type: 'application/zip',
+            lastModified: Date.now(),
+          }
+        );
+        // END FILE ENCYRPTION
+        const newShareRequest = await ShareRequestService.addShareRequestFile(
+          newZippedFile,
+          newZippedThumbnailFile,
+          updatedDoc?.type!,
+          account.id,
+          matchedShareRequests[i].shareWithAccountId!
+        );
+        // add share request to UI
+        this.addShareRequest(newShareRequest);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+
+    this.setState(
+      {
+        documents,
+        showModal: false,
+        isLoading: false,
+        documentSelected: undefined,
+        activeDocumentTab: '1',
+      },
+      () => {
+        this.handleSearch(documentQuery);
+      }
+    );
+  };
+
   handleDeleteDocument = async (document: Document) => {
     const { account } = { ...this.props };
     let { documents, searchedDocuments } = { ...this.state };
@@ -587,6 +696,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         document={documentSelected}
         shareRequests={shareRequests}
         handleUpdateDocument={this.handleUpdateDocument}
+        handleUpdateDocumentAndUpdateShareRequests={
+          this.handleUpdateDocumentAndUpdateShareRequests
+        }
         handleDeleteDocument={this.handleDeleteDocument}
         addShareRequest={this.addShareRequest}
         removeShareRequest={this.removeShareRequest}

@@ -134,7 +134,7 @@ class AddDocumentModal extends Component<
     };
   }
 
-  componentDidMount = async () => {
+  getNotarizationInfo = async () => {
     if (this.state.adminPublicKey === '') {
       let rskGasPrice = await rskClient.host().getGasPrice();
       let ethGasPrice = web3.utils.toWei(
@@ -569,9 +569,10 @@ class AddDocumentModal extends Component<
             <Toggle
               isLarge
               value={isGoingToNotarize}
-              onToggle={() =>
-                this.setState({ isGoingToNotarize: !isGoingToNotarize })
-              }
+              onToggle={() => {
+                this.getNotarizationInfo();
+                this.setState({ isGoingToNotarize: !isGoingToNotarize });
+              }}
             />
           </div>
           {/* TODO: */}
