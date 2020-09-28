@@ -179,6 +179,7 @@
         margin-top: 6px;
         flex-wrap: wrap;
         .contact {
+          position: relative;
           width: 160px;
           height: 140px;
           border: solid 1px #cecece;
@@ -190,8 +191,16 @@
           justify-content: space-evenly;
           align-items: center;
           cursor: pointer;
+          .badge-container {
+            position: absolute;
+            top: 0;
+            right: 50%;
+          }
           &.active {
             background: #cecece;
+            .share-status {
+              color: #484848;
+            }
           }
           .contact-image {
             width: 62px;
@@ -224,6 +233,7 @@
         }
         .react-multi-carousel-list {
           .contact {
+            position: relative;
             margin: 0 auto;
             width: 137.4px;
             height: 140px;
@@ -233,8 +243,16 @@
             justify-content: space-evenly;
             align-items: center;
             cursor: pointer;
+            .badge-container {
+              position: absolute;
+              top: 0;
+              right: 60%;
+            }
             &.active {
               background: #ececec;
+              .share-status {
+                color: #484848;
+              }
             }
             .contact-image {
               width: 86px;

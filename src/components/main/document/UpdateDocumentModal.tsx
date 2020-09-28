@@ -60,6 +60,7 @@ import APIService from '../../../services/APIService';
 import rskapi from 'rskapi';
 import Web3 from 'web3';
 import QRCode from 'qrcode.react';
+import Badge from '../../common/Badge';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -696,9 +697,7 @@ class UpdateDocumentModal extends Component<
           >
             <option value="eth">Ethereum Network</option>
             <option value="rsk">RSK Network</option>
-            <option selected value="s3">
-              Amazon S3
-            </option>
+            <option value="s3">Amazon S3</option>
           </select>
 
           {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
@@ -835,7 +834,14 @@ class UpdateDocumentModal extends Component<
   };
 
   render() {
-    const { showModal, document, accounts, myAccount, referencedAccount } = {
+    const {
+      showModal,
+      document,
+      accounts,
+      myAccount,
+      referencedAccount,
+      shareRequests,
+    } = {
       ...this.props,
     };
     const {
@@ -978,16 +984,23 @@ class UpdateDocumentModal extends Component<
                   </NavItem>
 
                   {!referencedAccount && (
-                    <NavItem>
-                      <NavLink
-                        className={classNames({ active: activeTab === '3' })}
-                        onClick={() => {
-                          this.toggleTab('3');
-                        }}
-                      >
-                        Share
-                      </NavLink>
-                    </NavItem>
+                    <div style={{position: 'relative'}}>
+                      {shareRequests.find((sr) => !sr.approved) && (
+                        <div style={{left: '-8px', top: '-12px', position: 'absolute'}}>
+                          <Badge />
+                        </div>
+                      )}
+                      <NavItem>
+                        <NavLink
+                          className={classNames({ active: activeTab === '3' })}
+                          onClick={() => {
+                            this.toggleTab('3');
+                          }}
+                        >
+                          Share
+                        </NavLink>
+                      </NavItem>
+                    </div>
                   )}
 
                   {this.props.myAccount.role === 'owner' &&

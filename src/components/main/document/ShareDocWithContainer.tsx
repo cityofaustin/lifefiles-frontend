@@ -1,20 +1,23 @@
-import React, {Component, Fragment} from 'react';
+import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import AccountService from '../../../services/AccountService';
 import AccountImpl from '../../../models/AccountImpl';
-import {roleDisplayMap} from '../../../models/Role';
+import { roleDisplayMap } from '../../../models/Role';
 import Checkbox from '../../common/Checkbox';
 import Select from 'react-select/base';
-import {addMonths, format} from 'date-fns';
+import { addMonths, format } from 'date-fns';
 import Account from '../../../models/Account';
 import ShareRequest from '../../../models/ShareRequest';
 import './ShareDocWithContainer.scss';
 import Carousel from 'react-multi-carousel';
 import Document from '../../../models/document/Document';
+import Badge from '../../common/Badge';
 
 interface ShareDocWithContainerProps {
   selectedContact?: Account;
-  getDocumentSharedWithContact: (selectedContact: Account) => ShareRequest | undefined;
+  getDocumentSharedWithContact: (
+    selectedContact: Account
+  ) => ShareRequest | undefined;
   handleShareDocCheck: () => Promise<void>;
   accounts: Account[];
   handleSelectContact: (contact: Account) => void;
@@ -22,10 +25,9 @@ interface ShareDocWithContainerProps {
 }
 
 class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
-
   getShareStatus(shareRequest: ShareRequest | undefined) {
-    if(shareRequest) {
-      if(shareRequest.approved) {
+    if (shareRequest) {
+      if (shareRequest.approved) {
         return 'shared';
       } else {
         return 'pending';
@@ -37,27 +39,48 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
 
   render() {
     const {
-      selectedContact, getDocumentSharedWithContact, handleShareDocCheck, accounts,
-      handleSelectContact, document
-    } = {...this.props};
+      selectedContact,
+      getDocumentSharedWithContact,
+      handleShareDocCheck,
+      accounts,
+      handleSelectContact,
+      document,
+    } = { ...this.props };
     const shareRequest = getDocumentSharedWithContact(selectedContact!);
     return (
       <div className="share-container">
-        <div className={classNames({'contact-details': true, active: selectedContact})}>
+        <div
+          className={classNames({
+            'contact-details': true,
+            active: selectedContact,
+          })}
+        >
           {selectedContact && (
             <div>
               <div className="contact-top">
-                <img className="contact-detail-image"
-                     src={AccountService.getProfileURL(selectedContact.profileImageUrl!)}
-                     alt="Profile"/>
+                <img
+                  className="contact-detail-image"
+                  src={AccountService.getProfileURL(
+                    selectedContact.profileImageUrl!
+                  )}
+                  alt="Profile"
+                />
                 <div className="contact-detail-share-doc-sm">
-                  <div className="prompt">
-                    Share {document!.type}?
-                  </div>
-                  <Checkbox isLarge isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
+                  <div className="prompt">Share {document!.type}?</div>
+                  <Checkbox
+                    isLarge
+                    isChecked={shareRequest && shareRequest.approved}
+                    onClick={handleShareDocCheck}
+                  />
                   <div className="share-status">
-                    This file is {(shareRequest && shareRequest.approved) ? '' : 'NOT '}currently shared with
-                    {' ' + AccountImpl.getFullName(selectedContact.firstName, selectedContact.lastName)}
+                    This file is{' '}
+                    {shareRequest && shareRequest.approved ? '' : 'NOT '}
+                    currently shared with
+                    {' ' +
+                      AccountImpl.getFullName(
+                        selectedContact.firstName,
+                        selectedContact.lastName
+                      )}
                   </div>
                 </div>
               </div>
@@ -65,20 +88,29 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
                 <div className="info-item">
                   <div className="item-attr">Name</div>
                   <div className="item-value">
-                    {AccountImpl.getFullName(selectedContact?.firstName, selectedContact?.lastName)}
+                    {AccountImpl.getFullName(
+                      selectedContact?.firstName,
+                      selectedContact?.lastName
+                    )}
                   </div>
                 </div>
                 <div className="info-item">
                   <div className="item-attr">Organization</div>
-                  <div className="item-value">{selectedContact?.organization || '-'}</div>
+                  <div className="item-value">
+                    {selectedContact?.organization || '-'}
+                  </div>
                 </div>
                 <div className="info-item">
                   <div className="item-attr">Role</div>
-                  <div className="item-value">{roleDisplayMap[selectedContact.role]}</div>
+                  <div className="item-value">
+                    {roleDisplayMap[selectedContact.role]}
+                  </div>
                 </div>
                 <div className="info-item">
                   <div className="item-attr">Phone</div>
-                  <div className="item-value">{selectedContact?.phoneNumber || '-'}</div>
+                  <div className="item-value">
+                    {selectedContact?.phoneNumber || '-'}
+                  </div>
                 </div>
                 <div className="info-item">
                   <div className="item-attr">E-mail</div>
@@ -88,13 +120,26 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
               <div className="contact-detail-share-doc">
                 <div className="prompt">
                   {shareRequest === undefined && `Share ${document!.type}?`}
-                  {shareRequest && shareRequest.approved && `Share ${document!.type}?`}
-                  {shareRequest && !shareRequest.approved && `${selectedContact.firstName} has Requested Access to your Document`}
+                  {shareRequest &&
+                    shareRequest.approved &&
+                    `Share ${document!.type}?`}
+                  {shareRequest &&
+                    !shareRequest.approved &&
+                    `${selectedContact.firstName} has Requested Access to your Document`}
                 </div>
-                <Checkbox isChecked={(shareRequest && shareRequest.approved)} onClick={handleShareDocCheck}/>
+                <Checkbox
+                  isChecked={shareRequest && shareRequest.approved}
+                  onClick={handleShareDocCheck}
+                />
                 <div className="share-status">
-                  This file is {(shareRequest && shareRequest.approved) ? '' : 'NOT '}currently shared with
-                  {' ' + AccountImpl.getFullName(selectedContact.firstName, selectedContact.lastName)}
+                  This file is{' '}
+                  {shareRequest && shareRequest.approved ? '' : 'NOT '}currently
+                  shared with
+                  {' ' +
+                    AccountImpl.getFullName(
+                      selectedContact.firstName,
+                      selectedContact.lastName
+                    )}
                 </div>
               </div>
             </div>
@@ -104,21 +149,41 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
         <div className="right-panel">
           <div className="contact-list">
             <div className="title">contacts</div>
-            <div className="subtitle">Select a contact to share this document with</div>
+            <div className="subtitle">
+              Select a contact to share this document with
+            </div>
             <div className="contact-grid">
-              {accounts.map(account => (
-                <div key={account.id}
-                     className={classNames({
-                         contact: true,
-                         active: (selectedContact && selectedContact.id === account.id)
-                       }
-                     )}
-                     onClick={() => handleSelectContact(account)}>
-                  <img className="contact-image"
-                       src={AccountService.getProfileURL(account.profileImageUrl!)}
-                       alt="Profile"/>
-                  <div className="contact-name">{AccountImpl.getFullName(account.firstName, account.lastName)}</div>
-                  <div className="share-status">{this.getShareStatus(getDocumentSharedWithContact(account))}</div>
+              {accounts.map((account) => (
+                <div
+                  key={account.id}
+                  className={classNames({
+                    contact: true,
+                    active:
+                      selectedContact && selectedContact.id === account.id,
+                  })}
+                  onClick={() => handleSelectContact(account)}
+                >
+                  {this.getShareStatus(
+                    getDocumentSharedWithContact(account)
+                  ) === 'pending' && (
+                    <div className="badge-container">
+                      <Badge />
+                    </div>
+                  )}
+                  <img
+                    className="contact-image"
+                    src={AccountService.getProfileURL(account.profileImageUrl!)}
+                    alt="Profile"
+                  />
+                  <div className="contact-name">
+                    {AccountImpl.getFullName(
+                      account.firstName,
+                      account.lastName
+                    )}
+                  </div>
+                  <div className="share-status">
+                    {this.getShareStatus(getDocumentSharedWithContact(account))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -126,50 +191,78 @@ class ShareDocWithContainer extends Component<ShareDocWithContainerProps> {
               <Carousel
                 responsive={{
                   mobile: {
-                    breakpoint: {max: 768, min: 0},
-                    items: 2
-                  }
+                    breakpoint: { max: 768, min: 0 },
+                    items: 2,
+                  },
                 }}
                 infinite={false}
                 // showDots={true}
               >
-                {accounts.map(account => (
-                  <div key={account.id}
-                       className={classNames({
-                           contact: true,
-                           active: (selectedContact && selectedContact.id === account.id)
-                         }
-                       )}
-                       onClick={() => handleSelectContact(account)}>
-                    <img className="contact-image"
-                         src={AccountService.getProfileURL(account.profileImageUrl!)}
-                         alt="Profile"/>
-                    <div className="contact-name">{AccountImpl.getFullName(account.firstName, account.lastName)}</div>
-                    <div className="share-status">{this.getShareStatus(getDocumentSharedWithContact(account))}</div>
+                {accounts.map((account) => (
+                  <div
+                    key={account.id}
+                    className={classNames({
+                      contact: true,
+                      active:
+                        selectedContact && selectedContact.id === account.id,
+                    })}
+                    onClick={() => handleSelectContact(account)}
+                  >
+                    {this.getShareStatus(
+                      getDocumentSharedWithContact(account)
+                    ) === 'pending' && (
+                      <div className="badge-container">
+                        <Badge />
+                      </div>
+                    )}
+                    <img
+                      className="contact-image"
+                      src={AccountService.getProfileURL(
+                        account.profileImageUrl!
+                      )}
+                      alt="Profile"
+                    />
+                    <div className="contact-name">
+                      {AccountImpl.getFullName(
+                        account.firstName,
+                        account.lastName
+                      )}
+                    </div>
+                    <div className="share-status">
+                      {this.getShareStatus(
+                        getDocumentSharedWithContact(account)
+                      )}
+                    </div>
                   </div>
                 ))}
               </Carousel>
             </div>
           </div>
           <div className="share-time-limit">
-            <div className="share-time-disabled-overlay"/>
+            <div className="share-time-disabled-overlay" />
             <div className="title">time limit</div>
-            <div className="subtitle">Specify how long this document will be shared</div>
+            <div className="subtitle">
+              Specify how long this document will be shared
+            </div>
             <div className="share-for-container">
               <div className="share-for-form-group">
                 <label>Share for...</label>
                 <div className="duration">
-                  <Select/>
+                  <Select />
                 </div>
               </div>
               <div className="date-container">
                 <div className="date-indicator">From</div>
-                <div className="date-value">{format(new Date(), 'MMMM d, y')}</div>
+                <div className="date-value">
+                  {format(new Date(), 'MMMM d, y')}
+                </div>
                 {/* <div className="date-value">September 25, 2020</div> */}
               </div>
               <div className="date-container">
                 <div className="date-indicator">To</div>
-                <div className="date-value">{format(addMonths(new Date(), 1), 'MMMM d, y')}</div>
+                <div className="date-value">
+                  {format(addMonths(new Date(), 1), 'MMMM d, y')}
+                </div>
                 {/* <div className="date-value">September 25, 2020</div> */}
               </div>
             </div>
