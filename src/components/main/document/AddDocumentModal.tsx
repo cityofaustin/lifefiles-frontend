@@ -17,7 +17,7 @@ import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
 import { ReactComponent as CrossSmSvg } from '../../../img/cross2-sm.svg';
 import { ReactComponent as NewDocSvg } from '../../../img/new-doc-2.svg';
 import { ReactComponent as NewDocSmSvg } from '../../../img/new-doc-sm.svg';
-import Select, { OptionTypeBase } from 'react-select';
+import { OptionTypeBase } from 'react-select';
 import './AddDocumentModal.scss';
 import AccountImpl from '../../../models/AccountImpl';
 import Account from '../../../models/Account';
@@ -108,9 +108,12 @@ class AddDocumentModal extends Component<
   AddDocumentModalProps,
   AddDocumentModalState
 > {
+  minDate: Date;
   constructor(props: Readonly<AddDocumentModalProps>) {
     super(props);
 
+    this.minDate = new Date();
+    this.minDate.setDate(new Date().getDate() + 1);
     this.state = {
       rskGasPrice: 1000000000,
       ethGasPrice: 1000000000,
@@ -122,7 +125,7 @@ class AddDocumentModal extends Component<
       documentType: '',
       isOther: false,
       hasValidUntilDate: false,
-      validUntilDate: new Date(),
+      validUntilDate: this.minDate,
       isGoingToNotarize: false,
       notaryId: '',
       notarySealBase64: '',
@@ -136,21 +139,21 @@ class AddDocumentModal extends Component<
 
   componentDidMount = async () => {
     if (this.state.adminPublicKey === '') {
-      let rskGasPrice = await rskClient.host().getGasPrice();
-      let ethGasPrice = web3.utils.toWei(
+      const rskGasPrice = await rskClient.host().getGasPrice();
+      const ethGasPrice = web3.utils.toWei(
         '' + (await NotaryService.getEthGasPrice()) / 10,
         'gwei'
       );
 
-      let adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
-      let currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
-      let currentEthPrice = await NotaryService.getCoinPrice('ethereum');
+      const adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
+      const currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
+      const currentEthPrice = await NotaryService.getCoinPrice('ethereum');
 
-      this.setState({ ethGasPrice: parseInt(ethGasPrice) });
+      this.setState({ ethGasPrice: Number(ethGasPrice) });
       this.setState({ rskGasPrice });
 
       if (
-        adminPublicKeyResponse == undefined ||
+        adminPublicKeyResponse === undefined ||
         adminPublicKeyResponse == null
       ) {
         this.setState({ adminPublicKey: '-' });
@@ -189,6 +192,7 @@ class AddDocumentModal extends Component<
       ...this.props,
     };
     let { documentType, newFile, errorMessage, isOther } = { ...this.state };
+    errorMessage = '';
     const { hasValidUntilDate, validUntilDate } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
     // If document type exists show error message, this shouldn't happen though
@@ -240,7 +244,7 @@ class AddDocumentModal extends Component<
       newFile,
       errorMessage,
       hasValidUntilDate: false,
-      validUntilDate: new Date(),
+      validUntilDate: this.minDate,
     });
     this.toggleModal();
   };
@@ -251,23 +255,45 @@ class AddDocumentModal extends Component<
   };
 
   handleNotaryUploadNewSeal = (file: any) => {
-    const notarySealBase64 = file.base64;
-    ImageUtil.processImageBase64(notarySealBase64);
-    this.setState({ notarySealBase64 });
+    let { errorMessage, notarySealBase64 } = { ...this.state };
+    errorMessage = '';
+    if (file.type === 'image/jpeg' || file.type === 'image/png') {
+      notarySealBase64 = file.base64;
+      ImageUtil.processImageBase64(notarySealBase64);
+    } else {
+      errorMessage = 'Invalid Notary Seal File';
+    }
+    this.setState({ errorMessage, notarySealBase64 });
   };
 
   handleNotaryUploadPem = async (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      let privatePem = '' as any;
-      privatePem = ev?.target?.result;
-      const publicPem = NotaryUtil.getPublicKeyFromPrivateKey(privatePem);
-      this.setState({ privatePem, publicPem });
-    };
-    if (e.target.files !== null) {
-      reader.readAsText(e.target.files[0]);
+    let { errorMessage, privatePem, publicPem } = { ...this.state };
+    errorMessage = '';
+    try {
+      if (e.target.files !== null) {
+        const file: File = e.target.files[0];
+        publicPem = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            privatePem = ev?.target?.result as string;
+            let publicPem1;
+            try {
+              publicPem1 = NotaryUtil.getPublicKeyFromPrivateKey(privatePem);
+            } catch (err) {
+              reject(err);
+            }
+            resolve(publicPem1);
+          };
+          reader.onerror = reject;
+          reader.readAsText(file);
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      errorMessage = 'Invalid Signing Key';
     }
+    this.setState({ errorMessage, privatePem, publicPem });
   };
 
   handleNotarizeDocument = async () => {
@@ -375,11 +401,30 @@ class AddDocumentModal extends Component<
       isOther: false,
       documentTypeOption: undefined,
       hasValidUntilDate: false,
-      validUntilDate: new Date(),
+      validUntilDate: this.minDate,
       isGoingToNotarize: false,
       notaryId: '',
     });
     toggleModal();
+  };
+
+  isNotarizeDisabled = () => {
+    // TODO: do file check pem check return error if they are in a bad format, e.g. wrong file for seal, incorrect pem format.
+    const { notaryId, notarySealBase64, publicPem, errorMessage } = { ...this.state };
+    let isDisabled = false;
+    if (notaryId.length <= 0) {
+      isDisabled = true;
+    }
+    if (notarySealBase64.length <= 0) {
+      isDisabled = true;
+    }
+    if (publicPem.length <= 0) {
+      isDisabled = true;
+    }
+    if(errorMessage && errorMessage.length > 0) {
+      isDisabled = true;
+    }
+    return isDisabled;
   };
 
   renderDocumentTypeSection() {
@@ -478,6 +523,7 @@ class AddDocumentModal extends Component<
             <div className="date-picker">
               <div className="label">EXPIRATION DATE</div>
               <DatePicker
+                minDate={this.minDate}
                 selected={validUntilDate}
                 onChange={(date) => {
                   this.setState({ validUntilDate: date });
@@ -496,17 +542,19 @@ class AddDocumentModal extends Component<
   }
 
   renderNotarizeSection() {
-    const { previewURL, isGoingToNotarize, notaryId } = { ...this.state };
+    const { previewURL, isGoingToNotarize, notaryId, errorMessage } = {
+      ...this.state,
+    };
 
     let fundNetworkSection;
 
     if (this.state.networkSelect === 'rsk') {
-      let rskTotalCostToSend = web3.utils.fromWei(
+      const rskTotalCostToSend = web3.utils.fromWei(
         '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
         'ether'
       );
 
-      let dollarAmount =
+      const dollarAmount =
         Math.round(
           parseFloat(rskTotalCostToSend) * this.state.currentBtcPrice * 1000
         ) / 1000;
@@ -529,12 +577,12 @@ class AddDocumentModal extends Component<
         </div>
       );
     } else if (this.state.networkSelect === 'eth') {
-      let ethTotalCostToSend = web3.utils.fromWei(
+      const ethTotalCostToSend = web3.utils.fromWei(
         '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
         'ether'
       );
 
-      let dollarAmount =
+      const dollarAmount =
         Math.round(
           parseFloat(ethTotalCostToSend) * this.state.currentEthPrice * 1000
         ) / 1000;
@@ -578,6 +626,9 @@ class AddDocumentModal extends Component<
           {isGoingToNotarize && (
             <div className="notary-form">
               <div>NOTARY INFORMATION</div>
+              {errorMessage && errorMessage.length > 0 && (
+                <span className="error">{errorMessage}</span>
+              )}
               {/* <div className="form-line">
                 <div className="input-section">
                   <label>Notary State</label>
@@ -632,9 +683,7 @@ class AddDocumentModal extends Component<
                   >
                     <option value="eth">Ethereum Network</option>
                     <option value="rsk">RSK Network</option>
-                    <option selected value="s3">
-                      Amazon S3
-                    </option>
+                    <option value="s3">Amazon S3</option>
                   </select>
 
                   {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
@@ -845,6 +894,7 @@ class AddDocumentModal extends Component<
                     color="primary"
                     // onClick={() => this.setState({ addDocumentStep: AddDocumentStep.NOTARIZED })}
                     onClick={this.handleNotarizeDocument}
+                    disabled={this.isNotarizeDisabled()}
                   >
                     Notarize
                   </Button>
