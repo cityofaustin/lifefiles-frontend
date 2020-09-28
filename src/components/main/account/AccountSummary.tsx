@@ -68,7 +68,7 @@ class AccountSummary extends Component<
       isNotary,
     } = { ...this.props };
     const { showAccountShareModal, goToClientDocuments } = { ...this.state };
-    const numberOfShares = shareRequests ? shareRequests.length : 0;
+    const numberOfShares = shareRequests ? shareRequests.filter(sr => sr.approved).length : 0;
     return (
       <div className="network-item" onClick={this.handleAccountSummaryClick}>
         {goToClientDocuments && (
