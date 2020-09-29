@@ -19,6 +19,8 @@ import AdminService from '../services/AdminService';
 
 interface AppState {
   account?: Account;
+  coreFeatures: string[];
+  viewFeatures: string[];
   logoFile?: File;
   isLoading: boolean;
   helperLogin: boolean;
@@ -40,6 +42,8 @@ class App extends Component<{}, AppState> {
       helperLogin: false,
       adminLogin: false,
       theme: Role.owner,
+      coreFeatures: [],
+      viewFeatures: []
     };
   }
 
@@ -68,7 +72,7 @@ class App extends Component<{}, AppState> {
       AccountService.setAuthApi(process.env.AUTH_API);
     }
 
-    let { account, theme } = { ...this.state };
+    let { account, theme, coreFeatures, viewFeatures } = { ...this.state };
     this.setState({ isLoading: true });
     const code = UrlUtil.getQueryVariable('code');
 
@@ -84,7 +88,7 @@ class App extends Component<{}, AppState> {
       try {
         const loginResponse = await AccountService.getMyAccount();
 
-        ({ account } = { ...loginResponse });
+        ({ account, coreFeatures, viewFeatures } = { ...loginResponse });
 
         theme = account?.role;
         document.body.classList.remove('theme-helper', 'theme-owner');
@@ -122,7 +126,7 @@ class App extends Component<{}, AppState> {
     } catch (err) {
       console.error('failed to get app settings.');
     }
-    this.setState({ account, theme, appSettings, isLoading: false });
+    this.setState({ account, theme, appSettings, isLoading: false, coreFeatures, viewFeatures });
   }
 
   setBringYourOwnEncryptionKey = (key) => {
@@ -222,6 +226,8 @@ class App extends Component<{}, AppState> {
       helperLogin,
       adminLogin,
       appSettings,
+      coreFeatures,
+      viewFeatures
     } = {
       ...this.state,
     };
@@ -252,9 +258,9 @@ class App extends Component<{}, AppState> {
           <LogoSvg />
         </div>
         <div id="main" className="app-container">
-          {process.env.NODE_ENV === 'development' && (
+          {/* {process.env.NODE_ENV === 'development' && (
             <div className="screen-info" />
-          )}
+          )} */}
           {isLoading && <ProgressIndicator isFullscreen />}
           {!isLoading && (
             <div className="page-container">
@@ -263,6 +269,8 @@ class App extends Component<{}, AppState> {
                   appSettings={appSettings}
                   saveAppSettings={this.saveAppSettings}
                   account={account}
+                  coreFeatures={coreFeatures}
+                  viewFeatures={viewFeatures}
                   handleLogout={this.handleLogout}
                   updateAccountShareRequests={this.updateAccountShareRequests}
                   privateEncryptionKey={privateEncryptionKey}

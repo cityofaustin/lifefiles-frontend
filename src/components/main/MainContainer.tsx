@@ -76,6 +76,8 @@ interface MainContainerProps {
   updateAccountShareRequests: (requests: ShareRequest[]) => void;
   privateEncryptionKey?: string;
   setBringYourOwnEncryptionKey: (key) => void;
+  coreFeatures: string[];
+  viewFeatures: string[];
 }
 
 class MainContainer extends Component<MainContainerProps, MainContainerState> {
@@ -871,7 +873,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       activeTab,
       accounts,
     } = { ...this.state };
-    const { account, privateEncryptionKey } = { ...this.props };
+    const { account, privateEncryptionKey, coreFeatures, viewFeatures } = { ...this.props };
     const { id } = props.match.params;
     let referencedAccount;
     if (id) {
@@ -899,6 +901,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         privateEncryptionKey={privateEncryptionKey}
         referencedAccount={referencedAccount}
         handleClientSelected={this.handleClientSelected}
+        coreFeatures={coreFeatures}
+        viewFeatures={viewFeatures}
       />
     );
   }

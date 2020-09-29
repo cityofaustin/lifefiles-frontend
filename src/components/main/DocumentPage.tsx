@@ -40,6 +40,8 @@ import AddContactModal from './account/AddContactModal';
 import HelperContact from '../../models/HelperContact';
 import { HelperContactRequest } from '../../services/HelperContactService';
 import ProfileImage, { ProfileImageSizeEnum } from '../common/ProfileImage';
+import { CoreFeatureEnum } from '../../models/admin/CoreFeature';
+import Role from '../../models/Role';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -61,6 +63,8 @@ interface DocumentPageProps {
   removeShareRequest: (request: ShareRequest) => void;
   privateEncryptionKey?: string;
   handleClientSelected: (clientSelected: Account) => void;
+  coreFeatures: string[];
+  viewFeatures: string[];
 }
 
 interface MainPageState {
@@ -171,20 +175,27 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       searchedHelperContacts,
       shareRequests,
       privateEncryptionKey,
+      myAccount,
+      coreFeatures
     } = { ...this.props };
     return (
       <Fragment>
         {this.renderGridSort()}
         <Row style={{ marginRight: '0', minHeight: '480px' }}>
-          <Col
-            sm="12"
-            md="6"
-            lg="4"
-            className="document-add-new document-item"
-            onClick={handleAddNew}
-          >
-            <AddNewDocument handleAddNew={handleAddNew} />
-          </Col>
+          {(myAccount.role === Role.owner ||
+            coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) >
+              -1) && (
+            <Col
+              sm="12"
+              md="6"
+              lg="4"
+              className="document-add-new document-item"
+              onClick={handleAddNew}
+            >
+              <AddNewDocument handleAddNew={handleAddNew} />
+            </Col>
+          )}
+
           {searchedDocuments.length <= 0 && (
             <Col sm="12" md="6" lg="4" className="document-summary-container">
               <div
@@ -268,6 +279,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       myAccount,
       privateEncryptionKey,
       referencedAccount,
+      coreFeatures,
     } = { ...this.props };
     return (
       <div>
@@ -288,20 +300,24 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             </tr>
           </thead>
           <tbody>
-            <tr onClick={handleAddNew}>
-              <td>
-                <div className="add-new">
-                  <div>
-                    <NewDoc />
+            {(myAccount.role === Role.owner ||
+              coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) >
+                -1) && (
+              <tr onClick={handleAddNew}>
+                <td>
+                  <div className="add-new">
+                    <div>
+                      <NewDoc />
+                    </div>
+                    <div>Add new</div>
                   </div>
-                  <div>Add new</div>
-                </div>
-              </td>
-              <td />
-              <td />
-              <td />
-              <td />
-            </tr>
+                </td>
+                <td />
+                <td />
+                <td />
+                <td />
+              </tr>
+            )}
             {searchedDocuments.map((document, idx) => {
               const sharedAccounts: Account[] = this.getSharedAccounts(
                 document,
@@ -599,6 +615,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       accounts,
       helperContacts,
       addHelperContact,
+      myAccount,
+      coreFeatures
     } = {
       ...this.props,
     };
@@ -661,7 +679,10 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <Link to="/helper-login/clients">
                     <ChevronLeft />
                   </Link>
-                  <ProfileImage account={referencedAccount} size={ProfileImageSizeEnum.SMALL} />
+                  <ProfileImage
+                    account={referencedAccount}
+                    size={ProfileImageSizeEnum.SMALL}
+                  />
                   {/* <img
                     src={AccountService.getProfileURL(
                       referencedAccount.profileImageUrl!
@@ -669,11 +690,13 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                     alt=""
                   /> */}
                   <span>
-                    {AccountImpl.hasNameSet(referencedAccount) && AccountImpl.getFullName(
-                      referencedAccount.firstName,
-                      referencedAccount.lastName
-                    )}
-                    {!AccountImpl.hasNameSet(referencedAccount) && referencedAccount.username}
+                    {AccountImpl.hasNameSet(referencedAccount) &&
+                      AccountImpl.getFullName(
+                        referencedAccount.firstName,
+                        referencedAccount.lastName
+                      )}
+                    {!AccountImpl.hasNameSet(referencedAccount) &&
+                      referencedAccount.username}
                   </span>
                 </div>
                 <div className="permission-section">
@@ -684,7 +707,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             </div>
           )}
 
-          {activeTab === '1' && (
+          {activeTab === '1' && (myAccount.role === Role.owner ||
+            coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) >
+              -1) && (
             <FabAdd className="fab-add" onClick={handleAddNew} />
           )}
         </Fragment>
