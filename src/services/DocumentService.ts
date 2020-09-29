@@ -33,13 +33,14 @@ class DocumentService extends AgentService {
     );
   }
 
-  static async uplooadDocumentOnBehalfOfUser(
+  static async uploadDocumentOnBehalfOfUser(
     newCaseworkerFile: File,
     newCaseworkerThumbnail: File,
     newOwnerFile: File,
     newOwnerThumbnail: File,
     documentType: string,
-    ownerId: string
+    ownerId: string,
+    validUntilDate?: Date
   ) {
     return await super.uploadDocumentOnBehalfOfUser(
       newCaseworkerFile,
@@ -47,7 +48,8 @@ class DocumentService extends AgentService {
       newOwnerFile,
       newOwnerThumbnail,
       documentType,
-      ownerId
+      ownerId,
+      validUntilDate
     );
   }
 

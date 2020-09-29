@@ -229,7 +229,8 @@ class APIService {
     newOwnerFile: File,
     newOwnerThumbnail: File,
     documentType: string,
-    ownerId: string
+    ownerId: string,
+    validUntilDate?: Date
   ) {
     const path = '/upload-document-on-behalf-of-user';
     const input = `${API_ENDPOINT}${path}`;
@@ -243,6 +244,9 @@ class APIService {
     formdata.append('img', newOwnerThumbnail, newOwnerThumbnail.name);
     formdata.append('type', documentType);
     formdata.append('uploadForAccountId', ownerId);
+    if(validUntilDate) {
+      formdata.append('validuntildate', validUntilDate.toUTCString());
+    }
     const init = {
       method: 'POST',
       headers,

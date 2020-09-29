@@ -360,7 +360,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               ownerFile,
               ownerThumbnail,
               documentTypeSelected!,
-              referencedAccount.id
+              referencedAccount.id,
+              validUntilDate
             );
             this.handleClientSelected(referencedAccount);
             newDocument = response.document;
@@ -596,16 +597,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         .filter((shareRequest: ShareRequest) => {
           return shareRequest.shareWithAccountId === account.id;
         })
-        .map((shareRequest: ShareRequest) => {
+        .map((shareRequest: any) => {
           return {
             type: shareRequest.documentType,
-            // FIXME: this could be handled more elegantly, but this way works for now, the server should be sending owner's documenturl
-            // and not the thumbnail but should instead be sending both as empty strings.
             url: shareRequest.approved ? shareRequest.documentUrl : '',
             thumbnailUrl: shareRequest.documentThumbnailUrl
               ? shareRequest.documentThumbnailUrl
               : '',
             sharedWithAccountIds: [shareRequest.shareWithAccountId],
+            validUntilDate: shareRequest.validUntilDate
           };
         });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(
@@ -623,6 +623,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             url: '',
             thumbnailUrl: '',
             sharedWithAccountIds: [],
+            // validUntilDate: shareRequest.validUntilDate
           };
         });
       documents = [
