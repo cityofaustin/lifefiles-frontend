@@ -721,7 +721,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       <div id="main-top-bar-sm">
         <LogoSm onClick={() => this.setSidebarOpen(true)} />
         {account.role !== 'admin' && (
-          <SearchInput handleSearch={this.handleSearch} />
+          <SearchInput handleSearch={this.handleSearch} autoSearch />
         )}
       </div>
     );
@@ -752,7 +752,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           {account.role !== 'admin' && adminLogin !== true && (
             <Row id="main-search">
               <Col style={{ display: 'flex' }}>
-                <SearchInput handleSearch={this.handleSearch} />
+                <SearchInput handleSearch={this.handleSearch} autoSearch />
               </Col>
             </Row>
           )}
