@@ -607,7 +607,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               ? shareRequest.documentThumbnailUrl
               : '',
             sharedWithAccountIds: [shareRequest.shareWithAccountId],
-            validUntilDate: shareRequest.validUntilDate
+            validUntilDate: shareRequest.validUntilDate,
           };
         });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(
@@ -770,7 +770,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem>
-                  <Link to="./account">My Account</Link>
+                  {account.role === Role.helper && (
+                    <Link to="/helper-login/account">My Account</Link>
+                  )}
+                  {account.role === Role.owner && (
+                    <Link to="/account">My Account</Link>
+                  )}
                 </DropdownItem>
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
@@ -873,7 +878,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       activeTab,
       accounts,
     } = { ...this.state };
-    const { account, privateEncryptionKey, coreFeatures, viewFeatures } = { ...this.props };
+    const { account, privateEncryptionKey, coreFeatures, viewFeatures } = {
+      ...this.props,
+    };
     const { id } = props.match.params;
     let referencedAccount;
     if (id) {

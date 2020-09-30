@@ -576,6 +576,16 @@ class UpdateDocumentModal extends Component<
     win?.focus();
   }
 
+  openPdfWindow(url: string) {
+    const win = window.open('');
+    win?.document.write(
+      '<embed type="application/pdf" src="' +
+        url +
+        '" id="pdfDocument" width="100%" height="100%" />'
+    );
+    win?.focus();
+  }
+
   getDocumentSharedWithContact = (selectedContact: Account) => {
     // const { selectedContact } = { ...this.state };
     const { shareRequests } = { ...this.props };
@@ -984,9 +994,15 @@ class UpdateDocumentModal extends Component<
                   </NavItem>
 
                   {!referencedAccount && (
-                    <div style={{position: 'relative'}}>
+                    <div style={{ position: 'relative' }}>
                       {shareRequests.find((sr) => !sr.approved) && (
-                        <div style={{left: '-8px', top: '-12px', position: 'absolute'}}>
+                        <div
+                          style={{
+                            left: '-8px',
+                            top: '-12px',
+                            position: 'absolute',
+                          }}
+                        >
                           <Badge />
                         </div>
                       )}
@@ -1052,41 +1068,70 @@ class UpdateDocumentModal extends Component<
                           src={base64Image}
                           alt="doc missing"
                         /> */}
-                              <ZoomBtnSmSvg
-                                onClick={() =>
-                                  this.setState({ isZoomed: true })
-                                }
-                              />
+                              {(base64Image || base64Pdf) && (
+                                <ZoomBtnSmSvg
+                                  onClick={() => {
+                                    if (base64Pdf) {
+                                      this.openPdfWindow(base64Pdf);
+                                    }
+                                    if (base64Image) {
+                                      this.setState({ isZoomed: true });
+                                    }
+                                  }}
+                                />
+                              )}
                             </div>
                             <div className="img-access-sm">
-                              <button
-                                onClick={() => {
-                                  // Not allowed to navigate top frame to data URL
-                                  // window.location.href = base64Image!;
-                                  const iframe =
-                                    '<iframe width="100%" height="100%" src="' +
-                                    base64Image! +
-                                    '"></iframe>';
-                                  const x = window.open()!;
-                                  x.document.open();
-                                  x.document.write(iframe);
-                                  x.document.close();
-                                }}
-                                className="download-btn"
-                              >
-                                Download
-                              </button>
-                              <button
-                                onClick={() => this.printImg(base64Image!)}
-                                className="print-btn"
-                              >
-                                Print
-                              </button>
+                              {(base64Image || base64Pdf) && (
+                                <button
+                                  onClick={() => {
+                                    // Not allowed to navigate top frame to data URL
+                                    // window.location.href = base64Image!;
+                                    const dataUri = base64Image
+                                      ? base64Image
+                                      : base64Pdf;
+                                    const iframe =
+                                      '<iframe width="100%" height="100%" src="' +
+                                      dataUri! +
+                                      '"></iframe>';
+                                    const x = window.open()!;
+                                    x.document.open();
+                                    x.document.write(iframe);
+                                    x.document.close();
+                                  }}
+                                  className="download-btn"
+                                >
+                                  Download
+                                </button>
+                              )}
+                              {base64Image && (
+                                <button
+                                  onClick={() => this.printImg(base64Image)}
+                                  className="print-btn"
+                                >
+                                  Print
+                                </button>
+                              )}
+                              {base64Pdf && (
+                                <button
+                                  onClick={() => this.openPdfWindow(base64Pdf)}
+                                  className="print-btn"
+                                >
+                                  Print
+                                </button>
+                              )}
                             </div>
                             <div className="img-access">
-                              <a href={base64Image} download target="_blank">
-                                <DownloadBtnSvg />
-                              </a>
+                              {base64Image && (
+                                <a href={base64Image} download target="_blank">
+                                  <DownloadBtnSvg />
+                                </a>
+                              )}
+                              {base64Pdf && (
+                                <a href={base64Pdf} download target="_blank">
+                                  <DownloadBtnSvg />
+                                </a>
+                              )}
                               <PrintBtnSvg
                                 onClick={() => this.printImg(base64Image!)}
                               />

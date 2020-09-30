@@ -15,6 +15,7 @@ import { ReactComponent as LogoutSvg } from '../../img/logout.svg';
 import { Link } from 'react-router-dom';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 import ProfileImage from '../common/ProfileImage';
+import Role from '../../models/Role';
 
 interface SidebarProps {
   appSettings: AppSetting[];
@@ -85,9 +86,16 @@ class SideBar extends Component<SidebarProps> {
                       <span>
                         <Contact />
                       </span>
-                      <Link to="./account">
-                        <span>My Profile</span>
-                      </Link>
+                      {account.role === Role.helper && (
+                        <Link to="/helper-login/account">
+                          <span>My Profile</span>
+                        </Link>
+                      )}
+                      {account.role === Role.owner && (
+                        <Link to="/account">
+                          <span>My Profile</span>
+                        </Link>
+                      )}
                     </span>
                     <span className="bm-item menu-item">
                       <span>
@@ -111,7 +119,9 @@ class SideBar extends Component<SidebarProps> {
                       className="bm-item menu-item"
                       onClick={this.handleLogout}
                     >
-                      <span><LogoutSvg /></span>
+                      <span>
+                        <LogoutSvg />
+                      </span>
                       <span>Logout</span>
                     </span>
                   </nav>
