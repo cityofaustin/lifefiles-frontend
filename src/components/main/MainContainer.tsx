@@ -608,6 +608,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               : '',
             sharedWithAccountIds: [shareRequest.shareWithAccountId],
             validUntilDate: shareRequest.validUntilDate,
+            vcJwt: shareRequest.vcJwt,
+            vpDocumentDidAddress: shareRequest.vpDocumentDidAddress
           };
         });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(

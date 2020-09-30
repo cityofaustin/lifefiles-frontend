@@ -61,6 +61,7 @@ import rskapi from 'rskapi';
 import Web3 from 'web3';
 import QRCode from 'qrcode.react';
 import Badge from '../../common/Badge';
+import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -1044,42 +1045,50 @@ class UpdateDocumentModal extends Component<
                               {/* NOTE: leaving out for now until we have functionality server side */}
                               {/*<FlipDocBtnSvg className="pointer"/>*/}
                             </div>
-                            <div className="img-container">
-                              {!base64Image && !base64Pdf && (
-                                <div>Loading...</div>
-                              )}
-                              {base64Pdf && (
-                                <div className="pdf-display">
-                                  <PdfPreview
-                                    fileURL={base64Pdf}
-                                    height={400}
-                                  />
+                            <div style={{ width: '100%' }}>
+                              {document.vcJwt && document.vpDocumentDidAddress && (
+                                <div className="notarized">
+                                  <StampSvg />
+                                  <div className="notary-label">NOTARIZED</div>
                                 </div>
                               )}
-                              {base64Image && (
-                                <ImageWithStatus
-                                  imageUrl={base64Image}
-                                  imageViewType={ImageViewTypes.PREVIEW}
-                                />
-                              )}
-                              {/* <img
-                          className="doc-image"
-                          // src={DocumentService.getDocumentURL(document!.url)}
-                          src={base64Image}
-                          alt="doc missing"
-                        /> */}
-                              {(base64Image || base64Pdf) && (
-                                <ZoomBtnSmSvg
-                                  onClick={() => {
-                                    if (base64Pdf) {
-                                      this.openPdfWindow(base64Pdf);
-                                    }
-                                    if (base64Image) {
-                                      this.setState({ isZoomed: true });
-                                    }
-                                  }}
-                                />
-                              )}
+                              <div className="img-container">
+                                {!base64Image && !base64Pdf && (
+                                  <div>Loading...</div>
+                                )}
+                                {base64Pdf && (
+                                  <div className="pdf-display">
+                                    <PdfPreview
+                                      fileURL={base64Pdf}
+                                      height={400}
+                                    />
+                                  </div>
+                                )}
+                                {base64Image && (
+                                  <ImageWithStatus
+                                    imageUrl={base64Image}
+                                    imageViewType={ImageViewTypes.PREVIEW}
+                                  />
+                                )}
+                                {/* <img
+                                  className="doc-image"
+                                  // src={DocumentService.getDocumentURL(document!.url)}
+                                  src={base64Image}
+                                  alt="doc missing"
+                                /> */}
+                                {(base64Image || base64Pdf) && (
+                                  <ZoomBtnSmSvg
+                                    onClick={() => {
+                                      if (base64Pdf) {
+                                        this.openPdfWindow(base64Pdf);
+                                      }
+                                      if (base64Image) {
+                                        this.setState({ isZoomed: true });
+                                      }
+                                    }}
+                                  />
+                                )}
+                              </div>
                             </div>
                             <div className="img-access-sm">
                               {(base64Image || base64Pdf) && (
@@ -1133,13 +1142,27 @@ class UpdateDocumentModal extends Component<
                                 </a>
                               )}
                               <PrintBtnSvg
-                                onClick={() => this.printImg(base64Image!)}
+                                onClick={() => {
+                                  if(base64Image) {
+                                    this.printImg(base64Image!);
+                                  }
+                                  if(base64Pdf) {
+                                    this.openPdfWindow(base64Pdf);
+                                  }
+                                }}
                               />
-                              <ZoomBtnSvg
-                                onClick={() =>
-                                  this.setState({ isZoomed: true })
-                                }
-                              />
+                              {(base64Image || base64Pdf) && (
+                                <ZoomBtnSmSvg
+                                  onClick={() => {
+                                    if (base64Pdf) {
+                                      this.openPdfWindow(base64Pdf);
+                                    }
+                                    if (base64Image) {
+                                      this.setState({ isZoomed: true });
+                                    }
+                                  }}
+                                />
+                              )}
                             </div>
                           </div>
                           <div className="preview-info">

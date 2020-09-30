@@ -67,5 +67,23 @@
     .no-shares {
       height: 92px;
     }
+    .notarized {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .notary-label {
+        font-size: 22px;
+        margin-left: 12px;
+        font-weight: bold;
+        @include themify($themes) {
+          color: themed("colorPrimary");
+        }
+      }
+      svg > path {
+        @include themify($themes) {
+          fill: themed("colorPrimary");
+        }
+      }
+    }
   }
 }

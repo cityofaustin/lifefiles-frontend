@@ -336,7 +336,6 @@
             text-transform: uppercase;
           }
         }
-
         .doc-updated-cell {
           display: flex;
           flex-direction: column;
@@ -356,6 +355,13 @@
               position: absolute;
               top: -9px;
               left: -15px;
+            }
+          }
+        }
+        &.notarized {
+          svg > path {
+            @include themify($themes) {
+              fill: themed("colorPrimary");
             }
           }
         }

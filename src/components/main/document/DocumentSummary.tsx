@@ -7,6 +7,7 @@ import SharedWith from './SharedWith';
 import ShareRequest from '../../../models/ShareRequest';
 import Badge from '../../common/Badge';
 import './DocumentSummary.scss';
+import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
 
 interface DocumentSummaryProps {
   document?: Document;
@@ -53,6 +54,12 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
         {document && (
           <Fragment>
             <div>
+              {document.vcJwt && document.vpDocumentDidAddress && (
+                <div className="notarized">
+                  <StampSvg />
+                  <div className="notary-label">NOTARIZED</div>
+                </div>
+              )}
               <ImageWithStatus
                 imageViewType={ImageViewTypes.GRID_LAYOUT}
                 imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}

@@ -42,6 +42,7 @@ import { HelperContactRequest } from '../../services/HelperContactService';
 import ProfileImage, { ProfileImageSizeEnum } from '../common/ProfileImage';
 import { CoreFeatureEnum } from '../../models/admin/CoreFeature';
 import Role from '../../models/Role';
+import {ReactComponent as StampSvg} from '../../img/stamp.svg';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -444,7 +445,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                         : 'N/A'}
                     </div>
                   </td>
-                  <td>{document.notarized}</td>
+                  <td className="notarized">{document.vcJwt && document.vpDocumentDidAddress && (<StampSvg />)}</td>
                 </tr>
               );
             })}
