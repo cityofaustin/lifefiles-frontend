@@ -136,9 +136,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     const { myAccount, coreFeatures, helperContacts, referencedAccount } = {
       ...this.props,
     };
-    const referencedContact = helperContacts.find(
+    const referencedContact = referencedAccount ? helperContacts.find(
       (hc) => hc.ownerAccount.username === referencedAccount!.username
-    );
+    ) : undefined;
     return (
       myAccount.role === Role.owner ||
       (coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) > -1 &&
