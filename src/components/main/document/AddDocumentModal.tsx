@@ -39,6 +39,7 @@ import ProgressIndicator from '../../common/ProgressIndicator';
 import rskapi from 'rskapi';
 import Web3 from 'web3';
 import QRCode from 'qrcode.react';
+import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -410,7 +411,9 @@ class AddDocumentModal extends Component<
 
   isNotarizeDisabled = () => {
     // TODO: do file check pem check return error if they are in a bad format, e.g. wrong file for seal, incorrect pem format.
-    const { notaryId, notarySealBase64, publicPem, errorMessage } = { ...this.state };
+    const { notaryId, notarySealBase64, publicPem, errorMessage } = {
+      ...this.state,
+    };
     let isDisabled = false;
     if (notaryId.length <= 0) {
       isDisabled = true;
@@ -421,7 +424,7 @@ class AddDocumentModal extends Component<
     if (publicPem.length <= 0) {
       isDisabled = true;
     }
-    if(errorMessage && errorMessage.length > 0) {
+    if (errorMessage && errorMessage.length > 0) {
       isDisabled = true;
     }
     return isDisabled;
@@ -747,20 +750,33 @@ class AddDocumentModal extends Component<
         >
           <ModalHeader toggle={this.toggleModal} close={closeBtn}>
             {referencedAccount && (
-              <Fragment>
-                <img
-                  src={AccountService.getProfileURL(
-                    referencedAccount.profileImageUrl!
-                  )}
-                  alt=""
-                />
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {!referencedAccount.profileImageUrl && (
+                  <div style={{ marginRight: '28.3px' }}>
+                    <ProfileImage
+                      account={referencedAccount}
+                      size={ProfileImageSizeEnum.SMALL}
+                    />
+                  </div>
+                )}
+                {referencedAccount.profileImageUrl && (
+                  <img
+                    src={AccountService.getProfileURL(
+                      referencedAccount.profileImageUrl!
+                    )}
+                    alt=""
+                  />
+                )}
                 <span>
-                  {AccountImpl.getFullName(
-                    referencedAccount.firstName,
-                    referencedAccount.lastName
-                  )}
+                  {AccountImpl.hasNameSet(referencedAccount) &&
+                    AccountImpl.getFullName(
+                      referencedAccount.firstName,
+                      referencedAccount.lastName
+                    )}
+                  {!AccountImpl.hasNameSet(referencedAccount) &&
+                    referencedAccount.username}
                 </span>
-              </Fragment>
+              </div>
             )}
             {!referencedAccount && (
               <Fragment>

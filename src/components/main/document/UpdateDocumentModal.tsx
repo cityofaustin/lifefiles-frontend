@@ -62,6 +62,7 @@ import Web3 from 'web3';
 import QRCode from 'qrcode.react';
 import Badge from '../../common/Badge';
 import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
+import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -900,21 +901,34 @@ class UpdateDocumentModal extends Component<
         >
           <ModalHeader toggle={this.toggleModal} close={closeBtn}>
             {referencedAccount && (
-              <Fragment>
-                <img
-                  src={AccountService.getProfileURL(
-                    referencedAccount.profileImageUrl!
-                  )}
-                  alt=""
-                />
-                <span>
-                  {AccountImpl.getFullName(
-                    referencedAccount.firstName,
-                    referencedAccount.lastName
-                  )}{' '}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {!referencedAccount.profileImageUrl && (
+                  <div style={{ marginRight: '28.3px' }}>
+                    <ProfileImage
+                      account={referencedAccount}
+                      size={ProfileImageSizeEnum.SMALL}
+                    />
+                  </div>
+                )}
+                {referencedAccount.profileImageUrl && (
+                  <img
+                    src={AccountService.getProfileURL(
+                      referencedAccount.profileImageUrl!
+                    )}
+                    alt=""
+                  />
+                )}
+                <span className="update-doc-title">
+                  {AccountImpl.hasNameSet(referencedAccount) &&
+                    AccountImpl.getFullName(
+                      referencedAccount.firstName,
+                      referencedAccount.lastName
+                    )}
+                  {!AccountImpl.hasNameSet(referencedAccount) &&
+                    referencedAccount.username}{' '}
                   - {document?.type}
                 </span>
-              </Fragment>
+              </div>
             )}
             {!referencedAccount && (
               <Fragment>
@@ -1143,10 +1157,10 @@ class UpdateDocumentModal extends Component<
                               )}
                               <PrintBtnSvg
                                 onClick={() => {
-                                  if(base64Image) {
+                                  if (base64Image) {
                                     this.printImg(base64Image!);
                                   }
-                                  if(base64Pdf) {
+                                  if (base64Pdf) {
                                     this.openPdfWindow(base64Pdf);
                                   }
                                 }}

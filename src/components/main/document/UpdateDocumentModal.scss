@@ -2,6 +2,31 @@
 @import "../../variables";
 
 .update-doc-modal {
+  .modal-title {
+    width: 100%;
+    width: -moz-available;
+    width: -webkit-fill-available;
+    width: fill-available;
+  }
+  .modal-close {
+    @include media-breakpoint-down(sm) {
+      margin-left: -10px;
+    }
+  }
+  .update-doc-title {
+    @include media-breakpoint-down(lg) {
+      width: 556px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    @include media-breakpoint-down(md) {
+      width: 258px;
+    }
+    @include media-breakpoint-down(sm) {
+      width: calc(100% - 104px);
+    }
+  }
   .modal-content {
     @include media-breakpoint-up(md) {
       background-color: white !important;

@@ -42,7 +42,7 @@ import { HelperContactRequest } from '../../services/HelperContactService';
 import ProfileImage, { ProfileImageSizeEnum } from '../common/ProfileImage';
 import { CoreFeatureEnum } from '../../models/admin/CoreFeature';
 import Role from '../../models/Role';
-import {ReactComponent as StampSvg} from '../../img/stamp.svg';
+import { ReactComponent as StampSvg } from '../../img/stamp.svg';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -132,6 +132,21 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     if (activeTab !== tab) setActiveTab(tab);
   };
 
+  canAddDocs = () => {
+    const { myAccount, coreFeatures, helperContacts, referencedAccount } = {
+      ...this.props,
+    };
+    const referencedContact = helperContacts.find(
+      (hc) => hc.ownerAccount.username === referencedAccount!.username
+    );
+    return (
+      myAccount.role === Role.owner ||
+      (coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) > -1 &&
+        referencedContact &&
+        referencedContact.canAddNewDocuments)
+    );
+  };
+
   renderGridSort() {
     const { isLayoutGrid } = { ...this.state };
     const { sortAsc, toggleSort, activeTab } = { ...this.props };
@@ -176,16 +191,12 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       searchedHelperContacts,
       shareRequests,
       privateEncryptionKey,
-      myAccount,
-      coreFeatures
     } = { ...this.props };
     return (
       <Fragment>
         {this.renderGridSort()}
         <Row style={{ marginRight: '0', minHeight: '480px' }}>
-          {(myAccount.role === Role.owner ||
-            coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) >
-              -1) && (
+          {this.canAddDocs() && (
             <Col
               sm="12"
               md="6"
@@ -280,7 +291,6 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       myAccount,
       privateEncryptionKey,
       referencedAccount,
-      coreFeatures,
     } = { ...this.props };
     return (
       <div>
@@ -301,10 +311,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             </tr>
           </thead>
           <tbody>
-            {(myAccount.role === Role.owner ||
-              coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) >
-                -1) && (
-              <tr onClick={handleAddNew}>
+            {this.canAddDocs() && (
+              <tr className="add-new-tr" onClick={handleAddNew}>
                 <td>
                   <div className="add-new">
                     <div>
@@ -445,7 +453,11 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                         : 'N/A'}
                     </div>
                   </td>
-                  <td className="notarized">{document.vcJwt && document.vpDocumentDidAddress && (<StampSvg />)}</td>
+                  <td className="notarized">
+                    {document.vcJwt && document.vpDocumentDidAddress && (
+                      <StampSvg />
+                    )}
+                  </td>
                 </tr>
               );
             })}
@@ -617,7 +629,6 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       helperContacts,
       addHelperContact,
       myAccount,
-      coreFeatures
     } = {
       ...this.props,
     };
@@ -708,9 +719,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             </div>
           )}
 
-          {activeTab === '1' && (myAccount.role === Role.owner ||
-            coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) >
-              -1) && (
+          {activeTab === '1' && this.canAddDocs() && (
             <FabAdd className="fab-add" onClick={handleAddNew} />
           )}
         </Fragment>

@@ -221,7 +221,7 @@
   tbody {
     tr {
       @include media-breakpoint-down(sm) {
-        &:first-child {
+        &.add-new-tr {
           display: none;
         }
         height: 74px;
