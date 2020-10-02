@@ -258,9 +258,9 @@ class App extends Component<{}, AppState> {
           <LogoSvg />
         </div>
         <div id="main" className="app-container">
-          {/* {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === 'development' && (
             <div className="screen-info" />
-          )} */}
+          )}
           {isLoading && <ProgressIndicator isFullscreen />}
           {!isLoading && (
             <div className="page-container">

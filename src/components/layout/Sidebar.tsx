@@ -20,6 +20,7 @@ import Role from '../../models/Role';
 interface SidebarProps {
   appSettings: AppSetting[];
   goToAccount: () => void;
+  goToMySettings: () => void;
   handleLogout: () => void;
   isOpen: boolean;
   setOpen: (b: boolean) => void;
@@ -37,6 +38,12 @@ class SideBar extends Component<SidebarProps> {
     const { goToAccount, setOpen } = { ...this.props };
     setOpen(false);
     goToAccount();
+  };
+
+  goToMySettings = () => {
+    const { goToMySettings, setOpen } = { ...this.props };
+    setOpen(false);
+    goToMySettings();
   };
 
   render() {
@@ -103,7 +110,10 @@ class SideBar extends Component<SidebarProps> {
                       </span>
                       <span>My Network</span>
                     </span>
-                    <span className="bm-item menu-item">
+                    <span
+                      className="bm-item menu-item"
+                      onClick={this.goToMySettings}
+                    >
                       <span>
                         <Cog />
                       </span>

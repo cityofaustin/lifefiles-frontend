@@ -39,6 +39,12 @@ class AccountImpl implements Account {
     );
   }
 
+  public static displayName(account) {
+    return this.hasNameSet(account)
+      ? this.getFullName(account.firstName, account.lastName)
+      : account.username;
+  }
+
   public static getProfileURLByIdAndList(accounts: Account[], accountId: any) {
     const account = this.getAccountByIdAndList(accounts, accountId);
     if (account) {

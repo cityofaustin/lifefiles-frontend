@@ -46,6 +46,7 @@ import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 import HelperContact from '../../models/HelperContact';
 import Role from '../../models/Role';
 import ProfileImage from '../common/ProfileImage';
+import MySettings from './MySettings';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -66,6 +67,7 @@ interface MainContainerState {
   activeDocumentTab: string;
   sidebarOpen?: boolean;
   clientShares: Map<string, ShareRequest[]>;
+  isMySettingsOpen: boolean;
 }
 
 interface MainContainerProps {
@@ -104,6 +106,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       activeDocumentTab: '1',
       sidebarOpen: false,
       clientShares: new Map<string, ShareRequest[]>(),
+      isMySettingsOpen: false,
     };
   }
 
@@ -609,7 +612,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             sharedWithAccountIds: [shareRequest.shareWithAccountId],
             validUntilDate: shareRequest.validUntilDate,
             vcJwt: shareRequest.vcJwt,
-            vpDocumentDidAddress: shareRequest.vpDocumentDidAddress
+            vpDocumentDidAddress: shareRequest.vpDocumentDidAddress,
           };
         });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(
@@ -779,6 +782,17 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     <Link to="/account">My Account</Link>
                   )}
                 </DropdownItem>
+                {account.role === Role.owner && (
+                  <DropdownItem>
+                    <div
+                      onClick={() => {
+                        this.setState({ isMySettingsOpen: true });
+                      }}
+                    >
+                      My Settings
+                    </div>
+                  </DropdownItem>
+                )}
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -917,8 +931,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   render() {
-    const { account, handleLogout, appSettings } = { ...this.props };
-    const { isLoading, isAccount, sidebarOpen } = { ...this.state };
+    const { account, handleLogout, appSettings, privateEncryptionKey } = {
+      ...this.props,
+    };
+    const { isLoading, isAccount, sidebarOpen, isMySettingsOpen } = {
+      ...this.state,
+    };
 
     let adminLogin = false;
 
@@ -948,6 +966,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       >
         {isLoading && <ProgressIndicator isFullscreen />}
         <div id="main-container">
+          {privateEncryptionKey && (
+            <MySettings
+              isOpen={isMySettingsOpen}
+              setOpen={(isOpen) => this.setState({ isMySettingsOpen: isOpen })}
+              privateEncryptionKey={privateEncryptionKey}
+              account={account}
+            />
+          )}
           <Sidebar
             appSettings={appSettings}
             account={account}
@@ -955,6 +981,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             goToAccount={this.goToAccount}
             isOpen={!!sidebarOpen}
             setOpen={this.setSidebarOpen}
+            goToMySettings={() => this.setState({ isMySettingsOpen: true })}
           />
           {this.renderTopBar(false)}
           {this.renderTopBarSmall()}
