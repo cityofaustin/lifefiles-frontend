@@ -43,7 +43,7 @@ class App extends Component<{}, AppState> {
       adminLogin: false,
       theme: Role.owner,
       coreFeatures: [],
-      viewFeatures: []
+      viewFeatures: [],
     };
   }
 
@@ -126,7 +126,14 @@ class App extends Component<{}, AppState> {
     } catch (err) {
       console.error('failed to get app settings.');
     }
-    this.setState({ account, theme, appSettings, isLoading: false, coreFeatures, viewFeatures });
+    this.setState({
+      account,
+      theme,
+      appSettings,
+      isLoading: false,
+      coreFeatures,
+      viewFeatures,
+    });
   }
 
   setBringYourOwnEncryptionKey = (key) => {
@@ -137,6 +144,24 @@ class App extends Component<{}, AppState> {
   };
 
   handleEncryptionKey = async (role) => {
+    let cookieValue;
+
+    try {
+      if (document.cookie !== undefined) {
+        cookieValue = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('bring-your-own-key'))!
+          .split('=')[1];
+      }
+    } catch (e) {}
+
+    // Owner BYOK
+    if (cookieValue !== undefined && cookieValue.length >= 64) {
+      // this.setState({ privateEncryptionKey: cookieValue });
+      this.setBringYourOwnEncryptionKey(cookieValue);
+      document.cookie = 'bring-your-own-key=' + -1;
+    }
+
     if (window.sessionStorage.getItem('bring-your-own-key') === null) {
       // If the user did not provider their own key we will provide one
       let encryptionKeyResponse: EncryptionKeyResponse;
@@ -177,8 +202,6 @@ class App extends Component<{}, AppState> {
 
       AuthService.logIn(account?.token, '');
 
-      console.log('account??');
-      console.log(account);
       await this.handleEncryptionKey(account?.role);
     } catch (err) {
       console.error('failed to login.');
@@ -227,7 +250,7 @@ class App extends Component<{}, AppState> {
       adminLogin,
       appSettings,
       coreFeatures,
-      viewFeatures
+      viewFeatures,
     } = {
       ...this.state,
     };
@@ -235,11 +258,21 @@ class App extends Component<{}, AppState> {
     let pageToRender = <ProgressIndicator isFullscreen />;
 
     if (helperLogin) {
-      pageToRender = <HelperLoginPage appSettings={appSettings} handleLogin={this.handleLogin} />;
+      pageToRender = (
+        <HelperLoginPage
+          appSettings={appSettings}
+          handleLogin={this.handleLogin}
+        />
+      );
     }
 
     if (adminLogin) {
-      pageToRender = <AdminLoginPage appSettings={appSettings} handleLogin={this.handleLogin} />;
+      pageToRender = (
+        <AdminLoginPage
+          appSettings={appSettings}
+          handleLogin={this.handleLogin}
+        />
+      );
     }
 
     return (
