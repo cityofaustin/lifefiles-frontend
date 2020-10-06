@@ -6,7 +6,8 @@ import Dotenv from 'dotenv-webpack';
 const htmlPlugin = new HtmlWebPackPlugin({
   template: './src/index.html',
   filename: './index.html',
-  favicon: 'public/favicon.ico'
+  favicon: 'public/favicon.ico',
+  hotjar: ''
 });
 
 const dotEnvPlugin = new Dotenv({
