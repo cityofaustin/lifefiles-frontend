@@ -26,6 +26,20 @@
           margin-right: 28.3px;
           border-radius: 50%;
         }
+        .my-settings-title {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          @include media-breakpoint-up(md) {
+            width: 257px;
+          }
+          @include media-breakpoint-up(lg) {
+            width: 558px;
+          }
+          @include media-breakpoint-up(xl) {
+            width: 897px;
+          }
+        }
       }
       .modal-close {
         @include themify($themes) {
@@ -54,12 +68,18 @@
       }
     }
     .modal-body {
+      @include media-breakpoint-up(xl) {
+        margin: -15px 0 0 0;
+      }
       .account-settings-title {
         text-align: center;
         color: $mid-blue;
         font-size: 30px;
         font-weight: 500;
         margin-bottom: 9px;
+        @include media-breakpoint-up(xl) {
+          margin-top: 9px;
+        }
       }
       .account-settings-option {
         font-size: 30px;
@@ -70,7 +90,7 @@
         cursor: pointer;
         &.active {
           color: #646565;
-          background-color: #ececec;
+          background-color: darken(#ececec, 10%);
         }
       }
       .account-settings-content {
@@ -82,9 +102,27 @@
         padding: 24px 42px;
         &.bottom {
           background-color: #f5f5f5;
+          @include media-breakpoint-up(xl) {
+            background-color: #ececec;
+          }
           .account-content-title {
             font-size: 28px;
             margin-left: -36px;
+            @include media-breakpoint-up(xl) {
+              font-size: 63px;
+              font-weight: bold;
+            }
+          }
+          .account-content-excerpt {
+            margin-bottom: 37px;
+          }
+          button {
+            margin-top: 48px;
+            height: auto;
+            width: min-content;
+            @include media-breakpoint-up(sm) {
+              width: max-content;
+            }
           }
         }
         .account-content-title {
@@ -92,6 +130,10 @@
           font-weight: bold;
           color: $mid-blue;
           margin-bottom: 26px;
+          @include media-breakpoint-up(xl) {
+            font-size: 63px;
+            font-weight: bold;
+          }
         }
         .account-content-excerpt {
           margin-top: 37px;
