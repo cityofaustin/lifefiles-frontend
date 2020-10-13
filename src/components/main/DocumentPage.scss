@@ -402,4 +402,15 @@
   bottom: 25px;
   right: 20px;
   cursor: pointer;
+
+  rect {
+    @include themify($themes) {
+      fill: themed("colorPrimary");
+    }
+  }
+  path[data-name="Path 1243"] {
+    @include themify($themes) {
+      fill: themed("colorPrimary");
+    }
+  }
 }

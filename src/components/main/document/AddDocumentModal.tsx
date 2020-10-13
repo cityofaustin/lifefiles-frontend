@@ -40,6 +40,8 @@ import rskapi from 'rskapi';
 import Web3 from 'web3';
 import QRCode from 'qrcode.react';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
+import { ReactComponent as NotarizeOverviewSvg } from '../../../img/notarize-overview.svg';
+import Checkbox from '../../common/Checkbox';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -74,7 +76,9 @@ enum AddDocumentStep {
   TYPE_SELECTION,
   FILE_SELECTION,
   EXPIRATION,
+  NOTARIZATION_OVERVIEW,
   NOTARIZATION,
+  NOTARIZATION_CONIRM,
   NOTARIZED,
 }
 
@@ -103,6 +107,9 @@ interface AddDocumentModalState {
   vc?: string;
   doc?: jsPDF;
   isLoading: boolean;
+  acceptsUsingDigitalSignatures: boolean;
+  isTrueDocument: boolean;
+  acceptsDigitalSignature: boolean;
 }
 
 class AddDocumentModal extends Component<
@@ -123,7 +130,9 @@ class AddDocumentModal extends Component<
       currentEthPrice: 0,
       networkSelect: 's3',
       addDocumentStep: AddDocumentStep.TYPE_SELECTION,
+      // addDocumentStep: AddDocumentStep.NOTARIZATION_CONIRM,
       documentType: '',
+      // documentType: 'MAP Card',
       isOther: false,
       hasValidUntilDate: false,
       validUntilDate: this.minDate,
@@ -135,6 +144,9 @@ class AddDocumentModal extends Component<
       vc: undefined,
       doc: undefined,
       isLoading: false,
+      acceptsUsingDigitalSignatures: false,
+      isTrueDocument: false,
+      acceptsDigitalSignature: false,
     };
   }
 
@@ -544,8 +556,91 @@ class AddDocumentModal extends Component<
     );
   }
 
+  renderNotarizeOverview() {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <NotarizeOverviewSvg />
+      </div>
+    );
+  }
+
+  renderNotarizeConfirm() {
+    const {
+      acceptsUsingDigitalSignatures,
+      isTrueDocument,
+      acceptsDigitalSignature,
+      previewURL,
+    } = { ...this.state };
+    const { myAccount } = { ...this.props };
+    return (
+      <div className="notarize-confirm">
+        <div className="notarize-prompt">
+          By notarizing this document you accept the following terms
+        </div>
+        <div
+          className="image-container"
+          style={{
+            width: '100%',
+            backgroundColor: '#ccc',
+            minWidth: '100px',
+            minHeight: '100px',
+          }}
+        >
+          <img src={previewURL} alt="" style={{width: '100%'}} />
+        </div>
+        <div className="confirm-item">
+          <Checkbox
+            isChecked={acceptsUsingDigitalSignatures}
+            onClick={() =>
+              this.setState({
+                acceptsUsingDigitalSignatures: !acceptsUsingDigitalSignatures,
+              })
+            }
+          />
+          <div className="confirm-label">
+            I accept the use of digital signatures
+          </div>
+        </div>
+        <div className="confirm-item">
+          <Checkbox
+            isChecked={isTrueDocument}
+            onClick={() =>
+              this.setState({
+                isTrueDocument: !isTrueDocument,
+              })
+            }
+          />
+          <div className="confirm-label">
+            I affirm that the scanned document, is a true, exact, complete, and
+            unaltered copy made by me. And this document was presented to me by
+            the document's custodian, and that to the best of my knowledge, the
+            scanned document is neither public record nor a publically
+            recordable document.
+          </div>
+        </div>
+        <div className="confirm-item">
+          <Checkbox
+            isChecked={acceptsDigitalSignature}
+            onClick={() =>
+              this.setState({
+                acceptsDigitalSignature: !acceptsDigitalSignature,
+              })
+            }
+          />
+          <div className="confirm-label">
+            I accept the following as my digital signature:
+          </div>
+        </div>
+        <div className="digital-sig">
+          {AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)}
+        </div>
+        <div className="continue-exerpt">Check the boxes to continue</div>
+      </div>
+    );
+  }
+
   renderNotarizeSection() {
-    const { previewURL, isGoingToNotarize, notaryId, errorMessage } = {
+    const { previewURL, notaryId, errorMessage } = {
       ...this.state,
     };
 
@@ -611,11 +706,30 @@ class AddDocumentModal extends Component<
 
     return (
       <section className="notarize-section">
-        <div className="image-container">
+        <div className="notarize-prompt">
+          Would you like to notarize this document?
+        </div>
+        <Button
+          className="add-non-notarize-btn"
+          outline
+          color="secondary"
+          onClick={this.handleAddNewDocument}
+        >
+          No, skip this step
+        </Button>
+        <div
+          className="image-container"
+          style={{
+            width: '100%',
+            backgroundColor: '#ccc',
+            minWidth: '100px',
+            minHeight: '100px',
+          }}
+        >
           <img src={previewURL} alt="" />
         </div>
         <div className="notary-container">
-          <div className="notary-toggle">
+          {/* <div className="notary-toggle">
             <div className="prompt">Are you going to notarize?</div>
             <Toggle
               isLarge
@@ -625,76 +739,76 @@ class AddDocumentModal extends Component<
                 this.setState({ isGoingToNotarize: !isGoingToNotarize });
               }}
             />
-          </div>
+          </div> */}
           {/* TODO: */}
-          {isGoingToNotarize && (
-            <div className="notary-form">
-              <div>NOTARY INFORMATION</div>
-              {errorMessage && errorMessage.length > 0 && (
-                <span className="error">{errorMessage}</span>
-              )}
-              {/* <div className="form-line">
+          {/* {isGoingToNotarize && ( */}
+          <div className="notary-form">
+            <div className="notary-info">NOTARY INFORMATION</div>
+            {errorMessage && errorMessage.length > 0 && (
+              <span className="error">{errorMessage}</span>
+            )}
+            {/* <div className="form-line">
                 <div className="input-section">
                   <label>Notary State</label>
                 </div>
               </div> */}
-              <div className="form-line">
-                <div className="input-section">
-                  <Label for="notaryId">Notary #</Label>
-                  <Input
-                    type="text"
-                    name="notaryId"
-                    id="notaryId"
-                    value={notaryId}
-                    onChange={this.handleNotaryIdChange}
-                    placeholder="Notary Id #..."
-                  />
-                  <Label
-                    style={{ paddingRight: '30px' }}
-                    for="notarySeal"
-                    className="other-prompt"
-                  >
-                    SIGNING KEY (Use PEM)
-                  </Label>
-                  <input
-                    type="file"
-                    onChange={(e) => this.handleNotaryUploadPem(e)}
-                  />
-                </div>
-                <div className="input-section">
-                  <Label
-                    style={{ paddingRight: '30px' }}
-                    for="notarySeal"
-                    className="other-prompt"
-                  >
-                    Notary Seal:
-                  </Label>
-                  <FileBase64
-                    multiple={false}
-                    onDone={this.handleNotaryUploadNewSeal}
-                  />
+            <div className="form-line">
+              <div className="input-section">
+                <Label for="notaryId">Notary ID</Label>
+                <Input
+                  type="text"
+                  name="notaryId"
+                  id="notaryId"
+                  value={notaryId}
+                  onChange={this.handleNotaryIdChange}
+                  placeholder="Notary Id..."
+                />
+                <Label
+                  style={{ paddingRight: '30px' }}
+                  for="notarySeal"
+                  className="other-prompt"
+                >
+                  SIGNING KEY (Use PEM)
+                </Label>
+                <input
+                  type="file"
+                  onChange={(e) => this.handleNotaryUploadPem(e)}
+                />
+              </div>
+              <div className="input-section">
+                <Label
+                  style={{ paddingRight: '30px' }}
+                  for="notarySeal"
+                  className="other-prompt"
+                >
+                  Notary Seal:
+                </Label>
+                <FileBase64
+                  multiple={false}
+                  onDone={this.handleNotaryUploadNewSeal}
+                />
 
-                  <Label
-                    style={{ paddingRight: '30px' }}
-                    for="network"
-                    className="other-prompt"
-                  >
-                    Notarization Destination
-                  </Label>
-                  <select
-                    value={this.state.networkSelect}
-                    onChange={this.handleChangeNetworkSelect}
-                  >
-                    <option value="eth">Ethereum Network</option>
-                    <option value="rsk">RSK Network</option>
-                    <option value="s3">Amazon S3</option>
-                  </select>
+                <Label
+                  style={{ paddingRight: '30px' }}
+                  for="network"
+                  className="other-prompt"
+                >
+                  Notarization Destination
+                </Label>
+                <select
+                  value={this.state.networkSelect}
+                  onChange={this.handleChangeNetworkSelect}
+                >
+                  <option value="eth">Ethereum Network</option>
+                  <option value="rsk">RSK Network</option>
+                  <option value="s3">Amazon S3</option>
+                </select>
 
-                  {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
-                </div>
+                {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
               </div>
             </div>
-          )}
+          </div>
+          {/* )} */}
         </div>
       </section>
     );
@@ -728,9 +842,11 @@ class AddDocumentModal extends Component<
       documentType,
       newFile,
       addDocumentStep,
-      isGoingToNotarize,
       hasValidUntilDate,
       isLoading,
+      acceptsUsingDigitalSignatures,
+      isTrueDocument,
+      acceptsDigitalSignature,
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -794,6 +910,10 @@ class AddDocumentModal extends Component<
                 this.renderDocumentFileSection()}
               {AddDocumentStep.EXPIRATION === addDocumentStep &&
                 this.renderExpirationDateSection()}
+              {AddDocumentStep.NOTARIZATION_OVERVIEW === addDocumentStep &&
+                this.renderNotarizeOverview()}
+              {AddDocumentStep.NOTARIZATION_CONIRM === addDocumentStep &&
+                this.renderNotarizeConfirm()}
               {AddDocumentStep.NOTARIZATION === addDocumentStep &&
                 this.renderNotarizeSection()}
               {AddDocumentStep.NOTARIZED === addDocumentStep &&
@@ -873,7 +993,7 @@ class AddDocumentModal extends Component<
                     color="primary"
                     onClick={() =>
                       this.setState({
-                        addDocumentStep: AddDocumentStep.NOTARIZATION,
+                        addDocumentStep: AddDocumentStep.NOTARIZATION_OVERVIEW,
                       })
                     }
                   >
@@ -891,6 +1011,21 @@ class AddDocumentModal extends Component<
                 )}
               </Fragment>
             )}
+            {AddDocumentStep.NOTARIZATION_OVERVIEW === addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  color="primary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.NOTARIZATION,
+                    })
+                  }
+                >
+                  Got it
+                </Button>
+              </Fragment>
+            )}
             {AddDocumentStep.NOTARIZATION === addDocumentStep && (
               <Fragment>
                 <Button
@@ -905,26 +1040,46 @@ class AddDocumentModal extends Component<
                 >
                   Go Back
                 </Button>{' '}
-                {isGoingToNotarize && (
-                  <Button
-                    className="margin-wide"
-                    color="primary"
-                    // onClick={() => this.setState({ addDocumentStep: AddDocumentStep.NOTARIZED })}
-                    onClick={this.handleNotarizeDocument}
-                    disabled={this.isNotarizeDisabled()}
-                  >
-                    Notarize
-                  </Button>
-                )}
-                {!isGoingToNotarize && (
-                  <Button
-                    className="margin-wide"
-                    color="primary"
-                    onClick={this.handleAddNewDocument}
-                  >
-                    Add File
-                  </Button>
-                )}
+                <Button
+                  className="margin-wide"
+                  color="primary"
+                  onClick={() => {
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.NOTARIZATION_CONIRM,
+                    });
+                  }}
+                  disabled={this.isNotarizeDisabled()}
+                >
+                  Next
+                </Button>
+              </Fragment>
+            )}
+            {AddDocumentStep.NOTARIZATION_CONIRM === addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.EXPIRATION,
+                    })
+                  }
+                >
+                  Go Back
+                </Button>
+                <Button
+                  className="margin-wide"
+                  color="primary"
+                  onClick={this.handleNotarizeDocument}
+                  disabled={
+                    !acceptsUsingDigitalSignatures ||
+                    !isTrueDocument ||
+                    !acceptsDigitalSignature
+                  }
+                >
+                  Notarize
+                </Button>
               </Fragment>
             )}
             {AddDocumentStep.NOTARIZED === addDocumentStep && (

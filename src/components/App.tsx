@@ -256,8 +256,10 @@ class App extends Component<{}, AppState> {
     };
 
     let pageToRender = <ProgressIndicator isFullscreen />;
+    let backgroundColor = '#2362c7';
 
-    if (helperLogin) {
+    if (window.location.href.indexOf('helper-login') > -1) {
+      backgroundColor = '#4ca9d8';
       pageToRender = (
         <HelperLoginPage
           appSettings={appSettings}
@@ -265,8 +267,8 @@ class App extends Component<{}, AppState> {
         />
       );
     }
-
-    if (adminLogin) {
+    if (window.location.href.indexOf('admin-login') > -1) {
+      backgroundColor = '#000';
       pageToRender = (
         <AdminLoginPage
           appSettings={appSettings}
@@ -274,13 +276,12 @@ class App extends Component<{}, AppState> {
         />
       );
     }
-
     return (
       <Fragment>
         <div
           id="splash"
           style={{
-            backgroundColor: '#2362c7',
+            backgroundColor,
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',

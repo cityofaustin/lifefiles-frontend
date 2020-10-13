@@ -6,6 +6,12 @@
     .modal-content {
       .modal-header {
         .modal-title {
+          @include media-breakpoint-down(sm) {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 400px;
+          }
           img {
             width: 63.7px;
             height: 63.7px;
@@ -210,13 +216,73 @@
   }
 }
 
+.notarize-confirm {
+  margin-top: -34.5px;
+  .notarize-prompt {
+    font-size: 20px;
+    font-weight: 500;
+    color: #4ba9d9;
+    text-align: center;
+    padding: 15px 25px;
+    background-color: #eef5f6;
+    border-radius: 34px;
+  }
+  .confirm-item {
+    display: flex;
+    .confirm-label {
+      margin-left: 15.5px;
+      font-size: 22px;
+      line-height: 1.23;
+      color: #707070;
+    }
+    &:not(:first-child) {
+      margin-top: 20px;
+    }
+  }
+  .digital-sig {
+    font-family: 'Caveat';
+    font-size: 45px;
+    color: #707070;
+    text-align: center;
+    background-color: white;
+    border: solid 1px #707070;
+    border-radius: 15px;
+    margin-top: 20px;
+  }
+  .continue-exerpt {
+    font-size: 18px;
+    color: #707070;
+    text-align: center;
+    margin-top: 7px;
+  }
+}
+
 .notarize-section {
+  .notarize-prompt {
+    font-size: 25px;
+    font-weight: 500;
+    color: #4ba9d9;
+    text-align: center;
+    padding: 10px 20px;
+    background-color: #eef5f6;
+    border-radius: 34px;
+  }
   display: flex;
-  flex-direction: row;
-  margin-top: 96px;
+  flex-direction: column;
+  align-items: center;
   justify-content: space-evenly;
+
+  margin-top: -34.5px;
+  .add-non-notarize-btn {
+    font-size: 20px;
+    width: 212px;
+    height: 44px;
+    border-radius: 11px;
+    padding: 0;
+    margin: 20px 0;
+  }
   .image-container {
-    width: 35%;
+    width: 31%;
     display: flex;
     justify-content: center;
     img {
@@ -228,9 +294,27 @@
     }
   }
   .notary-container {
-    width: 55%;
+    // width: 55%;
     display: flex;
     flex-direction: column;
+    .notary-form {
+      margin-top: 20px;
+      .notary-info {
+        font-size: 20px;
+        font-weight: 500;
+        color: #747474;
+      }
+      .form-line {
+        .input-section {
+          label {
+            font-size: 20px;
+            font-weight: 500;
+            color: #747474;
+            opacity: 0.71;
+          }
+        }
+      }
+    }
     .notary-toggle {
       display: flex;
       flex-direction: column;
