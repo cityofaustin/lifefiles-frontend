@@ -41,6 +41,9 @@ import Web3 from 'web3';
 import QRCode from 'qrcode.react';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 import { ReactComponent as NotarizeOverviewSvg } from '../../../img/notarize-overview.svg';
+import { ReactComponent as NotarizeRecordOverviewSvg } from '../../../img/notarize-record-overview.svg';
+import { ReactComponent as NotaryHandoffSvg } from '../../../img/notary-handoff.svg';
+import { ReactComponent as CustodianHandoffSvg } from '../../../img/custodian-handoff.svg';
 import Checkbox from '../../common/Checkbox';
 
 const CONTRACT_DEFAULT_GAS = 300000;
@@ -78,7 +81,10 @@ enum AddDocumentStep {
   EXPIRATION,
   NOTARIZATION_OVERVIEW,
   NOTARIZATION,
-  NOTARIZATION_CONIRM,
+  NOTARIZATION_CUSTODIAN_HANDOFF,
+  NOTARIZATION_CUSTODIAN_CONFIRM,
+  NOTARIZATION_NOTARY_HANDOFF,
+  NOTARIZATION_NOTARY_CONFIRM,
   NOTARIZED,
 }
 
@@ -110,6 +116,9 @@ interface AddDocumentModalState {
   acceptsUsingDigitalSignatures: boolean;
   isTrueDocument: boolean;
   acceptsDigitalSignature: boolean;
+  custodianAcceptsUsingDigitalSignatures: boolean;
+  custodianIsTrueDocument: boolean;
+  custodianAcceptsDigitalSignature: boolean;
 }
 
 class AddDocumentModal extends Component<
@@ -130,9 +139,10 @@ class AddDocumentModal extends Component<
       currentEthPrice: 0,
       networkSelect: 's3',
       addDocumentStep: AddDocumentStep.TYPE_SELECTION,
-      // addDocumentStep: AddDocumentStep.NOTARIZATION_CONIRM,
+      // addDocumentStep: AddDocumentStep.NOTARIZATION_CUSTODIAN_HANDOFF,
       documentType: '',
       // documentType: 'MAP Card',
+      // documentType: 'Social Security Card',
       isOther: false,
       hasValidUntilDate: false,
       validUntilDate: this.minDate,
@@ -147,6 +157,9 @@ class AddDocumentModal extends Component<
       acceptsUsingDigitalSignatures: false,
       isTrueDocument: false,
       acceptsDigitalSignature: false,
+      custodianAcceptsUsingDigitalSignatures: false,
+      custodianIsTrueDocument: false,
+      custodianAcceptsDigitalSignature: false,
     };
   }
 
@@ -178,6 +191,13 @@ class AddDocumentModal extends Component<
       this.setState({ currentBtcPrice });
       this.setState({ currentEthPrice });
     }
+  };
+
+  isRecordable = () => {
+    const { documentType } = { ...this.state };
+    const { documentTypes } = { ...this.props };
+    return !!documentTypes.find((dt) => dt.name === documentType)
+      ?.isRecordableDoc;
   };
 
   handleChangeNetworkSelect = (e) => {
@@ -355,11 +375,9 @@ class AddDocumentModal extends Component<
         base64String,
         notarySealBase64,
         documentType,
-        AccountImpl.getFullName(
-          referencedAccount?.firstName,
-          referencedAccount?.lastName
-        ),
-        AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
+        AccountImpl.displayName(referencedAccount),
+        AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
+        this.isRecordable()
       );
 
       const base64Pdf: string = notarizedDoc!.doc.output('datauristring');
@@ -559,7 +577,84 @@ class AddDocumentModal extends Component<
   renderNotarizeOverview() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <NotarizeOverviewSvg />
+        {this.isRecordable() && <NotarizeRecordOverviewSvg />}
+        {!this.isRecordable() && <NotarizeOverviewSvg />}
+      </div>
+    );
+  }
+
+  renderNotarizeCustodianHandoff() {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <CustodianHandoffSvg />
+      </div>
+    );
+  }
+
+  renderNotarizeCustodianConfirm() {
+    const {
+      custodianAcceptsUsingDigitalSignatures,
+      custodianIsTrueDocument,
+      custodianAcceptsDigitalSignature,
+    } = { ...this.state };
+    const { referencedAccount } = { ...this.props };
+    return (
+      <div className="notarize-confirm custodian">
+        <div className="notarize-prompt">
+          By electronically signing this document you accept the following terms
+        </div>
+        <div className="confirm-item">
+          <Checkbox
+            isChecked={custodianAcceptsUsingDigitalSignatures}
+            onClick={() =>
+              this.setState({
+                custodianAcceptsUsingDigitalSignatures: !custodianAcceptsUsingDigitalSignatures,
+              })
+            }
+          />
+          <div className="confirm-label">
+            I accept the use of digital signatures
+          </div>
+        </div>
+        <div className="confirm-item">
+          <Checkbox
+            isChecked={custodianIsTrueDocument}
+            onClick={() =>
+              this.setState({
+                custodianIsTrueDocument: !custodianIsTrueDocument,
+              })
+            }
+          />
+          <div className="confirm-label">
+            I affirm that the scanned document is a true, exact, complete, and
+            unaltered copy of the original document in my posession
+          </div>
+        </div>
+        <div className="confirm-item">
+          <Checkbox
+            isChecked={custodianAcceptsDigitalSignature}
+            onClick={() =>
+              this.setState({
+                custodianAcceptsDigitalSignature: !custodianAcceptsDigitalSignature,
+              })
+            }
+          />
+          <div className="confirm-label">
+            I accept the following as my digital signature:
+          </div>
+        </div>
+        <div className="digital-sig">
+          {AccountImpl.displayName(referencedAccount)}
+        </div>
+        <div className="continue-exerpt">Check the boxes to continue</div>
+      </div>
+    );
+  }
+
+  renderNotarizeNotaryHandoff() {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <NotaryHandoffSvg />
       </div>
     );
   }
@@ -586,7 +681,7 @@ class AddDocumentModal extends Component<
             minHeight: '100px',
           }}
         >
-          <img src={previewURL} alt="" style={{width: '100%'}} />
+          <img src={previewURL} alt="" style={{ width: '100%' }} />
         </div>
         <div className="confirm-item">
           <Checkbox
@@ -611,11 +706,22 @@ class AddDocumentModal extends Component<
             }
           />
           <div className="confirm-label">
-            I affirm that the scanned document, is a true, exact, complete, and
-            unaltered copy made by me. And this document was presented to me by
-            the document's custodian, and that to the best of my knowledge, the
-            scanned document is neither public record nor a publically
-            recordable document.
+            {this.isRecordable() && (
+              <Fragment>
+                I affirm that the document custodian has sworn before me and has
+                proved their identity to me on the basis of satisfactory
+                evidence
+              </Fragment>
+            )}
+            {!this.isRecordable() && (
+              <Fragment>
+                I affirm that the scanned document, is a true, exact, complete,
+                and unaltered copy made by me. And this document was presented
+                to me by the document's custodian, and that to the best of my
+                knowledge, the scanned document is neither public record nor a
+                publically recordable document.
+              </Fragment>
+            )}
           </div>
         </div>
         <div className="confirm-item">
@@ -847,6 +953,9 @@ class AddDocumentModal extends Component<
       acceptsUsingDigitalSignatures,
       isTrueDocument,
       acceptsDigitalSignature,
+      custodianAcceptsUsingDigitalSignatures,
+      custodianIsTrueDocument,
+      custodianAcceptsDigitalSignature,
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -912,8 +1021,14 @@ class AddDocumentModal extends Component<
                 this.renderExpirationDateSection()}
               {AddDocumentStep.NOTARIZATION_OVERVIEW === addDocumentStep &&
                 this.renderNotarizeOverview()}
-              {AddDocumentStep.NOTARIZATION_CONIRM === addDocumentStep &&
-                this.renderNotarizeConfirm()}
+              {AddDocumentStep.NOTARIZATION_CUSTODIAN_HANDOFF ===
+                addDocumentStep && this.renderNotarizeCustodianHandoff()}
+              {AddDocumentStep.NOTARIZATION_CUSTODIAN_CONFIRM ===
+                addDocumentStep && this.renderNotarizeCustodianConfirm()}
+              {AddDocumentStep.NOTARIZATION_NOTARY_HANDOFF ===
+                addDocumentStep && this.renderNotarizeNotaryHandoff()}
+              {AddDocumentStep.NOTARIZATION_NOTARY_CONFIRM ===
+                addDocumentStep && this.renderNotarizeConfirm()}
               {AddDocumentStep.NOTARIZATION === addDocumentStep &&
                 this.renderNotarizeSection()}
               {AddDocumentStep.NOTARIZED === addDocumentStep &&
@@ -1044,9 +1159,17 @@ class AddDocumentModal extends Component<
                   className="margin-wide"
                   color="primary"
                   onClick={() => {
-                    this.setState({
-                      addDocumentStep: AddDocumentStep.NOTARIZATION_CONIRM,
-                    });
+                    if (this.isRecordable()) {
+                      this.setState({
+                        addDocumentStep:
+                          AddDocumentStep.NOTARIZATION_CUSTODIAN_HANDOFF,
+                      });
+                    } else {
+                      this.setState({
+                        addDocumentStep:
+                          AddDocumentStep.NOTARIZATION_NOTARY_CONFIRM,
+                      });
+                    }
                   }}
                   disabled={this.isNotarizeDisabled()}
                 >
@@ -1054,7 +1177,8 @@ class AddDocumentModal extends Component<
                 </Button>
               </Fragment>
             )}
-            {AddDocumentStep.NOTARIZATION_CONIRM === addDocumentStep && (
+            {AddDocumentStep.NOTARIZATION_CUSTODIAN_HANDOFF ===
+              addDocumentStep && (
               <Fragment>
                 <Button
                   className="margin-wide"
@@ -1062,7 +1186,103 @@ class AddDocumentModal extends Component<
                   color="secondary"
                   onClick={() =>
                     this.setState({
-                      addDocumentStep: AddDocumentStep.EXPIRATION,
+                      addDocumentStep: AddDocumentStep.NOTARIZATION,
+                    })
+                  }
+                >
+                  Go Back
+                </Button>
+                <Button
+                  style={{ backgroundColor: '#2362c7', borderColor: '#2362c7' }}
+                  className="margin-wide"
+                  color="primary"
+                  onClick={() => {
+                    this.setState({
+                      addDocumentStep:
+                        AddDocumentStep.NOTARIZATION_CUSTODIAN_CONFIRM,
+                    });
+                  }}
+                >
+                  Next
+                </Button>
+              </Fragment>
+            )}
+            {AddDocumentStep.NOTARIZATION_CUSTODIAN_CONFIRM ===
+              addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep:
+                        AddDocumentStep.NOTARIZATION_CUSTODIAN_HANDOFF,
+                    })
+                  }
+                >
+                  Go Back
+                </Button>
+                <Button
+                  style={{ backgroundColor: '#2362c7', borderColor: '#2362c7' }}
+                  className="margin-wide"
+                  color="primary"
+                  onClick={() => {
+                    this.setState({
+                      addDocumentStep:
+                        AddDocumentStep.NOTARIZATION_NOTARY_HANDOFF,
+                    });
+                  }}
+                  disabled={
+                    !custodianAcceptsUsingDigitalSignatures ||
+                    !custodianIsTrueDocument ||
+                    !custodianAcceptsDigitalSignature
+                  }
+                >
+                  Accept
+                </Button>
+              </Fragment>
+            )}
+            {AddDocumentStep.NOTARIZATION_NOTARY_HANDOFF ===
+              addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep:
+                        AddDocumentStep.NOTARIZATION_CUSTODIAN_CONFIRM,
+                    })
+                  }
+                >
+                  Go Back
+                </Button>
+                <Button
+                  className="margin-wide"
+                  color="primary"
+                  onClick={() => {
+                    this.setState({
+                      addDocumentStep:
+                        AddDocumentStep.NOTARIZATION_NOTARY_CONFIRM,
+                    });
+                  }}
+                >
+                  Next
+                </Button>
+              </Fragment>
+            )}
+            {AddDocumentStep.NOTARIZATION_NOTARY_CONFIRM ===
+              addDocumentStep && (
+              <Fragment>
+                <Button
+                  className="margin-wide"
+                  outline
+                  color="secondary"
+                  onClick={() =>
+                    this.setState({
+                      addDocumentStep: AddDocumentStep.NOTARIZATION,
                     })
                   }
                 >

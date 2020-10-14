@@ -63,6 +63,7 @@ import QRCode from 'qrcode.react';
 import Badge from '../../common/Badge';
 import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
+import DocumentType from '../../../models/DocumentType';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -75,6 +76,7 @@ const web3 = new Web3(
 interface UpdateDocumentModalProps {
   showModal: boolean;
   toggleModal: () => void;
+  documentTypes: DocumentType[];
   document?: Document;
   handleDeleteDocument: (document: Document) => Promise<void>;
   shareRequests: ShareRequest[];
@@ -382,6 +384,12 @@ class UpdateDocumentModal extends Component<
     this.setState({ vp: vpJwt });
   };
 
+  isRecordable = () => {
+    const { document, documentTypes } = { ...this.props };
+    return !!documentTypes.find((dt) => dt.name === document!.type)
+      ?.isRecordableDoc;
+  };
+
   handleNotarizeDocument = async () => {
     const { document, referencedAccount, myAccount } = { ...this.props };
 
@@ -402,11 +410,9 @@ class UpdateDocumentModal extends Component<
       this.state.base64Image === undefined ? '' : this.state.base64Image,
       this.state.notarySealBase64,
       document?.type!,
-      AccountImpl.getFullName(
-        referencedAccount?.firstName,
-        referencedAccount?.lastName
-      ),
-      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
+      AccountImpl.displayName(referencedAccount),
+      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
+      this.isRecordable()
     );
 
     // await NotaryService.updateDocumentVC(

@@ -675,7 +675,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal(props) {
-    const { documentSelected, activeDocumentTab, accounts, helperContacts } = {
+    const { documentSelected, activeDocumentTab, accounts, helperContacts, documentTypes } = {
       ...this.state,
     };
     const { account } = { ...this.props };
@@ -703,6 +703,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         toggleModal={() =>
           this.setState({ documentSelected: undefined, activeDocumentTab: '1' })
         }
+        documentTypes={documentTypes}
         document={documentSelected}
         shareRequests={shareRequests}
         handleUpdateDocument={this.handleUpdateDocument}

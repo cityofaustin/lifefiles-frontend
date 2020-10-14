@@ -218,13 +218,30 @@
 
 .notarize-confirm {
   margin-top: -34.5px;
+  &.custodian {
+    .notarize-prompt {
+      font-size: 20px;
+      font-weight: 500;
+      color: #2362c7;
+      text-align: center;
+      padding: 15px 25px;
+      background-color: #eef5f6;
+      border-radius: 34px;
+    }
+    .checkbox-checked_svg__fill-background {
+      fill: #2362c7 !important;
+    }
+    .checkbox-checked_svg__border {
+      fill: #2362c7 !important;
+    }
+  }
   .notarize-prompt {
     font-size: 20px;
     font-weight: 500;
     color: #4ba9d9;
     text-align: center;
     padding: 15px 25px;
-    background-color: #eef5f6;
+    background-color: #eef2f6;
     border-radius: 34px;
   }
   .confirm-item {
