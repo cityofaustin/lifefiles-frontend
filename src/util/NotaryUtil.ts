@@ -14,7 +14,7 @@ class NotaryUtil {
   // To be called by the notary
   static async createNotarizedDocument(
     notaryType: string,
-    expirationDate: Date,
+    expirationDate: Date | null,
     notaryId: number,
     notaryEthAddress: string,
     notaryEthPrivateKey: string,

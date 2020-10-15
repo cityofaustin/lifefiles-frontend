@@ -218,6 +218,9 @@
 
 .notarize-confirm {
   margin-top: -34.5px;
+  @include media-breakpoint-up(md) {
+    margin-top: 0;
+  }
   &.custodian {
     .notarize-prompt {
       font-size: 20px;
@@ -257,6 +260,7 @@
     }
   }
   .digital-sig {
+    overflow: hidden;
     font-family: 'Caveat';
     font-size: 45px;
     color: #707070;
@@ -271,6 +275,21 @@
     color: #707070;
     text-align: center;
     margin-top: 7px;
+  }
+  .image-container {
+    background-color: #ccc;
+    min-width: 100px;
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    max-width: 100%;
+    @include media-breakpoint-up(lg) {
+      max-width: 425px;
+    }
+    img {
+      width: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -288,8 +307,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-
   margin-top: -34.5px;
+  @include media-breakpoint-up(md) {
+    margin-top: 0;
+  }
   .add-non-notarize-btn {
     font-size: 20px;
     width: 212px;
@@ -298,15 +319,26 @@
     padding: 0;
     margin: 20px 0;
   }
+  .image-container-col {
+    display: flex;
+    justify-content: center ;
+  }
   .image-container {
-    width: 31%;
+    // width: 31%;
+    background-color: #ccc;
+    min-width: 100px;
+    min-height: 100px;
     display: flex;
     justify-content: center;
+    max-width: 100%;
+    @include media-breakpoint-up(lg) {
+      max-width: 425px;
+    }
     img {
       width: 100%;
-      width: -moz-available; /* WebKit-based browsers will ignore this. */
-      width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
-      width: fill-available;
+      // width: -moz-available; /* WebKit-based browsers will ignore this. */
+      // width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+      // width: fill-available;
       object-fit: contain;
     }
   }
@@ -323,6 +355,9 @@
       }
       .form-line {
         .input-section {
+          input[type=file] {
+            width: 200px;
+          }
           label {
             font-size: 20px;
             font-weight: 500;
@@ -353,6 +388,41 @@
     align-items: center;
     .pdf-container {
       width: fit-content;
+    }
+  }
+}
+
+.document-type-container {
+  #svg-desktop {
+    display: none;
+  }
+  #svg-mobile {
+    display: block;
+  }
+  @include media-breakpoint-up(xl) {
+    #svg-desktop {
+      display: block;
+    }
+    #svg-mobile {
+      display: none;
+    }
+  }
+  .notarize-overview {
+    display: flex;
+    justify-content: center;
+    #notarize-overview-desktop {
+      display: none;
+    }
+    #notarize-overview {
+      display: block;
+    }
+    @include media-breakpoint-up(xl) {
+      #notarize-overview-desktop {
+        display: block;
+      }
+      #notarize-overview {
+        display: none;
+      }
     }
   }
 }

@@ -1,6 +1,7 @@
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
   Button,
+  Col,
   FormGroup,
   Input,
   Label,
@@ -8,6 +9,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
+  Row,
 } from 'reactstrap';
 import DocumentTypeService from '../../../services/DocumentTypeService';
 import FileUploader from '../../common/FileUploader';
@@ -42,8 +44,11 @@ import QRCode from 'qrcode.react';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 import { ReactComponent as NotarizeOverviewSvg } from '../../../img/notarize-overview.svg';
 import { ReactComponent as NotarizeRecordOverviewSvg } from '../../../img/notarize-record-overview.svg';
+import { ReactComponent as NotarizeRecordOverviewDesktopSvg } from '../../../img/notarize-record-overview-desktop.svg';
 import { ReactComponent as NotaryHandoffSvg } from '../../../img/notary-handoff.svg';
+import { ReactComponent as NotaryHandoffDesktopSvg } from '../../../img/notary-handoff-desktop.svg';
 import { ReactComponent as CustodianHandoffSvg } from '../../../img/custodian-handoff.svg';
+import { ReactComponent as CustodianHandoffDesktopSvg } from '../../../img/custodian-handoff-desktop.svg';
 import Checkbox from '../../common/Checkbox';
 
 const CONTRACT_DEFAULT_GAS = 300000;
@@ -104,7 +109,7 @@ interface AddDocumentModalState {
   addDocumentStep: AddDocumentStep;
   previewURL?: string;
   hasValidUntilDate: boolean;
-  validUntilDate: Date;
+  validUntilDate: Date | null;
   isGoingToNotarize: boolean;
   notaryId: string;
   notarySealBase64: string;
@@ -119,6 +124,7 @@ interface AddDocumentModalState {
   custodianAcceptsUsingDigitalSignatures: boolean;
   custodianIsTrueDocument: boolean;
   custodianAcceptsDigitalSignature: boolean;
+  width: number;
 }
 
 class AddDocumentModal extends Component<
@@ -145,7 +151,7 @@ class AddDocumentModal extends Component<
       // documentType: 'Social Security Card',
       isOther: false,
       hasValidUntilDate: false,
-      validUntilDate: this.minDate,
+      validUntilDate: null,
       isGoingToNotarize: false,
       notaryId: '',
       notarySealBase64: '',
@@ -160,8 +166,22 @@ class AddDocumentModal extends Component<
       custodianAcceptsUsingDigitalSignatures: false,
       custodianIsTrueDocument: false,
       custodianAcceptsDigitalSignature: false,
+      width: 0,
     };
   }
+
+  componentDidMount() {
+    this.updateWindowDimensions();
+    window.addEventListener('resize', this.updateWindowDimensions);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateWindowDimensions);
+  }
+
+  updateWindowDimensions = () => {
+    this.setState({ width: window.innerWidth });
+  };
 
   getNotarizationInfo = async () => {
     if (this.state.adminPublicKey === '') {
@@ -240,7 +260,7 @@ class AddDocumentModal extends Component<
       try {
         let validDate: Date | undefined;
         if (hasValidUntilDate) {
-          validDate = validUntilDate;
+          validDate = validUntilDate !== null ? validUntilDate : undefined;
         }
         if (referencedAccount) {
           await handleAddNewDocument(
@@ -359,7 +379,7 @@ class AddDocumentModal extends Component<
         newThumbnailFile!,
         documentType!,
         referencedAccount,
-        validUntilDate
+        validUntilDate !== null ? validUntilDate : undefined
       );
       const notarizedDoc = await NotaryUtil.createNotarizedDocument(
         'certifiedCopy',
@@ -533,7 +553,8 @@ class AddDocumentModal extends Component<
   }
 
   renderExpirationDateSection() {
-    const { previewURL, hasValidUntilDate, validUntilDate } = { ...this.state };
+    const { previewURL, hasValidUntilDate } = { ...this.state };
+    let { validUntilDate } = { ...this.state };
     return (
       <section className="expiration-date-section">
         <div className="image-container">
@@ -547,9 +568,17 @@ class AddDocumentModal extends Component<
             <Toggle
               isLarge
               value={hasValidUntilDate}
-              onToggle={() =>
-                this.setState({ hasValidUntilDate: !hasValidUntilDate })
-              }
+              onToggle={() => {
+                if (hasValidUntilDate) {
+                  validUntilDate = null;
+                } else {
+                  validUntilDate = this.minDate;
+                }
+                this.setState({
+                  hasValidUntilDate: !hasValidUntilDate,
+                  validUntilDate,
+                });
+              }}
             />
           </div>
           {hasValidUntilDate && (
@@ -576,8 +605,17 @@ class AddDocumentModal extends Component<
 
   renderNotarizeOverview() {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        {this.isRecordable() && <NotarizeRecordOverviewSvg />}
+      <div className="notarize-overview">
+        {this.isRecordable() && (
+          <div id="notarize-overview">
+            <NotarizeRecordOverviewSvg />
+          </div>
+        )}
+        {this.isRecordable() && (
+          <div id="notarize-overview-desktop">
+            <NotarizeRecordOverviewDesktopSvg />
+          </div>
+        )}
         {!this.isRecordable() && <NotarizeOverviewSvg />}
       </div>
     );
@@ -586,7 +624,12 @@ class AddDocumentModal extends Component<
   renderNotarizeCustodianHandoff() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <CustodianHandoffSvg />
+        <div id="svg-mobile">
+          <CustodianHandoffSvg />
+        </div>
+        <div id="svg-desktop">
+          <CustodianHandoffDesktopSvg />
+        </div>
       </div>
     );
   }
@@ -596,6 +639,7 @@ class AddDocumentModal extends Component<
       custodianAcceptsUsingDigitalSignatures,
       custodianIsTrueDocument,
       custodianAcceptsDigitalSignature,
+      previewURL,
     } = { ...this.state };
     const { referencedAccount } = { ...this.props };
     return (
@@ -603,50 +647,77 @@ class AddDocumentModal extends Component<
         <div className="notarize-prompt">
           By electronically signing this document you accept the following terms
         </div>
-        <div className="confirm-item">
-          <Checkbox
-            isChecked={custodianAcceptsUsingDigitalSignatures}
-            onClick={() =>
-              this.setState({
-                custodianAcceptsUsingDigitalSignatures: !custodianAcceptsUsingDigitalSignatures,
-              })
-            }
-          />
-          <div className="confirm-label">
-            I accept the use of digital signatures
-          </div>
-        </div>
-        <div className="confirm-item">
-          <Checkbox
-            isChecked={custodianIsTrueDocument}
-            onClick={() =>
-              this.setState({
-                custodianIsTrueDocument: !custodianIsTrueDocument,
-              })
-            }
-          />
-          <div className="confirm-label">
-            I affirm that the scanned document is a true, exact, complete, and
-            unaltered copy of the original document in my posession
-          </div>
-        </div>
-        <div className="confirm-item">
-          <Checkbox
-            isChecked={custodianAcceptsDigitalSignature}
-            onClick={() =>
-              this.setState({
-                custodianAcceptsDigitalSignature: !custodianAcceptsDigitalSignature,
-              })
-            }
-          />
-          <div className="confirm-label">
-            I accept the following as my digital signature:
-          </div>
-        </div>
-        <div className="digital-sig">
-          {AccountImpl.displayName(referencedAccount)}
-        </div>
-        <div className="continue-exerpt">Check the boxes to continue</div>
+        {/* d-none d-md-block */}
+        <Row>
+          <Col
+            sm={12}
+            xl={6}
+            className="d-none d-xl-block"
+            style={{
+              marginTop: '33px',
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              className="image-container"
+              style={{
+                width: '100%',
+                backgroundColor: '#ccc',
+                minWidth: '100px',
+                minHeight: '100px',
+              }}
+            >
+              <img src={previewURL} alt="" style={{ width: '100%' }} />
+            </div>
+          </Col>
+          <Col sm={12} xl={6} style={{ marginTop: '33px' }}>
+            <div className="confirm-item">
+              <Checkbox
+                isChecked={custodianAcceptsUsingDigitalSignatures}
+                onClick={() =>
+                  this.setState({
+                    custodianAcceptsUsingDigitalSignatures: !custodianAcceptsUsingDigitalSignatures,
+                  })
+                }
+              />
+              <div className="confirm-label">
+                I accept the use of digital signatures
+              </div>
+            </div>
+            <div className="confirm-item">
+              <Checkbox
+                isChecked={custodianIsTrueDocument}
+                onClick={() =>
+                  this.setState({
+                    custodianIsTrueDocument: !custodianIsTrueDocument,
+                  })
+                }
+              />
+              <div className="confirm-label">
+                I affirm that the scanned document is a true, exact, complete,
+                and unaltered copy of the original document in my posession
+              </div>
+            </div>
+            <div className="confirm-item">
+              <Checkbox
+                isChecked={custodianAcceptsDigitalSignature}
+                onClick={() =>
+                  this.setState({
+                    custodianAcceptsDigitalSignature: !custodianAcceptsDigitalSignature,
+                  })
+                }
+              />
+              <div className="confirm-label">
+                I accept the following as my digital signature:
+              </div>
+            </div>
+            <div className="digital-sig">
+              {AccountImpl.displayName(referencedAccount)}
+            </div>
+            <div className="continue-exerpt">Check the boxes to continue</div>
+          </Col>
+        </Row>
       </div>
     );
   }
@@ -654,7 +725,12 @@ class AddDocumentModal extends Component<
   renderNotarizeNotaryHandoff() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <NotaryHandoffSvg />
+        <div id="svg-mobile">
+          <NotaryHandoffSvg />
+        </div>
+        <div id="svg-desktop">
+          <NotaryHandoffDesktopSvg />
+        </div>
       </div>
     );
   }
@@ -672,75 +748,89 @@ class AddDocumentModal extends Component<
         <div className="notarize-prompt">
           By notarizing this document you accept the following terms
         </div>
-        <div
-          className="image-container"
-          style={{
-            width: '100%',
-            backgroundColor: '#ccc',
-            minWidth: '100px',
-            minHeight: '100px',
-          }}
-        >
-          <img src={previewURL} alt="" style={{ width: '100%' }} />
-        </div>
-        <div className="confirm-item">
-          <Checkbox
-            isChecked={acceptsUsingDigitalSignatures}
-            onClick={() =>
-              this.setState({
-                acceptsUsingDigitalSignatures: !acceptsUsingDigitalSignatures,
-              })
-            }
-          />
-          <div className="confirm-label">
-            I accept the use of digital signatures
-          </div>
-        </div>
-        <div className="confirm-item">
-          <Checkbox
-            isChecked={isTrueDocument}
-            onClick={() =>
-              this.setState({
-                isTrueDocument: !isTrueDocument,
-              })
-            }
-          />
-          <div className="confirm-label">
-            {this.isRecordable() && (
-              <Fragment>
-                I affirm that the document custodian has sworn before me and has
-                proved their identity to me on the basis of satisfactory
-                evidence
-              </Fragment>
-            )}
-            {!this.isRecordable() && (
-              <Fragment>
-                I affirm that the scanned document, is a true, exact, complete,
-                and unaltered copy made by me. And this document was presented
-                to me by the document's custodian, and that to the best of my
-                knowledge, the scanned document is neither public record nor a
-                publically recordable document.
-              </Fragment>
-            )}
-          </div>
-        </div>
-        <div className="confirm-item">
-          <Checkbox
-            isChecked={acceptsDigitalSignature}
-            onClick={() =>
-              this.setState({
-                acceptsDigitalSignature: !acceptsDigitalSignature,
-              })
-            }
-          />
-          <div className="confirm-label">
-            I accept the following as my digital signature:
-          </div>
-        </div>
-        <div className="digital-sig">
-          {AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)}
-        </div>
-        <div className="continue-exerpt">Check the boxes to continue</div>
+        <Row>
+          <Col
+            sm={12}
+            xl={6}
+            style={{
+              marginTop: '33px',
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              className="image-container"
+              style={{
+                width: '100%',
+                backgroundColor: '#ccc',
+                minWidth: '100px',
+                minHeight: '100px',
+              }}
+            >
+              <img src={previewURL} alt="" style={{ width: '100%' }} />
+            </div>
+          </Col>
+          <Col sm={12} xl={6} style={{ marginTop: '33px' }}>
+            <div className="confirm-item">
+              <Checkbox
+                isChecked={acceptsUsingDigitalSignatures}
+                onClick={() =>
+                  this.setState({
+                    acceptsUsingDigitalSignatures: !acceptsUsingDigitalSignatures,
+                  })
+                }
+              />
+              <div className="confirm-label">
+                I accept the use of digital signatures
+              </div>
+            </div>
+            <div className="confirm-item">
+              <Checkbox
+                isChecked={isTrueDocument}
+                onClick={() =>
+                  this.setState({
+                    isTrueDocument: !isTrueDocument,
+                  })
+                }
+              />
+              <div className="confirm-label">
+                {this.isRecordable() && (
+                  <Fragment>
+                    I affirm that the document custodian has sworn before me and
+                    has proved their identity to me on the basis of satisfactory
+                    evidence
+                  </Fragment>
+                )}
+                {!this.isRecordable() && (
+                  <Fragment>
+                    I affirm that the scanned document, is a true, exact,
+                    complete, and unaltered copy made by me. And this document
+                    was presented to me by the document's custodian, and that to
+                    the best of my knowledge, the scanned document is neither
+                    public record nor a publically recordable document.
+                  </Fragment>
+                )}
+              </div>
+            </div>
+            <div className="confirm-item">
+              <Checkbox
+                isChecked={acceptsDigitalSignature}
+                onClick={() =>
+                  this.setState({
+                    acceptsDigitalSignature: !acceptsDigitalSignature,
+                  })
+                }
+              />
+              <div className="confirm-label">
+                I accept the following as my digital signature:
+              </div>
+            </div>
+            <div className="digital-sig">
+              {AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)}
+            </div>
+            <div className="continue-exerpt">Check the boxes to continue</div>
+          </Col>
+        </Row>
       </div>
     );
   }
@@ -823,112 +913,106 @@ class AddDocumentModal extends Component<
         >
           No, skip this step
         </Button>
-        <div
-          className="image-container"
-          style={{
-            width: '100%',
-            backgroundColor: '#ccc',
-            minWidth: '100px',
-            minHeight: '100px',
-          }}
-        >
-          <img src={previewURL} alt="" />
-        </div>
-        <div className="notary-container">
-          {/* <div className="notary-toggle">
-            <div className="prompt">Are you going to notarize?</div>
-            <Toggle
-              isLarge
-              value={isGoingToNotarize}
-              onToggle={() => {
-                this.getNotarizationInfo();
-                this.setState({ isGoingToNotarize: !isGoingToNotarize });
-              }}
-            />
-          </div> */}
-          {/* TODO: */}
-          {/* {isGoingToNotarize && ( */}
-          <div className="notary-form">
-            <div className="notary-info">NOTARY INFORMATION</div>
-            {errorMessage && errorMessage.length > 0 && (
-              <span className="error">{errorMessage}</span>
-            )}
-            {/* <div className="form-line">
-                <div className="input-section">
-                  <label>Notary State</label>
+        <Row>
+          <Col sm={12} xl={6} className="image-container-col">
+            <div className="image-container">
+              <img src={previewURL} alt="" />
+            </div>
+          </Col>
+          <Col sm={12} xl={6}>
+            <div className="notary-container">
+              <div className="notary-form">
+                <div className="notary-info">NOTARY INFORMATION</div>
+                {errorMessage && errorMessage.length > 0 && (
+                  <span className="error">{errorMessage}</span>
+                )}
+                <div className="form-line">
+                  <div className="input-section">
+                    <Label for="notaryId">Notary ID</Label>
+                    <Input
+                      type="text"
+                      name="notaryId"
+                      id="notaryId"
+                      value={notaryId}
+                      onChange={this.handleNotaryIdChange}
+                      placeholder="Notary Id..."
+                    />
+                    <Label
+                      style={{ paddingRight: '30px' }}
+                      for="notarySeal"
+                      className="other-prompt"
+                    >
+                      SIGNING KEY (Use PEM)
+                    </Label>
+                    <input
+                      type="file"
+                      onChange={(e) => this.handleNotaryUploadPem(e)}
+                    />
+                  </div>
+                  <div className="input-section">
+                    <Label
+                      style={{ paddingRight: '30px' }}
+                      for="notarySeal"
+                      className="other-prompt"
+                    >
+                      Notary Seal:
+                    </Label>
+                    <FileBase64
+                      multiple={false}
+                      onDone={this.handleNotaryUploadNewSeal}
+                    />
+                    <br />
+                    <Label
+                      style={{ paddingRight: '30px' }}
+                      for="network"
+                      className="other-prompt"
+                    >
+                      Notarization Destination
+                    </Label>
+                    <select
+                      value={this.state.networkSelect}
+                      onChange={this.handleChangeNetworkSelect}
+                    >
+                      <option value="eth">Ethereum Network</option>
+                      <option value="rsk">RSK Network</option>
+                      <option value="s3">Amazon S3</option>
+                    </select>
+
+                    {this.state.networkSelect === 's3'
+                      ? ''
+                      : fundNetworkSection}
+                  </div>
                 </div>
-              </div> */}
-            <div className="form-line">
-              <div className="input-section">
-                <Label for="notaryId">Notary ID</Label>
-                <Input
-                  type="text"
-                  name="notaryId"
-                  id="notaryId"
-                  value={notaryId}
-                  onChange={this.handleNotaryIdChange}
-                  placeholder="Notary Id..."
-                />
-                <Label
-                  style={{ paddingRight: '30px' }}
-                  for="notarySeal"
-                  className="other-prompt"
-                >
-                  SIGNING KEY (Use PEM)
-                </Label>
-                <input
-                  type="file"
-                  onChange={(e) => this.handleNotaryUploadPem(e)}
-                />
-              </div>
-              <div className="input-section">
-                <Label
-                  style={{ paddingRight: '30px' }}
-                  for="notarySeal"
-                  className="other-prompt"
-                >
-                  Notary Seal:
-                </Label>
-                <FileBase64
-                  multiple={false}
-                  onDone={this.handleNotaryUploadNewSeal}
-                />
-
-                <Label
-                  style={{ paddingRight: '30px' }}
-                  for="network"
-                  className="other-prompt"
-                >
-                  Notarization Destination
-                </Label>
-                <select
-                  value={this.state.networkSelect}
-                  onChange={this.handleChangeNetworkSelect}
-                >
-                  <option value="eth">Ethereum Network</option>
-                  <option value="rsk">RSK Network</option>
-                  <option value="s3">Amazon S3</option>
-                </select>
-
-                {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
               </div>
             </div>
-          </div>
-          {/* )} */}
-        </div>
+          </Col>
+        </Row>
       </section>
     );
   }
 
   renderNotarizedSection() {
-    const { doc } = { ...this.state };
+    const { doc, width } = { ...this.state };
+    let pdfHeight = 200;
+    if (width < 576) {
+      pdfHeight = 200;
+    }
+    if (width >= 576) {
+      pdfHeight = 300;
+    }
+    if (width >= 1200) {
+      pdfHeight = 400;
+    }
     return (
       <section className="notarized-section">
         {/* <h3>Verifiable Credential</h3> */}
         {/* <pre className="vc-display">{this.state.vc}</pre> */}
         {doc && (
           <div className="pdf-display">
-            <PdfPreview fileURL={doc.output('datauristring')} />
+            <PdfPreview
+              fileURL={doc.output('datauristring')}
+              height={pdfHeight}
+            />
             <Button
               className="margin-wide"
               color="primary"
@@ -992,7 +1076,7 @@ class AddDocumentModal extends Component<
                     alt=""
                   />
                 )}
-                <span>
+                <span className="add-doc-title">
                   {AccountImpl.hasNameSet(referencedAccount) &&
                     AccountImpl.getFullName(
                       referencedAccount.firstName,
@@ -1102,7 +1186,7 @@ class AddDocumentModal extends Component<
                 >
                   Go Back
                 </Button>{' '}
-                {hasValidUntilDate && referencedAccount && (
+                {referencedAccount && (
                   <Button
                     className="margin-wide"
                     color="primary"
@@ -1115,7 +1199,7 @@ class AddDocumentModal extends Component<
                     Next
                   </Button>
                 )}
-                {(!hasValidUntilDate || !referencedAccount) && (
+                {!referencedAccount && (
                   <Button
                     className="margin-wide"
                     color="primary"

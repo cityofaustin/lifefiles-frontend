@@ -128,6 +128,7 @@ interface UpdateDocumentModalState {
   isLoading: boolean;
   updatedBase64Image?: string;
   gotNotarizationInfo: boolean;
+  width: number;
 }
 
 class UpdateDocumentModal extends Component<
@@ -167,8 +168,22 @@ class UpdateDocumentModal extends Component<
       isLoading: false,
       updatedBase64Image: undefined,
       gotNotarizationInfo: false,
+      width: 0,
     };
   }
+
+  componentDidMount() {
+    this.updateWindowDimensions();
+    window.addEventListener('resize', this.updateWindowDimensions);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateWindowDimensions);
+  }
+
+  updateWindowDimensions = () => {
+    this.setState({ width: window.innerWidth });
+  };
 
   getNotarizationInfo = async () => {
     if (this.state.gotNotarizationInfo == false) {
@@ -876,6 +891,7 @@ class UpdateDocumentModal extends Component<
       base64Pdf,
       pendingAccess,
       isLoading,
+      width
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -894,6 +910,16 @@ class UpdateDocumentModal extends Component<
         uploadedByAccount?.firstName,
         uploadedByAccount?.lastName
       );
+    }
+    let pdfHeight = 200;
+    if (width < 576) {
+      pdfHeight=200;
+    }
+    if (width >= 576) {
+      pdfHeight=300;
+    }
+    if (width >= 1200) {
+      pdfHeight=400;
     }
     return (
       <Fragment>
@@ -1080,7 +1106,7 @@ class UpdateDocumentModal extends Component<
                                   <div className="pdf-display">
                                     <PdfPreview
                                       fileURL={base64Pdf}
-                                      height={400}
+                                      height={pdfHeight}
                                     />
                                   </div>
                                 )}

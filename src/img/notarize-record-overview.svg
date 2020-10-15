@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="257" height="922" viewBox="0 0 257 922">
+<svg id="notarize-overview" xmlns="http://www.w3.org/2000/svg" width="257" height="922" viewBox="0 0 257 922">
   <g id="Group_3293" data-name="Group 3293" transform="translate(-28 -75)">
     <g id="Group_2982" data-name="Group 2982" transform="translate(-760 364)">
       <g id="Group_2777" data-name="Group 2777" transform="translate(796 567.208)">
@@ -50,8 +50,8 @@ Copy with MyPass" transform="translate(331 328)" fill="#4ba9d9" font-size="18" f
         <g id="Group_2981" data-name="Group 2981" transform="translate(-404 -182)">
           <g id="Group_1920" data-name="Group 1920" transform="translate(433 435.495)">
             <g id="Group_1800-2" data-name="Group 1800" transform="translate(0 128.448)">
-              <text id="Fill_in_your_notary_information_and_upload_your_PEM_key_and_notary_seal" data-name="Fill in your notary 
-information and upload your 
+              <text id="Fill_in_your_notary_information_and_upload_your_PEM_key_and_notary_seal" data-name="Fill in your notary
+information and upload your
 PEM key and notary seal" transform="translate(117 15.057)" fill="#707070" font-size="16" font-family="Montserrat-Regular, Montserrat"><tspan x="-71.296" y="0">Fill in your notary </tspan><tspan x="-117.304" y="19">information and upload your </tspan><tspan x="-97.92" y="38">PEM key and notary seal</tspan></text>
             </g>
             <g id="Group_2776" data-name="Group 2776" transform="translate(49.085 0)">
@@ -142,8 +142,8 @@ PEM key and notary seal" transform="translate(117 15.057)" fill="#707070" font-s
       <g id="Group_2991" data-name="Group 2991" transform="translate(-1116 75)">
         <g id="Group_2779" data-name="Group 2779" transform="translate(1154 584.954)">
           <g id="Group_1800-3" data-name="Group 1800" transform="translate(0 0)">
-            <text id="Turn_your_device_to_the_custodian_to_collect_their_electronic_signature" data-name="Turn your device to the 
-custodian to collect their 
+            <text id="Turn_your_device_to_the_custodian_to_collect_their_electronic_signature" data-name="Turn your device to the
+custodian to collect their
 electronic signature" transform="translate(120 18.046)" fill="#707070" font-size="19" font-family="Montserrat-Regular, Montserrat"><tspan x="-111.957" y="0">Turn your device to the </tspan><tspan x="-120.384" y="23">custodian to collect their </tspan><tspan x="-95.19" y="46">electronic signature</tspan></text>
           </g>
         </g>
