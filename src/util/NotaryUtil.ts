@@ -26,6 +26,7 @@ class NotaryUtil {
     documentType: string,
     ownerFullname: string,
     caseworkerFullname: string,
+    county: string,
     isRecordable: boolean
   ) {
     try {
@@ -52,7 +53,7 @@ class NotaryUtil {
         ? await PDFUtil.stitchTogetherRecordablePdf(
             originalImageDetail,
             'Texas',
-            'Travis',
+            county,
             issuanceDate,
             documentType,
             ownerFullname,
@@ -63,7 +64,7 @@ class NotaryUtil {
         : await PDFUtil.stitchTogetherPdf(
             originalImageDetail,
             'Texas',
-            'Travis',
+            county,
             issuanceDate,
             documentType,
             ownerFullname,

@@ -427,6 +427,7 @@ class UpdateDocumentModal extends Component<
       document?.type!,
       AccountImpl.displayName(referencedAccount),
       AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
+      'Travis',
       this.isRecordable()
     );
 

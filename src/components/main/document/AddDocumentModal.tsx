@@ -125,6 +125,7 @@ interface AddDocumentModalState {
   custodianIsTrueDocument: boolean;
   custodianAcceptsDigitalSignature: boolean;
   width: number;
+  county: string;
 }
 
 class AddDocumentModal extends Component<
@@ -167,6 +168,7 @@ class AddDocumentModal extends Component<
       custodianIsTrueDocument: false,
       custodianAcceptsDigitalSignature: false,
       width: 0,
+      county: '',
     };
   }
 
@@ -358,6 +360,7 @@ class AddDocumentModal extends Component<
       privatePem,
       notarySealBase64,
       notaryId,
+      county
     } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
     const {
@@ -397,6 +400,7 @@ class AddDocumentModal extends Component<
         documentType,
         AccountImpl.displayName(referencedAccount),
         AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
+        county,
         this.isRecordable()
       );
 
@@ -836,7 +840,7 @@ class AddDocumentModal extends Component<
   }
 
   renderNotarizeSection() {
-    const { previewURL, notaryId, errorMessage } = {
+    const { previewURL, notaryId, errorMessage, county } = {
       ...this.state,
     };
 
@@ -866,7 +870,7 @@ class AddDocumentModal extends Component<
           <p>
             {rskTotalCostToSend} RSK (${dollarAmount})
           </p>
-          <QRCode value={this.state.adminPublicKey} size="256" />
+          <QRCode value={this.state.adminPublicKey} size={256} renderAs="svg" />
           <p>{this.state.adminPublicKey}</p>
         </div>
       );
@@ -894,7 +898,7 @@ class AddDocumentModal extends Component<
           <p>
             {ethTotalCostToSend} ETH (${dollarAmount})
           </p>
-          <QRCode value={this.state.adminPublicKey} size="256" />
+          <QRCode value={this.state.adminPublicKey} size={256} renderAs="svg" />
           <p>{this.state.adminPublicKey}</p>
         </div>
       );
@@ -936,6 +940,15 @@ class AddDocumentModal extends Component<
                       value={notaryId}
                       onChange={this.handleNotaryIdChange}
                       placeholder="Notary Id..."
+                    />
+                    <Label for="county">County</Label>
+                    <Input
+                      type="text"
+                      name="county"
+                      id="county"
+                      value={county}
+                      onChange={(e) => this.setState({county: e.target.value})}
+                      placeholder="County..."
                     />
                     <Label
                       style={{ paddingRight: '30px' }}
