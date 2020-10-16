@@ -16,6 +16,10 @@ class StringUtil {
     return result;
   }
 
+  static truncate(str, n){
+    return (str.length > n) ? str.substr(0, n) : str;
+  }
+
   static stringPaddedCenter(str, numspace) {
     const spc = Array(numspace).fill(' ').join('');
     return spc + str + spc;

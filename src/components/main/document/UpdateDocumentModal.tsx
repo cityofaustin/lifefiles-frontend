@@ -63,6 +63,7 @@ import QRCode from 'qrcode.react';
 import Badge from '../../common/Badge';
 import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
+import DocumentType from '../../../models/DocumentType';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -75,6 +76,7 @@ const web3 = new Web3(
 interface UpdateDocumentModalProps {
   showModal: boolean;
   toggleModal: () => void;
+  documentTypes: DocumentType[];
   document?: Document;
   handleDeleteDocument: (document: Document) => Promise<void>;
   shareRequests: ShareRequest[];
@@ -126,6 +128,7 @@ interface UpdateDocumentModalState {
   isLoading: boolean;
   updatedBase64Image?: string;
   gotNotarizationInfo: boolean;
+  width: number;
 }
 
 class UpdateDocumentModal extends Component<
@@ -165,8 +168,22 @@ class UpdateDocumentModal extends Component<
       isLoading: false,
       updatedBase64Image: undefined,
       gotNotarizationInfo: false,
+      width: 0,
     };
   }
+
+  componentDidMount() {
+    this.updateWindowDimensions();
+    window.addEventListener('resize', this.updateWindowDimensions);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateWindowDimensions);
+  }
+
+  updateWindowDimensions = () => {
+    this.setState({ width: window.innerWidth });
+  };
 
   getNotarizationInfo = async () => {
     if (this.state.gotNotarizationInfo == false) {
@@ -382,6 +399,12 @@ class UpdateDocumentModal extends Component<
     this.setState({ vp: vpJwt });
   };
 
+  isRecordable = () => {
+    const { document, documentTypes } = { ...this.props };
+    return !!documentTypes.find((dt) => dt.name === document!.type)
+      ?.isRecordableDoc;
+  };
+
   handleNotarizeDocument = async () => {
     const { document, referencedAccount, myAccount } = { ...this.props };
 
@@ -402,11 +425,10 @@ class UpdateDocumentModal extends Component<
       this.state.base64Image === undefined ? '' : this.state.base64Image,
       this.state.notarySealBase64,
       document?.type!,
-      AccountImpl.getFullName(
-        referencedAccount?.firstName,
-        referencedAccount?.lastName
-      ),
-      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
+      AccountImpl.displayName(referencedAccount),
+      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
+      'Travis',
+      this.isRecordable()
     );
 
     // await NotaryService.updateDocumentVC(
@@ -870,6 +892,7 @@ class UpdateDocumentModal extends Component<
       base64Pdf,
       pendingAccess,
       isLoading,
+      width
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -888,6 +911,16 @@ class UpdateDocumentModal extends Component<
         uploadedByAccount?.firstName,
         uploadedByAccount?.lastName
       );
+    }
+    let pdfHeight = 200;
+    if (width < 576) {
+      pdfHeight=200;
+    }
+    if (width >= 576) {
+      pdfHeight=300;
+    }
+    if (width >= 1200) {
+      pdfHeight=400;
     }
     return (
       <Fragment>
@@ -1074,7 +1107,7 @@ class UpdateDocumentModal extends Component<
                                   <div className="pdf-display">
                                     <PdfPreview
                                       fileURL={base64Pdf}
-                                      height={400}
+                                      height={pdfHeight}
                                     />
                                   </div>
                                 )}

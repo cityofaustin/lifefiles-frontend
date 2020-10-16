@@ -47,6 +47,7 @@ import HelperContact from '../../models/HelperContact';
 import Role from '../../models/Role';
 import ProfileImage from '../common/ProfileImage';
 import MySettings from './MySettings';
+import NotaryPdfTestPage from '../NotaryPdfTestPage';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -94,6 +95,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       isAccount: false,
       sortAsc: true,
       showModal: false,
+      // showModal: true,
       isAccountMenuOpen: false,
       isSmallMenuOpen: false,
       isLoading: false,
@@ -673,7 +675,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal(props) {
-    const { documentSelected, activeDocumentTab, accounts, helperContacts } = {
+    const { documentSelected, activeDocumentTab, accounts, helperContacts, documentTypes } = {
       ...this.state,
     };
     const { account } = { ...this.props };
@@ -701,6 +703,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         toggleModal={() =>
           this.setState({ documentSelected: undefined, activeDocumentTab: '1' })
         }
+        documentTypes={documentTypes}
         document={documentSelected}
         shareRequests={shareRequests}
         handleUpdateDocument={this.handleUpdateDocument}
@@ -1005,12 +1008,6 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 <Route exact path="**/account">
                   {this.renderAccount()}
                 </Route>
-                <Route exact path="/bring-your-key">
-                  {this.renderBringYourKeyPage()}
-                </Route>
-                <Route exact path="/checkout">
-                  {this.renderCheckoutPage()}
-                </Route>
                 <Route
                   exact
                   path="/documents"
@@ -1074,6 +1071,20 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   )}
                   {this.renderAdminPage()}
                 </Route>
+                {/* Dev links for testing */}
+                {process.env.NODE_ENV === 'development' && (
+                  <Fragment>
+                    <Route exact path="/bring-your-key">
+                      {this.renderBringYourKeyPage()}
+                    </Route>
+                    <Route exact path="/checkout">
+                      {this.renderCheckoutPage()}
+                    </Route>
+                    <Route exact path="/notary-pdf-test">
+                      <NotaryPdfTestPage />
+                    </Route>
+                  </Fragment>
+                )}
               </Switch>
             </div>
           </div>
