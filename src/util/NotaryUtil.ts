@@ -14,7 +14,7 @@ class NotaryUtil {
   // To be called by the notary
   static async createNotarizedDocument(
     notaryType: string,
-    expirationDate: Date,
+    expirationDate: Date | null,
     notaryId: number,
     notaryEthAddress: string,
     notaryEthPrivateKey: string,
@@ -25,7 +25,9 @@ class NotaryUtil {
     notaryDigitalSealBase64: string,
     documentType: string,
     ownerFullname: string,
-    caseworkerFullname: string
+    caseworkerFullname: string,
+    county: string,
+    isRecordable: boolean
   ) {
     try {
       const didRes = await NotaryService.generateNewDid();
@@ -47,17 +49,29 @@ class NotaryUtil {
       const notarySealImageDetail: ImageDetail = await ImageUtil.processImageBase64(
         notaryDigitalSealBase64
       );
-      const { pdfArrayBuffer, doc } = await PDFUtil.stitchTogetherPdf(
-        originalImageDetail,
-        'Texas',
-        'Travis',
-        issuanceDate,
-        documentType,
-        ownerFullname,
-        notarySealImageDetail,
-        caseworkerFullname,
-        documentDID
-      );
+      const { pdfArrayBuffer, doc } = isRecordable
+        ? await PDFUtil.stitchTogetherRecordablePdf(
+            originalImageDetail,
+            'Texas',
+            county,
+            issuanceDate,
+            documentType,
+            ownerFullname,
+            notarySealImageDetail,
+            caseworkerFullname,
+            documentDID
+          )
+        : await PDFUtil.stitchTogetherPdf(
+            originalImageDetail,
+            'Texas',
+            county,
+            issuanceDate,
+            documentType,
+            ownerFullname,
+            notarySealImageDetail,
+            caseworkerFullname,
+            documentDID
+          );
 
       const documentHash = md5(this.arrayBuffertoBuffer(pdfArrayBuffer));
       const encryptedHash = this.encryptX509(notaryPrivateKey, documentHash);
@@ -193,8 +207,8 @@ class NotaryUtil {
   }
 
   // To be called by the owner
-  static anchorVpToBlockchain(vpJwt: string) {
-    NotaryService.anchorVpToBlockchain(vpJwt);
+  static anchorVpToBlockchain(vpJwt: string, network: string) {
+    NotaryService.anchorVpToBlockchain(vpJwt, network);
   }
 }
 

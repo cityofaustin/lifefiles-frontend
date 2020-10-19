@@ -29,7 +29,10 @@
       display: none;
     }
     @include media-breakpoint-up(md) {
-      display: table;
+      // display: table;
+      justify-content: space-between;
+      display: flex;
+      align-items: center;
     }
     width: 100%;
     padding-left: 10px;
@@ -48,6 +51,8 @@
       @include media-breakpoint-up(lg) {
         margin: 0 127px 0 80px;
       }
+      height: 56px;
+      flex: 1;
       position: relative;
       top: 4px;
     }
@@ -136,17 +141,33 @@
 }
 
 .account-circle {
-  width: 89px;
-  height: 89px;
+  &.lg {
+    width: 188px;
+    height: 188px;
+    font-size: 78px;
+    font-weight: 600;
+  }
+  &.md {
+    width: 89px;
+    height: 89px;
+    font-size: 37px;
+    font-weight: 600;
+  }
+  &.sm {
+    width: 64px;
+    height: 64px;
+    font-size: 26.6px;
+  }
   object-fit: contain;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border: 1px solid white;
-  font-size: 42px;
   color: white;
   text-align: center;
   vertical-align: middle;
-  line-height: 89px;
+  // line-height: 89px;
   //position:relative;
   //left:-20px;
   //bottom: 26px;

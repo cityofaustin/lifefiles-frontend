@@ -28,6 +28,23 @@ class AccountImpl implements Account {
     return (firstName + lastName).length > 0 ? `${firstName} ${lastName}` : '-';
   }
 
+  public static hasNameSet(account) {
+    return (
+      account.firstName &&
+      account.firstName.length > 0 &&
+      account.firstName !== '-' &&
+      account.lastName &&
+      account.lastName.length > 0 &&
+      account.lastName !== '-'
+    );
+  }
+
+  public static displayName(account) {
+    return this.hasNameSet(account)
+      ? this.getFullName(account.firstName, account.lastName)
+      : account.username;
+  }
+
   public static getProfileURLByIdAndList(accounts: Account[], accountId: any) {
     const account = this.getAccountByIdAndList(accounts, accountId);
     if (account) {

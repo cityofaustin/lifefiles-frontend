@@ -10,6 +10,7 @@ import ShareRequest from '../../../models/ShareRequest';
 import AccountShareModal from './AccountShareModal';
 import Document from '../../../models/document/Document';
 import { Redirect } from 'react-router-dom';
+import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 
 interface AccountSummaryProps {
   account: Account;
@@ -28,10 +29,12 @@ interface AccountSummaryState {
   goToClientDocuments: boolean;
 }
 
-class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState> {
-
+class AccountSummary extends Component<
+  AccountSummaryProps,
+  AccountSummaryState
+> {
   static defaultProps = {
-    handleClientSelected: () => {}
+    handleClientSelected: () => {},
   };
 
   constructor(props: Readonly<AccountSummaryProps>) {
@@ -39,13 +42,13 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
 
     this.state = {
       showAccountShareModal: false,
-      goToClientDocuments: false
+      goToClientDocuments: false,
     };
   }
 
   handleAccountSummaryClick = () => {
-    const {isNotary, handleClientSelected, account} = {...this.props};
-    if(isNotary) {
+    const { isNotary, handleClientSelected, account } = { ...this.props };
+    if (isNotary) {
       handleClientSelected(account);
       this.setState({ goToClientDocuments: true });
     } else {
@@ -54,16 +57,28 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
   };
 
   render() {
-    const { account, shareRequests, searchedDocuments, myAccount, addShareRequest,
-      removeShareRequest, privateEncryptionKey, isNotary } = { ...this.props };
+    const {
+      account,
+      shareRequests,
+      searchedDocuments,
+      myAccount,
+      addShareRequest,
+      removeShareRequest,
+      privateEncryptionKey,
+      isNotary,
+    } = { ...this.props };
     const { showAccountShareModal, goToClientDocuments } = { ...this.state };
-    const numberOfShares = (shareRequests) ? shareRequests.length : 0;
+    const numberOfShares = shareRequests ? shareRequests.filter(sr => sr.approved).length : 0;
     return (
       <div className="network-item" onClick={this.handleAccountSummaryClick}>
-        { goToClientDocuments && <Redirect push to={`clients/${account.id}/documents`}/> }
+        {goToClientDocuments && (
+          <Redirect push to={`clients/${account.id}/documents`} />
+        )}
         <AccountShareModal
           showModal={showAccountShareModal}
-          toggleModal={() => this.setState({ showAccountShareModal: !showAccountShareModal })}
+          toggleModal={() =>
+            this.setState({ showAccountShareModal: !showAccountShareModal })
+          }
           account={account}
           searchedDocuments={searchedDocuments}
           myAccount={myAccount}
@@ -73,15 +88,22 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
           privateEncryptionKey={privateEncryptionKey}
         />
         <div className="img-container">
-          <ImageWithStatus
-            imageViewType={ImageViewTypes.GRID_CIRCLE_LAYOUT}
-            imageUrl={AccountService.getProfileURL(account.profileImageUrl!)}
-          />
+          {account.profileImageUrl && (
+            <ImageWithStatus
+              imageViewType={ImageViewTypes.GRID_CIRCLE_LAYOUT}
+              imageUrl={AccountService.getProfileURL(account.profileImageUrl!)}
+            />
+          )}
+          {!account.profileImageUrl && <ProfileImage account={account} size={ProfileImageSizeEnum.LARGE} />}
           <div className="docs-shared-sm">
             <DocShared isNotary={isNotary} numberOfShares={numberOfShares} />
           </div>
         </div>
-        <div className="title">{AccountImpl.getFullName(account?.firstName, account?.lastName)}</div>
+        <div className="title">
+          {!AccountImpl.hasNameSet(account) && account.username}
+          {AccountImpl.hasNameSet(account) &&
+            AccountImpl.getFullName(account?.firstName, account?.lastName)}
+        </div>
         <div className="contact-info">
           {!isNotary && (
             <Fragment>
@@ -105,7 +127,9 @@ class AccountSummary extends Component<AccountSummaryProps, AccountSummaryState>
           </div>
         </div>
         <div className="subtitle">SHARED</div>
-        <div className="docs-shared"><DocShared isNotary={isNotary} numberOfShares={numberOfShares} /></div>
+        <div className="docs-shared">
+          <DocShared isNotary={isNotary} numberOfShares={numberOfShares} />
+        </div>
       </div>
     );
   }

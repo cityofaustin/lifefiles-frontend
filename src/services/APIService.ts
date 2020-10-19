@@ -102,7 +102,7 @@ class APIService {
     }
   }
 
-  static async postDocVC(path, vc, helperFile, ownerFile) {
+  static async postDocVC(path, vc, helperFile, ownerFile, network) {
     const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,
@@ -111,6 +111,7 @@ class APIService {
     formdata.append('img', helperFile, helperFile.name);
     formdata.append('img', ownerFile, ownerFile.name);
     formdata.append('vc', vc);
+    formdata.append('network', network);
     const init = {
       method: 'POST',
       headers,
@@ -153,12 +154,19 @@ class APIService {
     const formdata = new FormData();
     // const blob = await StringUtil.fileToText(request.file!);
     // const base64String2 = await StringUtil.fileContentsToString(thumbnailFile!);
+    let lastname = request.account.lastname;
+
+    if (lastname === '' || lastname === undefined) {
+      lastname = '-';
+    }
+
     formdata.append('img', request.file, request.file.name);
     formdata.append('email', request.account.email);
     formdata.append('password', request.account.password);
     formdata.append('username', request.account.username);
     formdata.append('firstname', request.account.firstname);
-    formdata.append('lastname', request.account.lastname);
+    formdata.append('lastname', lastname);
+
     if (request.account.publicEncryptionKey) {
       formdata.append(
         'publicEncryptionKey',
@@ -221,7 +229,8 @@ class APIService {
     newOwnerFile: File,
     newOwnerThumbnail: File,
     documentType: string,
-    ownerId: string
+    ownerId: string,
+    validUntilDate?: Date
   ) {
     const path = '/upload-document-on-behalf-of-user';
     const input = `${API_ENDPOINT}${path}`;
@@ -235,6 +244,9 @@ class APIService {
     formdata.append('img', newOwnerThumbnail, newOwnerThumbnail.name);
     formdata.append('type', documentType);
     formdata.append('uploadForAccountId', ownerId);
+    if(validUntilDate) {
+      formdata.append('validuntildate', validUntilDate.toUTCString());
+    }
     const init = {
       method: 'POST',
       headers,

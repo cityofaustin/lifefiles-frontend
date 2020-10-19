@@ -3,6 +3,7 @@
 
 .main-content {
   .big-title {
+    width: 91%;
     color: #4ba9d9;
     font-size: 22px;
     font-weight: bold;
@@ -10,6 +11,13 @@
     @include media-breakpoint-up(md) {
       font-size: 35px;
       margin: 0 0 0 5px;
+
+      span {
+        width: 40%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
     }
   }
   .bt-breadcrumb {

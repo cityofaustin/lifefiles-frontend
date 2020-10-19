@@ -4,13 +4,13 @@ class AuthService {
 
   static isLoggedIn(): boolean {
     return (
-      !!localStorage.getItem(this.ACCESS_TOKEN) &&
-      localStorage.getItem(this.ACCESS_TOKEN) !== 'undefined'
+      !!sessionStorage.getItem(this.ACCESS_TOKEN) &&
+      sessionStorage.getItem(this.ACCESS_TOKEN) !== 'undefined'
     );
   }
 
   static getAccessToken(): string {
-    return localStorage.getItem(this.ACCESS_TOKEN)!;
+    return sessionStorage.getItem(this.ACCESS_TOKEN)!;
   }
 
   static isNonAuthPath(path: string) {
@@ -19,13 +19,13 @@ class AuthService {
   }
 
   static logIn(accessToken: string, refreshToken: string) {
-    localStorage.setItem(this.ACCESS_TOKEN, accessToken);
-    localStorage.setItem(this.REFRESH_TOKEN, refreshToken);
+    sessionStorage.setItem(this.ACCESS_TOKEN, accessToken);
+    sessionStorage.setItem(this.REFRESH_TOKEN, refreshToken);
   }
 
   static logOut() {
-    localStorage.removeItem(this.ACCESS_TOKEN);
-    localStorage.removeItem(this.REFRESH_TOKEN);
+    sessionStorage.removeItem(this.ACCESS_TOKEN);
+    sessionStorage.removeItem(this.REFRESH_TOKEN);
     // redirect to auth server
     window.location.replace(location.origin + location.pathname + location.hash);
     window.location.reload();

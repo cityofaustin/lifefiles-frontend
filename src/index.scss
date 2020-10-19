@@ -4,19 +4,25 @@
 //@use '~@material/base';
 //////@import 'dropzone.scss';
 //@import '~@material/menu/mdc-menu';
-@import './components/variables';
-@import 'fonts';
-@import '~react-image-lightbox/style.css';
-@import '~bootstrap/scss/bootstrap';
-@import '~react-multi-carousel/lib/styles.css';
-@import '~react-datepicker/src/stylesheets/datepicker';
-@import '~ag-grid-community/src/styles/ag-grid';
-@import '~ag-grid-community/src/styles/ag-theme-alpine-dark/sass/ag-theme-alpine-dark';
+@import "./components/variables";
+@import "fonts";
+@import "~react-image-lightbox/style.css";
+@import "~bootstrap/scss/bootstrap";
+@import "~react-multi-carousel/lib/styles.css";
+@import "~react-datepicker/src/stylesheets/datepicker";
+@import "~ag-grid-community/src/styles/ag-grid";
+@import "~ag-grid-community/src/styles/ag-theme-alpine-dark/sass/ag-theme-alpine-dark";
 
-html { height:100%; }
+html {
+  height: 100%;
+}
 
 body {
-  position:absolute; top:0; bottom:0; right:0; left:0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
   background-color: $background-color;
   font-family: Montserrat, Arial, sans-serif;
   //padding: 15px;
@@ -31,8 +37,8 @@ body {
   display: flex;
   width: 100%;
   @include themify($themes) {
-    background-color: themed('backgroundColor');
-    color: themed('color');
+    background-color: themed("backgroundColor");
+    color: themed("color");
   }
 }
 
@@ -46,6 +52,7 @@ body {
   object-fit: contain;
   border-radius: 50%;
   display: inline-block;
+  background-color: #9a9a9a;
 }
 
 .padding-right-24 {
@@ -102,11 +109,25 @@ body {
   background-color: #2362c7;
   border-color: #2362c7;
   @include themify($themes) {
-    background-color: themed('colorPrimary');
-    border-color: themed('colorPrimary');
-    color: themed('buttonTextColor');
+    background-color: themed("colorPrimary");
+    border-color: themed("colorPrimary");
+    color: themed("buttonTextColor");
   }
 }
+
+// .btn-outline-primary {
+//   @include themify($themes) {
+//     border-color: themed("colorPrimary");
+//     color: themed("colorPrimary") !important;
+//   }
+//   &:hover {
+//     color: #fff;
+//     @include themify($themes) {
+//       background-color: themed("colorPrimary");
+//       border-color: themed("colorPrimary");
+//     }
+//   }
+// }
 
 .btn-danger {
   background-color: $danger;
@@ -118,9 +139,9 @@ body {
 // bootstrap modal
 
 .modal-dialog {
-  @include  media-breakpoint-down(sm) {
-    margin: 19px 21.5px 24px 21.5px;
-  }
+  // @include  media-breakpoint-down(sm) {
+  //   margin: 19px 21.5px 24px 21.5px;
+  // }
   .modal-content {
     padding: 0;
     background-color: #f6f6f6;
@@ -131,7 +152,7 @@ body {
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
     .modal-header {
       @include themify($themes) {
-        background: themed('colorPrimary') !important;
+        background: themed("colorPrimary") !important;
       }
       @include media-breakpoint-up(sm) {
         padding: 19px 44px 19px 44px;
@@ -144,6 +165,7 @@ body {
       border-top-left-radius: calc(17px - 1px);
       border-top-right-radius: calc(17px - 1px);
       .modal-title {
+        overflow: hidden;
         font-size: 18px;
         color: #f8f8f8;
         font-weight: 500;
@@ -218,7 +240,7 @@ body {
   text-transform: uppercase;
   font-size: 15px;
   .nav-item {
-    width: calc(100%/3);
+    width: calc(100% / 3);
   }
   @include media-breakpoint-up(md) {
     font-size: 20px;
@@ -238,7 +260,9 @@ body {
   font-weight: bold;
   text-transform: capitalize;
   margin: 10px 9px 0 9px;
-  @include media-breakpoint-up(md) {display: none;}
+  @include media-breakpoint-up(md) {
+    display: none;
+  }
   .nav-item {
     width: 50%;
     .nav-link {
@@ -262,7 +286,9 @@ body {
   @include media-breakpoint-up(sm) {
     display: flex;
   }
-  @include media-breakpoint-up(lg) {font-size: 35px;}
+  @include media-breakpoint-up(lg) {
+    font-size: 35px;
+  }
   font-weight: bold;
   text-transform: none;
   .nav-link {
@@ -288,10 +314,13 @@ body {
   text-align: center;
   opacity: 0.7;
   cursor: pointer;
-  @include media-breakpoint-up(md) { min-width: 187px; }
+  @include media-breakpoint-up(md) {
+    min-width: 187px;
+  }
 }
 
-.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
   color: #495057;
   background-color: inherit;
   border-color: transparent;
@@ -301,11 +330,13 @@ body {
   opacity: 1;
 }
 
-.nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
   border-color: transparent;
 }
 
-.nav-link.active:hover, .nav-link.active:focus {
+.nav-link.active:hover,
+.nav-link.active:focus {
   @include themify($themes) {
     border-color: themed("colorPrimary");
   }
@@ -366,10 +397,11 @@ button {
   border-color: #693237;
 }
 
-input[type="button"], input[type="submit"] {
-  border: none
+input[type="button"],
+input[type="submit"] {
+  border: none;
 }
 
 .button {
-  border: none
+  border: none;
 }

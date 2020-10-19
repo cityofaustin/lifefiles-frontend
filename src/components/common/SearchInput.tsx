@@ -5,6 +5,7 @@ import {ReactComponent as MagnifyingGlass} from '../../img/magnifying-glass.svg'
 
 interface SearchInputProps {
   handleSearch: (query: string) => void;
+  autoSearch: boolean;
 }
 
 interface SearchInputState {
@@ -12,6 +13,10 @@ interface SearchInputState {
 }
 
 class SearchInput extends Component<SearchInputProps, SearchInputState> {
+
+  static defaultProps = {
+    autoSearch: false
+  };
 
   constructor(props: Readonly<SearchInputProps>) {
     super(props);
@@ -30,9 +35,13 @@ class SearchInput extends Component<SearchInputProps, SearchInputState> {
   };
 
   handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const {autoSearch, handleSearch} = {...this.props};
     const {value} = e.target;
     const key = e.target.name;
 
+    if(autoSearch) {
+      handleSearch(value);
+    }
     if (Object.keys(this.state).includes(key)) {
       this.setState({[key]: value} as Pick<SearchInputState, keyof SearchInputState>);
     }

@@ -1,6 +1,7 @@
-import { Document, Page, pdfjs } from 'react-pdf';
+import { Document, Page, pdfjs, PDFDownloadLink } from 'react-pdf';
 import React, { Component } from 'react';
 import './PdfPreview.scss';
+import ProgressIndicator from './ProgressIndicator';
 
 // TODO fix this with webpack
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -49,6 +50,8 @@ class PdfPreview extends Component<PdfPreviewProps, PdfPreviewState> {
     return (
       <div className="pdf-container">
         <Document
+          error={(<div>Failed to load PDF file.</div>)}
+          loading={(<ProgressIndicator />)}
           title=""
           file={fileURL}
           onLoadSuccess={this.onDocumentLoadSuccess}

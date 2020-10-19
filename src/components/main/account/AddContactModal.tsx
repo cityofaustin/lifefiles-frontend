@@ -249,7 +249,7 @@ export default class AddContactModal extends Component<
           <div className="search-helper-container">
             <div className="search-input">
               <SearchInput
-                handleSearch={(val) => this.setState({ query: val })}
+                handleSearch={(val) => this.setState({ query: val })} autoSearch
               />
             </div>
             <div

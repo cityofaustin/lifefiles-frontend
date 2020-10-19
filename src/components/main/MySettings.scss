@@ -1,0 +1,148 @@
+@import "~bootstrap/scss/bootstrap";
+@import "../variables";
+
+.my-settings-modal {
+  @include media-breakpoint-down(xs) {
+    margin: 0 !important;
+  }
+  .modal-content {
+    @include media-breakpoint-down(xs) {
+      height: 100vh;
+      border-radius: 0 !important;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      @include media-breakpoint-down(xs) {
+        border-radius: 0 !important;
+      }
+      .modal-title {
+        display: flex;
+        align-items: center;
+        img {
+          width: 63.7px;
+          height: 63.7px;
+          margin-left: 6px;
+          margin-right: 28.3px;
+          border-radius: 50%;
+        }
+        .my-settings-title {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          @include media-breakpoint-up(md) {
+            width: 257px;
+          }
+          @include media-breakpoint-up(lg) {
+            width: 558px;
+          }
+          @include media-breakpoint-up(xl) {
+            width: 897px;
+          }
+        }
+      }
+      .modal-close {
+        @include themify($themes) {
+          background: themed("colorPrimary");
+        }
+        &:hover {
+          background: white;
+          svg g {
+            @include themify($themes) {
+              stroke: themed("colorPrimary");
+            }
+          }
+        }
+        .sm {
+          display: inline;
+          @include media-breakpoint-up(md) {
+            display: none;
+          }
+        }
+        .lg {
+          display: none;
+          @include media-breakpoint-up(md) {
+            display: inline;
+          }
+        }
+      }
+    }
+    .modal-body {
+      @include media-breakpoint-up(xl) {
+        margin: -15px 0 0 0;
+      }
+      .account-settings-title {
+        text-align: center;
+        color: $mid-blue;
+        font-size: 30px;
+        font-weight: 500;
+        margin-bottom: 9px;
+        @include media-breakpoint-up(xl) {
+          margin-top: 9px;
+        }
+      }
+      .account-settings-option {
+        font-size: 30px;
+        opacity: 0.8;
+        margin: 0 -16px;
+        padding: 11px 20px;
+        color: #484848;
+        cursor: pointer;
+        &.active {
+          color: #646565;
+          background-color: darken(#ececec, 10%);
+        }
+      }
+      .account-settings-content {
+        background-color: #ececec;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 -16px;
+        padding: 24px 42px;
+        &.bottom {
+          background-color: #f5f5f5;
+          @include media-breakpoint-up(xl) {
+            background-color: #ececec;
+          }
+          .account-content-title {
+            font-size: 28px;
+            margin-left: -36px;
+            @include media-breakpoint-up(xl) {
+              font-size: 63px;
+              font-weight: bold;
+            }
+          }
+          .account-content-excerpt {
+            margin-bottom: 37px;
+          }
+          button {
+            margin-top: 48px;
+            height: auto;
+            width: min-content;
+            @include media-breakpoint-up(sm) {
+              width: max-content;
+            }
+          }
+        }
+        .account-content-title {
+          font-size: 32px;
+          font-weight: bold;
+          color: $mid-blue;
+          margin-bottom: 26px;
+          @include media-breakpoint-up(xl) {
+            font-size: 63px;
+            font-weight: bold;
+          }
+        }
+        .account-content-excerpt {
+          margin-top: 37px;
+          font-size: 22px;
+          color: #484848;
+          text-align: center;
+          line-height: 1.23;
+        }
+      }
+    }
+  }
+}

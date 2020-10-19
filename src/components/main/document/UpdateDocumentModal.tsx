@@ -57,9 +57,26 @@ import PdfPreview from '../../common/PdfPreview';
 import ProgressIndicator from '../../common/ProgressIndicator';
 import APIService from '../../../services/APIService';
 
+import rskapi from 'rskapi';
+import Web3 from 'web3';
+import QRCode from 'qrcode.react';
+import Badge from '../../common/Badge';
+import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
+import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
+import DocumentType from '../../../models/DocumentType';
+
+const CONTRACT_DEFAULT_GAS = 300000;
+const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(
+    'https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08'
+  )
+);
+
 interface UpdateDocumentModalProps {
   showModal: boolean;
   toggleModal: () => void;
+  documentTypes: DocumentType[];
   document?: Document;
   handleDeleteDocument: (document: Document) => Promise<void>;
   shareRequests: ShareRequest[];
@@ -68,6 +85,9 @@ interface UpdateDocumentModalProps {
   removeShareRequest: (request: ShareRequest) => void;
   myAccount: Account;
   handleUpdateDocument: (request: UpdateDocumentRequest) => void;
+  handleUpdateDocumentAndUpdateShareRequests: (
+    request: UpdateDocumentRequest
+  ) => void;
   privateEncryptionKey?: string;
   referencedAccount?: Account;
   handleClientSelected: (otherOwnerAccount: Account) => void; // to refresh the share request data
@@ -75,6 +95,12 @@ interface UpdateDocumentModalProps {
 }
 
 interface UpdateDocumentModalState {
+  rskGasPrice: number;
+  ethGasPrice: number;
+  adminPublicKey: string;
+  currentBtcPrice: number;
+  currentEthPrice: number;
+  networkSelect: string;
   activeTab: string;
   showConfirmDeleteSection: boolean;
   hasConfirmedDelete: boolean;
@@ -100,6 +126,9 @@ interface UpdateDocumentModalState {
   approvedVpUrl?: string;
   doc?: any;
   isLoading: boolean;
+  updatedBase64Image?: string;
+  gotNotarizationInfo: boolean;
+  width: number;
 }
 
 class UpdateDocumentModal extends Component<
@@ -110,6 +139,12 @@ class UpdateDocumentModal extends Component<
     super(props);
 
     this.state = {
+      rskGasPrice: 1000000000,
+      ethGasPrice: 1000000000,
+      adminPublicKey: '',
+      currentBtcPrice: 0,
+      currentEthPrice: 0,
+      networkSelect: 's3',
       activeTab: props.activeTab,
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
@@ -131,8 +166,59 @@ class UpdateDocumentModal extends Component<
       vp: undefined,
       doc: undefined,
       isLoading: false,
+      updatedBase64Image: undefined,
+      gotNotarizationInfo: false,
+      width: 0,
     };
   }
+
+  componentDidMount() {
+    this.updateWindowDimensions();
+    window.addEventListener('resize', this.updateWindowDimensions);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateWindowDimensions);
+  }
+
+  updateWindowDimensions = () => {
+    this.setState({ width: window.innerWidth });
+  };
+
+  getNotarizationInfo = async () => {
+    if (this.state.gotNotarizationInfo == false) {
+      this.setState({ gotNotarizationInfo: true });
+
+      if (this.state.adminPublicKey === '') {
+        let rskGasPrice = await rskClient.host().getGasPrice();
+        let ethGasPrice = web3.utils.toWei(
+          '' + (await NotaryService.getEthGasPrice()) / 10,
+          'gwei'
+        );
+
+        let adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
+        let currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
+        let currentEthPrice = await NotaryService.getCoinPrice('ethereum');
+
+        this.setState({ ethGasPrice: parseInt(ethGasPrice) });
+        this.setState({ rskGasPrice });
+
+        if (
+          adminPublicKeyResponse == undefined ||
+          adminPublicKeyResponse == null
+        ) {
+          this.setState({ adminPublicKey: '-' });
+        } else {
+          this.setState({
+            adminPublicKey: adminPublicKeyResponse.adminPublicKey,
+          });
+        }
+
+        this.setState({ currentBtcPrice });
+        this.setState({ currentEthPrice });
+      }
+    }
+  };
 
   async componentDidUpdate(prevProps: Readonly<UpdateDocumentModalProps>) {
     if (prevProps.activeTab !== this.props.activeTab) {
@@ -199,16 +285,24 @@ class UpdateDocumentModal extends Component<
     toggleModal();
   };
 
+  handleChangeNetworkSelect = (e) => {
+    this.setState({ networkSelect: e.target.value });
+  };
+
   handleUpdateDocument = () => {
-    const { newFile, newThumbnailFile } = { ...this.state };
-    const { handleUpdateDocument, document } = { ...this.props };
-    handleUpdateDocument({
-      id: '5ed6aa532f74186d6238bf47',
-      // id: document!._id!,
+    const { newFile, newThumbnailFile, updatedBase64Image } = { ...this.state };
+    const { handleUpdateDocumentAndUpdateShareRequests, document } = {
+      ...this.props,
+    };
+
+    handleUpdateDocumentAndUpdateShareRequests({
+      id: document!._id!,
       img: newFile,
       thumbnail: newThumbnailFile,
       validUntilDate: undefined, // FIXME: add expired at form somewhere
+      base64Image: updatedBase64Image!,
     });
+
     // clear state
     this.setState({
       activeTab: '1',
@@ -296,10 +390,19 @@ class UpdateDocumentModal extends Component<
       document.type,
       document.vpJwt
     );
-    const receipt = await NotaryService.anchorVpToBlockchain(vpJwt);
+    const receipt = await NotaryService.anchorVpToBlockchain(
+      vpJwt,
+      this.state.networkSelect
+    );
     console.log({ receipt });
     this.setState({ approvedVpUrl: receipt.didStatus });
     this.setState({ vp: vpJwt });
+  };
+
+  isRecordable = () => {
+    const { document, documentTypes } = { ...this.props };
+    return !!documentTypes.find((dt) => dt.name === document!.type)
+      ?.isRecordableDoc;
   };
 
   handleNotarizeDocument = async () => {
@@ -322,11 +425,10 @@ class UpdateDocumentModal extends Component<
       this.state.base64Image === undefined ? '' : this.state.base64Image,
       this.state.notarySealBase64,
       document?.type!,
-      AccountImpl.getFullName(
-        referencedAccount?.firstName,
-        referencedAccount?.lastName
-      ),
-      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)
+      AccountImpl.displayName(referencedAccount),
+      AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
+      'Travis',
+      this.isRecordable()
     );
 
     // await NotaryService.updateDocumentVC(
@@ -495,10 +597,24 @@ class UpdateDocumentModal extends Component<
     this.setState({ newFile, newThumbnailFile });
   };
 
+  setUpdatedBase64Image = (updatedBase64Image) => {
+    this.setState({ updatedBase64Image });
+  };
+
   printImg(url: string) {
     const win = window.open('');
     win?.document.write(
       '<img src="' + url + '" onload="window.print();window.close()" />'
+    );
+    win?.focus();
+  }
+
+  openPdfWindow(url: string) {
+    const win = window.open('');
+    win?.document.write(
+      '<embed type="application/pdf" src="' +
+        url +
+        '" id="pdfDocument" width="100%" height="100%" />'
     );
     win?.focus();
   }
@@ -538,6 +654,7 @@ class UpdateDocumentModal extends Component<
 
   renderNotarizeTab = (base64Thumbnail) => {
     const options: OptionTypeBase[] = [];
+    // this.getNotarizationInfo();
     options.push({
       value: 'certifiedCopy',
       label: 'Certified Copy',
@@ -545,11 +662,89 @@ class UpdateDocumentModal extends Component<
     });
 
     if (this.props.myAccount.role === 'owner') {
+      let fundNetworkSection;
+
+      if (this.state.networkSelect === 'rsk') {
+        let rskTotalCostToSend = web3.utils.fromWei(
+          '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
+          'ether'
+        );
+
+        let dollarAmount =
+          Math.round(
+            parseFloat(rskTotalCostToSend) * this.state.currentBtcPrice * 1000
+          ) / 1000;
+
+        fundNetworkSection = (
+          <div>
+            {' '}
+            <Label
+              style={{ paddingRight: '30px' }}
+              for="network"
+              className="other-prompt"
+            >
+              Please Send Funds:
+            </Label>
+            <p>
+              {rskTotalCostToSend} RSK (${dollarAmount})
+            </p>
+            <QRCode value={this.state.adminPublicKey} size="256" />
+            <p>{this.state.adminPublicKey}</p>
+          </div>
+        );
+      } else if (this.state.networkSelect === 'eth') {
+        let ethTotalCostToSend = web3.utils.fromWei(
+          '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
+          'ether'
+        );
+
+        let dollarAmount =
+          Math.round(
+            parseFloat(ethTotalCostToSend) * this.state.currentEthPrice * 1000
+          ) / 1000;
+
+        fundNetworkSection = (
+          <div>
+            {' '}
+            <Label
+              style={{ paddingRight: '30px' }}
+              for="network"
+              className="other-prompt"
+            >
+              Please Send Funds:
+            </Label>
+            <p>
+              {ethTotalCostToSend} ETH (${dollarAmount})
+            </p>
+            <QRCode value={this.state.adminPublicKey} size="256" />
+            <p>{this.state.adminPublicKey}</p>
+          </div>
+        );
+      }
+
       return (
         <div>
           <h4>Verifiable Credential</h4>
           <pre className="vc-display">{this.props.document?.vcJwt}</pre>
           <pre className="vc-display">{this.state.approvedVpUrl}</pre>
+
+          <Label
+            style={{ paddingRight: '30px' }}
+            for="network"
+            className="other-prompt"
+          >
+            Notarization Destination
+          </Label>
+          <select
+            value={this.state.networkSelect}
+            onChange={this.handleChangeNetworkSelect}
+          >
+            <option value="eth">Ethereum Network</option>
+            <option value="rsk">RSK Network</option>
+            <option value="s3">Amazon S3</option>
+          </select>
+
+          {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
 
           <Button
             className="margin-wide"
@@ -707,6 +902,7 @@ class UpdateDocumentModal extends Component<
       base64Pdf,
       pendingAccess,
       isLoading,
+      width
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -726,6 +922,16 @@ class UpdateDocumentModal extends Component<
         uploadedByAccount?.lastName
       );
     }
+    let pdfHeight = 200;
+    if (width < 576) {
+      pdfHeight=200;
+    }
+    if (width >= 576) {
+      pdfHeight=300;
+    }
+    if (width >= 1200) {
+      pdfHeight=400;
+    }
     return (
       <Fragment>
         {isLoading && <ProgressIndicator isFullscreen />}
@@ -738,21 +944,34 @@ class UpdateDocumentModal extends Component<
         >
           <ModalHeader toggle={this.toggleModal} close={closeBtn}>
             {referencedAccount && (
-              <Fragment>
-                <img
-                  src={AccountService.getProfileURL(
-                    referencedAccount.profileImageUrl!
-                  )}
-                  alt=""
-                />
-                <span>
-                  {AccountImpl.getFullName(
-                    referencedAccount.firstName,
-                    referencedAccount.lastName
-                  )}{' '}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {!referencedAccount.profileImageUrl && (
+                  <div style={{ marginRight: '28.3px' }}>
+                    <ProfileImage
+                      account={referencedAccount}
+                      size={ProfileImageSizeEnum.SMALL}
+                    />
+                  </div>
+                )}
+                {referencedAccount.profileImageUrl && (
+                  <img
+                    src={AccountService.getProfileURL(
+                      referencedAccount.profileImageUrl!
+                    )}
+                    alt=""
+                  />
+                )}
+                <span className="update-doc-title">
+                  {AccountImpl.hasNameSet(referencedAccount) &&
+                    AccountImpl.getFullName(
+                      referencedAccount.firstName,
+                      referencedAccount.lastName
+                    )}
+                  {!AccountImpl.hasNameSet(referencedAccount) &&
+                    referencedAccount.username}{' '}
                   - {document?.type}
                 </span>
-              </Fragment>
+              </div>
             )}
             {!referencedAccount && (
               <Fragment>
@@ -833,16 +1052,29 @@ class UpdateDocumentModal extends Component<
                   </NavItem>
 
                   {!referencedAccount && (
-                    <NavItem>
-                      <NavLink
-                        className={classNames({ active: activeTab === '3' })}
-                        onClick={() => {
-                          this.toggleTab('3');
-                        }}
-                      >
-                        Share
-                      </NavLink>
-                    </NavItem>
+                    <div style={{ position: 'relative' }}>
+                      {shareRequests.find((sr) => !sr.approved) && (
+                        <div
+                          style={{
+                            left: '-8px',
+                            top: '-12px',
+                            position: 'absolute',
+                          }}
+                        >
+                          <Badge />
+                        </div>
+                      )}
+                      <NavItem>
+                        <NavLink
+                          className={classNames({ active: activeTab === '3' })}
+                          onClick={() => {
+                            this.toggleTab('3');
+                          }}
+                        >
+                          Share
+                        </NavLink>
+                      </NavItem>
+                    </div>
                   )}
 
                   {this.props.myAccount.role === 'owner' &&
@@ -852,6 +1084,7 @@ class UpdateDocumentModal extends Component<
                           className={classNames({ active: activeTab === '4' })}
                           onClick={() => {
                             this.toggleTab('4');
+                            this.getNotarizationInfo();
                           }}
                         >
                           Notarize
@@ -869,73 +1102,124 @@ class UpdateDocumentModal extends Component<
                               {/* NOTE: leaving out for now until we have functionality server side */}
                               {/*<FlipDocBtnSvg className="pointer"/>*/}
                             </div>
-                            <div className="img-container">
-                              {!base64Image && !base64Pdf && (
-                                <div>Loading...</div>
-                              )}
-                              {base64Pdf && (
-                                <div className="pdf-display">
-                                  <PdfPreview
-                                    fileURL={base64Pdf}
-                                    height={400}
-                                  />
+                            <div style={{ width: '100%' }}>
+                              {document.vcJwt && document.vpDocumentDidAddress && (
+                                <div className="notarized">
+                                  <StampSvg />
+                                  <div className="notary-label">NOTARIZED</div>
                                 </div>
                               )}
-                              {base64Image && (
-                                <ImageWithStatus
-                                  imageUrl={base64Image}
-                                  imageViewType={ImageViewTypes.PREVIEW}
-                                />
-                              )}
-                              {/* <img
-                          className="doc-image"
-                          // src={DocumentService.getDocumentURL(document!.url)}
-                          src={base64Image}
-                          alt="doc missing"
-                        /> */}
-                              <ZoomBtnSmSvg
-                                onClick={() =>
-                                  this.setState({ isZoomed: true })
-                                }
-                              />
+                              <div className="img-container">
+                                {!base64Image && !base64Pdf && (
+                                  <div>Loading...</div>
+                                )}
+                                {base64Pdf && (
+                                  <div className="pdf-display">
+                                    <PdfPreview
+                                      fileURL={base64Pdf}
+                                      height={pdfHeight}
+                                    />
+                                  </div>
+                                )}
+                                {base64Image && (
+                                  <ImageWithStatus
+                                    imageUrl={base64Image}
+                                    imageViewType={ImageViewTypes.PREVIEW}
+                                  />
+                                )}
+                                {/* <img
+                                  className="doc-image"
+                                  // src={DocumentService.getDocumentURL(document!.url)}
+                                  src={base64Image}
+                                  alt="doc missing"
+                                /> */}
+                                {(base64Image || base64Pdf) && (
+                                  <ZoomBtnSmSvg
+                                    onClick={() => {
+                                      if (base64Pdf) {
+                                        this.openPdfWindow(base64Pdf);
+                                      }
+                                      if (base64Image) {
+                                        this.setState({ isZoomed: true });
+                                      }
+                                    }}
+                                  />
+                                )}
+                              </div>
                             </div>
                             <div className="img-access-sm">
-                              <button
-                                onClick={() => {
-                                  // Not allowed to navigate top frame to data URL
-                                  // window.location.href = base64Image!;
-                                  const iframe =
-                                    '<iframe width="100%" height="100%" src="' +
-                                    base64Image! +
-                                    '"></iframe>';
-                                  const x = window.open()!;
-                                  x.document.open();
-                                  x.document.write(iframe);
-                                  x.document.close();
-                                }}
-                                className="download-btn"
-                              >
-                                Download
-                              </button>
-                              <button
-                                onClick={() => this.printImg(base64Image!)}
-                                className="print-btn"
-                              >
-                                Print
-                              </button>
+                              {(base64Image || base64Pdf) && (
+                                <button
+                                  onClick={() => {
+                                    // Not allowed to navigate top frame to data URL
+                                    // window.location.href = base64Image!;
+                                    const dataUri = base64Image
+                                      ? base64Image
+                                      : base64Pdf;
+                                    const iframe =
+                                      '<iframe width="100%" height="100%" src="' +
+                                      dataUri! +
+                                      '"></iframe>';
+                                    const x = window.open()!;
+                                    x.document.open();
+                                    x.document.write(iframe);
+                                    x.document.close();
+                                  }}
+                                  className="download-btn"
+                                >
+                                  Download
+                                </button>
+                              )}
+                              {base64Image && (
+                                <button
+                                  onClick={() => this.printImg(base64Image)}
+                                  className="print-btn"
+                                >
+                                  Print
+                                </button>
+                              )}
+                              {base64Pdf && (
+                                <button
+                                  onClick={() => this.openPdfWindow(base64Pdf)}
+                                  className="print-btn"
+                                >
+                                  Print
+                                </button>
+                              )}
                             </div>
                             <div className="img-access">
-                              <a href={base64Image} download target="_blank">
-                                <DownloadBtnSvg />
-                              </a>
+                              {base64Image && (
+                                <a href={base64Image} download target="_blank">
+                                  <DownloadBtnSvg />
+                                </a>
+                              )}
+                              {base64Pdf && (
+                                <a href={base64Pdf} download target="_blank">
+                                  <DownloadBtnSvg />
+                                </a>
+                              )}
                               <PrintBtnSvg
-                                onClick={() => this.printImg(base64Image!)}
+                                onClick={() => {
+                                  if (base64Image) {
+                                    this.printImg(base64Image!);
+                                  }
+                                  if (base64Pdf) {
+                                    this.openPdfWindow(base64Pdf);
+                                  }
+                                }}
                               />
-                              <ZoomBtnSvg
-                                onClick={() =>
-                                  this.setState({ isZoomed: true })
-                                }
-                              />
+                              {(base64Image || base64Pdf) && (
+                                <ZoomBtnSmSvg
+                                  onClick={() => {
+                                    if (base64Pdf) {
+                                      this.openPdfWindow(base64Pdf);
+                                    }
+                                    if (base64Image) {
+                                      this.setState({ isZoomed: true });
+                                    }
+                                  }}
+                                />
+                              )}
                             </div>
                           </div>
                           <div className="preview-info">
@@ -1030,6 +1314,7 @@ class UpdateDocumentModal extends Component<
                     <div className="update-doc-tab-spacing">
                       <FileUploader
                         setFile={this.setFile}
+                        setUpdatedBase64Image={this.setUpdatedBase64Image}
                         privateEncryptionKey={this.props.privateEncryptionKey}
                       />
                     </div>

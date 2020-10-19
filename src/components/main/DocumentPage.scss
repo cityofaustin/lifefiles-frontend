@@ -17,8 +17,9 @@
 
 .document-toolbar {
   display: flex;
-  justify-content: space-evenly;
-  width: 136px;
+  // justify-content: space-evenly;
+  justify-content: flex-end;
+  // width: 136px;
 }
 
 .document-tabs {
@@ -108,6 +109,9 @@
       background-color: themed("colorPrimary");
     }
     .client-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       font-size: 20px;
       font-weight: 500;
       svg {
@@ -120,6 +124,15 @@
         margin: 0 23px;
         background-color: #f8f8f8;
       }
+      .account-circle {
+        margin: 0 23px;
+      }
+      // span {
+      //   width: 200px;
+      //   text-overflow: ellipsis;
+      //   white-space: nowrap;
+      //   overflow: hidden;
+      // }
     }
     .permission-section {
       font-size: 25px;
@@ -208,7 +221,7 @@
   tbody {
     tr {
       @include media-breakpoint-down(sm) {
-        &:first-child {
+        &.add-new-tr {
           display: none;
         }
         height: 74px;
@@ -323,7 +336,6 @@
             text-transform: uppercase;
           }
         }
-
         .doc-updated-cell {
           display: flex;
           flex-direction: column;
@@ -343,6 +355,13 @@
               position: absolute;
               top: -9px;
               left: -15px;
+            }
+          }
+        }
+        &.notarized {
+          svg > path {
+            @include themify($themes) {
+              fill: themed("colorPrimary");
             }
           }
         }
@@ -383,4 +402,15 @@
   bottom: 25px;
   right: 20px;
   cursor: pointer;
+
+  rect {
+    @include themify($themes) {
+      fill: themed("colorPrimary");
+    }
+  }
+  path[data-name="Path 1243"] {
+    @include themify($themes) {
+      fill: themed("colorPrimary");
+    }
+  }
 }

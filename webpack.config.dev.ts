@@ -6,7 +6,8 @@ import Dotenv from 'dotenv-webpack';
 const htmlPlugin = new HtmlWebPackPlugin({
   template: './src/index.html',
   filename: './index.html',
-  favicon: 'public/favicon.ico'
+  favicon: 'public/favicon.ico',
+  hotjar: ''
 });
 
 const dotEnvPlugin = new Dotenv({
@@ -65,7 +66,10 @@ const config: webpack.Configuration = {
           (path.resolve(__dirname, 'node_modules') + '/ethereumjs-common'),
           (path.resolve(__dirname, 'node_modules') + '/ethereumjs-util'),
           (path.resolve(__dirname, 'node_modules') + '/ethereumjs-tx'),
-          (path.resolve(__dirname, 'node_modules') + '/rlp')
+          (path.resolve(__dirname, 'node_modules') + '/rlp'),
+          (path.resolve(__dirname, 'node_modules') + '/xhr2-cookies'),
+          (path.resolve(__dirname, 'node_modules') + '/@ethersproject'),
+          (path.resolve(__dirname, 'node_modules') + '/rskapi')
         ]
       },
       {

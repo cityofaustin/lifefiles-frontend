@@ -19,6 +19,8 @@ import AdminService from '../services/AdminService';
 
 interface AppState {
   account?: Account;
+  coreFeatures: string[];
+  viewFeatures: string[];
   logoFile?: File;
   isLoading: boolean;
   helperLogin: boolean;
@@ -40,6 +42,8 @@ class App extends Component<{}, AppState> {
       helperLogin: false,
       adminLogin: false,
       theme: Role.owner,
+      coreFeatures: [],
+      viewFeatures: [],
     };
   }
 
@@ -68,7 +72,7 @@ class App extends Component<{}, AppState> {
       AccountService.setAuthApi(process.env.AUTH_API);
     }
 
-    let { account, theme } = { ...this.state };
+    let { account, theme, coreFeatures, viewFeatures } = { ...this.state };
     this.setState({ isLoading: true });
     const code = UrlUtil.getQueryVariable('code');
 
@@ -84,7 +88,7 @@ class App extends Component<{}, AppState> {
       try {
         const loginResponse = await AccountService.getMyAccount();
 
-        ({ account } = { ...loginResponse });
+        ({ account, coreFeatures, viewFeatures } = { ...loginResponse });
 
         theme = account?.role;
         document.body.classList.remove('theme-helper', 'theme-owner');
@@ -122,7 +126,14 @@ class App extends Component<{}, AppState> {
     } catch (err) {
       console.error('failed to get app settings.');
     }
-    this.setState({ account, theme, appSettings, isLoading: false });
+    this.setState({
+      account,
+      theme,
+      appSettings,
+      isLoading: false,
+      coreFeatures,
+      viewFeatures,
+    });
   }
 
   setBringYourOwnEncryptionKey = (key) => {
@@ -133,6 +144,24 @@ class App extends Component<{}, AppState> {
   };
 
   handleEncryptionKey = async (role) => {
+    let cookieValue;
+
+    try {
+      if (document.cookie !== undefined) {
+        cookieValue = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('bring-your-own-key'))!
+          .split('=')[1];
+      }
+    } catch (e) {}
+
+    // Owner BYOK
+    if (cookieValue !== undefined && cookieValue.length >= 64) {
+      // this.setState({ privateEncryptionKey: cookieValue });
+      this.setBringYourOwnEncryptionKey(cookieValue);
+      document.cookie = 'bring-your-own-key=' + -1;
+    }
+
     if (window.sessionStorage.getItem('bring-your-own-key') === null) {
       // If the user did not provider their own key we will provide one
       let encryptionKeyResponse: EncryptionKeyResponse;
@@ -173,8 +202,6 @@ class App extends Component<{}, AppState> {
 
       AuthService.logIn(account?.token, '');
 
-      console.log('account??');
-      console.log(account);
       await this.handleEncryptionKey(account?.role);
     } catch (err) {
       console.error('failed to login.');
@@ -222,26 +249,39 @@ class App extends Component<{}, AppState> {
       helperLogin,
       adminLogin,
       appSettings,
+      coreFeatures,
+      viewFeatures,
     } = {
       ...this.state,
     };
 
     let pageToRender = <ProgressIndicator isFullscreen />;
+    let backgroundColor = '#2362c7';
 
-    if (helperLogin) {
-      pageToRender = <HelperLoginPage appSettings={appSettings} handleLogin={this.handleLogin} />;
+    if (window.location.href.indexOf('helper-login') > -1) {
+      backgroundColor = '#4ca9d8';
+      pageToRender = (
+        <HelperLoginPage
+          appSettings={appSettings}
+          handleLogin={this.handleLogin}
+        />
+      );
     }
-
-    if (adminLogin) {
-      pageToRender = <AdminLoginPage appSettings={appSettings} handleLogin={this.handleLogin} />;
+    if (window.location.href.indexOf('admin-login') > -1) {
+      backgroundColor = '#000';
+      pageToRender = (
+        <AdminLoginPage
+          appSettings={appSettings}
+          handleLogin={this.handleLogin}
+        />
+      );
     }
-
     return (
       <Fragment>
         <div
           id="splash"
           style={{
-            backgroundColor: '#2362c7',
+            backgroundColor,
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',
@@ -263,6 +303,8 @@ class App extends Component<{}, AppState> {
                   appSettings={appSettings}
                   saveAppSettings={this.saveAppSettings}
                   account={account}
+                  coreFeatures={coreFeatures}
+                  viewFeatures={viewFeatures}
                   handleLogout={this.handleLogout}
                   updateAccountShareRequests={this.updateAccountShareRequests}
                   privateEncryptionKey={privateEncryptionKey}

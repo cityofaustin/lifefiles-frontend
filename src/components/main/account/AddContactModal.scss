@@ -168,11 +168,17 @@
     }
   }
   .contacts-grid {
+    @include media-breakpoint-up(xs) {
+      margin: 0 8px;
+      width: calc(100% - 16px);
+    }
     @include media-breakpoint-up(sm) {
       margin: 0 24px;
+      width: calc(100% - 48px);
     }
     @include media-breakpoint-up(lg) {
       margin: 0 74.5px;
+      width: calc(100% - 149px);
     }
   }
   .helper-account {

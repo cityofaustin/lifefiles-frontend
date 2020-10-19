@@ -10,13 +10,17 @@ import { ReactComponent as Contact } from '../../img/contact.svg';
 import { ReactComponent as ContactGroup } from '../../img/contact-grp.svg';
 import { ReactComponent as Cog } from '../../img/cog.svg';
 import { ReactComponent as Help } from '../../img/help.svg';
+import { ReactComponent as LogoutSvg } from '../../img/logout.svg';
 // import { ReactComponent as MyPassLogoSvg } from '../../img/mypass-logo.svg';
 import { Link } from 'react-router-dom';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
+import ProfileImage from '../common/ProfileImage';
+import Role from '../../models/Role';
 
 interface SidebarProps {
   appSettings: AppSetting[];
   goToAccount: () => void;
+  goToMySettings: () => void;
   handleLogout: () => void;
   isOpen: boolean;
   setOpen: (b: boolean) => void;
@@ -34,6 +38,12 @@ class SideBar extends Component<SidebarProps> {
     const { goToAccount, setOpen } = { ...this.props };
     setOpen(false);
     goToAccount();
+  };
+
+  goToMySettings = () => {
+    const { goToMySettings, setOpen } = { ...this.props };
+    setOpen(false);
+    goToMySettings();
   };
 
   render() {
@@ -60,13 +70,7 @@ class SideBar extends Component<SidebarProps> {
               <div className="bm-menu">
                 <div className="top-section">
                   <div className="img-container">
-                    <img
-                      className="profile-img"
-                      src={AccountService.getProfileURL(
-                        account.profileImageUrl!
-                      )}
-                      alt="Profile"
-                    />
+                    <ProfileImage account={account} />
                   </div>
                   <div className="fullname">
                     {AccountImpl.getFullName(
@@ -89,9 +93,16 @@ class SideBar extends Component<SidebarProps> {
                       <span>
                         <Contact />
                       </span>
-                      <Link to="/account">
-                        <span>My Profile</span>
-                      </Link>
+                      {account.role === Role.helper && (
+                        <Link to="/helper-login/account">
+                          <span>My Profile</span>
+                        </Link>
+                      )}
+                      {account.role === Role.owner && (
+                        <Link to="/account">
+                          <span>My Profile</span>
+                        </Link>
+                      )}
                     </span>
                     <span className="bm-item menu-item">
                       <span>
@@ -99,7 +110,10 @@ class SideBar extends Component<SidebarProps> {
                       </span>
                       <span>My Network</span>
                     </span>
-                    <span className="bm-item menu-item">
+                    <span
+                      className="bm-item menu-item"
+                      onClick={this.goToMySettings}
+                    >
                       <span>
                         <Cog />
                       </span>
@@ -115,7 +129,9 @@ class SideBar extends Component<SidebarProps> {
                       className="bm-item menu-item"
                       onClick={this.handleLogout}
                     >
-                      <span />
+                      <span>
+                        <LogoutSvg />
+                      </span>
                       <span>Logout</span>
                     </span>
                   </nav>

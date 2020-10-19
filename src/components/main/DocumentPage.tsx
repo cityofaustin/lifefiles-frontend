@@ -39,6 +39,10 @@ import Badge from '../common/Badge';
 import AddContactModal from './account/AddContactModal';
 import HelperContact from '../../models/HelperContact';
 import { HelperContactRequest } from '../../services/HelperContactService';
+import ProfileImage, { ProfileImageSizeEnum } from '../common/ProfileImage';
+import { CoreFeatureEnum } from '../../models/admin/CoreFeature';
+import Role from '../../models/Role';
+import { ReactComponent as StampSvg } from '../../img/stamp.svg';
 
 interface DocumentPageProps {
   sortAsc: boolean;
@@ -60,6 +64,8 @@ interface DocumentPageProps {
   removeShareRequest: (request: ShareRequest) => void;
   privateEncryptionKey?: string;
   handleClientSelected: (clientSelected: Account) => void;
+  coreFeatures: string[];
+  viewFeatures: string[];
 }
 
 interface MainPageState {
@@ -126,6 +132,21 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     if (activeTab !== tab) setActiveTab(tab);
   };
 
+  canAddDocs = () => {
+    const { myAccount, coreFeatures, helperContacts, referencedAccount } = {
+      ...this.props,
+    };
+    const referencedContact = referencedAccount ? helperContacts.find(
+      (hc) => hc.ownerAccount.username === referencedAccount!.username
+    ) : undefined;
+    return (
+      myAccount.role === Role.owner ||
+      (coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) > -1 &&
+        referencedContact &&
+        referencedContact.canAddNewDocuments)
+    );
+  };
+
   renderGridSort() {
     const { isLayoutGrid } = { ...this.state };
     const { sortAsc, toggleSort, activeTab } = { ...this.props };
@@ -175,15 +196,18 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       <Fragment>
         {this.renderGridSort()}
         <Row style={{ marginRight: '0', minHeight: '480px' }}>
-          <Col
-            sm="12"
-            md="6"
-            lg="4"
-            className="document-add-new document-item"
-            onClick={handleAddNew}
-          >
-            <AddNewDocument handleAddNew={handleAddNew} />
-          </Col>
+          {this.canAddDocs() && (
+            <Col
+              sm="12"
+              md="6"
+              lg="4"
+              className="document-add-new document-item"
+              onClick={handleAddNew}
+            >
+              <AddNewDocument handleAddNew={handleAddNew} />
+            </Col>
+          )}
+
           {searchedDocuments.length <= 0 && (
             <Col sm="12" md="6" lg="4" className="document-summary-container">
               <div
@@ -287,20 +311,22 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             </tr>
           </thead>
           <tbody>
-            <tr onClick={handleAddNew}>
-              <td>
-                <div className="add-new">
-                  <div>
-                    <NewDoc />
+            {this.canAddDocs() && (
+              <tr className="add-new-tr" onClick={handleAddNew}>
+                <td>
+                  <div className="add-new">
+                    <div>
+                      <NewDoc />
+                    </div>
+                    <div>Add new</div>
                   </div>
-                  <div>Add new</div>
-                </div>
-              </td>
-              <td />
-              <td />
-              <td />
-              <td />
-            </tr>
+                </td>
+                <td />
+                <td />
+                <td />
+                <td />
+              </tr>
+            )}
             {searchedDocuments.map((document, idx) => {
               const sharedAccounts: Account[] = this.getSharedAccounts(
                 document,
@@ -427,7 +453,11 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                         : 'N/A'}
                     </div>
                   </td>
-                  <td>{document.notarized}</td>
+                  <td className="notarized">
+                    {document.vcJwt && document.vpDocumentDidAddress && (
+                      <StampSvg />
+                    )}
+                  </td>
                 </tr>
               );
             })}
@@ -598,6 +628,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       accounts,
       helperContacts,
       addHelperContact,
+      myAccount,
     } = {
       ...this.props,
     };
@@ -624,10 +655,13 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <Link to="/helper-login/clients">My Clients</Link>
                   <ChevronRight />
                   <span>
-                    {AccountImpl.getFullName(
-                      referencedAccount.firstName,
-                      referencedAccount.lastName
-                    )}
+                    {AccountImpl.hasNameSet(referencedAccount) &&
+                      AccountImpl.getFullName(
+                        referencedAccount.firstName,
+                        referencedAccount.lastName
+                      )}
+                    {!AccountImpl.hasNameSet(referencedAccount) &&
+                      referencedAccount.username}
                   </span>
                 </div>
               </Fragment>
@@ -645,7 +679,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   onClick={this.toggleLayout}
                 />
               )}
-              <SvgButton buttonType={SvgButtonTypes.INFO} />
+              {/* <SvgButton buttonType={SvgButtonTypes.INFO} /> */}
             </div>
           </div>
 
@@ -657,17 +691,24 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                   <Link to="/helper-login/clients">
                     <ChevronLeft />
                   </Link>
-                  <img
+                  <ProfileImage
+                    account={referencedAccount}
+                    size={ProfileImageSizeEnum.SMALL}
+                  />
+                  {/* <img
                     src={AccountService.getProfileURL(
                       referencedAccount.profileImageUrl!
                     )}
                     alt=""
-                  />
+                  /> */}
                   <span>
-                    {AccountImpl.getFullName(
-                      referencedAccount.firstName,
-                      referencedAccount.lastName
-                    )}
+                    {AccountImpl.hasNameSet(referencedAccount) &&
+                      AccountImpl.getFullName(
+                        referencedAccount.firstName,
+                        referencedAccount.lastName
+                      )}
+                    {!AccountImpl.hasNameSet(referencedAccount) &&
+                      referencedAccount.username}
                   </span>
                 </div>
                 <div className="permission-section">
@@ -678,7 +719,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             </div>
           )}
 
-          {activeTab === '1' && (
+          {activeTab === '1' && this.canAddDocs() && (
             <FabAdd className="fab-add" onClick={handleAddNew} />
           )}
         </Fragment>

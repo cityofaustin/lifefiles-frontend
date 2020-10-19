@@ -23,6 +23,7 @@ interface ShareDocWithContainerProps {
     selectedContact: Account
   ) => ShareRequest | undefined;
   handleShareDocCheck: (srp: ShareRequestPermissions) => Promise<void>;
+  // handleShareDocCheck: () => Promise<void>;
   accounts: Account[];
   handleSelectContact: (contact: Account) => void;
   document?: Document;
@@ -163,9 +164,15 @@ class ShareDocWithContainer extends Component<
                     <Toggle
                       value={this.state.canView}
                       onToggle={() => {
-                        let { canView } = { ...this.state };
-                        const { canReplace, canDownload } = { ...this.state };
-                        canView = !canView;
+                        let { canView, canDownload } = { ...this.state };
+                        const { canReplace } = { ...this.state };
+                        // NOTE: download true should inherently toggle view true, no need to limit viewing permissions if they can download a file.
+                        if (canView && canDownload) {
+                          canView = !canDownload;
+                          canDownload = !canDownload;
+                        } else {
+                          canView = !canView;
+                        }
                         this.setState({ canView, canReplace, canDownload });
                         // handleShareDocCheck({ canView, canReplace, canDownload });
                       }}
@@ -199,6 +206,7 @@ class ShareDocWithContainer extends Component<
                       onToggle={() => {
                         let { canView, canDownload } = { ...this.state };
                         const { canReplace } = { ...this.state };
+                        // NOTE: download true should inherently toggle view true, no need to limit viewing permissions if they can download a file.
                         if (!canView && !canDownload) {
                           canView = !canDownload;
                           canDownload = !canDownload;
@@ -243,17 +251,24 @@ class ShareDocWithContainer extends Component<
                   })}
                   onClick={() => handleSelectContact(account)}
                 >
+                  {this.getShareStatus(
+                    getDocumentSharedWithContact(account)
+                  ) === 'pending' && (
+                    <div className="badge-container">
+                      <Badge />
+                    </div>
+                  )}
                   <img
                     className="contact-image"
                     src={AccountService.getProfileURL(account.profileImageUrl!)}
                     alt="Profile"
                   />
-                  {/* {this.containsBadge(account, shareRequests) && (
-                    <div className="badge-container">
-                      <Badge />
-                    </div>
-                  )} */}
-                  <div className="contact-name">{account.username}</div>
+                  <div className="contact-name">
+                    {AccountImpl.getFullName(
+                      account.firstName,
+                      account.lastName
+                    )}
+                  </div>
                   <div className="share-status">
                     {this.getShareStatus(getDocumentSharedWithContact(account))}
                   </div>
@@ -281,6 +296,13 @@ class ShareDocWithContainer extends Component<
                     })}
                     onClick={() => handleSelectContact(account)}
                   >
+                    {this.getShareStatus(
+                      getDocumentSharedWithContact(account)
+                    ) === 'pending' && (
+                      <div className="badge-container">
+                        <Badge />
+                      </div>
+                    )}
                     <img
                       className="contact-image"
                       src={AccountService.getProfileURL(
@@ -288,7 +310,12 @@ class ShareDocWithContainer extends Component<
                       )}
                       alt="Profile"
                     />
-                    <div className="contact-name">{account.username}</div>
+                    <div className="contact-name">
+                      {AccountImpl.getFullName(
+                        account.firstName,
+                        account.lastName
+                      )}
+                    </div>
                     <div className="share-status">
                       {this.getShareStatus(
                         getDocumentSharedWithContact(account)

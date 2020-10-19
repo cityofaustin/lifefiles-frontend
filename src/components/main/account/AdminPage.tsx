@@ -20,6 +20,11 @@ import {
   CellValueChangedEvent,
   ColDef,
 } from 'ag-grid-community';
+
+import QRCode from 'qrcode.react';
+import Web3 from 'web3';
+import rskapi from 'rskapi';
+
 import Account from '../../../models/Account';
 import AccountType from '../../../models/admin/AccountType';
 import CoreFeature from '../../../models/admin/CoreFeature';
@@ -31,6 +36,14 @@ import FileUploader from '../../common/FileUploader';
 import AppSetting, { SettingNameEnum } from '../../../models/AppSetting';
 import AccountService from '../../../services/AccountService';
 
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(
+    'https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08'
+  )
+);
+
+const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
+
 interface AdminPageProps {
   account: Account;
   appSettings: AppSetting[];
@@ -39,6 +52,10 @@ interface AdminPageProps {
 }
 
 interface AdminPageState {
+  adminPublicKey: string;
+  adminPrivateKey: string;
+  ethBalance: string;
+  rskBalance: string;
   titleSetting: AppSetting;
   logoSetting: AppSetting;
   logoFile?: File;
@@ -83,6 +100,10 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       ? props.appSettings.find((a) => a.settingName === SettingNameEnum.LOGO)!
       : { settingName: SettingNameEnum.LOGO, settingValue: '' };
     this.state = {
+      adminPublicKey: '',
+      adminPrivateKey: '',
+      ethBalance: '',
+      rskBalance: '',
       logoFile: undefined,
       titleSetting,
       logoSetting,
@@ -191,7 +212,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   async componentDidMount() {
     const { account } = { ...this.props };
 
-    if (account.role === 'admin' || account.canAddOtherAccounts) {
+    if (account.role === 'admin') {
       const adminResponse = await AdminService.getAdminInfo();
 
       const accountTypes = adminResponse.account.adminInfo.accountTypes
@@ -213,14 +234,14 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
 
       accountsColumnDefs.unshift(toAdd);
 
-      if (account.role === 'admin') {
-        let toAddTwo = {
-          headerName: 'CanAddOtherAccounts',
-          field: 'canAddOtherAccounts',
-          cellRenderer: 'checkboxCellRenderer',
-        };
-        accountsColumnDefs.unshift(toAddTwo);
-      }
+      // if (account.role === 'admin') {
+      //   let toAddTwo = {
+      //     headerName: 'CanAddOtherAccounts',
+      //     field: 'canAddOtherAccounts',
+      //     cellRenderer: 'checkboxCellRenderer',
+      //   };
+      //   accountsColumnDefs.unshift(toAddTwo);
+      // }
 
       this.accountsGridApi.setColumnDefs(accountsColumnDefs);
 
@@ -241,6 +262,22 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         // NOTE: leaving out admin for now until further decisions made.
         accountTypes: accountTypes,
       });
+
+      const adminPublicKey =
+        adminResponse.account.adminInfo.adminCryptoKey.publicKey;
+
+      this.setState({
+        adminPublicKey: adminPublicKey,
+      });
+      this.setState({
+        adminPrivateKey:
+          adminResponse.account.adminInfo.adminCryptoKey.privateKey,
+      });
+
+      const ethBalance = await web3.eth.getBalance(adminPublicKey);
+      const rskBalance = await rskClient.balance(adminPublicKey);
+      this.setState({ ethBalance });
+      this.setState({ rskBalance });
     }
   }
 
@@ -257,6 +294,16 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   onAccountTypesGridReady = (params: GridOptions) => {
     this.accountTypesGridApi = params.api!;
     this.accountTypesGridColumnApi = params.columnApi!;
+  };
+
+  onPrivateKeyChanged = (privKey) => {
+    if (privKey.target.value != undefined && privKey.target.value !== '') {
+      this.setState({ adminPrivateKey: privKey.target.value });
+    }
+  };
+
+  updatePrivateKeyClicked = () => {
+    AdminService.updateAdminPrivateKey(this.state.adminPrivateKey);
   };
 
   onAccountTypeCellValueChanged = async (params: CellValueChangedEvent) => {
@@ -389,7 +436,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       reqObjectSub['email'] = baseAccount.email;
       reqObjectSub['firstname'] = baseAccount.firstName;
       reqObjectSub['lastname'] = baseAccount.lastName;
-      reqObjectSub['canAddOtherAccounts'] = baseAccount.canAddOtherAccounts;
+      // reqObjectSub['canAddOtherAccounts'] = baseAccount.canAddOtherAccounts;
 
       // TODO: Change to be dynamic based off selection!
       reqObjectSub['accounttype'] = baseAccount.accountType;
@@ -529,7 +576,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       organization: 'Org',
       firstName: 'First Name',
       lastName: 'Last Name',
-      canAddOtherAccounts: false,
+      // canAddOtherAccounts: false,
       adminInfo: '-',
       action: '',
     });
@@ -1096,6 +1143,34 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           />
         </div>
         <br />
+
+        <h3>Wallet</h3>
+
+        <p>
+          Current Ethereum (ETH) Blockchain Balance:{' '}
+          {web3.utils.fromWei(this.state.ethBalance, 'ether')} ETH{' '}
+        </p>
+        <p></p>
+        <p>
+          Current Rootstock (RSK) Blockchain Balance:{' '}
+          {web3.utils.fromWei(this.state.rskBalance, 'ether')} RSK
+        </p>
+        <p></p>
+
+        <br />
+
+        <p>Public Key:</p>
+        <p>{this.state.adminPublicKey}</p>
+        <QRCode value={this.state.adminPublicKey} size="256" />
+        <p>^ Send any amount of ETH or RSK to this address to fund account.</p>
+        <br />
+
+        <p>Private Key:</p>
+        <input
+          onChange={this.onPrivateKeyChanged}
+          value={this.state.adminPrivateKey}
+        ></input>
+        <button onClick={this.updatePrivateKeyClicked}>Update</button>
       </div>
     );
   }

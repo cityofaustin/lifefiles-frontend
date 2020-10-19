@@ -45,6 +45,9 @@ import CryptoUtil from '../../util/CryptoUtil';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
 import HelperContact from '../../models/HelperContact';
 import Role from '../../models/Role';
+import ProfileImage from '../common/ProfileImage';
+import MySettings from './MySettings';
+import NotaryPdfTestPage from '../NotaryPdfTestPage';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -65,6 +68,7 @@ interface MainContainerState {
   activeDocumentTab: string;
   sidebarOpen?: boolean;
   clientShares: Map<string, ShareRequest[]>;
+  isMySettingsOpen: boolean;
 }
 
 interface MainContainerProps {
@@ -75,6 +79,8 @@ interface MainContainerProps {
   updateAccountShareRequests: (requests: ShareRequest[]) => void;
   privateEncryptionKey?: string;
   setBringYourOwnEncryptionKey: (key) => void;
+  coreFeatures: string[];
+  viewFeatures: string[];
 }
 
 class MainContainer extends Component<MainContainerProps, MainContainerState> {
@@ -89,6 +95,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       isAccount: false,
       sortAsc: true,
       showModal: false,
+      // showModal: true,
       isAccountMenuOpen: false,
       isSmallMenuOpen: false,
       isLoading: false,
@@ -101,6 +108,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       activeDocumentTab: '1',
       sidebarOpen: false,
       clientShares: new Map<string, ShareRequest[]>(),
+      isMySettingsOpen: false,
     };
   }
 
@@ -188,10 +196,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           ? helperContact.helperAccount
           : helperContact.ownerAccount;
       return (
-        AccountImpl.getFullName(a?.firstName, a?.lastName) &&
-        AccountImpl.getFullName(a?.firstName, a?.lastName)
-          .toLowerCase()
-          .indexOf(query.toLowerCase()) !== -1
+        (AccountImpl.getFullName(a?.firstName, a?.lastName) &&
+          AccountImpl.getFullName(a?.firstName, a?.lastName)
+            .toLowerCase()
+            .indexOf(query.toLowerCase()) !== -1) ||
+        (a.email &&
+          a.email.toLowerCase().indexOf(query.toLowerCase()) !== -1) ||
+        (a.username &&
+          a.username.toLowerCase().indexOf(query.toLowerCase()) !== -1)
       );
     });
     if (query.length === 0) {
@@ -355,7 +367,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               ownerFile,
               ownerThumbnail,
               documentTypeSelected!,
-              referencedAccount.id
+              referencedAccount.id,
+              validUntilDate
             );
             this.handleClientSelected(referencedAccount);
             newDocument = response.document;
@@ -402,6 +415,120 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     } catch (err) {
       console.error('failed to upload file');
     }
+    this.setState(
+      {
+        documents,
+        showModal: false,
+        isLoading: false,
+        documentSelected: undefined,
+        activeDocumentTab: '1',
+      },
+      () => {
+        this.handleSearch(documentQuery);
+      }
+    );
+  };
+
+  handleUpdateDocumentAndUpdateShareRequests = async (
+    request: UpdateDocumentRequest
+  ) => {
+    const { account } = { ...this.props };
+    let { documents, accounts } = { ...this.state };
+    const { documentQuery } = { ...this.state };
+    this.setState({ isLoading: true });
+
+    let updatedDoc;
+    try {
+      updatedDoc = await DocumentService.updateDocument(request);
+      // FIXME: get API call to return updatedAt
+      updatedDoc.updatedAt = new Date();
+      documents = documents.map((doc) =>
+        doc.type === updatedDoc.type ? updatedDoc : doc
+      );
+    } catch (err) {
+      console.error('failed to upload file');
+    }
+
+    const matchedShareRequests = account.shareRequests.filter(
+      (shareRequest) => {
+        return shareRequest.documentType === updatedDoc.type;
+      }
+    );
+
+    // remove existing share requests
+    try {
+      for (let i = 0; i < matchedShareRequests.length; i++) {
+        await ShareRequestService.deleteShareRequest(
+          matchedShareRequests[i]!._id!
+        );
+        // remove share requests from UI
+        this.removeShareRequest(matchedShareRequests[i]);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+
+    // create new share requests
+    try {
+      for (let i = 0; i < matchedShareRequests.length; i++) {
+        let selectedContact;
+
+        for (let j = 0; j < accounts.length; j++) {
+          if (accounts[j].id == matchedShareRequests[i].shareWithAccountId!) {
+            selectedContact = accounts[j];
+            break;
+          }
+        }
+
+        // START FILE ENCYRPTION
+        const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
+        const file: File = StringUtil.dataURLtoFile(
+          request.base64Image!,
+          'original'
+        );
+        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(file);
+        const encryptedString = await CryptoUtil.getEncryptedByPublicString(
+          encryptionPublicKey!,
+          request.base64Image!
+        );
+        const encryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(
+          encryptionPublicKey!,
+          base64Thumbnail
+        );
+        const zipped: Blob = await ZipUtil.zip(encryptedString);
+        const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
+        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+          type: 'application/zip',
+          lastModified: Date.now(),
+        });
+        const newZippedThumbnailFile = new File(
+          [zippedThumbnail],
+          'encrypted-image-thumbnail.zip',
+          {
+            type: 'application/zip',
+            lastModified: Date.now(),
+          }
+        );
+        // END FILE ENCYRPTION
+        const newShareRequest = await ShareRequestService.addShareRequestFile(
+          newZippedFile,
+          newZippedThumbnailFile,
+          updatedDoc?.type!,
+          account.id,
+          matchedShareRequests[i].shareWithAccountId!,
+          {
+            canView: matchedShareRequests[i].canView,
+            canReplace: matchedShareRequests[i].canReplace,
+            canDownload: matchedShareRequests[i].canDownload
+          }
+        );
+        // add share request to UI
+        this.addShareRequest(newShareRequest);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+
     this.setState(
       {
         documents,
@@ -482,16 +609,17 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         .filter((shareRequest: ShareRequest) => {
           return shareRequest.shareWithAccountId === account.id;
         })
-        .map((shareRequest: ShareRequest) => {
+        .map((shareRequest: any) => {
           return {
             type: shareRequest.documentType,
-            // FIXME: this could be handled more elegantly, but this way works for now, the server should be sending owner's documenturl
-            // and not the thumbnail but should instead be sending both as empty strings.
             url: shareRequest.approved ? shareRequest.documentUrl : '',
             thumbnailUrl: shareRequest.documentThumbnailUrl
               ? shareRequest.documentThumbnailUrl
               : '',
             sharedWithAccountIds: [shareRequest.shareWithAccountId],
+            validUntilDate: shareRequest.validUntilDate,
+            vcJwt: shareRequest.vcJwt,
+            vpDocumentDidAddress: shareRequest.vpDocumentDidAddress,
           };
         });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(
@@ -509,6 +637,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             url: '',
             thumbnailUrl: '',
             sharedWithAccountIds: [],
+            // validUntilDate: shareRequest.validUntilDate
           };
         });
       documents = [
@@ -551,7 +680,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal(props) {
-    const { documentSelected, accounts, activeDocumentTab, helperContacts } = {
+    const { documentSelected, activeDocumentTab, accounts, helperContacts, documentTypes } = {
       ...this.state,
     };
     const { account } = { ...this.props };
@@ -569,19 +698,23 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         }
       }
     );
-    const helperContactAccounts = accounts.filter((a) =>
-      helperContacts.find((hc) => hc.helperAccount.email === a.email)
+    const contactAccounts = accounts.filter((a) =>
+      helperContacts.find((hc) => a.username === hc.helperAccount.username)
     );
     return (
       <UpdateDocumentModal
-        accounts={helperContactAccounts}
+        accounts={contactAccounts}
         showModal={!!documentSelected}
         toggleModal={() =>
           this.setState({ documentSelected: undefined, activeDocumentTab: '1' })
         }
+        documentTypes={documentTypes}
         document={documentSelected}
         shareRequests={shareRequests}
         handleUpdateDocument={this.handleUpdateDocument}
+        handleUpdateDocumentAndUpdateShareRequests={
+          this.handleUpdateDocumentAndUpdateShareRequests
+        }
         handleDeleteDocument={this.handleDeleteDocument}
         addShareRequest={this.addShareRequest}
         removeShareRequest={this.removeShareRequest}
@@ -601,7 +734,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       <div id="main-top-bar-sm">
         <LogoSm onClick={() => this.setSidebarOpen(true)} />
         {account.role !== 'admin' && (
-          <SearchInput handleSearch={this.handleSearch} />
+          <SearchInput handleSearch={this.handleSearch} autoSearch />
         )}
       </div>
     );
@@ -632,7 +765,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           {account.role !== 'admin' && adminLogin !== true && (
             <Row id="main-search">
               <Col style={{ display: 'flex' }}>
-                <SearchInput handleSearch={this.handleSearch} />
+                <SearchInput handleSearch={this.handleSearch} autoSearch />
               </Col>
             </Row>
           )}
@@ -642,27 +775,32 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               toggle={this.toggleAccountMenu}
             >
               <DropdownToggle
-                tag="span"
+                tag="div"
                 data-toggle="dropdown"
                 aria-expanded={isAccountMenuOpen}
               >
-                {account.profileImageUrl && (
-                  <img
-                    className="shared-with-image-single"
-                    src={AccountService.getProfileURL(account.profileImageUrl)}
-                    alt="Profile"
-                  />
-                )}
-                {!account.profileImageUrl && (
-                  <div className="account-circle">
-                    {StringUtil.getFirstUppercase(account.username)}
-                  </div>
-                )}
+                <ProfileImage account={account} />
               </DropdownToggle>
               <DropdownMenu right>
                 <DropdownItem>
-                  <Link to="/account">My Account</Link>
+                  {account.role === Role.helper && (
+                    <Link to="/helper-login/account">My Account</Link>
+                  )}
+                  {account.role === Role.owner && (
+                    <Link to="/account">My Account</Link>
+                  )}
                 </DropdownItem>
+                {account.role === Role.owner && (
+                  <DropdownItem>
+                    <div
+                      onClick={() => {
+                        this.setState({ isMySettingsOpen: true });
+                      }}
+                    >
+                      My Settings
+                    </div>
+                  </DropdownItem>
+                )}
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -721,13 +859,25 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderMyClients() {
-    const { searchedDocuments, accounts, sortAsc, clientShares } = {
+    const {
+      searchedDocuments,
+      sortAsc,
+      clientShares,
+      searchedHelperContacts,
+      accounts,
+    } = {
       ...this.state,
     };
     const { account, privateEncryptionKey } = { ...this.props };
+    const contactAccounts = searchedHelperContacts.map((hc) => {
+      const item = hc.ownerAccount;
+      item.id = accounts.find((a) => a.email === item.email)!.id;
+      item._id = accounts.find((a) => a.email === item.email)!._id;
+      return item;
+    });
     return (
       <ClientPage
-        otherOwnerAccounts={accounts}
+        otherOwnerAccounts={contactAccounts}
         handleAddNew={this.handleAddNew}
         handleSelectDocument={this.handleSelectDocument}
         searchedDocuments={searchedDocuments}
@@ -752,7 +902,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       activeTab,
       accounts,
     } = { ...this.state };
-    const { account, privateEncryptionKey } = { ...this.props };
+    const { account, privateEncryptionKey, coreFeatures, viewFeatures } = {
+      ...this.props,
+    };
     const { id } = props.match.params;
     let referencedAccount;
     if (id) {
@@ -780,13 +932,19 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         privateEncryptionKey={privateEncryptionKey}
         referencedAccount={referencedAccount}
         handleClientSelected={this.handleClientSelected}
+        coreFeatures={coreFeatures}
+        viewFeatures={viewFeatures}
       />
     );
   }
 
   render() {
-    const { account, handleLogout, appSettings } = { ...this.props };
-    const { isLoading, isAccount, sidebarOpen } = { ...this.state };
+    const { account, handleLogout, appSettings, privateEncryptionKey } = {
+      ...this.props,
+    };
+    const { isLoading, isAccount, sidebarOpen, isMySettingsOpen } = {
+      ...this.state,
+    };
 
     let adminLogin = false;
 
@@ -816,6 +974,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       >
         {isLoading && <ProgressIndicator isFullscreen />}
         <div id="main-container">
+          {privateEncryptionKey && (
+            <MySettings
+              isOpen={isMySettingsOpen}
+              setOpen={(isOpen) => this.setState({ isMySettingsOpen: isOpen })}
+              privateEncryptionKey={privateEncryptionKey}
+              account={account}
+            />
+          )}
           <Sidebar
             appSettings={appSettings}
             account={account}
@@ -823,13 +989,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             goToAccount={this.goToAccount}
             isOpen={!!sidebarOpen}
             setOpen={this.setSidebarOpen}
+            goToMySettings={() => this.setState({ isMySettingsOpen: true })}
           />
           {this.renderTopBar(false)}
           {this.renderTopBarSmall()}
           <div className="main-page">
             {account.role !== Role.admin && <div className="main-side" />}
             <div className="main-section">
-              {isAccount && <Redirect push to="/account" />}
+              {isAccount && <Redirect push to="**/account" />}
               <Switch>
                 <Route exact path="/helper-login">
                   <Redirect to="/helper-login/clients" />
@@ -843,14 +1010,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     <Redirect to="/admin-login" />
                   )}
                 </Route>
-                <Route exact path="/account">
+                <Route exact path="**/account">
                   {this.renderAccount()}
-                </Route>
-                <Route exact path="/bring-your-key">
-                  {this.renderBringYourKeyPage()}
-                </Route>
-                <Route exact path="/checkout">
-                  {this.renderCheckoutPage()}
                 </Route>
                 <Route
                   exact
@@ -876,7 +1037,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     <Redirect push to="/documents" />
                   )}
                   {account.role === Role.admin && <Redirect push to="/admin" />}
-                  {this.renderMyClients()}
+                  {account.role === Role.helper && this.renderMyClients()}
                 </Route>
                 <Route
                   exact
@@ -915,6 +1076,20 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   )}
                   {this.renderAdminPage()}
                 </Route>
+                {/* Dev links for testing */}
+                {process.env.NODE_ENV === 'development' && (
+                  <Fragment>
+                    <Route exact path="/bring-your-key">
+                      {this.renderBringYourKeyPage()}
+                    </Route>
+                    <Route exact path="/checkout">
+                      {this.renderCheckoutPage()}
+                    </Route>
+                    <Route exact path="/notary-pdf-test">
+                      <NotaryPdfTestPage />
+                    </Route>
+                  </Fragment>
+                )}
               </Switch>
             </div>
           </div>

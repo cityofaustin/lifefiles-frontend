@@ -2,6 +2,31 @@
 @import "../../variables";
 
 .update-doc-modal {
+  .modal-title {
+    width: 100%;
+    width: -moz-available;
+    width: -webkit-fill-available;
+    width: fill-available;
+  }
+  .modal-close {
+    @include media-breakpoint-down(sm) {
+      margin-left: -10px;
+    }
+  }
+  .update-doc-title {
+    @include media-breakpoint-down(lg) {
+      width: 556px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    @include media-breakpoint-down(md) {
+      width: 258px;
+    }
+    @include media-breakpoint-down(sm) {
+      width: calc(100% - 104px);
+    }
+  }
   .modal-content {
     @include media-breakpoint-up(md) {
       background-color: white !important;
@@ -251,6 +276,25 @@
                   }
                   margin: 6px 0;
                   cursor: pointer;
+                }
+              }
+              .notarized {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 50px;
+                .notary-label {
+                  font-size: 22px;
+                  margin-left: 12px;
+                  font-weight: bold;
+                  @include themify($themes) {
+                    color: themed("colorPrimary");
+                  }
+                }
+                svg > path {
+                  @include themify($themes) {
+                    fill: themed("colorPrimary");
+                  }
                 }
               }
             }

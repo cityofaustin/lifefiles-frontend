@@ -6,6 +6,12 @@
     .modal-content {
       .modal-header {
         .modal-title {
+          @include media-breakpoint-down(sm) {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 400px;
+          }
           img {
             width: 63.7px;
             height: 63.7px;
@@ -210,27 +216,157 @@
   }
 }
 
-.notarize-section {
-  display: flex;
-  flex-direction: row;
-  margin-top: 96px;
-  justify-content: space-evenly;
+.notarize-confirm {
+  margin-top: -34.5px;
+  @include media-breakpoint-up(md) {
+    margin-top: 0;
+  }
+  &.custodian {
+    .notarize-prompt {
+      font-size: 20px;
+      font-weight: 500;
+      color: #2362c7;
+      text-align: center;
+      padding: 15px 25px;
+      background-color: #eef5f6;
+      border-radius: 34px;
+    }
+    .checkbox-checked_svg__fill-background {
+      fill: #2362c7 !important;
+    }
+    .checkbox-checked_svg__border {
+      fill: #2362c7 !important;
+    }
+  }
+  .notarize-prompt {
+    font-size: 20px;
+    font-weight: 500;
+    color: #4ba9d9;
+    text-align: center;
+    padding: 15px 25px;
+    background-color: #eef2f6;
+    border-radius: 34px;
+  }
+  .confirm-item {
+    display: flex;
+    .confirm-label {
+      margin-left: 15.5px;
+      font-size: 22px;
+      line-height: 1.23;
+      color: #707070;
+    }
+    &:not(:first-child) {
+      margin-top: 20px;
+    }
+  }
+  .digital-sig {
+    overflow: hidden;
+    font-family: 'Caveat';
+    font-size: 45px;
+    color: #707070;
+    text-align: center;
+    background-color: white;
+    border: solid 1px #707070;
+    border-radius: 15px;
+    margin-top: 20px;
+  }
+  .continue-exerpt {
+    font-size: 18px;
+    color: #707070;
+    text-align: center;
+    margin-top: 7px;
+  }
   .image-container {
-    width: 35%;
+    background-color: #ccc;
+    min-width: 100px;
+    min-height: 100px;
     display: flex;
     justify-content: center;
+    max-width: 100%;
+    @include media-breakpoint-up(lg) {
+      max-width: 425px;
+    }
     img {
       width: 100%;
-      width: -moz-available; /* WebKit-based browsers will ignore this. */
-      width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
-      width: fill-available;
+      object-fit: contain;
+    }
+  }
+}
+
+.notarize-section {
+  .notarize-prompt {
+    font-size: 25px;
+    font-weight: 500;
+    color: #4ba9d9;
+    text-align: center;
+    padding: 10px 20px;
+    background-color: #eef5f6;
+    border-radius: 34px;
+  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-top: -34.5px;
+  @include media-breakpoint-up(md) {
+    margin-top: 0;
+  }
+  .add-non-notarize-btn {
+    font-size: 20px;
+    width: 212px;
+    height: 44px;
+    border-radius: 11px;
+    padding: 0;
+    margin: 20px 0;
+  }
+  .image-container-col {
+    display: flex;
+    justify-content: center ;
+  }
+  .image-container {
+    // width: 31%;
+    background-color: #ccc;
+    min-width: 100px;
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    max-width: 100%;
+    @include media-breakpoint-up(lg) {
+      max-width: 425px;
+    }
+    img {
+      width: 100%;
+      // width: -moz-available; /* WebKit-based browsers will ignore this. */
+      // width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+      // width: fill-available;
       object-fit: contain;
     }
   }
   .notary-container {
-    width: 55%;
+    // width: 55%;
     display: flex;
     flex-direction: column;
+    .notary-form {
+      margin-top: 20px;
+      .notary-info {
+        font-size: 20px;
+        font-weight: 500;
+        color: #747474;
+      }
+      .form-line {
+        .input-section {
+          input[type=file] {
+            width: 200px;
+          }
+          label {
+            font-size: 20px;
+            font-weight: 500;
+            color: #747474;
+            opacity: 0.71;
+          }
+        }
+      }
+    }
     .notary-toggle {
       display: flex;
       flex-direction: column;
@@ -252,6 +388,41 @@
     align-items: center;
     .pdf-container {
       width: fit-content;
+    }
+  }
+}
+
+.document-type-container {
+  #svg-desktop {
+    display: none;
+  }
+  #svg-mobile {
+    display: block;
+  }
+  @include media-breakpoint-up(xl) {
+    #svg-desktop {
+      display: block;
+    }
+    #svg-mobile {
+      display: none;
+    }
+  }
+  .notarize-overview {
+    display: flex;
+    justify-content: center;
+    #notarize-overview-desktop {
+      display: none;
+    }
+    #notarize-overview {
+      display: block;
+    }
+    @include media-breakpoint-up(xl) {
+      #notarize-overview-desktop {
+        display: block;
+      }
+      #notarize-overview {
+        display: none;
+      }
     }
   }
 }

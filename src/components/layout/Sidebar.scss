@@ -121,7 +121,7 @@
             &:not(:nth-child(2)) {
               svg {
                 height: 31.2px;
-                width: 25.7px;
+                width: 33px;
                 path {
                   @include themify($themes) {
                     fill: themed('colorPrimary');
