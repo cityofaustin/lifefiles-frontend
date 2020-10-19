@@ -6,6 +6,7 @@ import HttpStatusCode from '../models/HttpStatusCode';
 import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
 import { format } from 'date-fns';
 import HelperRegisterRequest from '../models/auth/HelperRegisterRequest';
+import { ShareRequestPermissions } from './ShareRequestService';
 
 let API_ENDPOINT;
 
@@ -265,7 +266,7 @@ class APIService {
     documentType: string,
     fromAccountId: string,
     toAccountId: string,
-    permissions: any
+    permissions: ShareRequestPermissions
   ) {
     const path = '/share-requests';
     const input = `${API_ENDPOINT}${path}`;
@@ -282,6 +283,9 @@ class APIService {
     formdata.append('fromAccountId', fromAccountId);
     formdata.append('toAccountId', toAccountId);
     formdata.append('documentType', documentType);
+    formdata.append('canView', String(permissions.canView));
+    formdata.append('canReplace', String(permissions.canReplace));
+    formdata.append('canDownload', String(permissions.canDownload));
     // formdata.append('shareRequest', {fromAccountId: fromAccountId, toAccountId, documentType});
     const init = {
       method: 'POST',

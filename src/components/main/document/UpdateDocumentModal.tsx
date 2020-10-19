@@ -39,7 +39,7 @@ import AccountImpl from '../../../models/AccountImpl';
 import { format } from 'date-fns';
 import MSelect from '../../common/MSelect';
 import ShareRequest from '../../../models/ShareRequest';
-import ShareRequestService from '../../../services/ShareRequestService';
+import ShareRequestService, { ShareRequestPermissions } from '../../../services/ShareRequestService';
 import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
 import ShareDocWithContainer from './ShareDocWithContainer';
 import StringUtil from '../../../util/StringUtil';
@@ -295,14 +295,13 @@ class UpdateDocumentModal extends Component<
       ...this.props,
     };
 
-    handleUpdateDocumentAndUpdateShareRequests({
-      id: document!._id!,
-      img: newFile,
-      thumbnail: newThumbnailFile,
-      validUntilDate: undefined, // FIXME: add expired at form somewhere
-      base64Image: updatedBase64Image!,
-    });
-
+  handleUpdateDocumentAndUpdateShareRequests({
+    id: document!._id!,
+    img: newFile,
+    thumbnail: newThumbnailFile,
+    validUntilDate: undefined, // FIXME: add expired at form somewhere
+    base64Image: updatedBase64Image!,
+  });
     // clear state
     this.setState({
       activeTab: '1',
@@ -445,21 +444,22 @@ class UpdateDocumentModal extends Component<
     const { document, addShareRequest, myAccount, removeShareRequest } = {
       ...this.props,
     };
-    const { selectedContact, base64Image } = { ...this.state };
+    const { selectedContact, base64Image, base64Pdf, base64Thumbnail } = { ...this.state };
     this.setState({ isLoading: true });
     // then add share and approve it api call
     try {
-      if (selectedContact && base64Image) {
+      if (selectedContact && (base64Image || base64Pdf)) {
         const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
-        const file: File = StringUtil.dataURLtoFile(base64Image, 'original');
-        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(file);
+        const dataUrl = base64Image ? base64Image : base64Pdf;
+        // const file: File = StringUtil.dataURLtoFile(dataUrl!, 'original');
+        // const base64Thumbnail = await StringUtil.fileContentsToThumbnail(file);
         const encryptedString = await CryptoUtil.getEncryptedByPublicString(
           encryptionPublicKey!,
-          base64Image
+          dataUrl!
         );
         const encryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(
           encryptionPublicKey!,
-          base64Thumbnail
+          base64Thumbnail!
         );
         const zipped: Blob = await ZipUtil.zip(encryptedString);
         const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
@@ -514,28 +514,32 @@ class UpdateDocumentModal extends Component<
     });
   };
 
-  handleShareDocCheck = async (permissions) => {
+  handleShareDocCheck = async (permissions: ShareRequestPermissions) => {
     const { removeShareRequest } = { ...this.props };
     const { selectedContact } = { ...this.state };
-    let showConfirmShare = false;
-    if (
-      this.getDocumentSharedWithContact(selectedContact!) &&
-      this.getDocumentSharedWithContact(selectedContact!)?.approved
-    ) {
-      try {
-
-        // NOTE: we don't delete share requests anymore, just unapprove them or change permissions
-        // await ShareRequestService.deleteShareRequest(
-        //   this.getDocumentSharedWithContact(selectedContact!)!._id!
-        // );
-        // removeShareRequest(
-        //   this.getDocumentSharedWithContact(selectedContact!)!
-        // );
-      } catch (err) {
-        console.error(err.message);
+    // let showConfirmShare = false;
+    if (this.getDocumentSharedWithContact(selectedContact!)) {
+      // const sr = this.getDocumentSharedWithContact(selectedContact!);
+      if(!permissions.canDownload && !permissions.canReplace && !permissions.canView) {
+        try {
+          await ShareRequestService.deleteShareRequest(
+            this.getDocumentSharedWithContact(selectedContact!)!._id!
+          );
+          removeShareRequest(
+            this.getDocumentSharedWithContact(selectedContact!)!
+          );
+        } catch (err) {
+          console.error(err.message);
+        }
+      } else {
+        // just updating permissions then
+        const sr = this.getDocumentSharedWithContact(selectedContact!)!;
+        sr.canView = permissions.canView;
+        sr.canReplace = permissions.canReplace;
+        sr.canDownload = permissions.canDownload;
+        await ShareRequestService.updateShareRequestPermissions(sr);
       }
     } else {
-      // TODO:
       this.handleShareDocWithContact(permissions);
       // show prompt
       // showConfirmShare = true;
@@ -1332,6 +1336,7 @@ class UpdateDocumentModal extends Component<
                           selectedContact={selectedContact}
                           handleSelectContact={this.handleSelectContact}
                           document={document}
+                          dataURL={base64Image ? base64Image : base64Pdf}
                         />
                       )}
                       {document.claimed !== undefined &&
