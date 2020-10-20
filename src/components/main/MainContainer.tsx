@@ -69,6 +69,7 @@ interface MainContainerState {
   sidebarOpen?: boolean;
   clientShares: Map<string, ShareRequest[]>;
   isMySettingsOpen: boolean;
+  clientIdSelected?: string;
 }
 
 interface MainContainerProps {
@@ -519,7 +520,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           {
             canView: matchedShareRequests[i].canView,
             canReplace: matchedShareRequests[i].canReplace,
-            canDownload: matchedShareRequests[i].canDownload
+            canDownload: matchedShareRequests[i].canDownload,
           }
         );
         // add share request to UI
@@ -648,9 +649,17 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     } catch (err) {
       console.error(err.message);
     }
-    this.setState({ documents, searchedDocuments, isLoading: false }, () => {
-      this.handleSearch(documentQuery);
-    });
+    this.setState(
+      {
+        documents,
+        searchedDocuments,
+        isLoading: false,
+        clientIdSelected: otherOwnerAccount.id,
+      },
+      () => {
+        this.handleSearch(documentQuery);
+      }
+    );
   };
 
   renderAddDocumentModal(props) {
@@ -680,7 +689,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderUpdateDocumentModal(props) {
-    const { documentSelected, activeDocumentTab, accounts, helperContacts, documentTypes } = {
+    const {
+      documentSelected,
+      activeDocumentTab,
+      accounts,
+      helperContacts,
+      documentTypes,
+      clientShares,
+      clientIdSelected,
+    } = {
       ...this.state,
     };
     const { account } = { ...this.props };
@@ -691,13 +708,22 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         (accountItem) => accountItem.id === id
       )[0];
     }
-    const shareRequests: ShareRequest[] = account.shareRequests.filter(
+    let shareRequests: ShareRequest[] = account.shareRequests.filter(
       (sharedRequest) => {
         if (sharedRequest.documentType === documentSelected?.type) {
           return sharedRequest;
         }
       }
     );
+    if (account.role === Role.helper) {
+      try {
+        shareRequests = clientShares
+          .get(clientIdSelected!)!
+          .filter((sr) => sr.shareWithAccountId === account.id);
+      } catch (err) {
+        return <Fragment />;
+      }
+    }
     const contactAccounts = accounts.filter((a) =>
       helperContacts.find((hc) => a.username === hc.helperAccount.username)
     );

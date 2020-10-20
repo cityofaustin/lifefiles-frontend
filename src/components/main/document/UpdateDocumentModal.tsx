@@ -38,8 +38,12 @@ import Account from '../../../models/Account';
 import AccountImpl from '../../../models/AccountImpl';
 import { format } from 'date-fns';
 import MSelect from '../../common/MSelect';
-import ShareRequest from '../../../models/ShareRequest';
-import ShareRequestService, { ShareRequestPermissions } from '../../../services/ShareRequestService';
+import ShareRequest, {
+  ShareRequestPermission,
+} from '../../../models/ShareRequest';
+import ShareRequestService, {
+  ShareRequestPermissions,
+} from '../../../services/ShareRequestService';
 import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
 import ShareDocWithContainer from './ShareDocWithContainer';
 import StringUtil from '../../../util/StringUtil';
@@ -64,6 +68,7 @@ import Badge from '../../common/Badge';
 import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 import DocumentType from '../../../models/DocumentType';
+import Role from '../../../models/Role';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -295,13 +300,13 @@ class UpdateDocumentModal extends Component<
       ...this.props,
     };
 
-  handleUpdateDocumentAndUpdateShareRequests({
-    id: document!._id!,
-    img: newFile,
-    thumbnail: newThumbnailFile,
-    validUntilDate: undefined, // FIXME: add expired at form somewhere
-    base64Image: updatedBase64Image!,
-  });
+    handleUpdateDocumentAndUpdateShareRequests({
+      id: document!._id!,
+      img: newFile,
+      thumbnail: newThumbnailFile,
+      validUntilDate: undefined, // FIXME: add expired at form somewhere
+      base64Image: updatedBase64Image!,
+    });
     // clear state
     this.setState({
       activeTab: '1',
@@ -444,7 +449,9 @@ class UpdateDocumentModal extends Component<
     const { document, addShareRequest, myAccount, removeShareRequest } = {
       ...this.props,
     };
-    const { selectedContact, base64Image, base64Pdf, base64Thumbnail } = { ...this.state };
+    const { selectedContact, base64Image, base64Pdf, base64Thumbnail } = {
+      ...this.state,
+    };
     this.setState({ isLoading: true });
     // then add share and approve it api call
     try {
@@ -520,7 +527,11 @@ class UpdateDocumentModal extends Component<
     // let showConfirmShare = false;
     if (this.getDocumentSharedWithContact(selectedContact!)) {
       // const sr = this.getDocumentSharedWithContact(selectedContact!);
-      if(!permissions.canDownload && !permissions.canReplace && !permissions.canView) {
+      if (
+        !permissions.canDownload &&
+        !permissions.canReplace &&
+        !permissions.canView
+      ) {
         try {
           await ShareRequestService.deleteShareRequest(
             this.getDocumentSharedWithContact(selectedContact!)!._id!
@@ -649,11 +660,32 @@ class UpdateDocumentModal extends Component<
       document!.type,
       referencedAccount!.id,
       myAccount.id,
-      {canView: false, canReplace: false, canDownload: false}
+      { canView: false, canReplace: false, canDownload: false }
     );
     // set this in main container
     handleClientSelected(referencedAccount!);
     this.setState({ pendingAccess: true });
+  };
+
+  isAllowedShareRequestPermission = (srp: ShareRequestPermission) => {
+    const {
+      myAccount,
+      // viewFeature, // NOTE: should handle admin view feature too.
+      shareRequests,
+      document,
+    } = { ...this.props };
+    let isAllowed = true;
+    if (myAccount.role === Role.helper) {
+      try {
+        const shareRequest = shareRequests.find(
+          (sr) => sr.documentType === document?.type
+        );
+        isAllowed = shareRequest ? shareRequest[srp] : true;
+      } catch (err) {
+        console.error('Unabled to get share request');
+      }
+    }
+    return isAllowed;
   };
 
   renderNotarizeTab = (base64Thumbnail) => {
@@ -906,7 +938,7 @@ class UpdateDocumentModal extends Component<
       base64Pdf,
       pendingAccess,
       isLoading,
-      width
+      width,
     } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
@@ -928,13 +960,13 @@ class UpdateDocumentModal extends Component<
     }
     let pdfHeight = 200;
     if (width < 576) {
-      pdfHeight=200;
+      pdfHeight = 200;
     }
     if (width >= 576) {
-      pdfHeight=300;
+      pdfHeight = 300;
     }
     if (width >= 1200) {
-      pdfHeight=400;
+      pdfHeight = 400;
     }
     return (
       <Fragment>
@@ -1044,17 +1076,20 @@ class UpdateDocumentModal extends Component<
                       Preview
                     </NavLink>
                   </NavItem>
-                  <NavItem>
-                    <NavLink
-                      className={classNames({ active: activeTab === '2' })}
-                      onClick={() => {
-                        this.toggleTab('2');
-                      }}
-                    >
-                      Replace
-                    </NavLink>
-                  </NavItem>
-
+                  {this.isAllowedShareRequestPermission(
+                    ShareRequestPermission.CAN_REPLACE
+                  ) && (
+                    <NavItem>
+                      <NavLink
+                        className={classNames({ active: activeTab === '2' })}
+                        onClick={() => {
+                          this.toggleTab('2');
+                        }}
+                      >
+                        Replace
+                      </NavLink>
+                    </NavItem>
+                  )}
                   {!referencedAccount && (
                     <div style={{ position: 'relative' }}>
                       {shareRequests.find((sr) => !sr.approved) && (
@@ -1101,42 +1136,154 @@ class UpdateDocumentModal extends Component<
                     <Row>
                       {document && (
                         <Col sm="12" className="preview-container">
-                          <div className="preview-img-container">
-                            <div className="img-tools">
-                              {/* NOTE: leaving out for now until we have functionality server side */}
-                              {/*<FlipDocBtnSvg className="pointer"/>*/}
-                            </div>
-                            <div style={{ width: '100%' }}>
-                              {document.vcJwt && document.vpDocumentDidAddress && (
-                                <div className="notarized">
-                                  <StampSvg />
-                                  <div className="notary-label">NOTARIZED</div>
-                                </div>
-                              )}
-                              <div className="img-container">
-                                {!base64Image && !base64Pdf && (
-                                  <div>Loading...</div>
-                                )}
-                                {base64Pdf && (
-                                  <div className="pdf-display">
-                                    <PdfPreview
-                                      fileURL={base64Pdf}
-                                      height={pdfHeight}
+                          {this.isAllowedShareRequestPermission(
+                            ShareRequestPermission.CAN_VIEW
+                          ) && (
+                            <div className="preview-img-container">
+                              <div className="img-tools">
+                                {/* NOTE: leaving out for now until we have functionality server side */}
+                                {/*<FlipDocBtnSvg className="pointer"/>*/}
+                              </div>
+                              <div style={{ width: '100%' }}>
+                                {document.vcJwt &&
+                                  document.vpDocumentDidAddress && (
+                                    <div className="notarized">
+                                      <StampSvg />
+                                      <div className="notary-label">
+                                        NOTARIZED
+                                      </div>
+                                    </div>
+                                  )}
+                                <div className="img-container">
+                                  {!base64Image && !base64Pdf && (
+                                    <div>Loading...</div>
+                                  )}
+                                  {base64Pdf && (
+                                    <div className="pdf-display">
+                                      <PdfPreview
+                                        fileURL={base64Pdf}
+                                        height={pdfHeight}
+                                      />
+                                    </div>
+                                  )}
+                                  {base64Image && (
+                                    <ImageWithStatus
+                                      imageUrl={base64Image}
+                                      imageViewType={ImageViewTypes.PREVIEW}
                                     />
-                                  </div>
+                                  )}
+                                  {/* <img
+                                className="doc-image"
+                                // src={DocumentService.getDocumentURL(document!.url)}
+                                src={base64Image}
+                                alt="doc missing"
+                              /> */}
+                                  {(base64Image || base64Pdf) && (
+                                    <ZoomBtnSmSvg
+                                      onClick={() => {
+                                        if (base64Pdf) {
+                                          this.openPdfWindow(base64Pdf);
+                                        }
+                                        if (base64Image) {
+                                          this.setState({ isZoomed: true });
+                                        }
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                              <div className="img-access-sm">
+                                {(base64Image || base64Pdf) &&
+                                  this.isAllowedShareRequestPermission(
+                                    ShareRequestPermission.CAN_DOWNLOAD
+                                  ) && (
+                                    <button
+                                      onClick={() => {
+                                        // Not allowed to navigate top frame to data URL
+                                        // window.location.href = base64Image!;
+                                        const dataUri = base64Image
+                                          ? base64Image
+                                          : base64Pdf;
+                                        const iframe =
+                                          '<iframe width="100%" height="100%" src="' +
+                                          dataUri! +
+                                          '"></iframe>';
+                                        const x = window.open()!;
+                                        x.document.open();
+                                        x.document.write(iframe);
+                                        x.document.close();
+                                      }}
+                                      className="download-btn"
+                                    >
+                                      Download
+                                    </button>
+                                  )}
+                                {this.isAllowedShareRequestPermission(
+                                  ShareRequestPermission.CAN_DOWNLOAD
+                                ) && (
+                                  <Fragment>
+                                    {base64Image && (
+                                      <button
+                                        onClick={() =>
+                                          this.printImg(base64Image)
+                                        }
+                                        className="print-btn"
+                                      >
+                                        Print
+                                      </button>
+                                    )}
+                                    {base64Pdf && (
+                                      <button
+                                        onClick={() =>
+                                          this.openPdfWindow(base64Pdf)
+                                        }
+                                        className="print-btn"
+                                      >
+                                        Print
+                                      </button>
+                                    )}
+                                  </Fragment>
                                 )}
-                                {base64Image && (
-                                  <ImageWithStatus
-                                    imageUrl={base64Image}
-                                    imageViewType={ImageViewTypes.PREVIEW}
+                              </div>
+                              <div className="img-access">
+                                {this.isAllowedShareRequestPermission(
+                                  ShareRequestPermission.CAN_DOWNLOAD
+                                ) && (
+                                  <Fragment>
+                                    {base64Image && (
+                                      <a
+                                        href={base64Image}
+                                        download
+                                        target="_blank"
+                                      >
+                                        <DownloadBtnSvg />
+                                      </a>
+                                    )}
+                                    {base64Pdf && (
+                                      <a
+                                        href={base64Pdf}
+                                        download
+                                        target="_blank"
+                                      >
+                                        <DownloadBtnSvg />
+                                      </a>
+                                    )}
+                                  </Fragment>
+                                )}
+                                {this.isAllowedShareRequestPermission(
+                                  ShareRequestPermission.CAN_DOWNLOAD
+                                ) && (
+                                  <PrintBtnSvg
+                                    onClick={() => {
+                                      if (base64Image) {
+                                        this.printImg(base64Image!);
+                                      }
+                                      if (base64Pdf) {
+                                        this.openPdfWindow(base64Pdf);
+                                      }
+                                    }}
                                   />
                                 )}
-                                {/* <img
-                                  className="doc-image"
-                                  // src={DocumentService.getDocumentURL(document!.url)}
-                                  src={base64Image}
-                                  alt="doc missing"
-                                /> */}
                                 {(base64Image || base64Pdf) && (
                                   <ZoomBtnSmSvg
                                     onClick={() => {
@@ -1151,81 +1298,7 @@ class UpdateDocumentModal extends Component<
                                 )}
                               </div>
                             </div>
-                            <div className="img-access-sm">
-                              {(base64Image || base64Pdf) && (
-                                <button
-                                  onClick={() => {
-                                    // Not allowed to navigate top frame to data URL
-                                    // window.location.href = base64Image!;
-                                    const dataUri = base64Image
-                                      ? base64Image
-                                      : base64Pdf;
-                                    const iframe =
-                                      '<iframe width="100%" height="100%" src="' +
-                                      dataUri! +
-                                      '"></iframe>';
-                                    const x = window.open()!;
-                                    x.document.open();
-                                    x.document.write(iframe);
-                                    x.document.close();
-                                  }}
-                                  className="download-btn"
-                                >
-                                  Download
-                                </button>
-                              )}
-                              {base64Image && (
-                                <button
-                                  onClick={() => this.printImg(base64Image)}
-                                  className="print-btn"
-                                >
-                                  Print
-                                </button>
-                              )}
-                              {base64Pdf && (
-                                <button
-                                  onClick={() => this.openPdfWindow(base64Pdf)}
-                                  className="print-btn"
-                                >
-                                  Print
-                                </button>
-                              )}
-                            </div>
-                            <div className="img-access">
-                              {base64Image && (
-                                <a href={base64Image} download target="_blank">
-                                  <DownloadBtnSvg />
-                                </a>
-                              )}
-                              {base64Pdf && (
-                                <a href={base64Pdf} download target="_blank">
-                                  <DownloadBtnSvg />
-                                </a>
-                              )}
-                              <PrintBtnSvg
-                                onClick={() => {
-                                  if (base64Image) {
-                                    this.printImg(base64Image!);
-                                  }
-                                  if (base64Pdf) {
-                                    this.openPdfWindow(base64Pdf);
-                                  }
-                                }}
-                              />
-                              {(base64Image || base64Pdf) && (
-                                <ZoomBtnSmSvg
-                                  onClick={() => {
-                                    if (base64Pdf) {
-                                      this.openPdfWindow(base64Pdf);
-                                    }
-                                    if (base64Image) {
-                                      this.setState({ isZoomed: true });
-                                    }
-                                  }}
-                                />
-                              )}
-                            </div>
-                          </div>
+                          )}
                           <div className="preview-info">
                             <div className="preview-info-item">
                               <div className="attr">File</div>

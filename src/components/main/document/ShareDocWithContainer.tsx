@@ -46,8 +46,13 @@ class ShareDocWithContainer extends Component<
     canDownload: false,
   };
   componentDidUpdate(prevProps: Readonly<ShareDocWithContainerProps>) {
-    if (this.props.selectedContact && this.props.selectedContact !== prevProps.selectedContact) {
-      const sr = this.props.getDocumentSharedWithContact(this.props.selectedContact!);
+    if (
+      this.props.selectedContact &&
+      this.props.selectedContact !== prevProps.selectedContact
+    ) {
+      const sr = this.props.getDocumentSharedWithContact(
+        this.props.selectedContact!
+      );
       this.setState({
         canView: !!(sr && sr.canView),
         canReplace: !!(sr && sr.canReplace),
@@ -72,15 +77,107 @@ class ShareDocWithContainer extends Component<
   //   return true;
   // }
 
+  renderPermissions() {
+    const { handleShareDocCheck, dataURL } = { ...this.props };
+    return (
+      <Fragment>
+        {!dataURL && <Fragment>Loading Document...</Fragment>}
+        {dataURL && (
+          <div className="sr-permissions">
+            <div className="sr-permission">
+              <ShareRequestPermissionSvg
+                permission="view"
+                isOn={this.state.canView}
+              />
+              <div className={`sr-title ${this.state.canView && 'on'}`}>
+                View
+              </div>
+              <Toggle
+                value={this.state.canView}
+                onToggle={() => {
+                  let { canView, canDownload } = { ...this.state };
+                  const { canReplace } = { ...this.state };
+                  // NOTE: download true should inherently toggle view true, no need to limit viewing permissions if they can download a file.
+                  if (canView && canDownload) {
+                    canView = !canDownload;
+                    canDownload = !canDownload;
+                  } else {
+                    canView = !canView;
+                  }
+                  this.setState({ canView, canReplace, canDownload });
+                  handleShareDocCheck({
+                    canView,
+                    canReplace,
+                    canDownload,
+                  });
+                }}
+              />
+            </div>
+            <div className="sr-permission">
+              <ShareRequestPermissionSvg
+                permission="replace"
+                isOn={this.state.canReplace}
+              />
+              <div className={`sr-title ${this.state.canReplace && 'on'}`}>
+                Replace
+              </div>
+              <Toggle
+                value={this.state.canReplace}
+                onToggle={() => {
+                  let { canReplace } = { ...this.state };
+                  const { canView, canDownload } = { ...this.state };
+                  canReplace = !canReplace;
+                  this.setState({ canView, canReplace, canDownload });
+                  handleShareDocCheck({
+                    canView,
+                    canReplace,
+                    canDownload,
+                  });
+                }}
+              />
+            </div>
+            <div className="sr-permission">
+              <ShareRequestPermissionSvg
+                permission="download"
+                isOn={this.state.canDownload}
+              />
+              <div className={`sr-title ${this.state.canDownload && 'on'}`}>
+                Download
+              </div>
+              <Toggle
+                value={this.state.canDownload}
+                onToggle={() => {
+                  let { canView, canDownload } = { ...this.state };
+                  const { canReplace } = { ...this.state };
+                  // NOTE: download true should inherently toggle view true, no need to limit viewing permissions if they can download a file.
+                  if (!canView && !canDownload) {
+                    canView = !canDownload;
+                    canDownload = !canDownload;
+                  } else {
+                    canDownload = !canDownload;
+                  }
+                  this.setState({ canView, canReplace, canDownload });
+                  handleShareDocCheck({
+                    canView,
+                    canReplace,
+                    canDownload,
+                  });
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </Fragment>
+    );
+  }
+
   render() {
     const {
       selectedContact,
       getDocumentSharedWithContact,
-      handleShareDocCheck,
       accounts,
       handleSelectContact,
       document,
-      dataURL
     } = { ...this.props };
     const shareRequest = getDocumentSharedWithContact(selectedContact!);
     return (
@@ -103,21 +200,7 @@ class ShareDocWithContainer extends Component<
                 />
                 <div className="contact-detail-share-doc-sm">
                   <div className="prompt">Share {document!.type}?</div>
-                  {/* TODO: make these 3 toggles */}
-                  <div>
-                    <Toggle />
-                  </div>
-                  {/* <Checkbox
-                    isLarge
-                    isChecked={shareRequest && shareRequest.approved}
-                    onClick={handleShareDocCheck}
-                  /> */}
-                  {/* <div className="share-status">
-                    This file is{' '}
-                    {shareRequest && shareRequest.approved ? '' : 'NOT '}
-                    currently shared with
-                    {' ' + selectedContact.username}
-                  </div> */}
+                  {this.renderPermissions()}
                 </div>
               </div>
               <div className="contact-detail-info">
@@ -163,113 +246,9 @@ class ShareDocWithContainer extends Component<
                     shareRequest &&
                       !shareRequest.approved &&
                       `Share ${document!.type}?`
-                    // `${selectedContact.firstName} has Requested Access to your Document`
                   }
                 </div>
-                {!dataURL && (
-                  <Fragment>
-                    Loading Document...
-                  </Fragment>
-                )}
-                {dataURL && (
-                  <div className="sr-permissions">
-                    <div className="sr-permission">
-                      <ShareRequestPermissionSvg
-                        permission="view"
-                        isOn={this.state.canView}
-                      />
-                      <div className={`sr-title ${this.state.canView && 'on'}`}>
-                        View
-                      </div>
-                      <Toggle
-                        value={this.state.canView}
-                        onToggle={() => {
-                          let { canView, canDownload } = { ...this.state };
-                          const { canReplace } = { ...this.state };
-                          // NOTE: download true should inherently toggle view true, no need to limit viewing permissions if they can download a file.
-                          if (canView && canDownload) {
-                            canView = !canDownload;
-                            canDownload = !canDownload;
-                          } else {
-                            canView = !canView;
-                          }
-                          this.setState({ canView, canReplace, canDownload });
-                          handleShareDocCheck({
-                            canView,
-                            canReplace,
-                            canDownload,
-                          });
-                        }}
-                      />
-                    </div>
-                    <div className="sr-permission">
-                      <ShareRequestPermissionSvg
-                        permission="replace"
-                        isOn={this.state.canReplace}
-                      />
-                      <div
-                        className={`sr-title ${this.state.canReplace && 'on'}`}
-                      >
-                        Replace
-                      </div>
-                      <Toggle
-                        value={this.state.canReplace}
-                        onToggle={() => {
-                          let { canReplace } = { ...this.state };
-                          const { canView, canDownload } = { ...this.state };
-                          canReplace = !canReplace;
-                          this.setState({ canView, canReplace, canDownload });
-                          handleShareDocCheck({
-                            canView,
-                            canReplace,
-                            canDownload,
-                          });
-                        }}
-                      />
-                    </div>
-                    <div className="sr-permission">
-                      <ShareRequestPermissionSvg
-                        permission="download"
-                        isOn={this.state.canDownload}
-                      />
-                      <div
-                        className={`sr-title ${this.state.canDownload && 'on'}`}
-                      >
-                        Download
-                      </div>
-                      <Toggle
-                        value={this.state.canDownload}
-                        onToggle={() => {
-                          let { canView, canDownload } = { ...this.state };
-                          const { canReplace } = { ...this.state };
-                          // NOTE: download true should inherently toggle view true, no need to limit viewing permissions if they can download a file.
-                          if (!canView && !canDownload) {
-                            canView = !canDownload;
-                            canDownload = !canDownload;
-                          } else {
-                            canDownload = !canDownload;
-                          }
-                          this.setState({ canView, canReplace, canDownload });
-                          handleShareDocCheck({
-                            canView,
-                            canReplace,
-                            canDownload,
-                          });
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                {/* <Checkbox
-                  isChecked={shareRequest && shareRequest.approved}
-                  onClick={handleShareDocCheck}
-                /> */}
-                {/* <div className="share-status">
-                  This file is{' '}
-                  {shareRequest && shareRequest.approved ? '' : 'NOT '}currently
-                  shared with
-                  {' ' + selectedContact.username}
-                </div> */}
+                {this.renderPermissions()}
               </div>
             </div>
           )}
