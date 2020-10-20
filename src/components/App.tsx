@@ -179,9 +179,10 @@ class App extends Component<{}, AppState> {
   };
 
   handleLogin = async (response: any): Promise<void> => {
-    let { account, theme, adminLogin } = {
+    let { account, theme, adminLogin, coreFeatures, viewFeatures } = {
       ...this.state,
     };
+
     this.setState({ isLoading: true });
     try {
       const loginResponse: LoginResponse = response as LoginResponse;
@@ -203,11 +204,19 @@ class App extends Component<{}, AppState> {
       AuthService.logIn(account?.token, '');
 
       await this.handleEncryptionKey(account?.role);
+      const myAccountResponse = await AccountService.getMyAccount();
+      ({ account, coreFeatures, viewFeatures } = { ...myAccountResponse });
     } catch (err) {
       console.error('failed to login.');
       console.error(err);
     }
-    this.setState({ account, theme, isLoading: false });
+    this.setState({
+      account,
+      theme,
+      isLoading: false,
+      coreFeatures,
+      viewFeatures,
+    });
   };
 
   handleLogout = () => {
