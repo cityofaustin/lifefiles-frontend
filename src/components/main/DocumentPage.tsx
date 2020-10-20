@@ -500,6 +500,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       addShareRequest,
       removeShareRequest,
       privateEncryptionKey,
+      accounts,
     } = { ...this.props };
     return (
       <Fragment>
@@ -520,8 +521,13 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
           </Col>
           {searchedHelperContacts.map((s) => {
             const matchedShareRequests = shareRequests.filter(
-              (shareRequest) =>
-                shareRequest.shareWithAccountId === s.helperAccount.id
+              (shareRequest) => {
+                // NOTE: can't use s.helperAccount._id, it is not the same as the actual account id
+                // so needing to join on other accounts
+                // return shareRequest.shareWithAccountId === s.helperAccount._id;
+                const helperAccount = accounts.find(a => a.username === s.helperAccount.username);
+                return shareRequest.shareWithAccountId === helperAccount?.id;
+              }
             );
             return (
               <Col

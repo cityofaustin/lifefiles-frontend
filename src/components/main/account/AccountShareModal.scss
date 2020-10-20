@@ -227,6 +227,40 @@
                 font-size: 20px;
                 font-weight: bold;
               }
+              .sr-permissions {
+                width: 220px;
+                display: flex;
+                flex-direction: column;
+                // @include media-breakpoint-down(xs) {
+                //   width: 164px;
+                //   margin-left: 6px;
+                // }
+                .sr-permission {
+                  display: flex;
+                  align-items: center;
+                  width: 100%;
+                  justify-content: space-between;
+                  margin-bottom: 10px;
+                  // @include media-breakpoint-down(xs) {
+                  //   margin-bottom: 6.4px;
+                  //   svg {
+                  //     width: 16.2px;
+                  //     height: 20.6px;
+                  //   }
+                  // }
+                  .sr-title {
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: #d95868;
+                    &.on {
+                      color: #2362c7;
+                    }
+                    // @include media-breakpoint-down(xs) {
+                    //   font-size: 9px;
+                    // }
+                  }
+                }
+              }
             }
           }
         }
