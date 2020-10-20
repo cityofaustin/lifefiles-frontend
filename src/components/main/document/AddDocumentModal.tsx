@@ -43,6 +43,7 @@ import Web3 from 'web3';
 import QRCode from 'qrcode.react';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 import { ReactComponent as NotarizeOverviewSvg } from '../../../img/notarize-overview.svg';
+import { ReactComponent as NotarizeOverviewDesktopSvg } from '../../../img/notarize-overview-desktop.svg';
 import { ReactComponent as NotarizeRecordOverviewSvg } from '../../../img/notarize-record-overview.svg';
 import { ReactComponent as NotarizeRecordOverviewDesktopSvg } from '../../../img/notarize-record-overview-desktop.svg';
 import { ReactComponent as NotaryHandoffSvg } from '../../../img/notary-handoff.svg';
@@ -360,7 +361,7 @@ class AddDocumentModal extends Component<
       privatePem,
       notarySealBase64,
       notaryId,
-      county
+      county,
     } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
     const {
@@ -620,7 +621,16 @@ class AddDocumentModal extends Component<
             <NotarizeRecordOverviewDesktopSvg />
           </div>
         )}
-        {!this.isRecordable() && <NotarizeOverviewSvg />}
+        {!this.isRecordable() && (
+          <div id="notarize-overview">
+            <NotarizeOverviewSvg />
+          </div>
+        )}
+        {!this.isRecordable() && (
+          <div id="notarize-overview-desktop">
+            <NotarizeOverviewDesktopSvg />
+          </div>
+        )}
       </div>
     );
   }
@@ -947,7 +957,9 @@ class AddDocumentModal extends Component<
                       name="county"
                       id="county"
                       value={county}
-                      onChange={(e) => this.setState({county: e.target.value})}
+                      onChange={(e) =>
+                        this.setState({ county: e.target.value })
+                      }
                       placeholder="County..."
                     />
                     <Label
