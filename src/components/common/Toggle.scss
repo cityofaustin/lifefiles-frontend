@@ -3,60 +3,149 @@
 .switch {
   position: relative;
   display: inline-block;
-  width: 92px;
-  height: 27px;
+
   margin-bottom: 0;
   cursor: pointer;
-
-  &.lg {
-    width: 134px;
-    height: 39px;
+  &.xs {
+    $width: 46px;
+    $height: 15px;
+    $fontSize: 7px;
+    $top: 2.5px;
+    $side: 5.5px;
+    width: $width;
+    height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX(67px);
-        -ms-transform: translateX(67px);
-        transform: translateX(67px);
+        -webkit-transform: translateX($width / 2);
+        -ms-transform: translateX($width / 2);
+        transform: translateX($width / 2);
       }
     }
     .slider {
       &:before {
-        height: 39px;
-        width: 67px;
+        height: $height;
+        width: $width / 2;
       }
     }
     .yes {
-      top: 4px;
-      left: 20px;
-      font-size: 21px;
+      font-size: $fontSize;
+      top: $top;
+      left: $side;
     }
     .no {
-      top: 4px;
-      right: 20px;
-      font-size: 21px;
+      font-size: $fontSize;
+      top: $top;
+      right: $side;
     }
   }
-
+  &.sm {
+    $width: 80px;
+    $height: 23px;
+    $fontSize: 12px;
+    $top: 3.4px;
+    $side: 9.5px;
+    width: $width;
+    height: $height;
+    input {
+      &:checked + .slider:before {
+        -webkit-transform: translateX($width / 2);
+        -ms-transform: translateX($width / 2);
+        transform: translateX($width / 2);
+      }
+    }
+    .slider {
+      &:before {
+        height: $height;
+        width: $width / 2;
+      }
+    }
+    .yes {
+      font-size: $fontSize;
+      top: $top;
+      left: $side;
+    }
+    .no {
+      font-size: $fontSize;
+      top: $top;
+      right: $side;
+    }
+  }
+  &.md {
+    $width: 92px;
+    $height: 27px;
+    $fontSize: 15px;
+    $top: 2.5px;
+    $side: 10px;
+    width: $width;
+    height: $height;
+    input {
+      &:checked + .slider:before {
+        -webkit-transform: translateX($width / 2);
+        -ms-transform: translateX($width / 2);
+        transform: translateX($width / 2);
+      }
+    }
+    .slider {
+      &:before {
+        height: $height;
+        width: $width / 2;
+      }
+    }
+    .yes {
+      font-size: $fontSize;
+      top: $top;
+      left: $side;
+    }
+    .no {
+      font-size: $fontSize;
+      top: $top;
+      right: $side;
+    }
+  }
+  &.lg {
+    $width: 134px;
+    $height: 39px;
+    $fontSize: 21px;
+    $top: 4px;
+    $side: 20px;
+    width: $width;
+    height: $height;
+    input {
+      &:checked + .slider:before {
+        -webkit-transform: translateX($width / 2);
+        -ms-transform: translateX($width / 2);
+        transform: translateX($width / 2);
+      }
+    }
+    .slider {
+      &:before {
+        height: $height;
+        width: $width / 2;
+      }
+    }
+    .yes {
+      font-size: $fontSize;
+      top: $top;
+      left: $side;
+    }
+    .no {
+      font-size: $fontSize;
+      top: $top;
+      right: $side;
+    }
+  }
 
   input {
     opacity: 0;
     width: 0;
     height: 0;
-
-    &:checked + .slider:before {
-      -webkit-transform: translateX(46px);
-      -ms-transform: translateX(46px);
-      transform: translateX(46px);
-    }
-
     &:focus + .slider {
       box-shadow: 0 0 2px #ccc;
     }
-
     &:checked ~ span {
       &.yes {
         color: white;
       }
-
       &.no {
         color: #afafaf;
       }
@@ -80,8 +169,6 @@
     &:before {
       position: absolute;
       content: "";
-      height: 27px;
-      width: 46px;
       left: 0;
       bottom: 0;
       background-color: #fff;
@@ -94,13 +181,9 @@
     &:before {
       content: 'Yes';
     }
-
     color: #afafaf;
-    font-size: 15px;
     font-weight: 500;
     position: absolute;
-    top: 2.5px;
-    left: 10px;
     transition: color .4s;
   }
 
@@ -108,13 +191,9 @@
     &:before {
       content: 'No';
     }
-
     color: #fff;
-    font-size: 15px;
     font-weight: 500;
     position: absolute;
-    top: 2.5px;
-    right: 10px;
     transition: color .4s;
   }
 }

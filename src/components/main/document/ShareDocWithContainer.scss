@@ -61,7 +61,7 @@
         .prompt {
           font-size: 12px;
           font-weight: 500;
-          margin: 5px 0 9px 0;
+          margin: 5px 0 9px 12px;
         }
         .share-status {
           text-align: center;
@@ -92,11 +92,17 @@
         @include media-breakpoint-up(sm) {
           margin: 6.5px 0;
         }
-        &:nth-child(5) .item-value {
-          word-break: break-all;
-          width: 132px;
+        // &:nth-child(5) .item-value {
+        //   word-break: break-all;
+        //   width: 132px;
+        // }
+        .item-value {
+          overflow: hidden;
+          width: 100%;
+          text-align: right;
         }
         .item-attr {
+          width: 100px;
           font-weight: 500;
           color: $dark-blue-grey;
           @include media-breakpoint-down(sm) {
@@ -139,8 +145,8 @@
       display: flex;
       flex-direction: column;
       @include media-breakpoint-down(xs) {
-        width: 164px;
-        margin-left: 6px;
+        width: 135px;
+        margin-left: 12px;
       }
       .sr-permission {
         display: flex;
@@ -148,6 +154,10 @@
         width: 100%;
         justify-content: space-between;
         margin-bottom: 10px;
+        .sr-attr {
+          display: flex;
+          align-items: center;
+        }
         @include media-breakpoint-down(xs) {
           margin-bottom: 6.4px;
           svg {
@@ -156,6 +166,7 @@
           }
         }
         .sr-title {
+          margin-left: 11px;
           font-size: 13px;
           font-weight: 500;
           color: #d95868;
@@ -232,9 +243,14 @@
             right: 50%;
           }
           &.active {
-            background: #cecece;
+            // background: #cecece;
+            background: #92a8df;
+            .contact-name {
+              color: white;
+            }
             .share-status {
-              color: #484848;
+              // color: #484848;
+              color: white;
             }
           }
           .badge-container {
@@ -289,9 +305,14 @@
               right: 60%;
             }
             &.active {
-              background: #ececec;
+              // background: #ececec;
+              background: #92a8df;
+              .contact-name {
+                color: white;
+              }
               .share-status {
-                color: #484848;
+                // color: #484848;
+                color: white;
               }
             }
             .contact-image {

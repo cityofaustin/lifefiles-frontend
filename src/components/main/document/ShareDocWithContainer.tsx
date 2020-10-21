@@ -13,7 +13,7 @@ import Carousel from 'react-multi-carousel';
 import Document from '../../../models/document/Document';
 import Badge from '../../common/Badge';
 import { ShareRequestPermissions } from '../../../services/ShareRequestService';
-import Toggle from '../../common/Toggle';
+import Toggle, { ToggleSizeEnum } from '../../common/Toggle';
 import ShareRequestPermissionSvg from '../../svg/ShareRequestPermissionSvg';
 
 interface ShareDocWithContainerProps {
@@ -77,22 +77,27 @@ class ShareDocWithContainer extends Component<
   //   return true;
   // }
 
-  renderPermissions() {
+  renderPermissions(size: ToggleSizeEnum) {
     const { handleShareDocCheck, dataURL } = { ...this.props };
     return (
       <Fragment>
-        {!dataURL && <Fragment>Loading Document...</Fragment>}
+        {!dataURL && (
+          <div style={{ marginLeft: '12px' }}>Loading Document...</div>
+        )}
         {dataURL && (
           <div className="sr-permissions">
             <div className="sr-permission">
-              <ShareRequestPermissionSvg
-                permission="view"
-                isOn={this.state.canView}
-              />
-              <div className={`sr-title ${this.state.canView && 'on'}`}>
-                View
+              <div className="sr-attr">
+                <ShareRequestPermissionSvg
+                  permission="view"
+                  isOn={this.state.canView}
+                />
+                <div className={`sr-title ${this.state.canView && 'on'}`}>
+                  View
+                </div>
               </div>
               <Toggle
+                size={size}
                 value={this.state.canView}
                 onToggle={() => {
                   let { canView, canDownload } = { ...this.state };
@@ -114,14 +119,17 @@ class ShareDocWithContainer extends Component<
               />
             </div>
             <div className="sr-permission">
-              <ShareRequestPermissionSvg
-                permission="replace"
-                isOn={this.state.canReplace}
-              />
-              <div className={`sr-title ${this.state.canReplace && 'on'}`}>
-                Replace
+              <div className="sr-attr">
+                <ShareRequestPermissionSvg
+                  permission="replace"
+                  isOn={this.state.canReplace}
+                />
+                <div className={`sr-title ${this.state.canReplace && 'on'}`}>
+                  Replace
+                </div>
               </div>
               <Toggle
+                size={size}
                 value={this.state.canReplace}
                 onToggle={() => {
                   let { canReplace } = { ...this.state };
@@ -137,14 +145,17 @@ class ShareDocWithContainer extends Component<
               />
             </div>
             <div className="sr-permission">
-              <ShareRequestPermissionSvg
-                permission="download"
-                isOn={this.state.canDownload}
-              />
-              <div className={`sr-title ${this.state.canDownload && 'on'}`}>
-                Download
+              <div className="sr-attr">
+                <ShareRequestPermissionSvg
+                  permission="download"
+                  isOn={this.state.canDownload}
+                />
+                <div className={`sr-title ${this.state.canDownload && 'on'}`}>
+                  Download
+                </div>
               </div>
               <Toggle
+                size={size}
                 value={this.state.canDownload}
                 onToggle={() => {
                   let { canView, canDownload } = { ...this.state };
@@ -200,7 +211,7 @@ class ShareDocWithContainer extends Component<
                 />
                 <div className="contact-detail-share-doc-sm">
                   <div className="prompt">Share {document!.type}?</div>
-                  {this.renderPermissions()}
+                  {this.renderPermissions(ToggleSizeEnum.XS)}
                 </div>
               </div>
               <div className="contact-detail-info">
@@ -242,13 +253,11 @@ class ShareDocWithContainer extends Component<
                   {shareRequest &&
                     shareRequest.approved &&
                     `Share ${document!.type}?`}
-                  {
-                    shareRequest &&
-                      !shareRequest.approved &&
-                      `Share ${document!.type}?`
-                  }
+                  {shareRequest &&
+                    !shareRequest.approved &&
+                    `Share ${document!.type}?`}
                 </div>
-                {this.renderPermissions()}
+                {this.renderPermissions(ToggleSizeEnum.SM)}
               </div>
             </div>
           )}

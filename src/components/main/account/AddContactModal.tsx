@@ -15,7 +15,7 @@ import HelperContact from '../../../models/HelperContact';
 import { HelperContactRequest } from '../../../services/HelperContactService';
 import SearchInput from '../../common/SearchInput';
 import SortArrow from '../../common/SortArrow';
-import Toggle from '../../common/Toggle';
+import Toggle, { ToggleSizeEnum } from '../../common/Toggle';
 import Chevron from '../../common/Chevron';
 
 interface AddContactModalProps {
@@ -188,7 +188,7 @@ export default class AddContactModal extends Component<
                     </div>
                     <div className="toggle-lg">
                       <Toggle
-                        isLarge
+                        size={ToggleSizeEnum.LG}
                         value={isSocialAttestationEnabled}
                         onToggle={() =>
                           this.setState({
@@ -213,7 +213,7 @@ export default class AddContactModal extends Component<
                     </div>
                     <div className="toggle-lg">
                       <Toggle
-                        isLarge
+                        size={ToggleSizeEnum.LG}
                         value={canAddNewDocuments}
                         onToggle={() =>
                           this.setState({

@@ -24,7 +24,7 @@ import './AddDocumentModal.scss';
 import AccountImpl from '../../../models/AccountImpl';
 import Account from '../../../models/Account';
 import AccountService from '../../../services/AccountService';
-import Toggle from '../../common/Toggle';
+import Toggle, { ToggleSizeEnum } from '../../common/Toggle';
 import DatePicker from 'react-datepicker';
 import MSelect from '../../common/MSelect';
 import FileBase64 from 'react-file-base64';
@@ -571,7 +571,7 @@ class AddDocumentModal extends Component<
               Does this document have an expiration date?
             </div>
             <Toggle
-              isLarge
+              size={ToggleSizeEnum.LG}
               value={hasValidUntilDate}
               onToggle={() => {
                 if (hasValidUntilDate) {

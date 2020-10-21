@@ -520,18 +520,19 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             </div>
           </Col>
           {searchedHelperContacts.map((s) => {
+            // NOTE: can't use s.helperAccount._id, it is not the same as the actual account id
+            // so needing to join on other accounts
+            const helperAccount = accounts.find(a => a.username === s.helperAccount.username);
+            const ownerAccount = accounts.find(a => a.username === s.ownerAccount.username);
+            const account = myAccount.role === Role.owner ? helperAccount : ownerAccount;
             const matchedShareRequests = shareRequests.filter(
               (shareRequest) => {
-                // NOTE: can't use s.helperAccount._id, it is not the same as the actual account id
-                // so needing to join on other accounts
-                // return shareRequest.shareWithAccountId === s.helperAccount._id;
-                const helperAccount = accounts.find(a => a.username === s.helperAccount.username);
-                return shareRequest.shareWithAccountId === helperAccount?.id;
+                return shareRequest.shareWithAccountId === account?.id;
               }
             );
             return (
               <Col
-                key={s.helperAccount._id}
+                key={account!.id}
                 sm="12"
                 md="6"
                 lg="6"
@@ -539,7 +540,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 className="network-container"
               >
                 <AccountSummary
-                  account={s.helperAccount}
+                  account={account!}
                   shareRequests={matchedShareRequests}
                   searchedDocuments={searchedDocuments}
                   myAccount={myAccount}
