@@ -15,6 +15,7 @@ import Badge from '../../common/Badge';
 import { ShareRequestPermissions } from '../../../services/ShareRequestService';
 import Toggle, { ToggleSizeEnum } from '../../common/Toggle';
 import ShareRequestPermissionSvg from '../../svg/ShareRequestPermissionSvg';
+import ProgressIndicator from '../../common/ProgressIndicator';
 
 interface ShareDocWithContainerProps {
   shareRequests: ShareRequest[];
@@ -73,17 +74,11 @@ class ShareDocWithContainer extends Component<
     }
   }
 
-  // containsBadge(account, shareRequests) {
-  //   return true;
-  // }
-
   renderPermissions(size: ToggleSizeEnum) {
     const { handleShareDocCheck, dataURL } = { ...this.props };
     return (
       <Fragment>
-        {!dataURL && (
-          <div style={{ marginLeft: '12px' }}>Loading Document...</div>
-        )}
+        {!dataURL && <ProgressIndicator />}
         {dataURL && (
           <div className="sr-permissions">
             <div className="sr-permission">

@@ -14,7 +14,9 @@ import DocumentSummary from './document/DocumentSummary';
 import Document from '../../models/document/Document';
 import Account from '../../models/Account';
 import './DocumentPage.scss';
-import ShareRequest from '../../models/ShareRequest';
+import ShareRequest, {
+  ShareRequestPermission,
+} from '../../models/ShareRequest';
 import classNames from 'classnames';
 import AccountSummary from './account/AccountSummary';
 import SortArrow from '../common/SortArrow';
@@ -25,7 +27,7 @@ import StringUtil from '../../util/StringUtil';
 import AccountImpl from '../../models/AccountImpl';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
-import AccountService from '../../services/AccountService';
+// import AccountService from '../../services/AccountService';
 import UserPreferenceUtil from '../../util/UserPreferenceUtil';
 
 import SvgButton, { SvgButtonTypes } from '../common/SvgButton';
@@ -136,15 +138,42 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     const { myAccount, coreFeatures, helperContacts, referencedAccount } = {
       ...this.props,
     };
-    const referencedContact = referencedAccount ? helperContacts.find(
-      (hc) => hc.ownerAccount.username === referencedAccount!.username
-    ) : undefined;
+    const referencedContact = referencedAccount
+      ? helperContacts.find(
+          (hc) => hc.ownerAccount.username === referencedAccount!.username
+        )
+      : undefined;
     return (
       myAccount.role === Role.owner ||
       (coreFeatures.indexOf(CoreFeatureEnum.UPLOAD_DOC_BEHALF_OWNER) > -1 &&
         referencedContact &&
         referencedContact.canAddNewDocuments)
     );
+  };
+
+  isAllowedShareRequestPermission = (
+    srp: ShareRequestPermission,
+    document: Document
+  ) => {
+    const {
+      myAccount,
+      // viewFeature, // NOTE: should handle admin view feature too.
+      shareRequests,
+    } = { ...this.props };
+    let isAllowed = true;
+    if (myAccount.role === Role.helper) {
+      try {
+        if(document.type) {
+          const shareRequest = shareRequests.find(
+            (sr) => sr.documentType === document?.type
+          );
+          isAllowed = shareRequest ? shareRequest[srp] : false;
+        }
+      } catch (err) {
+        console.error('Unabled to get share request');
+      }
+    }
+    return isAllowed;
   };
 
   renderGridSort() {
@@ -191,6 +220,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       searchedHelperContacts,
       shareRequests,
       privateEncryptionKey,
+      myAccount,
     } = { ...this.props };
     return (
       <Fragment>
@@ -245,6 +275,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 >
                   {document.thumbnailUrl !== '' && (
                     <DocumentSummary
+                      myAccount={myAccount}
                       document={document}
                       documentIdx={idx++}
                       sharedAccounts={sharedAccounts}
@@ -354,24 +385,31 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 >
                   <td>
                     <div className="doc-name-cell">
-                      {document.thumbnailUrl !== '' && (
-                        <div className="image-container">
-                          <ImageWithStatus
-                            imageViewType={ImageViewTypes.LIST_LAYOUT}
-                            imageUrl={DocumentService.getDocumentURL(
-                              document.thumbnailUrl
+                      {document.thumbnailUrl !== '' &&
+                        this.isAllowedShareRequestPermission(
+                          ShareRequestPermission.CAN_VIEW,
+                          document
+                        ) && (
+                          <div className="image-container">
+                            <ImageWithStatus
+                              imageViewType={ImageViewTypes.LIST_LAYOUT}
+                              imageUrl={DocumentService.getDocumentURL(
+                                document.thumbnailUrl
+                              )}
+                              encrypted
+                              privateEncryptionKey={privateEncryptionKey}
+                            />
+                            {this.containsBadge(document.type) && (
+                              <div className="badge-container">
+                                <Badge />
+                              </div>
                             )}
-                            encrypted
-                            privateEncryptionKey={privateEncryptionKey}
-                          />
-                          {this.containsBadge(document.type) && (
-                            <div className="badge-container">
-                              <Badge />
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {document.thumbnailUrl === '' && <NotSharedDoc />}
+                          </div>
+                        )}
+                      {!this.isAllowedShareRequestPermission(
+                          ShareRequestPermission.CAN_VIEW,
+                          document
+                        ) && <NotSharedDoc />}
                       <div className="doc-info">
                         <div className="doc-type">{document.type}</div>
                         <div className="doc-upd">
@@ -522,9 +560,14 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
           {searchedHelperContacts.map((s) => {
             // NOTE: can't use s.helperAccount._id, it is not the same as the actual account id
             // so needing to join on other accounts
-            const helperAccount = accounts.find(a => a.username === s.helperAccount.username);
-            const ownerAccount = accounts.find(a => a.username === s.ownerAccount.username);
-            const account = myAccount.role === Role.owner ? helperAccount : ownerAccount;
+            const helperAccount = accounts.find(
+              (a) => a.username === s.helperAccount.username
+            );
+            const ownerAccount = accounts.find(
+              (a) => a.username === s.ownerAccount.username
+            );
+            const account =
+              myAccount.role === Role.owner ? helperAccount : ownerAccount;
             const matchedShareRequests = shareRequests.filter(
               (shareRequest) => {
                 return shareRequest.shareWithAccountId === account?.id;

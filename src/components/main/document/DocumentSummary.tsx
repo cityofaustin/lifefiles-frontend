@@ -4,12 +4,17 @@ import DocumentService from '../../../services/DocumentService';
 import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
 import Account from '../../../models/Account';
 import SharedWith from './SharedWith';
-import ShareRequest from '../../../models/ShareRequest';
+import ShareRequest, {
+  ShareRequestPermission,
+} from '../../../models/ShareRequest';
 import Badge from '../../common/Badge';
 import './DocumentSummary.scss';
 import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
+import Role from '../../../models/Role';
+import { ReactComponent as NotSharedDoc } from '../../../img/not-shared-doc.svg';
 
 interface DocumentSummaryProps {
+  myAccount: Account;
   document?: Document;
   documentIdx: number;
   sharedAccounts: Account[];
@@ -40,6 +45,27 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
     return result;
   }
 
+  isAllowedShareRequestPermission = (srp: ShareRequestPermission) => {
+    const {
+      myAccount,
+      // viewFeature, // NOTE: should handle admin view feature too.
+      shareRequests,
+      document,
+    } = { ...this.props };
+    let isAllowed = true;
+    if (myAccount.role === Role.helper) {
+      try {
+        const shareRequest = shareRequests.find(
+          (sr) => sr.documentType === document?.type
+        );
+        isAllowed = shareRequest ? shareRequest[srp] : true;
+      } catch (err) {
+        console.error('Unabled to get share request');
+      }
+    }
+    return isAllowed;
+  };
+
   render() {
     const {
       document,
@@ -60,12 +86,25 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
                   <div className="notary-label">NOTARIZED</div>
                 </div>
               )}
-              <ImageWithStatus
-                imageViewType={ImageViewTypes.GRID_LAYOUT}
-                imageUrl={DocumentService.getDocumentURL(document.thumbnailUrl)}
-                encrypted
-                privateEncryptionKey={privateEncryptionKey}
-              />
+              {this.isAllowedShareRequestPermission(
+                ShareRequestPermission.CAN_VIEW
+              ) && (
+                <ImageWithStatus
+                  imageViewType={ImageViewTypes.GRID_LAYOUT}
+                  imageUrl={DocumentService.getDocumentURL(
+                    document.thumbnailUrl
+                  )}
+                  encrypted
+                  privateEncryptionKey={privateEncryptionKey}
+                />
+              )}
+              {!this.isAllowedShareRequestPermission(
+                ShareRequestPermission.CAN_VIEW
+              ) && (
+                <div style={{width: '160px', height: '203px', marginBottom: '40px'}}>
+                  <NotSharedDoc />
+                </div>
+              )}
             </div>
             {this.containsBadge() && (
               <div className="badge-container">
@@ -73,19 +112,12 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
               </div>
             )}
             <div className="title">{document.type}</div>
-            {/* TODO: claimed needs to show up here for notaries. */}
             {document.thumbnailUrl.length > 0 &&
-              // && document.claimed === true
               document.sharedWithAccountIds.length > 0 && (
                 <div>
                   <div className="subtitle">SHARED</div>
                 </div>
               )}
-            {/* {document.claimed !== undefined && document.claimed === false && (
-            <div>
-              <div className="subtitle">NOT CLAIMED</div>
-            </div>
-            )} */}
             {document.claimed && sharedAccounts.length > 0 && (
               <div>
                 <div className="subtitle">SHARED WITH</div>

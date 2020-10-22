@@ -48,6 +48,7 @@ import Role from '../../models/Role';
 import ProfileImage from '../common/ProfileImage';
 import MySettings from './MySettings';
 import NotaryPdfTestPage from '../NotaryPdfTestPage';
+import documentSelected from '../../test-data/document';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -93,6 +94,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       documents: [],
       searchedDocuments: [],
       documentSelected: undefined,
+      // documentSelected,
       isAccount: false,
       sortAsc: true,
       showModal: false,
@@ -927,16 +929,21 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       searchedHelperContacts,
       activeTab,
       accounts,
+      clientShares,
+      clientIdSelected
     } = { ...this.state };
     const { account, privateEncryptionKey, coreFeatures, viewFeatures } = {
       ...this.props,
     };
     const { id } = props.match.params;
     let referencedAccount;
+    let sharedRequests = account.shareRequests;
     if (id) {
       referencedAccount = accounts.filter(
         (accountItem) => accountItem.id === id
       )[0];
+      const selectedClientShares = clientShares.get(clientIdSelected!);
+      sharedRequests = selectedClientShares ? selectedClientShares.filter((sr) => sr.shareWithAccountId === account.id) : [];
     }
     return (
       <DocumentPage
@@ -949,7 +956,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         helperContacts={helperContacts}
         searchedHelperContacts={searchedHelperContacts}
         accounts={accounts}
-        shareRequests={account.shareRequests}
+        shareRequests={sharedRequests}
         activeTab={activeTab}
         setActiveTab={this.setActiveTab}
         myAccount={account}

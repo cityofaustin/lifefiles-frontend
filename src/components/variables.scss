@@ -40,6 +40,13 @@ $themes: (
   @return map-get($theme-map, $key);
 }
 
+@mixin font-mixin($size: false, $colour: false, $weight: false,  $lh: false) {
+  @if $size { font-size: $size; }
+  @if $colour { color: $colour; }
+  @if $weight { font-weight: $weight; }
+  @if $lh { line-height: $lh; }
+}
+
 $background-color: #fcfcfc;
 $hover-color: #f8f8f8;
 $grey: #645857;

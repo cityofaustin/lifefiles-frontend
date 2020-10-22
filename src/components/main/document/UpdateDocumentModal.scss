@@ -144,6 +144,7 @@
         display: none;
         position: absolute;
         padding: 8px 34.5px;
+        margin-top: -18.3px;
         @include media-breakpoint-up(md) {
           display: block;
           right: 16px;
@@ -176,6 +177,7 @@
           }
         }
         @include media-breakpoint-up(lg) {
+          margin-top: -18.3px;
           font-size: 20px;
           .nav-item {
             width: auto;
@@ -205,84 +207,40 @@
               .img-tools {
                 margin-right: 32px;
               }
-
-              .img-container {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                //
-                position: relative;
-                margin: 22px 0;
-                svg {
-                  position: absolute;
-                  bottom: -3px;
-                  right: 52px;
-                }
-                @include media-breakpoint-down(sm) {
-                }
-                @include media-breakpoint-up(md) {
-                  height: 412px;
-                  flex-grow: 1;
-                  svg {
-                    display: none;
-                  }
-                }
-              }
-              .img-access-sm {
-                display: flex;
-                justify-content: space-evenly;
-                @include media-breakpoint-up(md) {
-                  display: none;
-                }
-                button {
-                  padding: 6px 20px;
-                  border-radius: 22px;
-                  font-size: 20px;
-                  border: none;
-                }
-                .download-btn {
-                  color: white;
-                  background-color: $bluey-grey;
-                }
-                .print-btn {
-                  background-color: white;
-                }
-              }
-              .img-access {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                @include media-breakpoint-down(sm) {
-                  display: none;
-                }
-                @include media-breakpoint-up(lg) {
-                  align-items: flex-start;
-                  justify-content: flex-end;
-                  margin-left: 32px;
-                }
-                svg {
-                 & > path {
-                    @include themify($themes) {
-                      fill: themed("colorPrimary");
+              .img-section {
+                width: 100%;
+                .img-container {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  //
+                  position: relative;
+                  margin: 22px 0;
+                  .zoom-svg {
+                    svg {
+                      position: absolute;
+                      bottom: -3px;
+                      right: 52px;
                     }
                   }
-                  g {
-                    rect {
-                      @include themify($themes) {
-                        fill: themed("colorPrimary");
+                  @include media-breakpoint-down(sm) {
+                  }
+                  @include media-breakpoint-up(md) {
+                    height: 412px;
+                    flex-grow: 1;
+                    .zoom-svg {
+                      svg {
+                        display: none;
                       }
                     }
                   }
-                  margin: 6px 0;
-                  cursor: pointer;
                 }
               }
               .notarized {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin-bottom: 50px;
+                // margin-bottom: 50px;
                 .notary-label {
                   font-size: 22px;
                   margin-left: 12px;
@@ -296,6 +254,80 @@
                     fill: themed("colorPrimary");
                   }
                 }
+              }
+            }
+
+            .preview-info-lg {
+              .preview-info-title {
+                text-transform: uppercase;
+                margin-bottom: 30px;
+                @include font-mixin(20px, #7f7f7f, bold);
+              }
+              .preview-info-item {
+                .attr {
+                  @include font-mixin(25px, #9a9a9a);
+                }
+                .attr-value {
+                  @include font-mixin(33px, #484848);
+                }
+              }
+            }
+
+            .img-access-sm {
+              display: flex;
+              justify-content: space-evenly;
+              @include media-breakpoint-up(md) {
+                display: none;
+              }
+              button {
+                padding: 6px 20px;
+                border-radius: 22px;
+                font-size: 20px;
+                border: none;
+              }
+              .download-btn {
+                color: white;
+                background-color: $bluey-grey;
+              }
+              .print-btn {
+                background-color: white;
+              }
+            }
+            .img-access {
+              margin-bottom: 37.7px;
+              display: flex;
+              flex-direction: row;
+              // justify-content: space-between;
+              align-items: center;
+              @include media-breakpoint-down(sm) {
+                display: none;
+              }
+              @include media-breakpoint-up(lg) {
+                // align-items: flex-start;
+                // justify-content: flex-end;
+                // margin-left: 32px;
+              }
+              .btn {
+                margin-right: 40px;
+              }
+              a {
+                margin-right: 40px;
+              }
+              svg {
+               & > path {
+                  @include themify($themes) {
+                    fill: themed("colorPrimary");
+                  }
+                }
+                g {
+                  rect {
+                    @include themify($themes) {
+                      fill: themed("colorPrimary");
+                    }
+                  }
+                }
+                margin: 6px 0;
+                cursor: pointer;
               }
             }
 
@@ -482,7 +514,7 @@
           overflow-wrap: break-word;
         }
         .pdf-display {
-          background-color: #ccc;
+          // background-color: #ccc;
           display: flex;
           flex-direction: column;
           align-items: center;

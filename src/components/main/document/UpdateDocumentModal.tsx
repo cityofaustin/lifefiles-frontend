@@ -16,7 +16,6 @@ import {
   TabContent,
   TabPane,
 } from 'reactstrap';
-
 import classNames from 'classnames';
 import Document from '../../../models/document/Document';
 import './UpdateDocumentModal.scss';
@@ -28,9 +27,9 @@ import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
 import { ReactComponent as CrossSmSvg } from '../../../img/cross2-sm.svg';
 import FileUploader from '../../common/FileUploader';
 import { ReactComponent as DownloadBtnSvg } from '../../../img/download-btn.svg';
-// import {ReactComponent as FlipDocBtnSvg} from '../../../img/flip-doc-btn.svg';
 import { ReactComponent as PrintBtnSvg } from '../../../img/print-btn.svg';
-import { ReactComponent as ZoomBtnSvg } from '../../../img/zoom-btn.svg';
+// import { ReactComponent as ZoomBtnSvg } from '../../../img/zoom-btn.svg';
+import { ReactComponent as ZoomSvg } from '../../../img/zoom.svg';
 import { ReactComponent as ZoomBtnSmSvg } from '../../../img/zoom-btn-sm.svg';
 import { ReactComponent as NotSharedDoc } from '../../../img/not-shared-doc.svg';
 import Lightbox from 'react-image-lightbox';
@@ -140,6 +139,8 @@ class UpdateDocumentModal extends Component<
   UpdateDocumentModalProps,
   UpdateDocumentModalState
 > {
+  previewPadding = '0 30px';
+
   constructor(props: Readonly<UpdateDocumentModalProps>) {
     super(props);
 
@@ -180,6 +181,16 @@ class UpdateDocumentModal extends Component<
   componentDidMount() {
     this.updateWindowDimensions();
     window.addEventListener('resize', this.updateWindowDimensions);
+    this.setImage();
+  }
+
+  componentDidUpdate(prevProps: Readonly<UpdateDocumentModalProps>) {
+    if (prevProps.activeTab !== this.props.activeTab) {
+      this.setState({ activeTab: this.props.activeTab });
+    }
+    if (prevProps.document !== this.props.document) {
+      this.setImage();
+    }
   }
 
   componentWillUnmount() {
@@ -195,15 +206,15 @@ class UpdateDocumentModal extends Component<
       this.setState({ gotNotarizationInfo: true });
 
       if (this.state.adminPublicKey === '') {
-        let rskGasPrice = await rskClient.host().getGasPrice();
-        let ethGasPrice = web3.utils.toWei(
+        const rskGasPrice = await rskClient.host().getGasPrice();
+        const ethGasPrice = web3.utils.toWei(
           '' + (await NotaryService.getEthGasPrice()) / 10,
           'gwei'
         );
 
-        let adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
-        let currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
-        let currentEthPrice = await NotaryService.getCoinPrice('ethereum');
+        const adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
+        const currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
+        const currentEthPrice = await NotaryService.getCoinPrice('ethereum');
 
         this.setState({ ethGasPrice: parseInt(ethGasPrice) });
         this.setState({ rskGasPrice });
@@ -225,52 +236,44 @@ class UpdateDocumentModal extends Component<
     }
   };
 
-  async componentDidUpdate(prevProps: Readonly<UpdateDocumentModalProps>) {
-    if (prevProps.activeTab !== this.props.activeTab) {
-      this.setState({ activeTab: this.props.activeTab });
-    }
+  setImage = async () => {
+    let base64Pdf: string | undefined;
+    let base64Image: string | undefined;
+    let base64Thumbnail: string | undefined;
+    let docType: string | undefined;
     if (
-      prevProps.document !== this.props.document &&
       this.props.document &&
-      this.props.privateEncryptionKey
+      this.props.privateEncryptionKey &&
+      this.props.document.url.length > 0
     ) {
-      let base64Pdf: string | undefined;
-      let base64Image: string | undefined;
-      let base64Thumbnail: string | undefined;
-      let docType: string | undefined;
-      if (this.props.document.url.length > 0) {
-        try {
-          const encryptedThumbnail = await ZipUtil.unzip(
-            DocumentService.getDocumentURL(this.props.document.thumbnailUrl)
-          );
-          base64Thumbnail = await CryptoUtil.getDecryptedString(
-            this.props.privateEncryptionKey,
-            encryptedThumbnail
-          );
-          this.setState({ base64Thumbnail }); // do this since it's much quicker than the pdf.
-          docType = this.props.document.type;
-          const encryptedString = await ZipUtil.unzip(
-            DocumentService.getDocumentURL(this.props.document.url)
-          );
-          const base64 = await CryptoUtil.getDecryptedString(
-            this.props.privateEncryptionKey,
-            encryptedString
-          );
-          if (base64.startsWith('data:application/pdf')) {
-            base64Pdf = base64;
-          } else {
-            base64Image = base64;
-          }
-        } catch (err) {
-          console.error(err);
+      try {
+        const encryptedThumbnail = await ZipUtil.unzip(
+          DocumentService.getDocumentURL(this.props.document.thumbnailUrl)
+        );
+        base64Thumbnail = await CryptoUtil.getDecryptedString(
+          this.props.privateEncryptionKey,
+          encryptedThumbnail
+        );
+        this.setState({ base64Thumbnail }); // do this since it's much quicker than the pdf.
+        docType = this.props.document.type;
+        const encryptedString = await ZipUtil.unzip(
+          DocumentService.getDocumentURL(this.props.document.url)
+        );
+        const base64 = await CryptoUtil.getDecryptedString(
+          this.props.privateEncryptionKey,
+          encryptedString
+        );
+        if (base64.startsWith('data:application/pdf')) {
+          base64Pdf = base64;
+        } else {
+          base64Image = base64;
         }
+      } catch (err) {
+        console.error(err);
       }
-      this.setState({ base64Image, docType, base64Pdf, base64Thumbnail });
     }
-
-    // console.log(this.props.referencedAccount?.didAddress);
-    // console.log(this.props.document);
-  }
+    this.setState({ base64Image, docType, base64Pdf, base64Thumbnail });
+  };
 
   toggleModal = () => {
     // clear state
@@ -688,6 +691,583 @@ class UpdateDocumentModal extends Component<
     return isAllowed;
   };
 
+  renderNotShared() {
+    const { document } = { ...this.props };
+    const { pendingAccess } = { ...this.state };
+    return (
+      <Fragment>
+        {document && (
+          <div className="share-request">
+            <div className="file-container">
+              <NotSharedDoc />
+              <div className="file-info">
+                <div className="attr">File</div>
+                <div className="value">{document.type}</div>
+                <div className="attr">Upload Date</div>
+                <div className="value">{document.updatedAt || '-'}</div>
+                <div className="attr">Upload By</div>
+                <div className="value">{document.uploadedBy || '-'}</div>
+                <div className="attr">Valid Until</div>
+                <div className="value">{document.validUntilDate || '-'}</div>
+              </div>
+            </div>
+            <div className="request-access">
+              <button
+                className="button"
+                onClick={this.handleRequestAccess}
+                disabled={
+                  pendingAccess || document.sharedWithAccountIds.length > 0
+                }
+              >
+                {pendingAccess || document.sharedWithAccountIds.length > 0
+                  ? 'Access Pending'
+                  : 'Request Access'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Fragment>
+    );
+  }
+
+  renderModalHeader() {
+    const { document, referencedAccount } = { ...this.props };
+    return (
+      <Fragment>
+        {referencedAccount && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {!referencedAccount.profileImageUrl && (
+              <div style={{ marginRight: '28.3px' }}>
+                <ProfileImage
+                  account={referencedAccount}
+                  size={ProfileImageSizeEnum.SMALL}
+                />
+              </div>
+            )}
+            {referencedAccount.profileImageUrl && (
+              <img
+                src={AccountService.getProfileURL(
+                  referencedAccount.profileImageUrl!
+                )}
+                alt=""
+              />
+            )}
+            <span className="update-doc-title">
+              {AccountImpl.hasNameSet(referencedAccount) &&
+                AccountImpl.getFullName(
+                  referencedAccount.firstName,
+                  referencedAccount.lastName
+                )}
+              {!AccountImpl.hasNameSet(referencedAccount) &&
+                referencedAccount.username}{' '}
+              - {document?.type}
+            </span>
+          </div>
+        )}
+        {!referencedAccount && (
+          <Fragment>
+            <EditDocSvg className="lg" />
+            <EditDocSmSvg className="sm" />
+            <span>{document?.type}</span>
+          </Fragment>
+        )}
+      </Fragment>
+    );
+  }
+
+  renderNav() {
+    const { referencedAccount, shareRequests } = { ...this.props };
+    const { activeTab, showConfirmDeleteSection } = { ...this.state };
+    return (
+      <Fragment>
+        {!referencedAccount && (
+          <div
+            className={classNames({
+              'upload-doc-delete-container': true,
+              active: showConfirmDeleteSection,
+            })}
+          >
+            <DeleteSvg
+              className="delete-svg"
+              onClick={() => this.confirmDelete()}
+            />
+          </div>
+        )}
+        <Nav tabs>
+          <NavItem>
+            <NavLink
+              className={classNames({ active: activeTab === '1' })}
+              onClick={() => {
+                this.toggleTab('1');
+              }}
+            >
+              Preview
+            </NavLink>
+          </NavItem>
+          {this.isAllowedShareRequestPermission(
+            ShareRequestPermission.CAN_REPLACE
+          ) && (
+            <NavItem>
+              <NavLink
+                className={classNames({ active: activeTab === '2' })}
+                onClick={() => {
+                  this.toggleTab('2');
+                }}
+              >
+                Replace
+              </NavLink>
+            </NavItem>
+          )}
+          {!referencedAccount && (
+            <div style={{ position: 'relative' }}>
+              {shareRequests.find((sr) => !sr.approved) && (
+                <div
+                  style={{
+                    left: '-8px',
+                    top: '-12px',
+                    position: 'absolute',
+                  }}
+                >
+                  <Badge />
+                </div>
+              )}
+              <NavItem>
+                <NavLink
+                  className={classNames({ active: activeTab === '3' })}
+                  onClick={() => {
+                    this.toggleTab('3');
+                  }}
+                >
+                  Share
+                </NavLink>
+              </NavItem>
+            </div>
+          )}
+
+          {this.props.myAccount.role === 'owner' &&
+            this.props.document?.vcJwt! && (
+              <NavItem>
+                <NavLink
+                  className={classNames({ active: activeTab === '4' })}
+                  onClick={() => {
+                    this.toggleTab('4');
+                    this.getNotarizationInfo();
+                  }}
+                >
+                  Notarize
+                </NavLink>
+              </NavItem>
+            )}
+        </Nav>
+      </Fragment>
+    );
+  }
+
+  renderPreviewTab() {
+    const { document, referencedAccount } = { ...this.props };
+    return (
+      <Fragment>
+        <Row>
+          {document && (
+            <Col sm="12" className="preview-container">
+              <Row>
+                {this.isAllowedShareRequestPermission(
+                  ShareRequestPermission.CAN_VIEW
+                ) && (
+                  <Col md={12} lg={6} style={{ padding: this.previewPadding }}>
+                    <div className="preview-img-container">
+                      {this.renderImageOrPDF()}
+                    </div>
+                  </Col>
+                )}
+                {this.renderPreviewInfo()}
+              </Row>
+              {this.renderImageAccessSmall()}
+              {this.renderImageAccess()}
+              {this.renderPreviewInfoSmall()}
+            </Col>
+          )}
+        </Row>
+        {!referencedAccount && this.renderDeleteSmall()}
+      </Fragment>
+    );
+  }
+
+  renderImageOrPDF() {
+    const { document } = { ...this.props };
+    const { base64Image, base64Pdf, width } = { ...this.state };
+    let pdfHeight = 200;
+    if (width < 576) {
+      pdfHeight = 200;
+    }
+    if (width >= 576) {
+      pdfHeight = 220;
+    }
+    if (width >= 1200) {
+      pdfHeight = 340;
+    }
+    return (
+      <div className="img-section">
+        {document!.vcJwt && document!.vpDocumentDidAddress && (
+          <div className="notarized">
+            <StampSvg />
+            <div className="notary-label">NOTARIZED</div>
+          </div>
+        )}
+        <div className="img-container">
+          {!base64Image && !base64Pdf && <ProgressIndicator />}
+          {base64Pdf && (
+            <div className="pdf-display">
+              <PdfPreview fileURL={base64Pdf} height={pdfHeight} />
+            </div>
+          )}
+          {base64Image && (
+            <ImageWithStatus
+              imageUrl={base64Image}
+              imageViewType={ImageViewTypes.PREVIEW}
+            />
+          )}
+          {(base64Image || base64Pdf) && (
+            <div className="zoom-svg">
+              <ZoomBtnSmSvg
+                onClick={() => {
+                  if (base64Pdf) {
+                    this.openPdfWindow(base64Pdf);
+                  }
+                  if (base64Image) {
+                    this.setState({ isZoomed: true });
+                  }
+                }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  renderImageAccess() {
+    const { base64Image, base64Pdf } = { ...this.state };
+    return (
+      <div className="img-access">
+        <Button
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-evenly',
+          }}
+          color="primary"
+          onClick={() => {
+            if (base64Pdf) {
+              this.openPdfWindow(base64Pdf);
+            }
+            if (base64Image) {
+              this.setState({ isZoomed: true });
+            }
+          }}
+          disabled={
+            !(base64Image || base64Pdf) ||
+            !this.isAllowedShareRequestPermission(
+              ShareRequestPermission.CAN_VIEW
+            )
+          }
+        >
+          <ZoomSvg />
+          <span style={{ fontSize: '22px' }}>Zoom in</span>
+        </Button>
+        {this.isAllowedShareRequestPermission(
+          ShareRequestPermission.CAN_DOWNLOAD
+        ) && (
+          <Fragment>
+            {base64Image && (
+              <a href={base64Image} download target="_blank">
+                <DownloadBtnSvg />
+              </a>
+            )}
+            {base64Pdf && (
+              <a href={base64Pdf} download target="_blank">
+                <DownloadBtnSvg />
+              </a>
+            )}
+          </Fragment>
+        )}
+        {this.isAllowedShareRequestPermission(
+          ShareRequestPermission.CAN_DOWNLOAD
+        ) && (
+          <PrintBtnSvg
+            onClick={() => {
+              if (base64Image) {
+                this.printImg(base64Image!);
+              }
+              if (base64Pdf) {
+                this.openPdfWindow(base64Pdf);
+              }
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  renderImageAccessSmall() {
+    const { base64Image, base64Pdf } = { ...this.state };
+    return (
+      <div className="img-access-sm">
+        {(base64Image || base64Pdf) &&
+          this.isAllowedShareRequestPermission(
+            ShareRequestPermission.CAN_DOWNLOAD
+          ) && (
+            <button
+              onClick={() => {
+                // Not allowed to navigate top frame to data URL
+                // window.location.href = base64Image!;
+                const dataUri = base64Image ? base64Image : base64Pdf;
+                const iframe =
+                  '<iframe width="100%" height="100%" src="' +
+                  dataUri! +
+                  '"></iframe>';
+                const x = window.open()!;
+                x.document.open();
+                x.document.write(iframe);
+                x.document.close();
+              }}
+              className="download-btn"
+            >
+              Download
+            </button>
+          )}
+        {this.isAllowedShareRequestPermission(
+          ShareRequestPermission.CAN_DOWNLOAD
+        ) && (
+          <Fragment>
+            {base64Image && (
+              <button
+                onClick={() => this.printImg(base64Image)}
+                className="print-btn"
+              >
+                Print
+              </button>
+            )}
+            {base64Pdf && (
+              <button
+                onClick={() => this.openPdfWindow(base64Pdf)}
+                className="print-btn"
+              >
+                Print
+              </button>
+            )}
+          </Fragment>
+        )}
+      </div>
+    );
+  }
+
+  renderPreviewInfo() {
+    const { document, accounts, myAccount } = { ...this.props };
+    let uploadedBy = 'N/A';
+    if (document) {
+      const uploadedByAccount = AccountImpl.getAccountByIdAndList(
+        [...accounts, myAccount],
+        document!.uploadedBy
+      );
+      uploadedBy = AccountImpl.getFullName(
+        uploadedByAccount?.firstName,
+        uploadedByAccount?.lastName
+      );
+    }
+    return (
+      <Col md={12} lg={6} style={{ padding: this.previewPadding }}>
+        <div className="preview-info-lg d-none d-lg-block">
+          <div className="preview-info-title">Information</div>
+          <div className="preview-info-item">
+            <div className="attr">File</div>
+            <div className="attr-value">{document!.type}</div>
+          </div>
+          <div className="preview-info-item">
+            <div className="attr">Update date</div>
+            <div className="attr-value">
+              {document?.updatedAt &&
+                format(new Date(document?.updatedAt), 'MM/dd/yyyy')}
+              {!document?.updatedAt && '-'}
+            </div>
+          </div>
+          <div className="preview-info-item">
+            <div className="attr">Expiration Date</div>
+            <div className="attr-value">
+              {document?.validUntilDate &&
+                format(new Date(document?.validUntilDate), 'MM/dd/yyyy')}
+              {!document?.validUntilDate && '-'}
+            </div>
+          </div>
+          <div className="preview-info-item">
+            <div className="attr">Uploaded by</div>
+            <div className="attr-value">{uploadedBy}</div>
+          </div>
+        </div>
+      </Col>
+    );
+  }
+
+  renderPreviewInfoSmall() {
+    const { document, accounts, myAccount } = { ...this.props };
+    let uploadedBy = 'N/A';
+    if (document) {
+      const uploadedByAccount = AccountImpl.getAccountByIdAndList(
+        [...accounts, myAccount],
+        document!.uploadedBy
+      );
+      uploadedBy = AccountImpl.getFullName(
+        uploadedByAccount?.firstName,
+        uploadedByAccount?.lastName
+      );
+    }
+    return (
+      <div className="preview-info d-block d-lg-none">
+        <div className="preview-info-item">
+          <div className="attr">File</div>
+          <div className="attr-value">{document!.type}</div>
+        </div>
+        <div className="preview-info-item">
+          <div className="attr">Update date</div>
+          <div className="attr-value">
+            {document?.updatedAt &&
+              format(new Date(document?.updatedAt), 'MM/dd/yyyy')}
+            {!document?.updatedAt && '-'}
+          </div>
+        </div>
+        <div className="preview-info-item">
+          <div className="attr">Uploaded by</div>
+          <div className="attr-value">{uploadedBy}</div>
+        </div>
+        <div className="preview-info-item">
+          <div className="attr">Valid Until</div>
+          <div className="attr-value">
+            {document?.validUntilDate &&
+              format(new Date(document?.validUntilDate), 'MM/dd/yyyy')}
+            {!document?.validUntilDate && '-'}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderDeleteSmall() {
+    const { document } = { ...this.props };
+    const {
+      showConfirmDeleteSection,
+      hasConfirmedDelete,
+      deleteConfirmInput,
+    } = { ...this.state };
+    return (
+      <div className="delete-sm">
+        <button
+          onClick={() => this.setState({ showConfirmDeleteSection: true })}
+        >
+          {showConfirmDeleteSection && <strong>Delete File</strong>}
+          {!showConfirmDeleteSection && 'Delete File'}
+        </button>
+        {showConfirmDeleteSection && (
+          <div className="confirm-delete-sm">
+            <p>
+              Deleting this file will <strong>permanently</strong> revoke access
+              to all users you have shared this document with.
+            </p>
+            <p>Are you sure?</p>
+            <FormGroup>
+              <Label for="documentDelete">Type DELETE to confirm</Label>
+              <Input
+                type="text"
+                name="documentDelete"
+                value={deleteConfirmInput}
+                onChange={this.handleDeleteConfirmChange}
+                placeholder=""
+                autoComplete="off"
+              />
+              <span className="delete-info">
+                Please enter the text exactly as displayed to confirm
+              </span>
+            </FormGroup>
+            <div className="delete-final">
+              <Button
+                color="danger"
+                onClick={() => this.handleDeleteDocument(document!)}
+                disabled={!hasConfirmedDelete}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  renderReplaceTab() {
+    return (
+      <div className="update-doc-tab-spacing">
+        <FileUploader
+          setFile={this.setFile}
+          setUpdatedBase64Image={this.setUpdatedBase64Image}
+          privateEncryptionKey={this.props.privateEncryptionKey}
+        />
+      </div>
+    );
+  }
+
+  renderShareTab() {
+    const { document, accounts, shareRequests } = { ...this.props };
+    const { selectedContact, base64Image, base64Thumbnail, base64Pdf } = {
+      ...this.state,
+    };
+    return (
+      <div>
+        {document!.claimed && (
+          <ShareDocWithContainer
+            accounts={accounts}
+            shareRequests={shareRequests}
+            getDocumentSharedWithContact={this.getDocumentSharedWithContact}
+            handleShareDocCheck={this.handleShareDocCheck}
+            selectedContact={selectedContact}
+            handleSelectContact={this.handleSelectContact}
+            document={document}
+            dataURL={base64Image ? base64Image : base64Pdf}
+          />
+        )}
+        {document!.claimed !== undefined && document!.claimed === false && (
+          <div className="claim-container">
+            <div className="info">
+              You must claim this document before you can share it
+            </div>
+            <div className="doc">
+              <ImageWithStatus
+                imageUrl={base64Thumbnail}
+                imageViewType={ImageViewTypes.PREVIEW}
+              />
+              <div className="doc-info">
+                <div className="info-attr">File Name</div>
+                <div className="info-val">{document!.name}</div>
+                <div className="info-attr">Document Name</div>
+                <div className="info-val">{document!.type}</div>
+                {/* TODO: expiration date */}
+              </div>
+            </div>
+            <div className="buttons">
+              <button className="button" onClick={this.handleClaim}>
+                Claim
+              </button>
+              <button
+                className="danger-outline button"
+                onClick={() => this.confirmDelete()}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   renderNotarizeTab = (base64Thumbnail) => {
     const options: OptionTypeBase[] = [];
     // this.getNotarizationInfo();
@@ -701,12 +1281,12 @@ class UpdateDocumentModal extends Component<
       let fundNetworkSection;
 
       if (this.state.networkSelect === 'rsk') {
-        let rskTotalCostToSend = web3.utils.fromWei(
+        const rskTotalCostToSend = web3.utils.fromWei(
           '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
           'ether'
         );
 
-        let dollarAmount =
+        const dollarAmount =
           Math.round(
             parseFloat(rskTotalCostToSend) * this.state.currentBtcPrice * 1000
           ) / 1000;
@@ -729,12 +1309,12 @@ class UpdateDocumentModal extends Component<
           </div>
         );
       } else if (this.state.networkSelect === 'eth') {
-        let ethTotalCostToSend = web3.utils.fromWei(
+        const ethTotalCostToSend = web3.utils.fromWei(
           '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
           'ether'
         );
 
-        let dollarAmount =
+        const dollarAmount =
           Math.round(
             parseFloat(ethTotalCostToSend) * this.state.currentEthPrice * 1000
           ) / 1000;
@@ -885,10 +1465,6 @@ class UpdateDocumentModal extends Component<
 
   renderNotarizationComplete = () => {
     const { doc } = { ...this.state };
-    // debugger;
-    // if(doc) {
-    //   console.log(doc.output('datauristring'));
-    // }
     return (
       <div>
         <h3>Verifiable Credential</h3>
@@ -896,10 +1472,6 @@ class UpdateDocumentModal extends Component<
         {doc && (
           <div className="pdf-display">
             <PdfPreview fileURL={doc.output('datauristring')} />
-            {/* <object data={doc.output('datauristring')} type="application/pdf">
-                <embed src={doc.output('datauristring')} type="application/pdf" />
-            </object>
-            <iframe src={doc.output('datauristring')} height="297.5" width="421"></iframe> */}
             <Button
               className="margin-wide"
               color="primary"
@@ -913,61 +1485,171 @@ class UpdateDocumentModal extends Component<
     );
   };
 
-  render() {
-    const {
-      showModal,
-      document,
-      accounts,
-      myAccount,
-      referencedAccount,
-      shareRequests,
-    } = {
-      ...this.props,
+  renderConfirmDelete() {
+    const { document } = { ...this.props };
+    const { hasConfirmedDelete, deleteConfirmInput, base64Thumbnail } = {
+      ...this.state,
     };
+    return (
+      <div className="confirm-delete-container">
+        <div className="delete-prompt">
+          Are you sure you want to permanently delete this file?
+        </div>
+        <div className="delete-section">
+          <div className="delete-image-container">
+            {document && (
+              <img
+                className="delete-image"
+                src={base64Thumbnail}
+                alt="doc missing"
+              />
+            )}
+          </div>
+          <div className="delete-info">
+            <div className="delete-info-prompt">
+              <p>
+                Deleting this file will{' '}
+                <span className="delete-info-danger">
+                  permanently revoke access to all users.
+                </span>
+              </p>
+              <p>Are you sure?</p>
+            </div>
+            <FormGroup>
+              <Label for="documentDelete" className="other-prompt">
+                Type DELETE to confirm
+              </Label>
+              <Input
+                type="text"
+                name="documentDelete"
+                value={deleteConfirmInput}
+                onChange={this.handleDeleteConfirmChange}
+                placeholder=""
+                autoComplete="off"
+              />
+              <span>Please enter the text exactly as displayed to confirm</span>
+            </FormGroup>
+          </div>
+        </div>
+        <div className="delete-buttons">
+          <Button
+            className="margin-wide"
+            outline
+            color="secondary"
+            onClick={this.toggleModal}
+          >
+            Cancel
+          </Button>{' '}
+          <Button
+            className="margin-wide"
+            color="danger"
+            onClick={() => this.handleDeleteDocument(document!)}
+            disabled={!hasConfirmedDelete}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  renderConfirmShareModal() {
+    const { document } = { ...this.props };
+    const { selectedContact, showConfirmShare, base64Image } = {
+      ...this.state,
+    };
+    return (
+      <Modal
+        toggle={this.toggleConfirmShare}
+        size={'lg'}
+        isOpen={showConfirmShare}
+      >
+        <ModalBody>
+          {document && (
+            <div className="confirm-share">
+              <div className="confirm-share-prompt">
+                You're about to share
+                <br />
+                {document?.type?.toUpperCase()} with{' '}
+                {AccountImpl.getFullName(
+                  selectedContact?.firstName,
+                  selectedContact?.lastName
+                ).toUpperCase()}
+                .
+              </div>
+              <img
+                className="share-doc-img"
+                src={base64Image}
+                alt="doc missing"
+              />
+              <div className="confirm-prompt">
+                Are you sure you want to continue?
+              </div>
+              <div className="confirm-buttons">
+                <Button
+                  outline
+                  color="secondary"
+                  onClick={this.toggleConfirmShare}
+                >
+                  No, take me back
+                </Button>
+                <Button
+                  color="primary"
+                  onClick={this.handleShareDocWithContact}
+                >
+                  Yes, share access
+                </Button>
+              </div>
+            </div>
+          )}
+        </ModalBody>
+      </Modal>
+    );
+  }
+
+  renderUpdateDocument() {
     const {
       activeTab,
       showConfirmDeleteSection,
-      hasConfirmedDelete,
-      deleteConfirmInput,
       isZoomed,
-      selectedContact,
-      showConfirmShare,
-      newFile,
       base64Image,
       base64Thumbnail,
-      base64Pdf,
-      pendingAccess,
-      isLoading,
-      width,
     } = { ...this.state };
+    return (
+      <Fragment>
+        {this.renderNav()}
+        <TabContent activeTab={activeTab}>
+          <TabPane tabId="1">{this.renderPreviewTab()}</TabPane>
+          <TabPane tabId="2">{this.renderReplaceTab()}</TabPane>
+          <TabPane tabId="3">{this.renderShareTab()}</TabPane>
+          <TabPane tabId="4">
+            {this.state.vc === undefined
+              ? this.renderNotarizeTab(base64Thumbnail)
+              : this.renderNotarizationComplete()}
+          </TabPane>
+        </TabContent>
+        {showConfirmDeleteSection && this.renderConfirmDelete()}
+        {isZoomed && (
+          <Lightbox
+            // reactModalStyle={{zIndex: '1060'}}
+            mainSrc={base64Image!}
+            onCloseRequest={() => this.setState({ isZoomed: false })}
+          />
+        )}
+        {this.renderConfirmShareModal()}
+      </Fragment>
+    );
+  }
+
+  render() {
+    const { showModal, document } = { ...this.props };
+    const { activeTab, newFile, isLoading } = { ...this.state };
     const closeBtn = (
       <div className="modal-close" onClick={this.toggleModal}>
         <CrossSvg className="lg" />
         <CrossSmSvg className="sm" />
       </div>
     );
-
-    let uploadedBy = 'N/A';
-    if (document) {
-      const uploadedByAccount = AccountImpl.getAccountByIdAndList(
-        [...accounts, myAccount],
-        document!.uploadedBy
-      );
-      uploadedBy = AccountImpl.getFullName(
-        uploadedByAccount?.firstName,
-        uploadedByAccount?.lastName
-      );
-    }
-    let pdfHeight = 200;
-    if (width < 576) {
-      pdfHeight = 200;
-    }
-    if (width >= 576) {
-      pdfHeight = 300;
-    }
-    if (width >= 1200) {
-      pdfHeight = 400;
-    }
     return (
       <Fragment>
         {isLoading && <ProgressIndicator isFullscreen />}
@@ -979,602 +1661,11 @@ class UpdateDocumentModal extends Component<
           className="update-doc-modal"
         >
           <ModalHeader toggle={this.toggleModal} close={closeBtn}>
-            {referencedAccount && (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {!referencedAccount.profileImageUrl && (
-                  <div style={{ marginRight: '28.3px' }}>
-                    <ProfileImage
-                      account={referencedAccount}
-                      size={ProfileImageSizeEnum.SMALL}
-                    />
-                  </div>
-                )}
-                {referencedAccount.profileImageUrl && (
-                  <img
-                    src={AccountService.getProfileURL(
-                      referencedAccount.profileImageUrl!
-                    )}
-                    alt=""
-                  />
-                )}
-                <span className="update-doc-title">
-                  {AccountImpl.hasNameSet(referencedAccount) &&
-                    AccountImpl.getFullName(
-                      referencedAccount.firstName,
-                      referencedAccount.lastName
-                    )}
-                  {!AccountImpl.hasNameSet(referencedAccount) &&
-                    referencedAccount.username}{' '}
-                  - {document?.type}
-                </span>
-              </div>
-            )}
-            {!referencedAccount && (
-              <Fragment>
-                <EditDocSvg className="lg" />
-                <EditDocSmSvg className="sm" />
-                <span>{document?.type}</span>
-              </Fragment>
-            )}
+            {this.renderModalHeader()}
           </ModalHeader>
           <ModalBody className="update-doc-container">
-            {document && document.url.length <= 0 && (
-              <div className="share-request">
-                <div className="file-container">
-                  <NotSharedDoc />
-                  <div className="file-info">
-                    <div className="attr">File</div>
-                    <div className="value">{document.type}</div>
-                    <div className="attr">Upload Date</div>
-                    <div className="value">{document.updatedAt || '-'}</div>
-                    <div className="attr">Upload By</div>
-                    <div className="value">{document.uploadedBy || '-'}</div>
-                    <div className="attr">Valid Until</div>
-                    <div className="value">
-                      {document.validUntilDate || '-'}
-                    </div>
-                  </div>
-                </div>
-                <div className="request-access">
-                  <button
-                    className="button"
-                    onClick={this.handleRequestAccess}
-                    disabled={
-                      pendingAccess || document.sharedWithAccountIds.length > 0
-                    }
-                  >
-                    {pendingAccess || document.sharedWithAccountIds.length > 0
-                      ? 'Access Pending'
-                      : 'Request Access'}
-                  </button>
-                </div>
-              </div>
-            )}
-            {document && document.url.length > 0 && (
-              <Fragment>
-                {!referencedAccount && (
-                  <div
-                    className={classNames({
-                      'upload-doc-delete-container': true,
-                      active: showConfirmDeleteSection,
-                    })}
-                  >
-                    <DeleteSvg
-                      className="delete-svg"
-                      onClick={() => this.confirmDelete()}
-                    />
-                  </div>
-                )}
-                <Nav tabs>
-                  <NavItem>
-                    <NavLink
-                      className={classNames({ active: activeTab === '1' })}
-                      onClick={() => {
-                        this.toggleTab('1');
-                      }}
-                    >
-                      Preview
-                    </NavLink>
-                  </NavItem>
-                  {this.isAllowedShareRequestPermission(
-                    ShareRequestPermission.CAN_REPLACE
-                  ) && (
-                    <NavItem>
-                      <NavLink
-                        className={classNames({ active: activeTab === '2' })}
-                        onClick={() => {
-                          this.toggleTab('2');
-                        }}
-                      >
-                        Replace
-                      </NavLink>
-                    </NavItem>
-                  )}
-                  {!referencedAccount && (
-                    <div style={{ position: 'relative' }}>
-                      {shareRequests.find((sr) => !sr.approved) && (
-                        <div
-                          style={{
-                            left: '-8px',
-                            top: '-12px',
-                            position: 'absolute',
-                          }}
-                        >
-                          <Badge />
-                        </div>
-                      )}
-                      <NavItem>
-                        <NavLink
-                          className={classNames({ active: activeTab === '3' })}
-                          onClick={() => {
-                            this.toggleTab('3');
-                          }}
-                        >
-                          Share
-                        </NavLink>
-                      </NavItem>
-                    </div>
-                  )}
-
-                  {this.props.myAccount.role === 'owner' &&
-                    this.props.document?.vcJwt! && (
-                      <NavItem>
-                        <NavLink
-                          className={classNames({ active: activeTab === '4' })}
-                          onClick={() => {
-                            this.toggleTab('4');
-                            this.getNotarizationInfo();
-                          }}
-                        >
-                          Notarize
-                        </NavLink>
-                      </NavItem>
-                    )}
-                </Nav>
-                <TabContent activeTab={activeTab}>
-                  <TabPane tabId="1">
-                    <Row>
-                      {document && (
-                        <Col sm="12" className="preview-container">
-                          {this.isAllowedShareRequestPermission(
-                            ShareRequestPermission.CAN_VIEW
-                          ) && (
-                            <div className="preview-img-container">
-                              <div className="img-tools">
-                                {/* NOTE: leaving out for now until we have functionality server side */}
-                                {/*<FlipDocBtnSvg className="pointer"/>*/}
-                              </div>
-                              <div style={{ width: '100%' }}>
-                                {document.vcJwt &&
-                                  document.vpDocumentDidAddress && (
-                                    <div className="notarized">
-                                      <StampSvg />
-                                      <div className="notary-label">
-                                        NOTARIZED
-                                      </div>
-                                    </div>
-                                  )}
-                                <div className="img-container">
-                                  {!base64Image && !base64Pdf && (
-                                    <div>Loading...</div>
-                                  )}
-                                  {base64Pdf && (
-                                    <div className="pdf-display">
-                                      <PdfPreview
-                                        fileURL={base64Pdf}
-                                        height={pdfHeight}
-                                      />
-                                    </div>
-                                  )}
-                                  {base64Image && (
-                                    <ImageWithStatus
-                                      imageUrl={base64Image}
-                                      imageViewType={ImageViewTypes.PREVIEW}
-                                    />
-                                  )}
-                                  {/* <img
-                                className="doc-image"
-                                // src={DocumentService.getDocumentURL(document!.url)}
-                                src={base64Image}
-                                alt="doc missing"
-                              /> */}
-                                  {(base64Image || base64Pdf) && (
-                                    <ZoomBtnSmSvg
-                                      onClick={() => {
-                                        if (base64Pdf) {
-                                          this.openPdfWindow(base64Pdf);
-                                        }
-                                        if (base64Image) {
-                                          this.setState({ isZoomed: true });
-                                        }
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                              </div>
-                              <div className="img-access-sm">
-                                {(base64Image || base64Pdf) &&
-                                  this.isAllowedShareRequestPermission(
-                                    ShareRequestPermission.CAN_DOWNLOAD
-                                  ) && (
-                                    <button
-                                      onClick={() => {
-                                        // Not allowed to navigate top frame to data URL
-                                        // window.location.href = base64Image!;
-                                        const dataUri = base64Image
-                                          ? base64Image
-                                          : base64Pdf;
-                                        const iframe =
-                                          '<iframe width="100%" height="100%" src="' +
-                                          dataUri! +
-                                          '"></iframe>';
-                                        const x = window.open()!;
-                                        x.document.open();
-                                        x.document.write(iframe);
-                                        x.document.close();
-                                      }}
-                                      className="download-btn"
-                                    >
-                                      Download
-                                    </button>
-                                  )}
-                                {this.isAllowedShareRequestPermission(
-                                  ShareRequestPermission.CAN_DOWNLOAD
-                                ) && (
-                                  <Fragment>
-                                    {base64Image && (
-                                      <button
-                                        onClick={() =>
-                                          this.printImg(base64Image)
-                                        }
-                                        className="print-btn"
-                                      >
-                                        Print
-                                      </button>
-                                    )}
-                                    {base64Pdf && (
-                                      <button
-                                        onClick={() =>
-                                          this.openPdfWindow(base64Pdf)
-                                        }
-                                        className="print-btn"
-                                      >
-                                        Print
-                                      </button>
-                                    )}
-                                  </Fragment>
-                                )}
-                              </div>
-                              <div className="img-access">
-                                {this.isAllowedShareRequestPermission(
-                                  ShareRequestPermission.CAN_DOWNLOAD
-                                ) && (
-                                  <Fragment>
-                                    {base64Image && (
-                                      <a
-                                        href={base64Image}
-                                        download
-                                        target="_blank"
-                                      >
-                                        <DownloadBtnSvg />
-                                      </a>
-                                    )}
-                                    {base64Pdf && (
-                                      <a
-                                        href={base64Pdf}
-                                        download
-                                        target="_blank"
-                                      >
-                                        <DownloadBtnSvg />
-                                      </a>
-                                    )}
-                                  </Fragment>
-                                )}
-                                {this.isAllowedShareRequestPermission(
-                                  ShareRequestPermission.CAN_DOWNLOAD
-                                ) && (
-                                  <PrintBtnSvg
-                                    onClick={() => {
-                                      if (base64Image) {
-                                        this.printImg(base64Image!);
-                                      }
-                                      if (base64Pdf) {
-                                        this.openPdfWindow(base64Pdf);
-                                      }
-                                    }}
-                                  />
-                                )}
-                                {(base64Image || base64Pdf) && (
-                                  <ZoomBtnSmSvg
-                                    onClick={() => {
-                                      if (base64Pdf) {
-                                        this.openPdfWindow(base64Pdf);
-                                      }
-                                      if (base64Image) {
-                                        this.setState({ isZoomed: true });
-                                      }
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          <div className="preview-info">
-                            <div className="preview-info-item">
-                              <div className="attr">File</div>
-                              <div className="attr-value">{document!.type}</div>
-                            </div>
-                            <div className="preview-info-item">
-                              <div className="attr">Update date</div>
-                              <div className="attr-value">
-                                {document?.updatedAt &&
-                                  format(
-                                    new Date(document?.updatedAt),
-                                    'MM/dd/yyyy'
-                                  )}
-                                {!document?.updatedAt && '-'}
-                              </div>
-                            </div>
-                            <div className="preview-info-item">
-                              <div className="attr">Uploaded by</div>
-                              <div className="attr-value">{uploadedBy}</div>
-                            </div>
-                            <div className="preview-info-item">
-                              <div className="attr">Valid Until</div>
-                              <div className="attr-value">
-                                {document?.validUntilDate &&
-                                  format(
-                                    new Date(document?.validUntilDate),
-                                    'MM/dd/yyyy'
-                                  )}
-                                {!document?.validUntilDate && '-'}
-                              </div>
-                            </div>
-                          </div>
-                        </Col>
-                      )}
-                    </Row>
-                    {!referencedAccount && (
-                      <div className="delete-sm">
-                        <button
-                          onClick={() =>
-                            this.setState({ showConfirmDeleteSection: true })
-                          }
-                        >
-                          {showConfirmDeleteSection && (
-                            <strong>Delete File</strong>
-                          )}
-                          {!showConfirmDeleteSection && 'Delete File'}
-                        </button>
-                        {showConfirmDeleteSection && (
-                          <div className="confirm-delete-sm">
-                            <p>
-                              Deleting this file will{' '}
-                              <strong>permanently</strong> revoke access to all
-                              users you have shared this document with.
-                            </p>
-                            <p>Are you sure?</p>
-                            <FormGroup>
-                              <Label for="documentDelete">
-                                Type DELETE to confirm
-                              </Label>
-                              <Input
-                                type="text"
-                                name="documentDelete"
-                                value={deleteConfirmInput}
-                                onChange={this.handleDeleteConfirmChange}
-                                placeholder=""
-                                autoComplete="off"
-                              />
-                              <span className="delete-info">
-                                Please enter the text exactly as displayed to
-                                confirm
-                              </span>
-                            </FormGroup>
-                            <div className="delete-final">
-                              <Button
-                                color="danger"
-                                onClick={() =>
-                                  this.handleDeleteDocument(document!)
-                                }
-                                disabled={!hasConfirmedDelete}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </TabPane>
-                  <TabPane tabId="2">
-                    <div className="update-doc-tab-spacing">
-                      <FileUploader
-                        setFile={this.setFile}
-                        setUpdatedBase64Image={this.setUpdatedBase64Image}
-                        privateEncryptionKey={this.props.privateEncryptionKey}
-                      />
-                    </div>
-                  </TabPane>
-                  <TabPane tabId="3">
-                    <div>
-                      {document.claimed && (
-                        <ShareDocWithContainer
-                          accounts={accounts}
-                          shareRequests={shareRequests}
-                          getDocumentSharedWithContact={
-                            this.getDocumentSharedWithContact
-                          }
-                          handleShareDocCheck={this.handleShareDocCheck}
-                          selectedContact={selectedContact}
-                          handleSelectContact={this.handleSelectContact}
-                          document={document}
-                          dataURL={base64Image ? base64Image : base64Pdf}
-                        />
-                      )}
-                      {document.claimed !== undefined &&
-                        document.claimed === false && (
-                          <div className="claim-container">
-                            <div className="info">
-                              You must claim this document before you can share
-                              it
-                            </div>
-                            <div className="doc">
-                              <ImageWithStatus
-                                imageUrl={base64Thumbnail}
-                                imageViewType={ImageViewTypes.PREVIEW}
-                              />
-                              <div className="doc-info">
-                                <div className="info-attr">File Name</div>
-                                <div className="info-val">{document.name}</div>
-                                <div className="info-attr">Document Name</div>
-                                <div className="info-val">{document.type}</div>
-                                {/* TODO: expiration date */}
-                              </div>
-                            </div>
-                            <div className="buttons">
-                              <button
-                                className="button"
-                                onClick={this.handleClaim}
-                              >
-                                Claim
-                              </button>
-                              <button
-                                className="danger-outline button"
-                                onClick={() => this.confirmDelete()}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                    </div>
-                  </TabPane>
-                  <TabPane tabId="4">
-                    {this.state.vc === undefined
-                      ? this.renderNotarizeTab(base64Thumbnail)
-                      : this.renderNotarizationComplete()}
-                  </TabPane>
-                </TabContent>
-                {showConfirmDeleteSection && (
-                  <div className="confirm-delete-container">
-                    <div className="delete-prompt">
-                      Are you sure you want to permanently delete this file?
-                    </div>
-                    <div className="delete-section">
-                      <div className="delete-image-container">
-                        {document && (
-                          <img
-                            className="delete-image"
-                            src={base64Thumbnail}
-                            alt="doc missing"
-                          />
-                        )}
-                      </div>
-                      <div className="delete-info">
-                        <div className="delete-info-prompt">
-                          <p>
-                            Deleting this file will{' '}
-                            <span className="delete-info-danger">
-                              permanently revoke access to all users.
-                            </span>
-                          </p>
-                          <p>Are you sure?</p>
-                        </div>
-                        <FormGroup>
-                          <Label for="documentDelete" className="other-prompt">
-                            Type DELETE to confirm
-                          </Label>
-                          <Input
-                            type="text"
-                            name="documentDelete"
-                            value={deleteConfirmInput}
-                            onChange={this.handleDeleteConfirmChange}
-                            placeholder=""
-                            autoComplete="off"
-                          />
-                          <span>
-                            Please enter the text exactly as displayed to
-                            confirm
-                          </span>
-                        </FormGroup>
-                      </div>
-                    </div>
-                    <div className="delete-buttons">
-                      <Button
-                        className="margin-wide"
-                        outline
-                        color="secondary"
-                        onClick={this.toggleModal}
-                      >
-                        Cancel
-                      </Button>{' '}
-                      <Button
-                        className="margin-wide"
-                        color="danger"
-                        onClick={() => this.handleDeleteDocument(document!)}
-                        disabled={!hasConfirmedDelete}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {isZoomed && (
-                  <Lightbox
-                    // reactModalStyle={{zIndex: '1060'}}
-                    mainSrc={base64Image!}
-                    onCloseRequest={() => this.setState({ isZoomed: false })}
-                  />
-                )}
-                <Modal
-                  toggle={this.toggleConfirmShare}
-                  size={'lg'}
-                  isOpen={showConfirmShare}
-                >
-                  {/*<ModalHeader>Nested Modal title</ModalHeader>*/}
-                  <ModalBody>
-                    {document && (
-                      <div className="confirm-share">
-                        <div className="confirm-share-prompt">
-                          You're about to share
-                          <br />
-                          {document?.type?.toUpperCase()} with{' '}
-                          {AccountImpl.getFullName(
-                            selectedContact?.firstName,
-                            selectedContact?.lastName
-                          ).toUpperCase()}
-                          .
-                        </div>
-                        <img
-                          className="share-doc-img"
-                          src={base64Image}
-                          alt="doc missing"
-                        />
-                        <div className="confirm-prompt">
-                          Are you sure you want to continue?
-                        </div>
-                        <div className="confirm-buttons">
-                          <Button
-                            outline
-                            color="secondary"
-                            onClick={this.toggleConfirmShare}
-                          >
-                            No, take me back
-                          </Button>
-                          <Button
-                            color="primary"
-                            onClick={this.handleShareDocWithContact}
-                          >
-                            Yes, share access
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </ModalBody>
-                </Modal>
-              </Fragment>
-            )}
+            {document && document.url.length <= 0 && this.renderNotShared()}
+            {document && document.url.length > 0 && this.renderUpdateDocument()}
           </ModalBody>
           {activeTab === '2' && (
             <ModalFooter className="modal-footer-center">

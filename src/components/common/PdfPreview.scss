@@ -1,5 +1,6 @@
 .pdf-container {
   .react-pdf__Document {
+    border: 1px solid #aaa;
     .react-pdf__Page {
       box-shadow: 12px 12px 8px 3px rgba(0, 0, 0, .2);
     }
