@@ -2,8 +2,10 @@
 // import * as React from 'react';
 // import App from './App';
 
-
-// describe('<App />', () => {
+describe('<App />', () => {
+  it('passes', () => {
+    expect(1).toBe(1);
+  });
 //   xit('renders', () => {
 //     let newValue = false;
 //     const props = { className: 'test', value: true, onSelectChanged: (value: boolean) => { newValue = value; } };
@@ -17,4 +19,4 @@
 //     // sut.find('select').simulate('change', {target: { value : 'false'}});
 //     // expect(newValue).toEqual(false);
 //   });
-// });
+});
