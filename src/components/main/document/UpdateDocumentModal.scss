@@ -180,7 +180,12 @@
           margin-top: -18.3px;
           font-size: 20px;
           .nav-item {
-            width: auto;
+            width: 116px;
+          }
+        }
+        @include media-breakpoint-up(xl) {
+          .nav-item {
+            width: 172px;
           }
         }
       }
@@ -225,7 +230,7 @@
                   }
                   @include media-breakpoint-down(sm) {
                   }
-                  @include media-breakpoint-up(md) {
+                  @include media-breakpoint-up(lg) {
                     height: 412px;
                     flex-grow: 1;
                     .zoom-svg {
@@ -276,7 +281,7 @@
             .img-access-sm {
               display: flex;
               justify-content: space-evenly;
-              @include media-breakpoint-up(md) {
+              @include media-breakpoint-up(lg) {
                 display: none;
               }
               button {
@@ -299,7 +304,7 @@
               flex-direction: row;
               // justify-content: space-between;
               align-items: center;
-              @include media-breakpoint-down(sm) {
+              @include media-breakpoint-down(md) {
                 display: none;
               }
               @include media-breakpoint-up(lg) {
@@ -308,10 +313,19 @@
                 // margin-left: 32px;
               }
               .btn {
+                display: flex;
+                align-items: center;
+                justify-content: space-evenly;
+                @include media-breakpoint-down(lg) {
+                  margin-right: 20px;
+                }
                 margin-right: 40px;
+                span {
+                  font-size: 22px;
+                }
               }
               a {
-                margin-right: 40px;
+                text-decoration: none;
               }
               svg {
                & > path {

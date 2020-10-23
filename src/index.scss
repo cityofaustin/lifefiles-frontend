@@ -236,8 +236,8 @@ body {
 
 .nav-tabs {
   border-bottom: 0 solid transparent;
-  font-weight: 500;
-  text-transform: uppercase;
+  font-weight: bold;
+  // text-transform: uppercase;
   font-size: 15px;
   .nav-item {
     width: calc(100% / 3);
@@ -314,6 +314,10 @@ body {
   text-align: center;
   opacity: 0.7;
   cursor: pointer;
+  @include themify($themes) {
+    // color: themed("colorPrimary");
+    color: themed("colorDisabled");
+  }
   @include media-breakpoint-up(md) {
     min-width: 187px;
   }
@@ -321,10 +325,11 @@ body {
 
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
-  color: #495057;
+
   background-color: inherit;
   border-color: transparent;
   @include themify($themes) {
+    color: themed("colorPrimary");
     border-bottom: 4px solid themed("colorPrimary");
   }
   opacity: 1;

@@ -26,8 +26,9 @@ import { ReactComponent as EditDocSmSvg } from '../../../img/edit-doc-sm.svg';
 import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
 import { ReactComponent as CrossSmSvg } from '../../../img/cross2-sm.svg';
 import FileUploader from '../../common/FileUploader';
-import { ReactComponent as DownloadBtnSvg } from '../../../img/download-btn.svg';
-import { ReactComponent as PrintBtnSvg } from '../../../img/print-btn.svg';
+// import { ReactComponent as DownloadBtnSvg } from '../../../img/download-btn.svg';
+import { ReactComponent as DownloadSvg } from '../../../img/download2.svg';
+import { ReactComponent as PrintSvg } from '../../../img/print2.svg';
 // import { ReactComponent as ZoomBtnSvg } from '../../../img/zoom-btn.svg';
 import { ReactComponent as ZoomSvg } from '../../../img/zoom.svg';
 import { ReactComponent as ZoomBtnSmSvg } from '../../../img/zoom-btn-sm.svg';
@@ -951,11 +952,6 @@ class UpdateDocumentModal extends Component<
     return (
       <div className="img-access">
         <Button
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
-          }}
           color="primary"
           onClick={() => {
             if (base64Pdf) {
@@ -973,38 +969,63 @@ class UpdateDocumentModal extends Component<
           }
         >
           <ZoomSvg />
-          <span style={{ fontSize: '22px' }}>Zoom in</span>
+          <span>Zoom in</span>
         </Button>
         {this.isAllowedShareRequestPermission(
           ShareRequestPermission.CAN_DOWNLOAD
-        ) && (
-          <Fragment>
-            {base64Image && (
-              <a href={base64Image} download target="_blank">
-                <DownloadBtnSvg />
-              </a>
-            )}
-            {base64Pdf && (
-              <a href={base64Pdf} download target="_blank">
-                <DownloadBtnSvg />
-              </a>
-            )}
-          </Fragment>
-        )}
-        {this.isAllowedShareRequestPermission(
+        ) &&
+          (base64Image || base64Pdf) && (
+            <Fragment>
+              {base64Image && (
+                <a href={base64Image} download target="_blank">
+                  <Button color="primary">
+                    <DownloadSvg />
+                    <span>Download</span>
+                  </Button>
+                </a>
+              )}
+              {base64Pdf && (
+                <a href={base64Pdf} download target="_blank">
+                  <Button color="primary">
+                    <DownloadSvg />
+                    <span>Download</span>
+                  </Button>
+                </a>
+              )}
+            </Fragment>
+          )}
+        {(!this.isAllowedShareRequestPermission(
           ShareRequestPermission.CAN_DOWNLOAD
-        ) && (
-          <PrintBtnSvg
-            onClick={() => {
-              if (base64Image) {
-                this.printImg(base64Image!);
-              }
-              if (base64Pdf) {
-                this.openPdfWindow(base64Pdf);
-              }
-            }}
-          />
+        ) ||
+          (!base64Image && !base64Pdf)) && (
+          <Button
+            color="primary"
+            disabled
+          >
+            <DownloadSvg />
+            <span>Download</span>
+          </Button>
         )}
+        <Button
+          color="primary"
+          disabled={
+            !this.isAllowedShareRequestPermission(
+              ShareRequestPermission.CAN_DOWNLOAD
+            ) ||
+            (!base64Image && !base64Pdf)
+          }
+          onClick={() => {
+            if (base64Image) {
+              this.printImg(base64Image!);
+            }
+            if (base64Pdf) {
+              this.openPdfWindow(base64Pdf);
+            }
+          }}
+        >
+          <PrintSvg />
+          <span>Print</span>
+        </Button>
       </div>
     );
   }
