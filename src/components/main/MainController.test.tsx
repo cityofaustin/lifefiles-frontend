@@ -4,7 +4,7 @@ import Role from '../../models/Role';
 import MainContainer from './MainContainer';
 
 describe('<MainContainer />', () => {
-  it('renders', () => {
+  xit('renders', () => {
     const props = {
       appSettings: [],
       saveAppSettings: async (title, logo?) => {},
