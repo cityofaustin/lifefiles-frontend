@@ -101,7 +101,7 @@ class DocumentSummary extends Component<DocumentSummaryProps> {
               {!this.isAllowedShareRequestPermission(
                 ShareRequestPermission.CAN_VIEW
               ) && (
-                <div style={{width: '160px', height: '203px', marginBottom: '40px'}}>
+                <div style={{width: '160px', height: '203px', margin: '40px'}}>
                   <NotSharedDoc />
                 </div>
               )}

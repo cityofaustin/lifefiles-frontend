@@ -191,6 +191,9 @@ class UpdateDocumentModal extends Component<
     }
     if (prevProps.document !== this.props.document) {
       this.setImage();
+      if (this.props.myAccount.role === 'owner' && this.props.document?.vcJwt!) {
+        this.getNotarizationInfo();
+      }
     }
   }
 
@@ -326,19 +329,25 @@ class UpdateDocumentModal extends Component<
 
   handleClaim = async () => {
     const { handleUpdateDocument, document } = { ...this.props };
-
+    this.setState({ isLoading: true });
     if (document?.vcJwt) {
-      // TODO: I'm pretty sure you have to set this in parent
-      // this.handleOwnerAcceptNotarization();
+      try {
+        await this.handleOwnerAcceptNotarization();
+      } catch (err) {
+        console.error('Failed to add vp');
+      }
     }
-
-    handleUpdateDocument({
-      id: document!._id!,
-      img: undefined,
-      thumbnail: undefined,
-      validUntilDate: undefined, // FIXME: add expired at form somewhere
-      claimed: true,
-    });
+    try {
+      await handleUpdateDocument({
+        id: document!._id!,
+        img: undefined,
+        thumbnail: undefined,
+        validUntilDate: undefined, // FIXME: add expired at form somewhere
+        claimed: true,
+      });
+    } catch (err) {
+      console.error('Failed to update document');
+    }
     // clear state
     this.setState({
       activeTab: '1',
@@ -349,6 +358,7 @@ class UpdateDocumentModal extends Component<
       selectedContact: undefined,
       showConfirmShare: false,
       base64Image: undefined,
+      isLoading: false,
     });
   };
 
@@ -844,21 +854,6 @@ class UpdateDocumentModal extends Component<
               </NavItem>
             </div>
           )}
-
-          {this.props.myAccount.role === 'owner' &&
-            this.props.document?.vcJwt! && (
-              <NavItem>
-                <NavLink
-                  className={classNames({ active: activeTab === '4' })}
-                  onClick={() => {
-                    this.toggleTab('4');
-                    this.getNotarizationInfo();
-                  }}
-                >
-                  Notarize
-                </NavLink>
-              </NavItem>
-            )}
         </Nav>
       </Fragment>
     );
@@ -998,10 +993,7 @@ class UpdateDocumentModal extends Component<
           ShareRequestPermission.CAN_DOWNLOAD
         ) ||
           (!base64Image && !base64Pdf)) && (
-          <Button
-            color="primary"
-            disabled
-          >
+          <Button color="primary" disabled>
             <DownloadSvg />
             <span>Download</span>
           </Button>
@@ -1272,6 +1264,9 @@ class UpdateDocumentModal extends Component<
                 {/* TODO: expiration date */}
               </div>
             </div>
+            {this.props.myAccount.role === 'owner' &&
+              this.props.document?.vcJwt! &&
+              this.renderNotarize()}
             <div className="buttons">
               <button className="button" onClick={this.handleClaim}>
                 Claim
@@ -1289,7 +1284,7 @@ class UpdateDocumentModal extends Component<
     );
   }
 
-  renderNotarizeTab = (base64Thumbnail) => {
+  renderNotarize = () => {
     const options: OptionTypeBase[] = [];
     // this.getNotarizationInfo();
     options.push({
@@ -1298,190 +1293,191 @@ class UpdateDocumentModal extends Component<
       isDisabled: false,
     });
 
-    if (this.props.myAccount.role === 'owner') {
-      let fundNetworkSection;
+    // if (this.props.myAccount.role === 'owner') {
+    let fundNetworkSection;
 
-      if (this.state.networkSelect === 'rsk') {
-        const rskTotalCostToSend = web3.utils.fromWei(
-          '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
-          'ether'
-        );
+    if (this.state.networkSelect === 'rsk') {
+      const rskTotalCostToSend = web3.utils.fromWei(
+        '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
+        'ether'
+      );
 
-        const dollarAmount =
-          Math.round(
-            parseFloat(rskTotalCostToSend) * this.state.currentBtcPrice * 1000
-          ) / 1000;
+      const dollarAmount =
+        Math.round(
+          parseFloat(rskTotalCostToSend) * this.state.currentBtcPrice * 1000
+        ) / 1000;
 
-        fundNetworkSection = (
-          <div>
-            {' '}
-            <Label
-              style={{ paddingRight: '30px' }}
-              for="network"
-              className="other-prompt"
-            >
-              Please Send Funds:
-            </Label>
-            <p>
-              {rskTotalCostToSend} RSK (${dollarAmount})
-            </p>
-            <QRCode value={this.state.adminPublicKey} size="256" />
-            <p>{this.state.adminPublicKey}</p>
-          </div>
-        );
-      } else if (this.state.networkSelect === 'eth') {
-        const ethTotalCostToSend = web3.utils.fromWei(
-          '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
-          'ether'
-        );
-
-        const dollarAmount =
-          Math.round(
-            parseFloat(ethTotalCostToSend) * this.state.currentEthPrice * 1000
-          ) / 1000;
-
-        fundNetworkSection = (
-          <div>
-            {' '}
-            <Label
-              style={{ paddingRight: '30px' }}
-              for="network"
-              className="other-prompt"
-            >
-              Please Send Funds:
-            </Label>
-            <p>
-              {ethTotalCostToSend} ETH (${dollarAmount})
-            </p>
-            <QRCode value={this.state.adminPublicKey} size="256" />
-            <p>{this.state.adminPublicKey}</p>
-          </div>
-        );
-      }
-
-      return (
+      fundNetworkSection = (
         <div>
-          <h4>Verifiable Credential</h4>
-          <pre className="vc-display">{this.props.document?.vcJwt}</pre>
-          <pre className="vc-display">{this.state.approvedVpUrl}</pre>
-
+          {' '}
           <Label
             style={{ paddingRight: '30px' }}
             for="network"
             className="other-prompt"
           >
-            Notarization Destination
+            Please Send Funds:
           </Label>
-          <select
-            value={this.state.networkSelect}
-            onChange={this.handleChangeNetworkSelect}
-          >
-            <option value="eth">Ethereum Network</option>
-            <option value="rsk">RSK Network</option>
-            <option value="s3">Amazon S3</option>
-          </select>
-
-          {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
-
-          <Button
-            className="margin-wide"
-            color="primary"
-            onClick={this.handleOwnerAcceptNotarization}
-          >
-            Accept Notarization
-          </Button>
+          <p>
+            {rskTotalCostToSend} RSK (${dollarAmount})
+          </p>
+          <QRCode value={this.state.adminPublicKey} size="256" />
+          <p>{this.state.adminPublicKey}</p>
         </div>
       );
-    } else {
-      return (
-        <div className="update-doc-tab-spacing">
-          <div className="row">
-            <div className="col-6">
-              <div className="img-container">
-                <ImageWithStatus
-                  imageUrl={base64Thumbnail}
-                  imageViewType={ImageViewTypes.PREVIEW}
-                />
-              </div>
-            </div>
+    } else if (this.state.networkSelect === 'eth') {
+      const ethTotalCostToSend = web3.utils.fromWei(
+        '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
+        'ether'
+      );
 
-            <div className="col-6">
-              <h4>Notarization Type:</h4>
+      const dollarAmount =
+        Math.round(
+          parseFloat(ethTotalCostToSend) * this.state.currentEthPrice * 1000
+        ) / 1000;
 
-              <div className="select-md">
-                <MSelect
-                  options={options}
-                  onChange={this.handleNotarizationTypeChange}
-                  isSearchable={false}
-                  placeholder={'-Select document-'}
-                />
-              </div>
-
-              <h4>Notary Information:</h4>
-              <FormGroup>
-                <Label for="documentTypeSelected" className="other-prompt">
-                  Please enter your notary id
-                </Label>
-                <Input
-                  type="text"
-                  name="documentTypeSelected"
-                  id="documentTypeSelected"
-                  value={this.state.notaryId}
-                  onChange={this.handleNotaryIdChange}
-                  placeholder="Notary Id #..."
-                />
-
-                <Label
-                  style={{ paddingRight: '30px' }}
-                  for="notarySeal"
-                  className="other-prompt"
-                >
-                  Notary Seal:
-                </Label>
-
-                <FileBase64
-                  multiple={false}
-                  onDone={this.handleNotaryUploadNewSeal}
-                />
-
-                <Label
-                  style={{ paddingRight: '30px' }}
-                  for="notaryPem"
-                  className="other-prompt"
-                >
-                  Notary Pem File:
-                </Label>
-
-                <input
-                  type="file"
-                  onChange={(e) => this.handleNotaryUploadPem(e)}
-                />
-
-                <DatePicker
-                  selected={this.state.validUntilDate}
-                  onChange={(date) => {
-                    this.setState({ validUntilDate: date });
-                  }}
-                  dateFormatCalendar={'MMM yyyy'}
-                  peekNextMonth
-                  showMonthDropdown
-                  showYearDropdown
-                  dropdownMode="select"
-                />
-                <hr></hr>
-                <Button
-                  className="margin-wide"
-                  color="primary"
-                  onClick={this.handleNotarizeDocument}
-                >
-                  Notarize
-                </Button>
-              </FormGroup>
-            </div>
-          </div>
+      fundNetworkSection = (
+        <div>
+          {' '}
+          <Label
+            style={{ paddingRight: '30px' }}
+            for="network"
+            className="other-prompt"
+          >
+            Please Send Funds:
+          </Label>
+          <p>
+            {ethTotalCostToSend} ETH (${dollarAmount})
+          </p>
+          <QRCode value={this.state.adminPublicKey} size="256" />
+          <p>{this.state.adminPublicKey}</p>
         </div>
       );
     }
+
+    return (
+      <div style={{ marginTop: '20px' }}>
+        {/* <h4>Verifiable Credential</h4> */}
+        {/* <pre className="vc-display">{this.props.document?.vcJwt}</pre> */}
+        {/* <pre className="vc-display">{this.state.approvedVpUrl}</pre> */}
+
+        <Label
+          style={{ paddingRight: '30px' }}
+          for="network"
+          className="other-prompt"
+        >
+          Notarization Destination
+        </Label>
+        <select
+          value={this.state.networkSelect}
+          onChange={this.handleChangeNetworkSelect}
+        >
+          <option value="eth">Ethereum Network</option>
+          <option value="rsk">RSK Network</option>
+          <option value="s3">Amazon S3</option>
+        </select>
+
+        {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
+
+        {/* <Button
+          className="margin-wide"
+          color="primary"
+          onClick={this.handleOwnerAcceptNotarization}
+        >
+          Accept Notarization
+        </Button> */}
+      </div>
+    );
+    // }
+    // else {
+    //   return (
+    //     <div className="update-doc-tab-spacing">
+    //       <div className="row">
+    //         <div className="col-6">
+    //           <div className="img-container">
+    //             <ImageWithStatus
+    //               imageUrl={base64Thumbnail}
+    //               imageViewType={ImageViewTypes.PREVIEW}
+    //             />
+    //           </div>
+    //         </div>
+
+    //         <div className="col-6">
+    //           <h4>Notarization Type:</h4>
+
+    //           <div className="select-md">
+    //             <MSelect
+    //               options={options}
+    //               onChange={this.handleNotarizationTypeChange}
+    //               isSearchable={false}
+    //               placeholder={'-Select document-'}
+    //             />
+    //           </div>
+
+    //           <h4>Notary Information:</h4>
+    //           <FormGroup>
+    //             <Label for="documentTypeSelected" className="other-prompt">
+    //               Please enter your notary id
+    //             </Label>
+    //             <Input
+    //               type="text"
+    //               name="documentTypeSelected"
+    //               id="documentTypeSelected"
+    //               value={this.state.notaryId}
+    //               onChange={this.handleNotaryIdChange}
+    //               placeholder="Notary Id #..."
+    //             />
+
+    //             <Label
+    //               style={{ paddingRight: '30px' }}
+    //               for="notarySeal"
+    //               className="other-prompt"
+    //             >
+    //               Notary Seal:
+    //             </Label>
+
+    //             <FileBase64
+    //               multiple={false}
+    //               onDone={this.handleNotaryUploadNewSeal}
+    //             />
+
+    //             <Label
+    //               style={{ paddingRight: '30px' }}
+    //               for="notaryPem"
+    //               className="other-prompt"
+    //             >
+    //               Notary Pem File:
+    //             </Label>
+
+    //             <input
+    //               type="file"
+    //               onChange={(e) => this.handleNotaryUploadPem(e)}
+    //             />
+
+    //             <DatePicker
+    //               selected={this.state.validUntilDate}
+    //               onChange={(date) => {
+    //                 this.setState({ validUntilDate: date });
+    //               }}
+    //               dateFormatCalendar={'MMM yyyy'}
+    //               peekNextMonth
+    //               showMonthDropdown
+    //               showYearDropdown
+    //               dropdownMode="select"
+    //             />
+    //             <hr></hr>
+    //             <Button
+    //               className="margin-wide"
+    //               color="primary"
+    //               onClick={this.handleNotarizeDocument}
+    //             >
+    //               Notarize
+    //             </Button>
+    //           </FormGroup>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   );
+    // }
   };
 
   renderNotarizationComplete = () => {
@@ -1645,7 +1641,7 @@ class UpdateDocumentModal extends Component<
           <TabPane tabId="3">{this.renderShareTab()}</TabPane>
           <TabPane tabId="4">
             {this.state.vc === undefined
-              ? this.renderNotarizeTab(base64Thumbnail)
+              ? this.renderNotarize()
               : this.renderNotarizationComplete()}
           </TabPane>
         </TabContent>

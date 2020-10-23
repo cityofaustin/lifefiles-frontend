@@ -1240,11 +1240,12 @@ class AddDocumentModal extends Component<
                 <Button
                   className="margin-wide"
                   color="primary"
-                  onClick={() =>
+                  onClick={() => {
+                    this.getNotarizationInfo();
                     this.setState({
                       addDocumentStep: AddDocumentStep.NOTARIZATION,
-                    })
-                  }
+                    });
+                  }}
                 >
                   Got it
                 </Button>
