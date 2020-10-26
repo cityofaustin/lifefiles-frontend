@@ -112,6 +112,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       sidebarOpen: false,
       clientShares: new Map<string, ShareRequest[]>(),
       isMySettingsOpen: false,
+      // isMySettingsOpen: true,
     };
   }
 

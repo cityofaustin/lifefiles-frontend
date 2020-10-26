@@ -1,5 +1,16 @@
 import React, { Component, Fragment } from 'react';
-import { Button, Col, Modal, ModalBody, ModalHeader, Row } from 'reactstrap';
+import {
+  Button,
+  Col,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  Row,
+} from 'reactstrap';
 import { ReactComponent as CrossSvg } from '../../img/cross2.svg';
 import { ReactComponent as CrossSmSvg } from '../../img/cross2-sm.svg';
 import './MySettings.scss';
@@ -18,6 +29,8 @@ import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import AuthService from '../../services/AuthService';
 import DocsUploadedSvg from '../svg/DocsUploadedSvg';
+import Toggle, { ToggleSizeEnum } from '../common/Toggle';
+import DocShared from '../main/document/DocShared';
 
 interface MySettingsProps {
   isOpen: boolean;
@@ -123,7 +136,7 @@ export default class MySettings extends Component<
             </div>
           </ModalHeader>
           <ModalBody>
-            <Row style={{margin: '0 -15px'}}>
+            <Row style={{ margin: '0 -15px' }}>
               <Col xs="12" xl="4">
                 <div className="account-settings-title">Account Settings</div>
                 <div
@@ -133,6 +146,14 @@ export default class MySettings extends Component<
                   }`}
                 >
                   Login Methods
+                </div>
+                <div
+                  onClick={() => this.setState({ activeOption: 2 })}
+                  className={`account-settings-option${
+                    activeOption === 2 ? ' active' : ''
+                  }`}
+                >
+                  Privacy
                 </div>
                 <div
                   onClick={() => this.setState({ activeOption: 3 })}
@@ -170,6 +191,76 @@ export default class MySettings extends Component<
                     >
                       Configure
                     </Button>
+                  </div>
+                )}
+                {activeOption === 2 && (
+                  <div className="account-privacy-content">
+                    <div className="account-content-title">Privacy</div>
+                    {/* <LoginMethodsSvg /> */}
+                    <div className="account-privacy-excerpt">
+                      This is how helpers in your network see your profile
+                    </div>
+                    <div className="settings-preview">
+                      <div className="preview-title">Preview</div>
+                      <div className="preview-body">
+                        {/* <div className="preview-image"></div> */}
+                        <ProfileImage
+                          account={account}
+                          size={ProfileImageSizeEnum.LARGE}
+                        />
+                        <div className="fullname">
+                          {AccountImpl.displayName(account)}
+                        </div>
+                        <div className="preview-item">
+                          <div className="preview-attr">E-mail</div>
+                          <div className="preview-val">{account.email}</div>
+                        </div>
+                        <div className="preview-item">
+                          <div className="preview-attr">Phone</div>
+                          <div className="preview-val">
+                            {account.phoneNumber}
+                          </div>
+                        </div>
+                        <div className="shared">
+                          <div className="shared-title">Shared</div>
+                          <DocShared numberOfShares={3} />
+                        </div>
+                      </div>
+                    </div>
+                    <Form
+                      className="profile-info-form"
+                      onSubmit={(e) => e.preventDefault()}
+                    >
+                      <div className="form-title">Profile Information</div>
+                      <FormGroup>
+                        <Label for="phone">Phone</Label>
+                        <Input id="phone" type="tel" />
+                      </FormGroup>
+                      <FormGroup className="form-input">
+                        <Label>Name/Alias</Label>
+                        <Input type="text" />
+                      </FormGroup>
+                      <div className="submit-section">
+                        <Button color="primary" type="submit" disabled>
+                          Save
+                        </Button>
+                      </div>
+                    </Form>
+                    <div className="display-options">
+                      <div className="option-title">Display Options</div>
+                      <FormGroup>
+                        <Label>Photo</Label>
+                        <Toggle size={ToggleSizeEnum.LG} />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label>Name</Label>
+                        <Toggle size={ToggleSizeEnum.LG} />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label>Phone</Label>
+                        <Toggle size={ToggleSizeEnum.LG} />
+                      </FormGroup>
+                    </div>
                   </div>
                 )}
                 {activeOption === 3 && (
