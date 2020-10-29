@@ -24,14 +24,14 @@ export default class ProfileImage extends Component<ProfileImageProps> {
     const { account, size } = { ...this.props };
     return (
       <Fragment>
-        {account.profileImageUrl && (
+        {!account.isNotDisplayPhoto && account.profileImageUrl && (
           <img
             className="shared-with-image-single"
             src={AccountService.getProfileURL(account.profileImageUrl)}
             alt="Profile"
           />
         )}
-        {!account.profileImageUrl && (
+        {(account.isNotDisplayPhoto || !account.profileImageUrl) && (
           <div className={'account-circle ' + size}>
             {AccountImpl.hasNameSet(account) &&
               StringUtil.getFirstUppercase(account.firstName!) +

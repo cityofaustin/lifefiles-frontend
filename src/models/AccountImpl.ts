@@ -28,6 +28,26 @@ class AccountImpl implements Account {
     return (firstName + lastName).length > 0 ? `${firstName} ${lastName}` : '-';
   }
 
+  public static getFirstNameByFull(fullname) {
+    if (fullname.length > 0) {
+      const names = fullname.split(' ');
+      if (names.length > 0) {
+        return names[0];
+      }
+    }
+    return '';
+  }
+
+  public static getLastNameByFull(fullname) {
+    if (fullname.length > 0) {
+      const names = fullname.split(' ');
+      if (names.length > 1) {
+        return names[names.length - 1];
+      }
+    }
+    return '';
+  }
+
   public static hasNameSet(account) {
     return (
       account.firstName &&

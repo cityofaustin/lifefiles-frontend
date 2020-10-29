@@ -83,6 +83,7 @@ interface MainContainerProps {
   setBringYourOwnEncryptionKey: (key) => void;
   coreFeatures: string[];
   viewFeatures: string[];
+  setMyAccount: (account: Account) => void;
 }
 
 class MainContainer extends Component<MainContainerProps, MainContainerState> {
@@ -973,7 +974,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   render() {
-    const { account, handleLogout, appSettings, privateEncryptionKey } = {
+    const { account, handleLogout, appSettings, privateEncryptionKey, setMyAccount } = {
       ...this.props,
     };
     const { isLoading, isAccount, sidebarOpen, isMySettingsOpen } = {
@@ -1014,6 +1015,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               setOpen={(isOpen) => this.setState({ isMySettingsOpen: isOpen })}
               privateEncryptionKey={privateEncryptionKey}
               account={account}
+              setMyAccount={setMyAccount}
             />
           )}
           <Sidebar
@@ -1110,12 +1112,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                   )}
                   {this.renderAdminPage()}
                 </Route>
+                <Route exact path="/bring-your-key">
+                  {this.renderBringYourKeyPage()}
+                </Route>
                 {/* Dev links for testing */}
                 {process.env.NODE_ENV === 'development' && (
                   <Fragment>
-                    <Route exact path="/bring-your-key">
-                      {this.renderBringYourKeyPage()}
-                    </Route>
                     <Route exact path="/checkout">
                       {this.renderCheckoutPage()}
                     </Route>

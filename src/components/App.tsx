@@ -312,6 +312,7 @@ class App extends Component<{}, AppState> {
                   appSettings={appSettings}
                   saveAppSettings={this.saveAppSettings}
                   account={account}
+                  setMyAccount={(a) => this.setState({account: a})}
                   coreFeatures={coreFeatures}
                   viewFeatures={viewFeatures}
                   handleLogout={this.handleLogout}

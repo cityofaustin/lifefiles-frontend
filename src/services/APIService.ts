@@ -7,6 +7,7 @@ import UpdateDocumentRequest from '../models/document/UpdateDocumentRequest';
 import { format } from 'date-fns';
 import HelperRegisterRequest from '../models/auth/HelperRegisterRequest';
 import { ShareRequestPermissions } from './ShareRequestService';
+import Account from '../models/Account';
 
 let API_ENDPOINT;
 
@@ -343,6 +344,47 @@ class APIService {
     }
     if (request.claimed) {
       formdata.append('claimed', request.claimed + '');
+    }
+    const init = {
+      method: 'PUT',
+      headers,
+      body: formdata,
+    };
+    // NOTE: putting a longer timeout over here since uploading files can take longer.
+    const response = await fetch(input, init, 20000);
+    const responseJson = await response.json();
+    this.handleErrorStatusCodes(response.status, responseJson);
+    return responseJson;
+  }
+
+  static async updateMyAccount(account: Account) {
+    const path = '/accounts';
+    const input = `${API_ENDPOINT}${path}`;
+    const headers = {
+      Authorization: `Bearer ${AuthService.getAccessToken()}`,
+    };
+    const formdata = new FormData();
+    // if (request.img && request.thumbnail) {
+    //   formdata.append('img', request.img, request.img.name);
+    //   formdata.append('img', request.thumbnail, request.thumbnail.name);
+    // }
+    if (account.phoneNumber && account.phoneNumber.length > 0) {
+      formdata.append('phonenumber', account.phoneNumber);
+    }
+    if (account.firstName && account.firstName.length > 0) {
+      formdata.append('firstname', account.firstName);
+    }
+    if (account.lastName && account.lastName.length > 0) {
+      formdata.append('lastname', account.lastName);
+    }
+    if (account.isNotDisplayPhoto) {
+      formdata.append('isnotdisplayphoto', String(account.isNotDisplayPhoto));
+    }
+    if (account.isNotDisplayName) {
+      formdata.append('isnotdisplayname', String(account.isNotDisplayName));
+    }
+    if (account.isNotDisplayPhone) {
+      formdata.append('isnotdisplayphone', String(account.isNotDisplayPhone));
     }
     const init = {
       method: 'PUT',

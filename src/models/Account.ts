@@ -23,6 +23,9 @@ interface Account {
   action?: any;
   accountType?: string;
   canAddOtherAccounts?: boolean;
+  isNotDisplayPhoto?: boolean;
+  isNotDisplayName?: boolean;
+  isNotDisplayPhone?: boolean;
 }
 
 export default Account;

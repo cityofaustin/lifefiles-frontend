@@ -85,6 +85,10 @@ class AccountService extends AgentService {
     return await super.get('/my-account');
   }
 
+  static async updateMyAccount(account: Account) {
+    return await super.updateMyAccount(account);
+  }
+
   static async getAccounts(): Promise<Account[]> {
     return await super.get(PATH);
   }
