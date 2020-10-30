@@ -68,6 +68,7 @@ interface DocumentPageProps {
   handleClientSelected: (clientSelected: Account) => void;
   coreFeatures: string[];
   viewFeatures: string[];
+  removeHelperContact: (account: Account) => void;
 }
 
 interface MainPageState {
@@ -539,6 +540,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       removeShareRequest,
       privateEncryptionKey,
       accounts,
+      removeHelperContact
     } = { ...this.props };
     return (
       <Fragment>
@@ -583,6 +585,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 className="network-container"
               >
                 <AccountSummary
+                  removeHelperContact={removeHelperContact}
                   account={account!}
                   shareRequests={matchedShareRequests}
                   searchedDocuments={searchedDocuments}

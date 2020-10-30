@@ -186,6 +186,22 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({ helperContacts });
   };
 
+  removeHelperContact = (account: Account) => {
+    let { helperContacts } = { ...this.state };
+    const { sortAsc } = { ...this.state };
+    helperContacts = helperContacts.filter(
+      (hc) => hc.helperAccount.username !== account.username
+    );
+    this.setState({
+      helperContacts,
+      searchedHelperContacts: this.sortHelperContacts(
+        helperContacts,
+        sortAsc,
+        account.role
+      ),
+    });
+  };
+
   handleSearch = (query: string) => {
     const { documents, helperContacts, sortAsc } = { ...this.state };
     const { account } = { ...this.props };
@@ -932,7 +948,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       activeTab,
       accounts,
       clientShares,
-      clientIdSelected
+      clientIdSelected,
     } = { ...this.state };
     const { account, privateEncryptionKey, coreFeatures, viewFeatures } = {
       ...this.props,
@@ -945,10 +961,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         (accountItem) => accountItem.id === id
       )[0];
       const selectedClientShares = clientShares.get(clientIdSelected!);
-      sharedRequests = selectedClientShares ? selectedClientShares.filter((sr) => sr.shareWithAccountId === account.id) : [];
+      sharedRequests = selectedClientShares
+        ? selectedClientShares.filter(
+            (sr) => sr.shareWithAccountId === account.id
+          )
+        : [];
     }
     return (
       <DocumentPage
+        removeHelperContact={this.removeHelperContact}
         sortAsc={sortAsc}
         toggleSort={this.toggleSort}
         handleAddNew={this.handleAddNew}
@@ -974,7 +995,13 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   render() {
-    const { account, handleLogout, appSettings, privateEncryptionKey, setMyAccount } = {
+    const {
+      account,
+      handleLogout,
+      appSettings,
+      privateEncryptionKey,
+      setMyAccount,
+    } = {
       ...this.props,
     };
     const { isLoading, isAccount, sidebarOpen, isMySettingsOpen } = {

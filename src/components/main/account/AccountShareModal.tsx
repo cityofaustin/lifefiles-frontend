@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Modal, ModalBody, ModalHeader, TabPane } from 'reactstrap';
+import { Button, Modal, ModalBody, ModalHeader, TabPane } from 'reactstrap';
 import { ReactComponent as ContactSvg } from '../../../img/contact.svg';
 import { ReactComponent as CrossSvg } from '../../../img/cross3.svg';
 import AccountImpl from '../../../models/AccountImpl';
@@ -25,6 +25,7 @@ import CryptoUtil from '../../../util/CryptoUtil';
 import ZipUtil from '../../../util/ZipUtil';
 import ShareRequestPermissionSvg from '../../svg/ShareRequestPermissionSvg';
 import ProgressIndicator from '../../common/ProgressIndicator';
+import DocShared from '../document/DocShared';
 
 interface AccountShareModalProps {
   showModal: boolean;
@@ -36,12 +37,14 @@ interface AccountShareModalProps {
   addShareRequest: (request: ShareRequest) => void;
   removeShareRequest: (request: ShareRequest) => void;
   privateEncryptionKey: string;
+  removeHelperContact: (account: Account) => void;
 }
 
 // NOTE: temporarily until get share api hooked up.
 interface AccountShareModalState {
   docShare: DocShare;
   isLoading: boolean;
+  showDeleteContactModal: boolean;
 }
 
 interface DocShare {
@@ -57,6 +60,8 @@ class AccountShareModal extends Component<
     this.state = {
       docShare: {},
       isLoading: false,
+      showDeleteContactModal: false,
+      // showDeleteContactModal: true,
     };
   }
 
@@ -187,6 +192,13 @@ class AccountShareModal extends Component<
     this.setState({ isLoading: false });
   };
 
+  handleDeleteContact = () => {
+    const {toggleModal, removeHelperContact, account} = {...this.props};
+    this.setState({showDeleteContactModal: false});
+    toggleModal();
+    removeHelperContact(account);
+  };
+
   renderPermissions(sd: Document, size: ToggleSizeEnum, sr?: ShareRequest) {
     let canView = sr ? sr.canView : false;
     let canReplace = sr ? sr.canReplace : false;
@@ -262,6 +274,58 @@ class AccountShareModal extends Component<
     );
   }
 
+  renderDeleteContactModal() {
+    const { showDeleteContactModal } = { ...this.state };
+    const closeBtn = (
+      <div
+        className="modal-close"
+        onClick={() => this.setState({ showDeleteContactModal: false })}
+      >
+        <CrossSvg />
+      </div>
+    );
+    return (
+      <Modal
+        isOpen={showDeleteContactModal}
+        toggle={() => this.setState({ showDeleteContactModal: false })}
+        backdrop={'static'}
+        size={'xl'}
+        className="delete-contact-modal"
+      >
+        <ModalHeader
+          toggle={() => this.setState({ showDeleteContactModal: false })}
+          close={closeBtn}
+        />
+        <ModalBody className="delete-contact-body">
+          <div className="delete-title">Are you sure?</div>
+          <div className="excerpt">
+            Doing so will&nbsp;
+            <strong>
+              delete this contact from your network and revoke access to all
+              your documents.
+            </strong>
+          </div>
+          <div className="excerpt">
+            Alternatively, you can choose to unshare all shared documents with
+            this contact
+          </div>
+          <div className="doc-shared-container">
+            <DocShared numberOfShares={4} />
+            <div className="doc-share">Documents Shared</div>
+          </div>
+          <Button className="unshare-btn" color="danger" outline disabled>
+            Unshare
+          </Button>
+          <div className="excerpt">
+            Or, if you're sure, tap the button below to permanently remove this
+            contact.
+          </div>
+          <Button color="danger" onClick={this.handleDeleteContact}>Delete</Button>
+        </ModalBody>
+      </Modal>
+    );
+  }
+
   render() {
     const {
       toggleModal,
@@ -296,6 +360,7 @@ class AccountShareModal extends Component<
             </span>
           </ModalHeader>
           <ModalBody className="account-share-container">
+            {this.renderDeleteContactModal()}
             <div className="account-share">
               <div className="left-pane">
                 <img
@@ -303,7 +368,10 @@ class AccountShareModal extends Component<
                   src={AccountService.getProfileURL(account.profileImageUrl!)}
                   alt="img"
                 />
-                <div className="delete-contact-container">
+                <div
+                  className="delete-contact-container"
+                  onClick={() => this.setState({showDeleteContactModal: true})}
+                >
                   <DeleteContactBtn />
                 </div>
                 <div className="contact-detail-info">

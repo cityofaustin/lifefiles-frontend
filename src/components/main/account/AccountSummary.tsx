@@ -22,6 +22,7 @@ interface AccountSummaryProps {
   privateEncryptionKey: string;
   isNotary?: boolean;
   handleClientSelected: (clientSelected: Account) => void;
+  removeHelperContact: (account: Account) => void;
 }
 
 interface AccountSummaryState {
@@ -42,6 +43,7 @@ class AccountSummary extends Component<
 
     this.state = {
       showAccountShareModal: false,
+      // showAccountShareModal: true,
       goToClientDocuments: false,
     };
   }
@@ -66,6 +68,7 @@ class AccountSummary extends Component<
       removeShareRequest,
       privateEncryptionKey,
       isNotary,
+      removeHelperContact
     } = { ...this.props };
     const { showAccountShareModal, goToClientDocuments } = { ...this.state };
     const numberOfShares = shareRequests ? shareRequests.filter(sr => sr.approved).length : 0;
@@ -75,6 +78,7 @@ class AccountSummary extends Component<
           <Redirect push to={`clients/${account.id}/documents`} />
         )}
         <AccountShareModal
+          removeHelperContact={removeHelperContact}
           showModal={showAccountShareModal}
           toggleModal={() =>
             this.setState({ showAccountShareModal: !showAccountShareModal })

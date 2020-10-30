@@ -152,7 +152,7 @@ body {
     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
     .modal-header {
       @include themify($themes) {
-        background: themed("colorPrimary") !important;
+        background-color: themed("colorPrimary");
       }
       @include media-breakpoint-up(sm) {
         padding: 19px 44px 19px 44px;
