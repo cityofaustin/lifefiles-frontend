@@ -191,7 +191,10 @@ class UpdateDocumentModal extends Component<
     }
     if (prevProps.document !== this.props.document) {
       this.setImage();
-      if (this.props.myAccount.role === 'owner' && this.props.document?.vcJwt!) {
+      if (
+        this.props.myAccount.role === 'owner' &&
+        this.props.document?.vcJwt!
+      ) {
         this.getNotarizationInfo();
       }
     }
@@ -557,8 +560,11 @@ class UpdateDocumentModal extends Component<
           console.error(err.message);
         }
       } else {
-        // just updating permissions then
         const sr = this.getDocumentSharedWithContact(selectedContact!)!;
+        if (sr.approved === false) {
+          await this.handleShareDocWithContact(permissions);
+        }
+        // just updating permissions then
         sr.canView = permissions.canView;
         sr.canReplace = permissions.canReplace;
         sr.canDownload = permissions.canDownload;

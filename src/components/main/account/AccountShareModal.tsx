@@ -63,7 +63,7 @@ class AccountShareModal extends Component<
   handleShareDocWithContact = async (
     document: Document,
     permissions: ShareRequestPermissions
-  ): Promise<void> => {
+  ): Promise<any> => {
     const {
       myAccount,
       account,
@@ -76,57 +76,57 @@ class AccountShareModal extends Component<
       if (sr) {
         await ShareRequestService.deleteShareRequest(sr!._id!);
         removeShareRequest(this.getDocumentSharedWithContact(document)!);
-      } else {
-        // decrypt with owner's private key
-        const encryptionPublicKey = account.didPublicEncryptionKey!;
-        const encryptedString = await ZipUtil.unzip(
-          DocumentService.getDocumentURL(document.url)
-        );
-        const encryptedStringThumbnail = await ZipUtil.unzip(
-          DocumentService.getDocumentURL(document.thumbnailUrl)
-        );
-        // could be a image or a pdf
-        const dataUrl = await CryptoUtil.getDecryptedString(
-          privateEncryptionKey,
-          encryptedString
-        );
-        const dataUrlThumbail = await CryptoUtil.getDecryptedString(
-          privateEncryptionKey,
-          encryptedStringThumbnail
-        );
-        // encrypt with selected helper's public key
-        const encryptedString2 = await CryptoUtil.getEncryptedByPublicString(
-          encryptionPublicKey!,
-          dataUrl!
-        );
-        const encryptedThumbnail2 = await CryptoUtil.getEncryptedByPublicString(
-          encryptionPublicKey!,
-          dataUrlThumbail!
-        );
-        const zipped: Blob = await ZipUtil.zip(encryptedString2);
-        const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail2);
-        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+      }
+      // decrypt with owner's private key
+      const encryptionPublicKey = account.didPublicEncryptionKey!;
+      const encryptedString = await ZipUtil.unzip(
+        DocumentService.getDocumentURL(document.url)
+      );
+      const encryptedStringThumbnail = await ZipUtil.unzip(
+        DocumentService.getDocumentURL(document.thumbnailUrl)
+      );
+      // could be a image or a pdf
+      const dataUrl = await CryptoUtil.getDecryptedString(
+        privateEncryptionKey,
+        encryptedString
+      );
+      const dataUrlThumbail = await CryptoUtil.getDecryptedString(
+        privateEncryptionKey,
+        encryptedStringThumbnail
+      );
+      // encrypt with selected helper's public key
+      const encryptedString2 = await CryptoUtil.getEncryptedByPublicString(
+        encryptionPublicKey!,
+        dataUrl!
+      );
+      const encryptedThumbnail2 = await CryptoUtil.getEncryptedByPublicString(
+        encryptionPublicKey!,
+        dataUrlThumbail!
+      );
+      const zipped: Blob = await ZipUtil.zip(encryptedString2);
+      const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail2);
+      const newZippedFile = new File([zipped], 'encrypted-image.zip', {
+        type: 'application/zip',
+        lastModified: Date.now(),
+      });
+      const newZippedThumbnailFile = new File(
+        [zippedThumbnail],
+        'encrypted-image-thumbnail.zip',
+        {
           type: 'application/zip',
           lastModified: Date.now(),
-        });
-        const newZippedThumbnailFile = new File(
-          [zippedThumbnail],
-          'encrypted-image-thumbnail.zip',
-          {
-            type: 'application/zip',
-            lastModified: Date.now(),
-          }
-        );
-        const newShareRequest = await ShareRequestService.addShareRequestFile(
-          newZippedFile,
-          newZippedThumbnailFile,
-          document?.type!,
-          myAccount.id,
-          account?.id!,
-          permissions
-        );
-        addShareRequest(newShareRequest);
-      }
+        }
+      );
+      const newShareRequest = await ShareRequestService.addShareRequestFile(
+        newZippedFile,
+        newZippedThumbnailFile,
+        document?.type!,
+        myAccount.id,
+        account?.id!,
+        permissions
+      );
+      addShareRequest(newShareRequest);
+      return newShareRequest;
     } catch (err) {
       console.error(err.message);
     }
@@ -171,11 +171,15 @@ class AccountShareModal extends Component<
           console.error(err.message);
         }
       } else {
+        let sr2 = sr;
+        if (sr.approved === false) {
+          sr2 = await this.handleShareDocWithContact(sd, permissions);
+        }
         // just updating permissions then
-        sr.canView = permissions.canView;
-        sr.canReplace = permissions.canReplace;
-        sr.canDownload = permissions.canDownload;
-        await ShareRequestService.updateShareRequestPermissions(sr);
+        sr2.canView = permissions.canView;
+        sr2.canReplace = permissions.canReplace;
+        sr2.canDownload = permissions.canDownload;
+        await ShareRequestService.updateShareRequestPermissions(sr2);
       }
     } else {
       await this.handleShareDocWithContact(sd, permissions);

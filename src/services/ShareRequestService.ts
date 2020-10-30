@@ -45,7 +45,7 @@ class ShareRequestService extends AgentService {
     fromAccountId: string,
     toAccountId: string,
     permissions: ShareRequestPermissions
-  ) {
+  ): Promise<ShareRequest> {
     return await super.postShareRequestFile(
       file,
       thumbnailFile,
