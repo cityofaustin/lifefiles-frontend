@@ -100,10 +100,74 @@
         align-items: center;
         margin: 0 -16px;
         padding: 24px 42px;
+        &.delete {
+          background-color: #8e3c3c;
+          color: white;
+          .account-content-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+          }
+          .account-content-excerpt {
+            margin-top: 0;
+            color: white;
+          }
+          .doc-shared-container {
+            margin: 28px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            svg {
+              #_3 {
+                text {
+                  fill: #8e3c3c;
+                }
+              }
+              text {
+                fill: white;
+              }
+              path {
+                fill: white;
+              }
+            }
+            .doc-share {
+              margin-left: 18px;
+              font-size: 19px;
+              font-weight: bold;
+              @include media-breakpoint-up(lg) {
+                font-size: 25px;
+              }
+            }
+          }
+          .export-btn {
+            background-color: white;
+            color: $mid-blue;
+            height: 102px;
+            width: 294px;
+            display: flex;
+            align-items: center;
+            padding: 4px 21px;
+            .export-container {
+              svg {
+                height: 53.6px;
+                width: 64px;
+              }
+            }
+            .export-text {
+              text-align: left;
+              margin-left: 12px;
+              line-height: 1.23;
+            }
+          }
+        }
         &.bottom {
           background-color: #f5f5f5;
           @include media-breakpoint-up(xl) {
             background-color: #ececec;
+          }
+          svg:first-of-type {
+            width: 95.154px;
+            height: 79.73px;
           }
           .account-content-title {
             font-size: 28px;
@@ -276,6 +340,16 @@
               }
             }
           }
+        }
+      }
+      .delete-bottom {
+        margin: 0 -15px;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        padding: 28px;
+        .btn {
+          width: 300px;
         }
       }
     }
