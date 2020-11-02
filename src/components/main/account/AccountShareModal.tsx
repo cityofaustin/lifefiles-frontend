@@ -289,7 +289,7 @@ class AccountShareModal extends Component<
         isOpen={showDeleteContactModal}
         toggle={() => this.setState({ showDeleteContactModal: false })}
         backdrop={'static'}
-        size={'xl'}
+        size={'lg'}
         className="delete-contact-modal"
       >
         <ModalHeader
