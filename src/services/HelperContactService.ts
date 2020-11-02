@@ -15,4 +15,8 @@ export default class HelperContactService extends ApiService {
   static async addHelperContact(helperContactReq: HelperContactRequest) {
     return await super.post(this.path, helperContactReq);
   }
+
+  static async deleteHelperContact(id: string) {
+    return await super.delete(`${this.path}/${id}`);
+  }
 }

@@ -186,12 +186,16 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({ helperContacts });
   };
 
-  removeHelperContact = (account: Account) => {
+  removeHelperContact = async (account: Account) => {
     let { helperContacts } = { ...this.state };
     const { sortAsc } = { ...this.state };
+    const helperContactMatch = helperContacts.find(
+      (hc) => hc.helperAccount.username === account.username
+    );
     helperContacts = helperContacts.filter(
       (hc) => hc.helperAccount.username !== account.username
     );
+    await HelperContactService.deleteHelperContact(helperContactMatch!._id);
     this.setState({
       helperContacts,
       searchedHelperContacts: this.sortHelperContacts(
