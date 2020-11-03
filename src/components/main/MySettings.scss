@@ -147,6 +147,7 @@
             display: flex;
             align-items: center;
             padding: 4px 21px;
+            margin-bottom: 28px;
             .export-container {
               svg {
                 height: 53.6px;
@@ -158,6 +159,49 @@
               margin-left: 12px;
               line-height: 1.23;
             }
+          }
+          .share-with-container {
+            background-color: white;
+            border-radius: 24px;
+            width: 87px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            padding-left: 5px;
+            margin: 28px 0;
+          }
+          .confirm-btn {
+            background: white;
+            width: 298px;
+            margin: 28px 0;
+            &:hover {
+              &:enabled {
+                background: #ca606a;
+              }
+            }
+          }
+          .confirm-delete {
+            width: 292px;
+            margin-top: 28px;
+            background-color: #d95868;
+            color: white;
+            padding: 8px 9px;
+            border-radius: 15px;
+            .instruction {
+              font-size: 22px;
+              margin-bottom: 5px;
+            }
+            .confirm-excerpt {
+              margin-top: 5px;
+              font-size: 13px;
+              text-align: center;
+              line-height: 1.23;
+              padding: 0 40px;
+            }
+          }
+          .delete-account-btn {
+            margin: 28px 0;
+            width: 298px;
           }
         }
         &.bottom {

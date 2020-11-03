@@ -56,9 +56,9 @@ export default class DocsUploadedSvg extends Component<DocsUploadedSvgProps> {
                     data-name="7"
                     // transform="translate(-2.099 45.807)"
                     fill="#fff"
-                    font-size="48"
-                    font-family="Montserrat-Medium, Montserrat"
-                    font-weight="500"
+                    fontSize="48"
+                    fontFamily="Montserrat-Medium, Montserrat"
+                    fontWeight="500"
                   >
                     <tspan x="0" y="0">
                       {numberOfDocs}
@@ -74,9 +74,9 @@ export default class DocsUploadedSvg extends Component<DocsUploadedSvgProps> {
 Uploaded"
             transform="translate(403 891)"
             fill="#2362c7"
-            font-size="25"
-            font-family="Montserrat-Bold, Montserrat"
-            font-weight="700"
+            fontSize="25"
+            fontFamily="Montserrat-Bold, Montserrat"
+            fontWeight="700"
           >
             <tspan x="0" y="0">
               Document{numberOfDocs === 1 ? '' : 's'}{' '}

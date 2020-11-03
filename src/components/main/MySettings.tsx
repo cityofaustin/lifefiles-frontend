@@ -32,7 +32,15 @@ import DocsUploadedSvg from '../svg/DocsUploadedSvg';
 import Toggle, { ToggleSizeEnum } from '../common/Toggle';
 import DocShared from '../main/document/DocShared';
 import cloneDeep from 'lodash.clonedeep';
+import SharedWith from './document/SharedWith';
+import HelperContact from '../../models/HelperContact';
 
+enum SettingOptionEnum {
+  LOGIN_METHODS,
+  PRIVACY,
+  EXPORT_DOCUMENTS,
+  DELETE_MY_ACCOUNT,
+}
 
 interface MySettingsProps {
   isOpen: boolean;
@@ -40,6 +48,7 @@ interface MySettingsProps {
   account: Account;
   setMyAccount: (account: Account) => void;
   privateEncryptionKey: string;
+  helperContacts: HelperContact[];
 }
 
 interface MySettingsState {
@@ -50,6 +59,8 @@ interface MySettingsState {
   isNotDisplayPhoto: boolean;
   isNotDisplayName: boolean;
   isNotDisplayPhone: boolean;
+  isConfirmingDelete: boolean;
+  confirmText: string;
 }
 
 export default class MySettings extends Component<
@@ -69,14 +80,16 @@ export default class MySettings extends Component<
     const isNotDisplayName = !!account.isNotDisplayName;
     const isNotDisplayPhone = !!account.isNotDisplayPhone;
     this.state = {
-      activeOption: 1,
-      // activeOption: 2,
+      activeOption: SettingOptionEnum.LOGIN_METHODS,
+      // activeOption: SettingOptionEnum.DELETE_MY_ACCOUNT,
       isLoading: false,
       phoneNumber,
       fullname,
       isNotDisplayPhoto,
       isNotDisplayName,
       isNotDisplayPhone,
+      isConfirmingDelete: false,
+      confirmText: '',
     };
   }
 
@@ -148,6 +161,15 @@ export default class MySettings extends Component<
     await AccountService.updateMyAccount(newAccount);
     setMyAccount(newAccount);
     this.setState({ isLoading: false });
+    setOpen(false);
+  };
+
+  handleDeleteMyAccount = () => {
+    const { setOpen } = { ...this.props };
+    // TODO: make an api that deletes all their helper contacts, their share requests,
+    // their documents, their oauth account
+    AccountService.deleteMyAccount();
+    // TODO: logout or delete oauth
     setOpen(false);
   };
 
@@ -315,6 +337,85 @@ export default class MySettings extends Component<
     );
   }
 
+  renderConfirmDelete() {
+    const { confirmText } = { ...this.state };
+    return (
+      <Fragment>
+        <div className="confirm-delete">
+          <div className="instruction">
+            Type <strong>DELETE</strong> to Confirm
+          </div>
+          <Input
+            type="text"
+            value={confirmText}
+            onChange={(e) => this.setState({ confirmText: e.target.value })}
+          />
+          <div className="confirm-excerpt">
+            Please enter the text exactly as displayed to confirm
+          </div>
+        </div>
+        <Button
+          className="delete-account-btn"
+          color="danger"
+          onClick={this.handleDeleteMyAccount}
+          disabled={confirmText !== 'DELETE'}
+        >
+          Delete Account
+        </Button>
+      </Fragment>
+    );
+  }
+
+  renderDeleteMyAccount() {
+    const { isConfirmingDelete } = { ...this.state };
+    const { account, helperContacts } = { ...this.props };
+    return (
+      <div className="account-settings-content delete">
+        <div className="account-content-title">Delete Account</div>
+        <div className="account-content-excerpt">
+          Once your account is deleted, it cannot be recovered. If you wish to
+          use MyPass again, you will have to create a new account.
+        </div>
+        <div className="doc-shared-container">
+          <DocsUploadedSvg numberOfDocs={account.documents.length} />
+        </div>
+        <Button className="export-btn" onClick={this.exportAllDocuments}>
+          <div className="export-container">
+            <ExportDocSvg />
+          </div>
+          <div className="export-text">Export my documents</div>
+        </Button>
+        {helperContacts.length > 0 && (
+          <Fragment>
+            <div className="account-content-excerpt">
+              Additionally, all your documents will be deleted and unshared with
+              helpers in your network.
+            </div>
+            <div className="share-with-container">
+              <SharedWith
+                sharedAccounts={helperContacts.map((hc) => hc.helperAccount)}
+              />
+            </div>
+          </Fragment>
+        )}
+        <div className="account-content-excerpt">
+          Are you sure you wish to continue?
+        </div>
+        {isConfirmingDelete && this.renderConfirmDelete()}
+        {!isConfirmingDelete && (
+          <Button
+            className="confirm-btn"
+            color="danger"
+            outline
+            onClick={() => this.setState({ isConfirmingDelete: true })}
+          >
+            Delete Account
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   render() {
     const { account, isOpen, setOpen } = { ...this.props };
     const { activeOption, isLoading } = { ...this.state };
@@ -360,36 +461,69 @@ export default class MySettings extends Component<
               <Col xs="12" xl="4">
                 <div className="account-settings-title">Account Settings</div>
                 <div
-                  onClick={() => this.setState({ activeOption: 1 })}
+                  onClick={() =>
+                    this.setState({
+                      activeOption: SettingOptionEnum.LOGIN_METHODS,
+                    })
+                  }
                   className={`account-settings-option${
-                    activeOption === 1 ? ' active' : ''
+                    activeOption === SettingOptionEnum.LOGIN_METHODS
+                      ? ' active'
+                      : ''
                   }`}
                 >
                   Login Methods
                 </div>
                 <div
-                  onClick={() => this.setState({ activeOption: 2 })}
+                  onClick={() =>
+                    this.setState({ activeOption: SettingOptionEnum.PRIVACY })
+                  }
                   className={`account-settings-option${
-                    activeOption === 2 ? ' active' : ''
+                    activeOption === SettingOptionEnum.PRIVACY ? ' active' : ''
                   }`}
                 >
                   Privacy
                 </div>
                 <div
-                  onClick={() => this.setState({ activeOption: 3 })}
+                  onClick={() =>
+                    this.setState({
+                      activeOption: SettingOptionEnum.EXPORT_DOCUMENTS,
+                    })
+                  }
                   className={`account-settings-option${
-                    activeOption === 3 ? ' active' : ''
+                    activeOption === SettingOptionEnum.EXPORT_DOCUMENTS
+                      ? ' active'
+                      : ''
                   }`}
                 >
                   Export Documents
                 </div>
               </Col>
               <Col xs="12" xl="8">
-                {activeOption === 1 && this.renderLoginMethodTab()}
-                {activeOption === 2 && this.renderPrivacyTab()}
-                {activeOption === 3 && this.renderExportDocuments()}
+                {activeOption === SettingOptionEnum.LOGIN_METHODS &&
+                  this.renderLoginMethodTab()}
+                {activeOption === SettingOptionEnum.PRIVACY &&
+                  this.renderPrivacyTab()}
+                {activeOption === SettingOptionEnum.EXPORT_DOCUMENTS &&
+                  this.renderExportDocuments()}
+                {activeOption === SettingOptionEnum.DELETE_MY_ACCOUNT &&
+                  this.renderDeleteMyAccount()}
               </Col>
             </Row>
+            {activeOption !== SettingOptionEnum.DELETE_MY_ACCOUNT && (
+              <div className="delete-bottom">
+                <Button
+                  color="danger"
+                  onClick={() =>
+                    this.setState({
+                      activeOption: SettingOptionEnum.DELETE_MY_ACCOUNT,
+                    })
+                  }
+                >
+                  Delete Account
+                </Button>
+              </div>
+            )}
           </ModalBody>
         </Modal>
       </Fragment>

@@ -106,13 +106,16 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
   getSharedAccounts = (
     document: Document,
     searchedHelperContacts: HelperContact[],
-    shareRequests: ShareRequest[]
+    shareRequests: ShareRequest[],
+    accounts
   ): Account[] => {
     return searchedHelperContacts
       .filter((h: HelperContact) => {
         const matchedShareRequest = shareRequests.find((shareRequest) => {
+          const matchedHelperAccount = accounts.find(a => a.username === h.helperAccount.username);
           return (
-            shareRequest.shareWithAccountId === h.helperAccount.id &&
+            matchedHelperAccount &&
+            shareRequest.shareWithAccountId === matchedHelperAccount.id &&
             shareRequest.documentType === document.type &&
             shareRequest.approved
           );
@@ -222,6 +225,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       shareRequests,
       privateEncryptionKey,
       myAccount,
+      accounts
     } = { ...this.props };
     return (
       <Fragment>
@@ -257,7 +261,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
             const sharedAccounts: Account[] = this.getSharedAccounts(
               document,
               searchedHelperContacts,
-              shareRequests
+              shareRequests,
+              accounts
             );
             const matchedShareRequests: ShareRequest[] = shareRequests.filter(
               (shareRequest) => shareRequest.documentType === document.type
@@ -323,6 +328,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       myAccount,
       privateEncryptionKey,
       referencedAccount,
+      accounts
     } = { ...this.props };
     return (
       <div>
@@ -363,7 +369,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
               const sharedAccounts: Account[] = this.getSharedAccounts(
                 document,
                 searchedHelperContacts,
-                shareRequests
+                shareRequests,
+                accounts
               );
               const accountProfileURL = AccountImpl.getProfileURLByIdAndList(
                 [
