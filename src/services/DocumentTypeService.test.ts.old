@@ -2,7 +2,7 @@ import DocumentTypeService from './DocumentTypeService';
 import Document from '../models/document/Document';
 import DocumentType from '../models/DocumentType';
 
-describe('DocumentTypeService', () => {
+xdescribe('DocumentTypeService', () => {
   it('should get a match and not get a match', () => {
     const documents: Document[] = [
       {
