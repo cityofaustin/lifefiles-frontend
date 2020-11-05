@@ -1,3 +1,5 @@
+import AccountService from './AccountService';
+
 class AuthService {
   private static ACCESS_TOKEN: string = 'accessToken';
   private static REFRESH_TOKEN: string = 'refreshToken';
@@ -29,6 +31,19 @@ class AuthService {
     // redirect to auth server
     window.location.replace(location.origin + location.pathname + location.hash);
     window.location.reload();
+  }
+
+  static deleteOwnerAccount() {
+    // redirect to unregister page with all of the query string params
+    const scope = '';
+    const state = '';
+    const jwt = this.getAccessToken();
+    sessionStorage.removeItem(this.ACCESS_TOKEN);
+    sessionStorage.removeItem(this.REFRESH_TOKEN);
+    window.location.replace(
+      AccountService.getAuthApi() +
+        `/unregister?access_token=${jwt}&client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
+    );
   }
 }
 

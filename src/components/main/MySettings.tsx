@@ -31,9 +31,11 @@ import AuthService from '../../services/AuthService';
 import DocsUploadedSvg from '../svg/DocsUploadedSvg';
 import Toggle, { ToggleSizeEnum } from '../common/Toggle';
 import DocShared from '../main/document/DocShared';
+import ContactShared from '../svg/ContactShared';
 import cloneDeep from 'lodash.clonedeep';
 import SharedWith from './document/SharedWith';
 import HelperContact from '../../models/HelperContact';
+import Role from '../../models/Role';
 
 enum SettingOptionEnum {
   LOGIN_METHODS,
@@ -79,8 +81,12 @@ export default class MySettings extends Component<
     const isNotDisplayPhoto = !!account.isNotDisplayPhoto;
     const isNotDisplayName = !!account.isNotDisplayName;
     const isNotDisplayPhone = !!account.isNotDisplayPhone;
+    const activeOption =
+      account.role === Role.owner
+        ? SettingOptionEnum.LOGIN_METHODS
+        : SettingOptionEnum.PRIVACY;
     this.state = {
-      activeOption: SettingOptionEnum.LOGIN_METHODS,
+      activeOption,
       // activeOption: SettingOptionEnum.DELETE_MY_ACCOUNT,
       isLoading: false,
       phoneNumber,
@@ -164,13 +170,17 @@ export default class MySettings extends Component<
     setOpen(false);
   };
 
-  handleDeleteMyAccount = () => {
-    const { setOpen } = { ...this.props };
-    // TODO: make an api that deletes all their helper contacts, their share requests,
-    // their documents, their oauth account
-    AccountService.deleteMyAccount();
-    // TODO: logout or delete oauth
-    setOpen(false);
+  handleDeleteMyAccount = async () => {
+    const { account } = { ...this.props };
+    this.setState({ isLoading: true });
+
+    await AccountService.deleteMyAccount();
+    if (account.role === Role.owner) {
+      AuthService.deleteOwnerAccount();
+    }
+    if (account.role === Role.helper) {
+      AuthService.logOut();
+    }
   };
 
   renderLoginMethodTab() {
@@ -225,7 +235,8 @@ export default class MySettings extends Component<
         <div className="account-content-title">Privacy</div>
         {/* <LoginMethodsSvg /> */}
         <div className="account-privacy-excerpt">
-          This is how helpers in your network see your profile
+          This is how {account.role === Role.owner ? 'helpers' : 'clients'} in
+          your network see your profile
         </div>
         <div className="settings-preview">
           <div className="preview-title">Preview</div>
@@ -284,26 +295,30 @@ export default class MySettings extends Component<
         </Form>
         <div className="display-options">
           <div className="option-title">Display Options</div>
-          <FormGroup>
-            <Label>Photo</Label>
-            <Toggle
-              size={ToggleSizeEnum.LG}
-              value={!isNotDisplayPhoto}
-              onToggle={() =>
-                this.setState({ isNotDisplayPhoto: !isNotDisplayPhoto })
-              }
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label>Name</Label>
-            <Toggle
-              size={ToggleSizeEnum.LG}
-              value={!isNotDisplayName}
-              onToggle={() =>
-                this.setState({ isNotDisplayName: !isNotDisplayName })
-              }
-            />
-          </FormGroup>
+          {account.role === Role.owner && (
+            <Fragment>
+              <FormGroup>
+                <Label>Photo</Label>
+                <Toggle
+                  size={ToggleSizeEnum.LG}
+                  value={!isNotDisplayPhoto}
+                  onToggle={() =>
+                    this.setState({ isNotDisplayPhoto: !isNotDisplayPhoto })
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Name</Label>
+                <Toggle
+                  size={ToggleSizeEnum.LG}
+                  value={!isNotDisplayName}
+                  onToggle={() =>
+                    this.setState({ isNotDisplayName: !isNotDisplayName })
+                  }
+                />
+              </FormGroup>
+            </Fragment>
+          )}
           <FormGroup>
             <Label>Phone</Label>
             <Toggle
@@ -340,29 +355,37 @@ export default class MySettings extends Component<
   renderConfirmDelete() {
     const { confirmText } = { ...this.state };
     return (
-      <Fragment>
-        <div className="confirm-delete">
-          <div className="instruction">
-            Type <strong>DELETE</strong> to Confirm
-          </div>
-          <Input
-            type="text"
-            value={confirmText}
-            onChange={(e) => this.setState({ confirmText: e.target.value })}
-          />
-          <div className="confirm-excerpt">
-            Please enter the text exactly as displayed to confirm
-          </div>
-        </div>
-        <Button
-          className="delete-account-btn"
-          color="danger"
-          onClick={this.handleDeleteMyAccount}
-          disabled={confirmText !== 'DELETE'}
+      <Row>
+        <Col
+          md={12}
+          lg={6}
+          style={{ display: 'flex', justifyContent: 'center' }}
         >
-          Delete Account
-        </Button>
-      </Fragment>
+          <div className="confirm-delete">
+            <div className="instruction">
+              Type <strong>DELETE</strong> to Confirm
+            </div>
+            <Input
+              type="text"
+              value={confirmText}
+              onChange={(e) => this.setState({ confirmText: e.target.value })}
+            />
+            <div className="confirm-excerpt">
+              Please enter the text exactly as displayed to confirm
+            </div>
+          </div>
+        </Col>
+        <Col md={12} lg={6} className="delete-btn-col">
+          <Button
+            className="delete-account-btn"
+            color="danger"
+            onClick={this.handleDeleteMyAccount}
+            disabled={confirmText !== 'DELETE'}
+          >
+            Delete Account
+          </Button>
+        </Col>
+      </Row>
     );
   }
 
@@ -376,24 +399,50 @@ export default class MySettings extends Component<
           Once your account is deleted, it cannot be recovered. If you wish to
           use MyPass again, you will have to create a new account.
         </div>
-        <div className="doc-shared-container">
-          <DocsUploadedSvg numberOfDocs={account.documents.length} />
-        </div>
-        <Button className="export-btn" onClick={this.exportAllDocuments}>
-          <div className="export-container">
-            <ExportDocSvg />
+        {account.role === Role.owner && (
+          <Row style={{ alignItems: 'center' }}>
+            <Col md={12} lg={6}>
+              <div className="doc-shared-container">
+                <DocsUploadedSvg numberOfDocs={account.documents.length} />
+              </div>
+            </Col>
+            <Col md={12} lg={6}>
+              <div className="export-btn-container">
+                <Button
+                  className="export-btn"
+                  onClick={this.exportAllDocuments}
+                >
+                  <div className="export-container">
+                    <ExportDocSvg />
+                  </div>
+                  <div className="export-text">Export my documents</div>
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        )}
+        {account.role !== Role.owner && (
+          <div className="doc-shared-container">
+            <div className="contact-share-container">
+              <ContactShared numberOfShares={helperContacts.length} />
+            </div>
+            <div className="contact-share">Contacts in your network</div>
           </div>
-          <div className="export-text">Export my documents</div>
-        </Button>
+        )}
         {helperContacts.length > 0 && (
           <Fragment>
             <div className="account-content-excerpt">
-              Additionally, all your documents will be deleted and unshared with
-              helpers in your network.
+              {account.role === Role.owner
+                ? 'Additionally, all your documents will be deleted and unshared with helpers in your network.'
+                : 'Additionally, all contacts in your network will be deleted and will have to be re-added'}
             </div>
             <div className="share-with-container">
               <SharedWith
-                sharedAccounts={helperContacts.map((hc) => hc.helperAccount)}
+                sharedAccounts={helperContacts.map((hc) =>
+                  account.role === Role.owner
+                    ? hc.helperAccount
+                    : hc.ownerAccount
+                )}
               />
             </div>
           </Fragment>
@@ -460,20 +509,22 @@ export default class MySettings extends Component<
             <Row style={{ margin: '0 -15px' }}>
               <Col xs="12" xl="4">
                 <div className="account-settings-title">Account Settings</div>
-                <div
-                  onClick={() =>
-                    this.setState({
-                      activeOption: SettingOptionEnum.LOGIN_METHODS,
-                    })
-                  }
-                  className={`account-settings-option${
-                    activeOption === SettingOptionEnum.LOGIN_METHODS
-                      ? ' active'
-                      : ''
-                  }`}
-                >
-                  Login Methods
-                </div>
+                {account.role === Role.owner && (
+                  <div
+                    onClick={() =>
+                      this.setState({
+                        activeOption: SettingOptionEnum.LOGIN_METHODS,
+                      })
+                    }
+                    className={`account-settings-option${
+                      activeOption === SettingOptionEnum.LOGIN_METHODS
+                        ? ' active'
+                        : ''
+                    }`}
+                  >
+                    Login Methods
+                  </div>
+                )}
                 <div
                   onClick={() =>
                     this.setState({ activeOption: SettingOptionEnum.PRIVACY })
@@ -484,19 +535,33 @@ export default class MySettings extends Component<
                 >
                   Privacy
                 </div>
-                <div
-                  onClick={() =>
-                    this.setState({
-                      activeOption: SettingOptionEnum.EXPORT_DOCUMENTS,
-                    })
-                  }
-                  className={`account-settings-option${
-                    activeOption === SettingOptionEnum.EXPORT_DOCUMENTS
-                      ? ' active'
-                      : ''
-                  }`}
-                >
-                  Export Documents
+                {account.role === Role.owner && (
+                  <div
+                    onClick={() =>
+                      this.setState({
+                        activeOption: SettingOptionEnum.EXPORT_DOCUMENTS,
+                      })
+                    }
+                    className={`account-settings-option${
+                      activeOption === SettingOptionEnum.EXPORT_DOCUMENTS
+                        ? ' active'
+                        : ''
+                    }`}
+                  >
+                    Export Documents
+                  </div>
+                )}
+                <div className="delete-bottom-lg">
+                  <Button
+                    color="danger"
+                    onClick={() =>
+                      this.setState({
+                        activeOption: SettingOptionEnum.DELETE_MY_ACCOUNT,
+                      })
+                    }
+                  >
+                    Delete Account
+                  </Button>
                 </div>
               </Col>
               <Col xs="12" xl="8">

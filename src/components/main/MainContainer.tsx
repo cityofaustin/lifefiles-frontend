@@ -840,17 +840,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                     <Link to="/account">My Account</Link>
                   )}
                 </DropdownItem>
-                {account.role === Role.owner && (
-                  <DropdownItem>
-                    <div
-                      onClick={() => {
-                        this.setState({ isMySettingsOpen: true });
-                      }}
-                    >
-                      My Settings
-                    </div>
-                  </DropdownItem>
-                )}
+                <DropdownItem>
+                  <div
+                    onClick={() => {
+                      this.setState({ isMySettingsOpen: true });
+                    }}
+                  >
+                    My Settings
+                  </div>
+                </DropdownItem>
                 <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -1008,7 +1006,13 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     } = {
       ...this.props,
     };
-    const { isLoading, isAccount, sidebarOpen, isMySettingsOpen } = {
+    const {
+      isLoading,
+      isAccount,
+      sidebarOpen,
+      isMySettingsOpen,
+      helperContacts,
+    } = {
       ...this.state,
     };
 
@@ -1047,6 +1051,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               privateEncryptionKey={privateEncryptionKey}
               account={account}
               setMyAccount={setMyAccount}
+              helperContacts={helperContacts}
             />
           )}
           <Sidebar

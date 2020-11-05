@@ -73,10 +73,12 @@
       }
       .account-settings-title {
         text-align: center;
-        color: $mid-blue;
         font-size: 30px;
         font-weight: 500;
         margin-bottom: 9px;
+        @include themify($themes) {
+          color: themed("colorPrimary");
+        }
         @include media-breakpoint-up(xl) {
           margin-top: 9px;
         }
@@ -100,17 +102,43 @@
         align-items: center;
         margin: 0 -16px;
         padding: 24px 42px;
+        @include media-breakpoint-up(xl) {
+          margin-bottom: -16px;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 16px;
+          margin-top: -2px;
+          border-bottom-left-radius: 0;
+        }
         &.delete {
           background-color: #8e3c3c;
           color: white;
+          @include media-breakpoint-up(sm) {
+            margin-bottom: -49px;
+            border-bottom-left-radius: 32px;
+            border-bottom-right-radius: 32px;
+          }
+          @include media-breakpoint-up(md) {
+            margin-bottom: -16px;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+          }
+          @include media-breakpoint-up(xl) {
+            border-bottom-left-radius: 0;
+          }
           .account-content-title {
             font-size: 32px;
             font-weight: bold;
-            color: white;
+            color: white !important;
+            @include media-breakpoint-up(xl) {
+              font-size: 63px;
+            }
           }
           .account-content-excerpt {
             margin-top: 0;
             color: white;
+            @include media-breakpoint-up(xl) {
+              font-size: 34px;
+            }
           }
           .doc-shared-container {
             margin: 28px 0;
@@ -118,6 +146,9 @@
             justify-content: center;
             align-items: center;
             svg {
+              #_3-2 {
+                fill: #8e3c3c;
+              }
               #_3 {
                 text {
                   fill: #8e3c3c;
@@ -130,6 +161,15 @@
                 fill: white;
               }
             }
+            .contact-share-container {
+              width: 74px;
+            }
+            .contact-share {
+              margin-left: 26px;
+              font-size: 25px;
+              font-weight: bold;
+              line-height: 1.08;
+            }
             .doc-share {
               margin-left: 18px;
               font-size: 19px;
@@ -137,6 +177,17 @@
               @include media-breakpoint-up(lg) {
                 font-size: 25px;
               }
+            }
+          }
+          .export-btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 28px 0;
+            min-width: 294px;
+            width: 100%;
+            @include media-breakpoint-down(md) {
+              margin: 0 0 28px 0;
             }
           }
           .export-btn {
@@ -147,7 +198,7 @@
             display: flex;
             align-items: center;
             padding: 4px 21px;
-            margin-bottom: 28px;
+            // margin-bottom: 28px;
             .export-container {
               svg {
                 height: 53.6px;
@@ -169,6 +220,11 @@
             justify-content: center;
             padding-left: 5px;
             margin: 28px 0;
+            @include media-breakpoint-up(sm) {
+              border-radius: 32px;
+              width: 126px;
+              height: 65px;
+            }
           }
           .confirm-btn {
             background: white;
@@ -199,9 +255,18 @@
               padding: 0 40px;
             }
           }
-          .delete-account-btn {
-            margin: 28px 0;
-            width: 298px;
+          .delete-btn-col {
+            margin-top: 28px;
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            @include media-breakpoint-down(md) {
+              margin-top: 0;
+            }
+            .delete-account-btn {
+              margin: 28px 0;
+              width: 298px;
+            }
           }
         }
         &.bottom {
@@ -236,8 +301,10 @@
         .account-content-title {
           font-size: 32px;
           font-weight: bold;
-          color: $mid-blue;
           margin-bottom: 26px;
+          @include themify($themes) {
+            color: themed("colorPrimary");
+          }
           @include media-breakpoint-up(xl) {
             font-size: 63px;
             font-weight: bold;
@@ -258,11 +325,20 @@
         align-items: center;
         margin: 0 -16px;
         padding: 24px 22px;
+        @include media-breakpoint-up(xl) {
+          margin-bottom: -16px;
+          border-bottom-left-radius: 16px;
+          border-bottom-right-radius: 16px;
+          margin-top: -2px;
+          border-bottom-left-radius: 0;
+        }
         .account-content-title {
           font-size: 32px;
           font-weight: bold;
-          color: $mid-blue;
           margin-bottom: 26px;
+          @include themify($themes) {
+            color: themed("colorPrimary");
+          }
           @include media-breakpoint-up(xl) {
             font-size: 63px;
             font-weight: bold;
@@ -271,12 +347,14 @@
         .account-privacy-excerpt {
           font-size: 25px;
           font-weight: 500;
-          color: $mid-blue;
           background-color: $pale-grey;
           border-radius: 34px;
           padding: 15px 25px;
           margin: -6px -2px 0 -2px;
           text-align: center;
+          @include themify($themes) {
+            color: themed("colorPrimary");
+          }
         }
         .settings-preview {
           width: 100%;
@@ -338,6 +416,13 @@
                 font-weight: bold;
                 color: $silver;
               }
+              svg {
+                path {
+                  @include themify($themes) {
+                    fill: themed("colorPrimary");
+                  }
+                }
+              }
             }
           }
         }
@@ -392,8 +477,30 @@
         display: flex;
         justify-content: center;
         padding: 28px;
+        @include media-breakpoint-up(sm) {
+          margin-bottom: -49px;
+          border-bottom-left-radius: 32px;
+          border-bottom-right-radius: 32px;
+        }
+        @include media-breakpoint-up(md) {
+          margin-bottom: -16px;
+          border-bottom-left-radius: 16px;
+          border-bottom-right-radius: 16px;
+        }
+        @include media-breakpoint-up(xl) {
+          display: none;
+        }
         .btn {
           width: 300px;
+        }
+      }
+      .delete-bottom-lg {
+        position: absolute;
+        bottom: 10px;
+        left: 55px;
+        display: none;
+        @include media-breakpoint-up(xl) {
+          display: block;
         }
       }
     }
