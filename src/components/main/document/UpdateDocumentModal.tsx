@@ -37,7 +37,7 @@ import { ReactComponent as NotSharedDoc } from '../../../img/not-shared-doc.svg'
 import Lightbox from 'react-image-lightbox';
 import Account from '../../../models/Account';
 import AccountImpl from '../../../models/AccountImpl';
-import { format } from 'date-fns';
+import { format, isThisISOWeek } from 'date-fns';
 import MSelect from '../../common/MSelect';
 import ShareRequest, {
   ShareRequestPermission,
@@ -626,10 +626,6 @@ class UpdateDocumentModal extends Component<
     this.setState({ deleteConfirmInput: value, hasConfirmedDelete });
   };
 
-  confirmDelete = () => {
-    this.setState({ activeTab: '0', showConfirmDeleteSection: true });
-  };
-
   setFile = (newFile: File, newThumbnailFile: File) => {
     this.setState({ newFile, newThumbnailFile });
   };
@@ -801,15 +797,18 @@ class UpdateDocumentModal extends Component<
       <Fragment>
         {!referencedAccount && (
           <div
+            onClick={() =>
+              this.setState({
+                showConfirmDeleteSection: !showConfirmDeleteSection,
+              })
+            }
             className={classNames({
               'upload-doc-delete-container': true,
               active: showConfirmDeleteSection,
             })}
           >
-            <DeleteSvg
-              className="delete-svg"
-              onClick={() => this.confirmDelete()}
-            />
+            <DeleteSvg2 className="delete-svg" />
+            {showConfirmDeleteSection && this.renderConfirmDelete()}
           </div>
         )}
         <Nav tabs>
@@ -1202,7 +1201,7 @@ class UpdateDocumentModal extends Component<
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginBottom: '18px'
+                marginBottom: '18px',
               }}
             >
               <div className="share-with-container">
@@ -1267,7 +1266,13 @@ class UpdateDocumentModal extends Component<
 
   renderShareTab() {
     const { document, accounts, shareRequests } = { ...this.props };
-    const { selectedContact, base64Image, base64Thumbnail, base64Pdf } = {
+    const {
+      selectedContact,
+      base64Image,
+      base64Thumbnail,
+      base64Pdf,
+      showConfirmDeleteSection,
+    } = {
       ...this.state,
     };
     return (
@@ -1311,7 +1316,11 @@ class UpdateDocumentModal extends Component<
               </button>
               <button
                 className="danger-outline button"
-                onClick={() => this.confirmDelete()}
+                onClick={() =>
+                  this.setState({
+                    showConfirmDeleteSection: !showConfirmDeleteSection,
+                  })
+                }
               >
                 Delete
               </button>
@@ -1415,107 +1424,8 @@ class UpdateDocumentModal extends Component<
         </select>
 
         {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
-
-        {/* <Button
-          className="margin-wide"
-          color="primary"
-          onClick={this.handleOwnerAcceptNotarization}
-        >
-          Accept Notarization
-        </Button> */}
       </div>
     );
-    // }
-    // else {
-    //   return (
-    //     <div className="update-doc-tab-spacing">
-    //       <div className="row">
-    //         <div className="col-6">
-    //           <div className="img-container">
-    //             <ImageWithStatus
-    //               imageUrl={base64Thumbnail}
-    //               imageViewType={ImageViewTypes.PREVIEW}
-    //             />
-    //           </div>
-    //         </div>
-
-    //         <div className="col-6">
-    //           <h4>Notarization Type:</h4>
-
-    //           <div className="select-md">
-    //             <MSelect
-    //               options={options}
-    //               onChange={this.handleNotarizationTypeChange}
-    //               isSearchable={false}
-    //               placeholder={'-Select document-'}
-    //             />
-    //           </div>
-
-    //           <h4>Notary Information:</h4>
-    //           <FormGroup>
-    //             <Label for="documentTypeSelected" className="other-prompt">
-    //               Please enter your notary id
-    //             </Label>
-    //             <Input
-    //               type="text"
-    //               name="documentTypeSelected"
-    //               id="documentTypeSelected"
-    //               value={this.state.notaryId}
-    //               onChange={this.handleNotaryIdChange}
-    //               placeholder="Notary Id #..."
-    //             />
-
-    //             <Label
-    //               style={{ paddingRight: '30px' }}
-    //               for="notarySeal"
-    //               className="other-prompt"
-    //             >
-    //               Notary Seal:
-    //             </Label>
-
-    //             <FileBase64
-    //               multiple={false}
-    //               onDone={this.handleNotaryUploadNewSeal}
-    //             />
-
-    //             <Label
-    //               style={{ paddingRight: '30px' }}
-    //               for="notaryPem"
-    //               className="other-prompt"
-    //             >
-    //               Notary Pem File:
-    //             </Label>
-
-    //             <input
-    //               type="file"
-    //               onChange={(e) => this.handleNotaryUploadPem(e)}
-    //             />
-
-    //             <DatePicker
-    //               selected={this.state.validUntilDate}
-    //               onChange={(date) => {
-    //                 this.setState({ validUntilDate: date });
-    //               }}
-    //               dateFormatCalendar={'MMM yyyy'}
-    //               peekNextMonth
-    //               showMonthDropdown
-    //               showYearDropdown
-    //               dropdownMode="select"
-    //             />
-    //             <hr></hr>
-    //             <Button
-    //               className="margin-wide"
-    //               color="primary"
-    //               onClick={this.handleNotarizeDocument}
-    //             >
-    //               Notarize
-    //             </Button>
-    //           </FormGroup>
-    //         </div>
-    //       </div>
-    //     </div>
-    //   );
-    // }
   };
 
   renderNotarizationComplete = () => {
@@ -1541,7 +1451,7 @@ class UpdateDocumentModal extends Component<
   };
 
   renderConfirmDelete() {
-    const { document } = { ...this.props };
+    const { document, accounts, shareRequests } = { ...this.props };
     const { hasConfirmedDelete, deleteConfirmInput, base64Thumbnail } = {
       ...this.state,
     };
@@ -1551,7 +1461,7 @@ class UpdateDocumentModal extends Component<
           Are you sure you want to permanently delete this file?
         </div>
         <div className="delete-section">
-          <div className="delete-image-container">
+          {/* <div className="delete-image-container">
             {document && (
               <img
                 className="delete-image"
@@ -1559,20 +1469,47 @@ class UpdateDocumentModal extends Component<
                 alt="doc missing"
               />
             )}
-          </div>
+          </div> */}
           <div className="delete-info">
             <div className="delete-info-prompt">
               <p>
-                Deleting this file will{' '}
-                <span className="delete-info-danger">
-                  permanently revoke access to all users.
-                </span>
+                Deleting this file will <strong>permanently</strong> erase it
+                from MyPass. Once deleted it cannot be recovered.
               </p>
-              <p>Are you sure?</p>
+              <p>
+                <strong>Alternatively</strong>, you can choose to revoke access
+                to this document with everyone in your network
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: '8px',
+                  marginBottom: '24px',
+                }}
+              >
+                <div className="share-with-container">
+                  <SharedWith
+                    sharedAccounts={accounts.filter((a) =>
+                      shareRequests.find(
+                        (sr) =>
+                          sr.shareWithAccountId === a.id &&
+                          sr.documentType === document?.type
+                      )
+                    )}
+                  />
+                </div>
+                <Button className="unshare-btn" color="danger" outline disabled>
+                  Unshare
+                </Button>
+              </div>
+              <p>Or, if you still wish to delete it...</p>
             </div>
-            <FormGroup>
+            <FormGroup className="confirm-delete-form">
               <Label for="documentDelete" className="other-prompt">
-                Type DELETE to confirm
+                Type <strong>DELETE</strong> to confirm
               </Label>
               <Input
                 type="text"
@@ -1587,14 +1524,6 @@ class UpdateDocumentModal extends Component<
           </div>
         </div>
         <div className="delete-buttons">
-          <Button
-            className="margin-wide"
-            outline
-            color="secondary"
-            onClick={this.toggleModal}
-          >
-            Cancel
-          </Button>{' '}
           <Button
             className="margin-wide"
             color="danger"
@@ -1683,7 +1612,6 @@ class UpdateDocumentModal extends Component<
               : this.renderNotarizationComplete()}
           </TabPane>
         </TabContent>
-        {showConfirmDeleteSection && this.renderConfirmDelete()}
         {isZoomed && (
           <Lightbox
             // reactModalStyle={{zIndex: '1060'}}
