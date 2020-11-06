@@ -328,7 +328,7 @@
                 text-decoration: none;
               }
               svg {
-               & > path {
+                & > path {
                   @include themify($themes) {
                     fill: themed("colorPrimary");
                   }
@@ -392,9 +392,22 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             margin-top: 20px;
             margin-bottom: -20px;
             font-size: 15px;
+            button {
+              display: flex;
+              align-items: center;
+            }
+            svg {
+              margin-right: 10.5px;
+              width: 12.5px;
+              height: 16.9px;
+              g {
+                fill: #d95868;
+              }
+            }
             @include media-breakpoint-up(md) {
               display: none;
             }
@@ -412,6 +425,31 @@
               color: white;
               border-bottom-left-radius: 32px;
               border-bottom-right-radius: 32px;
+              .share-with-container {
+                background-color: white;
+                border-radius: 24px;
+                width: 87px;
+                height: 48px;
+                display: flex;
+                justify-content: center;
+                padding-left: 5px;
+                margin: 1.5px 0 17.5px 0;
+                @include media-breakpoint-up(sm) {
+                  border-radius: 32px;
+                  width: 126px;
+                  height: 65px;
+                }
+              }
+              .unshare-btn {
+                background-color: white;
+                align-items: center;
+                justify-content: center;
+                &:hover {
+                  &:enabled {
+                    background: #ca606a;
+                  }
+                }
+              }
               .form-group {
                 .delete-info {
                   font-size: 10px;
@@ -428,6 +466,7 @@
                   color: white;
                   text-transform: capitalize;
                   font-weight: normal;
+                  justify-content: center;
                 }
               }
             }

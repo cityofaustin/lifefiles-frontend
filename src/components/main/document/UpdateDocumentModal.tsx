@@ -21,6 +21,7 @@ import Document from '../../../models/document/Document';
 import './UpdateDocumentModal.scss';
 import DocumentService from '../../../services/DocumentService';
 import { ReactComponent as DeleteSvg } from '../../../img/delete.svg';
+import { ReactComponent as DeleteSvg2 } from '../../../img/delete-unbound.svg';
 import { ReactComponent as EditDocSvg } from '../../../img/edit-doc.svg';
 import { ReactComponent as EditDocSmSvg } from '../../../img/edit-doc-sm.svg';
 import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
@@ -69,6 +70,7 @@ import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
 import DocumentType from '../../../models/DocumentType';
 import Role from '../../../models/Role';
+import SharedWith from './SharedWith';
 
 const CONTRACT_DEFAULT_GAS = 300000;
 const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
@@ -836,7 +838,7 @@ class UpdateDocumentModal extends Component<
             </NavItem>
           )}
           {!referencedAccount && (
-            <div style={{ position: 'relative' }}>
+            <NavItem style={{ position: 'relative' }}>
               {shareRequests.find((sr) => !sr.approved) && (
                 <div
                   style={{
@@ -848,17 +850,15 @@ class UpdateDocumentModal extends Component<
                   <Badge />
                 </div>
               )}
-              <NavItem>
-                <NavLink
-                  className={classNames({ active: activeTab === '3' })}
-                  onClick={() => {
-                    this.toggleTab('3');
-                  }}
-                >
-                  Share
-                </NavLink>
-              </NavItem>
-            </div>
+              <NavLink
+                className={classNames({ active: activeTab === '3' })}
+                onClick={() => {
+                  this.toggleTab('3');
+                }}
+              >
+                Share
+              </NavLink>
+            </NavItem>
           )}
         </Nav>
       </Fragment>
@@ -1171,7 +1171,7 @@ class UpdateDocumentModal extends Component<
   }
 
   renderDeleteSmall() {
-    const { document } = { ...this.props };
+    const { document, accounts, shareRequests } = { ...this.props };
     const {
       showConfirmDeleteSection,
       hasConfirmedDelete,
@@ -1182,18 +1182,50 @@ class UpdateDocumentModal extends Component<
         <button
           onClick={() => this.setState({ showConfirmDeleteSection: true })}
         >
+          <DeleteSvg2 />
           {showConfirmDeleteSection && <strong>Delete File</strong>}
-          {!showConfirmDeleteSection && 'Delete File'}
+          {!showConfirmDeleteSection && <span>Delete File</span>}
         </button>
         {showConfirmDeleteSection && (
           <div className="confirm-delete-sm">
             <p>
-              Deleting this file will <strong>permanently</strong> revoke access
-              to all users you have shared this document with.
+              Deleting this file will <strong>permanently</strong> erase it.
+              Once deleted it cannot be recovered.
             </p>
-            <p>Are you sure?</p>
+            <p>
+              <strong>Alternatively</strong>, you can choose to revoke access to
+              this document with everyone in your network
+            </p>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: '18px'
+              }}
+            >
+              <div className="share-with-container">
+                <SharedWith
+                  sharedAccounts={accounts.filter((a) =>
+                    shareRequests.find(
+                      (sr) =>
+                        sr.shareWithAccountId === a.id &&
+                        sr.documentType === document?.type
+                    )
+                  )}
+                />
+              </div>
+              <Button className="unshare-btn" color="danger" outline disabled>
+                Unshare
+              </Button>
+            </div>
+
+            <p>Or, if you still wish to delete it...</p>
             <FormGroup>
-              <Label for="documentDelete">Type DELETE to confirm</Label>
+              <Label for="documentDelete">
+                Type <strong>DELETE</strong> to confirm
+              </Label>
               <Input
                 type="text"
                 name="documentDelete"
