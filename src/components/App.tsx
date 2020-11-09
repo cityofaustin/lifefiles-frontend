@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
-import HelperLoginPage from './auth/HelperLoginPage';
+import SecureLoginPage from './auth/SecureLoginPage';
 import AdminLoginPage from './auth/AdminLoginPage';
+import OauthFlow from './auth/OauthFlow';
 import MainContainer from './main/MainContainer';
 import Account from '../models/Account';
 import AuthService from '../services/AuthService';
@@ -16,6 +17,13 @@ import UrlUtil from '../util/UrlUtil';
 import LogoSvg from './svg/logo-svg';
 import AppSetting, { SettingNameEnum } from '../models/AppSetting';
 import AdminService from '../services/AdminService';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  Link,
+  Redirect,
+} from 'react-router-dom';
 
 interface AppState {
   account?: Account;
@@ -23,8 +31,6 @@ interface AppState {
   viewFeatures: string[];
   logoFile?: File;
   isLoading: boolean;
-  helperLogin: boolean;
-  adminLogin: boolean;
   theme: string;
   privateEncryptionKey?: string;
   appSettings: AppSetting[];
@@ -39,8 +45,6 @@ class App extends Component<{}, AppState> {
       logoFile: undefined,
       account: undefined,
       isLoading: false,
-      helperLogin: false,
-      adminLogin: false,
       theme: Role.owner,
       coreFeatures: [],
       viewFeatures: [],
@@ -48,7 +52,11 @@ class App extends Component<{}, AppState> {
   }
 
   async componentDidMount(): Promise<void> {
-    let { appSettings } = { ...this.state };
+    let { appSettings, account, theme, coreFeatures, viewFeatures } = {
+      ...this.state,
+    };
+    this.setState({ isLoading: true });
+
     setTimeout(() => {
       document.getElementById('splash')!.style.animation = 'fadeout 1s';
       document.getElementById('splash')!.style.opacity = '0';
@@ -65,52 +73,17 @@ class App extends Component<{}, AppState> {
       ApiService.setApiEndpoint(process.env.MYPASS_API);
     }
 
-    if (process.env.AUTH_API === undefined) {
-      const response = await AccountService.getOauthEndpoint();
-      AccountService.setAuthApi(response.url);
-    } else {
-      AccountService.setAuthApi(process.env.AUTH_API);
-    }
-
-    let { account, theme, coreFeatures, viewFeatures } = { ...this.state };
-    this.setState({ isLoading: true });
-    const code = UrlUtil.getQueryVariable('code');
-
-    if (code) {
-      // they are in the process of logging in, need to exchange auth code for access token
-      const response = await AccountService.getToken(code);
-      AuthService.logIn(response.access_token, response.refresh_token);
-      window.location.replace(`${location.origin}${location.pathname}`);
-      return;
-    }
     if (AuthService.isLoggedIn()) {
       // they have a jwt access token, use app as normal
       try {
         const loginResponse = await AccountService.getMyAccount();
-
         ({ account, coreFeatures, viewFeatures } = { ...loginResponse });
-
         theme = account?.role;
         document.body.classList.remove('theme-helper', 'theme-owner');
         document.body.classList.add(`theme-${theme}`);
         await this.handleEncryptionKey(account?.role);
       } catch (err) {
         console.error(err.message);
-      }
-    } else {
-      // Stop flow and allow helper to login
-      if (window.location.href.indexOf('helper-login') > -1) {
-        this.setState({ helperLogin: true });
-      } else if (window.location.href.indexOf('admin-login') > -1) {
-        this.setState({ adminLogin: true });
-      } else {
-        // redirect to login page with all of the query string params
-        const scope = '';
-        const state = '';
-        window.location.replace(
-          AccountService.getAuthApi() +
-            `/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
-        );
       }
     }
     try {
@@ -179,7 +152,7 @@ class App extends Component<{}, AppState> {
   };
 
   handleLogin = async (response: any): Promise<void> => {
-    let { account, theme, adminLogin, coreFeatures, viewFeatures } = {
+    let { account, theme, coreFeatures, viewFeatures } = {
       ...this.state,
     };
 
@@ -189,10 +162,6 @@ class App extends Component<{}, AppState> {
 
       ({ account } = { ...loginResponse });
       theme = account?.role;
-
-      if (adminLogin) {
-        theme = 'admin';
-      }
 
       document.body.classList.remove(
         'theme-helper',
@@ -255,35 +224,18 @@ class App extends Component<{}, AppState> {
       account,
       isLoading,
       privateEncryptionKey,
-      helperLogin,
-      adminLogin,
       appSettings,
       coreFeatures,
       viewFeatures,
     } = {
       ...this.state,
     };
-
-    let pageToRender = <ProgressIndicator isFullscreen />;
     let backgroundColor = '#2362c7';
-
     if (window.location.href.indexOf('helper-login') > -1) {
       backgroundColor = '#4ca9d8';
-      pageToRender = (
-        <HelperLoginPage
-          appSettings={appSettings}
-          handleLogin={this.handleLogin}
-        />
-      );
     }
     if (window.location.href.indexOf('admin-login') > -1) {
       backgroundColor = '#000';
-      pageToRender = (
-        <AdminLoginPage
-          appSettings={appSettings}
-          handleLogin={this.handleLogin}
-        />
-      );
     }
     return (
       <Fragment>
@@ -307,12 +259,41 @@ class App extends Component<{}, AppState> {
           {isLoading && <ProgressIndicator isFullscreen />}
           {!isLoading && (
             <div className="page-container">
+              {!account && (
+                <Router hashType="slash">
+                  <Switch>
+                    <Route path="/helper-login">
+                      <SecureLoginPage
+                        role={Role.helper}
+                        appSettings={appSettings}
+                        handleLogin={this.handleLogin}
+                      />
+                    </Route>
+                    <Route path="/admin-login">
+                      <AdminLoginPage
+                        appSettings={appSettings}
+                        handleLogin={this.handleLogin}
+                      />
+                    </Route>
+                    <Route path="/secure-login">
+                      <SecureLoginPage
+                        role={Role.owner}
+                        appSettings={appSettings}
+                        handleLogin={this.handleLogin}
+                      />
+                    </Route>
+                    <Route>
+                      <OauthFlow />
+                    </Route>
+                  </Switch>
+                </Router>
+              )}
               {account && (
                 <MainContainer
                   appSettings={appSettings}
                   saveAppSettings={this.saveAppSettings}
                   account={account}
-                  setMyAccount={(a) => this.setState({account: a})}
+                  setMyAccount={(a) => this.setState({ account: a })}
                   coreFeatures={coreFeatures}
                   viewFeatures={viewFeatures}
                   handleLogout={this.handleLogout}
@@ -323,7 +304,7 @@ class App extends Component<{}, AppState> {
                   }
                 />
               )}
-              {!account && pageToRender}
+              {/* {!account && pageToRender} */}
             </div>
           )}
         </div>

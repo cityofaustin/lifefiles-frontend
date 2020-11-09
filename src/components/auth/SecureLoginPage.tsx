@@ -21,27 +21,29 @@ import AccountService from '../../services/AccountService';
 // import APIError from '../../services/APIError';
 import HttpStatusCode from '../../models/HttpStatusCode';
 import Checkbox from '../common/Checkbox';
-import HelperRegister from './helper-register/HelperRegister';
+import SecureRegister from './secure-register/SecureRegister';
 import GoBackSvg from '../svg/GoBackSvg';
 // import img from '../../img/document-file.png';
-import './HelperLoginPage.scss';
+import './SecureLoginPage.scss';
 
 import EthCrypto from 'eth-crypto';
 import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
+import Role from '../../models/Role';
 // import { add } from 'date-fns';
 
-export interface HelperLoginProps {
+export interface SecureLoginProps {
   appSettings: AppSetting[];
+  role: Role;
   handleLogin: (loginResponse: any) => Promise<void>;
 }
 
-export interface HelperLoginState {
+export interface SecureLoginState {
   email: string;
   password: string;
   errorMessage: string;
 }
 
-class HelperLoginPage extends Component<HelperLoginProps> {
+class SecureLoginPage extends Component<SecureLoginProps> {
   state = {
     email: '',
     password: '',
@@ -52,8 +54,17 @@ class HelperLoginPage extends Component<HelperLoginProps> {
     passwordSelected: false,
     privateKeySelected: false,
   };
-  constructor(props: HelperLoginProps) {
+  constructor(props: SecureLoginProps) {
     super(props);
+  }
+
+  componentDidMount() {
+    document.body.classList.remove(
+      'theme-helper',
+      'theme-owner',
+      'theme-admin'
+    );
+    document.body.classList.add(`theme-${this.props.role}`);
   }
 
   handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -62,8 +73,8 @@ class HelperLoginPage extends Component<HelperLoginProps> {
 
     if (Object.keys(this.state).includes(key)) {
       this.setState({ [key]: value } as Pick<
-        HelperLoginState,
-        keyof HelperLoginState
+        SecureLoginState,
+        keyof SecureLoginState
       >);
     }
   };
@@ -151,71 +162,6 @@ class HelperLoginPage extends Component<HelperLoginProps> {
     }
   };
 
-  // handleRegister = async () => {
-  //   const { email, password, secureAccount } = { ...this.state };
-  //   let { errorMessage } = { ...this.state };
-  //   const username = this.state.email.split('@')[0];
-  //   const accountBody = {
-  //     email,
-  //     password,
-  //     username,
-  //     firstname: '',
-  //     lastname: '',
-  //   };
-  //   let secureAccountbody;
-
-  //   if (secureAccount) {
-  //     window.sessionStorage.setItem('bring-your-own-key', password);
-  //     const publicKey = EthCrypto.publicKeyByPrivateKey('0x' + password);
-  //     const address = EthCrypto.publicKey.toAddress(publicKey);
-
-  //     secureAccountbody = {
-  //       email: address + '@eth.com',
-  //       password: 'isnotused',
-  //       username: address,
-  //       firstname: '',
-  //       lastname: '',
-  //       publicEncryptionKey: publicKey,
-  //     };
-  //   }
-
-  //   try {
-  //     let registerResponse;
-  //     if (secureAccount) {
-  //       registerResponse = await AccountService.registerHelperAccount({
-  //         account: secureAccountbody,
-  //         file: new File([new Blob([''])], 'profile.png'),
-  //       });
-  //     } else {
-  //       registerResponse = await AccountService.registerHelperAccount({
-  //         account: accountBody,
-  //         file: new File([new Blob([''])], 'profile.png'),
-  //       });
-  //     }
-
-  //     if (registerResponse === undefined) {
-  //       throw new Error('Server unavailable.');
-  //     }
-
-  //     await this.props.handleLogin(registerResponse);
-  //     return;
-  //   } catch (err) {
-  //     if (
-  //       err &&
-  //       [
-  //         HttpStatusCode.UNPROCESSABLE_ENTITY,
-  //         HttpStatusCode.INTERNAL_SERVER_ERROR,
-  //       ].includes(Number(err.message))
-  //     ) {
-  //       errorMessage = 'Unable to log in with provided credentials.';
-  //     } else {
-  //       errorMessage =
-  //         'Oops, something went wrong. Please try again in a few minutes.';
-  //     }
-  //   }
-  //   this.setState({ errorMessage });
-  // };
-
   secureAccountChange = () => {
     let secureAccount = !this.state.secureAccount;
     this.setState({ secureAccount });
@@ -287,18 +233,19 @@ class HelperLoginPage extends Component<HelperLoginProps> {
   }
 
   renderLoginPrivateKey() {
+    const { role } = { ...this.props };
     const { password, errorMessage } = { ...this.state };
     return (
       <section className="container">
         <div ref="section" id="section-1-owner" className="section">
           <div className="section-contents">
-            <div className="title1">Document Helper</div>
+            <div className="title1" style={{ textTransform: 'capitalize' }}>Document {role}</div>
             <div className="subtitle">Help us find your account</div>
             <div className="card owner1">
               <div className="card-body">
                 <div className="card-body-section" style={{ marginTop: 0 }}>
                   <LoginSvg />
-                  <div className="helper-login">Helper Login</div>
+                  <div className="helper-login" style={{textTransform: 'capitalize'}}>{role} Login</div>
                   <div className="helper-excerpt" style={{ padding: '0 10px' }}>
                     Advanced users that registered their account with a private
                     key may use it to login
@@ -341,19 +288,26 @@ class HelperLoginPage extends Component<HelperLoginProps> {
                   </div>
                 </div>
                 <div className="bottom">
-                  <input
-                    style={{ width: '210px', marginTop: '27px' }}
-                    type="button"
-                    value="Login"
+                  <Button
+                    color="primary"
+                    style={{
+                      width: '210px',
+                      marginTop: '27px',
+                      fontSize: '25px',
+                      height: '50px',
+                      borderRadius: '9px',
+                    }}
                     disabled={password.length < 1}
                     onClick={this.handleLogin}
-                  />
+                  >
+                    Login
+                  </Button>
                   <div className="bottom-excerpt">Forgot your username?</div>
                 </div>
               </div>
             </div>
             <GoBackSvg
-              color="#4BA9D9"
+              color={role === Role.owner ? '#2362C7' : '#4BA9D9'}
               goBack={() =>
                 this.setState({ privateKeySelected: false, errorMessage: '' })
               }
@@ -365,18 +319,19 @@ class HelperLoginPage extends Component<HelperLoginProps> {
   }
 
   renderLoginPassword() {
+    const { role } = { ...this.props };
     const { password, email, errorMessage } = { ...this.state };
     return (
       <section className="container">
         <div ref="section" id="section-1-owner" className="section">
           <div className="section-contents">
-            <div className="title1">Document Helper</div>
+            <div className="title1" style={{ textTransform: 'capitalize' }}>Document {role}</div>
             <div className="subtitle">Help us find your account</div>
             <div className="card owner1">
               <div className="card-body">
                 <div className="card-body-section" style={{ marginTop: 0 }}>
                   <LoginSvg />
-                  <div className="helper-login">Helper Login</div>
+                  <div className="helper-login" style={{textTransform: 'capitalize'}}>{role} Login</div>
                   <div className="helper-excerpt">
                     Please enter your credentials below...
                   </div>
@@ -428,19 +383,26 @@ class HelperLoginPage extends Component<HelperLoginProps> {
                   </div>
                 </div>
                 <div className="bottom">
-                  <input
-                    style={{ width: '210px', marginTop: '27px' }}
-                    type="button"
-                    value="Login"
+                  <Button
+                    color="primary"
+                    style={{
+                      width: '210px',
+                      marginTop: '27px',
+                      fontSize: '25px',
+                      height: '50px',
+                      borderRadius: '9px',
+                    }}
                     disabled={password.length < 1 || email.length < 1}
                     onClick={this.handleLogin}
-                  />
+                  >
+                    Login
+                  </Button>
                   <div className="bottom-excerpt">Forgot your username?</div>
                 </div>
               </div>
             </div>
             <GoBackSvg
-              color="#4BA9D9"
+              color={role === Role.owner ? '#2362C7' : '#4BA9D9'}
               goBack={() =>
                 this.setState({ passwordSelected: false, errorMessage: '' })
               }
@@ -488,12 +450,20 @@ class HelperLoginPage extends Component<HelperLoginProps> {
               </div>
             </div>
             <div className="or">or</div>
-            <input
-              className="sign-up"
+            <Button
+              style={{
+                fontSize: '23px',
+                width: '210px',
+                height: '50px',
+                borderRadius: '9px',
+              }}
+              // className="sign-up"
               type="button"
-              value="Create Account"
+              color="primary"
               onClick={() => this.setState({ isRegistering: true })}
-            />
+            >
+              Create Account
+            </Button>
           </div>
         </div>
       </section>
@@ -501,6 +471,7 @@ class HelperLoginPage extends Component<HelperLoginProps> {
   }
 
   render() {
+    const { role } = { ...this.props };
     const { passwordSelected, privateKeySelected, isRegistering } = {
       ...this.state,
     };
@@ -518,16 +489,16 @@ class HelperLoginPage extends Component<HelperLoginProps> {
           </Fragment>
         )}
         {isRegistering && (
-          <HelperRegister
+          <SecureRegister
+            role={role}
             appSettings={appSettings}
             handleLogin={this.props.handleLogin}
             goBack={() => this.setState({ isRegistering: false })}
           />
         )}
-        {/* {this.renderOriginalLogin()} */}
       </main>
     );
   }
 }
 
-export default HelperLoginPage;
+export default SecureLoginPage;

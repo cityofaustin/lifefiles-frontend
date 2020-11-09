@@ -2,23 +2,25 @@ import React, { Component, Fragment } from 'react';
 
 import HttpStatusCode from '../../../models/HttpStatusCode';
 import AccountService from '../../../services/AccountService';
-import HelperEmail, { HelperEmailState } from './HelperEmail';
+import EmailCard, { EmailCardState } from './EmailCard';
 import HelperProfile, { HelperProfileState } from './HelperProfile';
 import HelperOverview from './HelperOverview';
-import HelperLoginMethod, { HelperLoginMethodState } from './HelperLoginMethod';
+import OwnerOverview from './OwnerOverview';
+import SecureLoginMethod, { SecureLoginMethodState } from './SecureLoginMethod';
 import HelperLoginSetup, { HelperLoginSetupState } from './HelperLoginSetup';
 import NotarySetup, { NotarySetupState } from './NotarySetup';
 import { LoginOption } from '../../svg/HelperLoginOption';
 import CryptoUtil from '../../../util/CryptoUtil';
-import './HelperRegister.scss';
+import './SecureRegister.scss';
 import { HelperAccountRequest } from '../../../models/auth/HelperRegisterRequest';
 import APIError from '../../../services/APIError';
 import RegisterAndLogin from './RegisterAndLogin';
 import delay from '../../../util/delay';
 import { ANIMATION_TIMEOUT } from '../../../util/animation-util';
 import AppSetting from '../../../models/AppSetting';
+import Role from '../../../models/Role';
 
-interface HelperRegisterState {
+interface SecureRegisterState {
   isAnimatingForward: boolean;
   isAnimatingBackward: boolean;
   email: string;
@@ -33,14 +35,15 @@ interface HelperRegisterState {
   notaryId: string;
   notaryState: string;
 }
-interface HelperRegisterProps {
+interface SecureRegisterProps {
+  role: Role;
   appSettings: AppSetting[];
   handleLogin: (loginResponse: any) => Promise<void>;
   goBack: () => void;
 }
-export default class HelperRegister extends Component<
-  HelperRegisterProps,
-  HelperRegisterState
+export default class SecureRegister extends Component<
+  SecureRegisterProps,
+  SecureRegisterState
 > {
   state = {
     isAnimatingForward: false,
@@ -168,7 +171,7 @@ export default class HelperRegister extends Component<
 
   goBack = async () => {
     let { step } = { ...this.state };
-    const { goBack } = { ...this.props };
+    const { goBack, role } = { ...this.props };
     if (step === 0) {
       goBack();
       return;
@@ -176,16 +179,20 @@ export default class HelperRegister extends Component<
     this.setState({ isAnimatingBackward: true });
     await delay(100);
     const elObj = this.getElObj();
-    // debugger;
     elObj.helper[step]!.style.transform = `translateX(360px)`;
     elObj.helper[step]!.style.opacity = '0';
-    step--;
+    if (step === 2 && role === Role.owner) {
+      step -= 2;
+    } else {
+      step--;
+    }
     (elObj.wave as any).style.transform = `translateX(-${step * 360}px)`;
     await delay(1500);
     this.setState({ step, isAnimatingBackward: false });
   };
 
   goForward = async (prevCardState?: any) => {
+    const { role } = { ...this.props };
     let {
       step,
       email,
@@ -202,7 +209,7 @@ export default class HelperRegister extends Component<
     };
     switch (step) {
       case 0:
-        ({ email, fullname } = { ...(prevCardState as HelperEmailState) });
+        ({ email, fullname } = { ...(prevCardState as EmailCardState) });
         break;
       case 1:
         previewURL = (prevCardState as HelperProfileState).previewURL!;
@@ -212,7 +219,7 @@ export default class HelperRegister extends Component<
       case 2:
         break; // overview has no state
       case 3:
-        selectedOption = (prevCardState as HelperLoginMethodState)
+        selectedOption = (prevCardState as SecureLoginMethodState)
           .selectedOption!;
         break;
       case 4:
@@ -230,7 +237,11 @@ export default class HelperRegister extends Component<
     const elObj = this.getElObj();
     elObj.helper[step]!.style.transform = 'translateX(-360px)';
     elObj.helper[step]!.style.opacity = '0';
-    step++;
+    if (step === 0 && role === Role.owner) {
+      step += 2;
+    } else {
+      step++;
+    }
     (elObj.wave as any).style.transform = `translateX(-${step * 360}px)`;
     this.setState({
       step,
@@ -270,6 +281,7 @@ export default class HelperRegister extends Component<
   }
 
   render() {
+    const { role } = { ...this.props };
     const {
       email,
       fullname,
@@ -286,12 +298,13 @@ export default class HelperRegister extends Component<
     } = {
       ...this.state,
     };
-    const {appSettings} = {...this.props};
+    const { appSettings } = { ...this.props };
     let section = <Fragment />;
     switch (step) {
       case 0:
         section = (
-          <HelperEmail
+          <EmailCard
+            role={role}
             errorMessage={errorMessage}
             email={email}
             fullname={fullname}
@@ -304,7 +317,8 @@ export default class HelperRegister extends Component<
         if (isAnimatingForward) {
           section = (
             <Fragment>
-              <HelperEmail
+              <EmailCard
+                role={role}
                 errorMessage={errorMessage}
                 email={email}
                 fullname={fullname}
@@ -325,7 +339,8 @@ export default class HelperRegister extends Component<
         } else if (isAnimatingBackward) {
           section = (
             <Fragment>
-              <HelperEmail
+              <EmailCard
+                role={role}
                 position="left"
                 errorMessage={errorMessage}
                 email={email}
@@ -358,73 +373,159 @@ export default class HelperRegister extends Component<
         break;
       case 2:
         if (isAnimatingForward) {
-          section = (
-            <Fragment>
-              <HelperProfile
+          let prevCard = (
+            <HelperProfile
+              email={email}
+              fullname={fullname}
+              previewURL={previewURL}
+              file={file}
+              goBack={this.goBack}
+              goForward={this.goForward}
+            />
+          );
+          let card = (
+            <HelperOverview
+              goBack={this.goBack}
+              goForward={this.goForward}
+              position="right"
+            />
+          );
+          if (role === Role.owner) {
+            prevCard = (
+              <EmailCard
+                role={role}
+                errorMessage={errorMessage}
                 email={email}
                 fullname={fullname}
-                previewURL={previewURL}
-                file={file}
                 goBack={this.goBack}
                 goForward={this.goForward}
               />
-              <HelperOverview
+            );
+            card = (
+              <OwnerOverview
                 goBack={this.goBack}
                 goForward={this.goForward}
                 position="right"
               />
+            );
+          }
+          section = (
+            <Fragment>
+              {prevCard}
+              {card}
             </Fragment>
           );
         } else if (isAnimatingBackward) {
-          section = (
-            <Fragment>
-              <HelperProfile
+          let card = (
+            <HelperProfile
+              email={email}
+              fullname={fullname}
+              previewURL={previewURL}
+              file={file}
+              goBack={this.goBack}
+              goForward={this.goForward}
+              position="left"
+            />
+          );
+          let prevCard = (
+            <HelperOverview goBack={this.goBack} goForward={this.goForward} />
+          );
+          if (role === Role.owner) {
+            card = (
+              <EmailCard
+                role={role}
+                errorMessage={errorMessage}
                 email={email}
                 fullname={fullname}
-                previewURL={previewURL}
-                file={file}
                 goBack={this.goBack}
                 goForward={this.goForward}
                 position="left"
               />
-              <HelperOverview goBack={this.goBack} goForward={this.goForward} />
+            );
+            prevCard = (
+              <OwnerOverview goBack={this.goBack} goForward={this.goForward} />
+            );
+          }
+          section = (
+            <Fragment>
+              {card}
+              {prevCard}
             </Fragment>
           );
         } else {
-          section = (
-            <HelperOverview goBack={this.goBack} goForward={this.goForward} />
-          );
+          section =
+            role === Role.owner ? (
+              <OwnerOverview goBack={this.goBack} goForward={this.goForward} />
+            ) : (
+              <HelperOverview goBack={this.goBack} goForward={this.goForward} />
+            );
         }
         break;
       case 3:
         if (isAnimatingForward) {
-          section = (
-            <Fragment>
-              <HelperOverview goBack={this.goBack} goForward={this.goForward} />
-              <HelperLoginMethod
+          let prevCard = (
+            <HelperOverview goBack={this.goBack} goForward={this.goForward} />
+          );
+          let card = (
+            <SecureLoginMethod
+              role={role}
+              goBack={this.goBack}
+              goForward={this.goForward}
+              position="right"
+            />
+          );
+          if (role === Role.owner) {
+            prevCard = (
+              <OwnerOverview goBack={this.goBack} goForward={this.goForward} />
+            );
+            card = (
+              <SecureLoginMethod
+                role={role}
                 goBack={this.goBack}
                 goForward={this.goForward}
                 position="right"
               />
+            );
+          }
+          section = (
+            <Fragment>
+              {prevCard}
+              {card}
             </Fragment>
           );
         } else if (isAnimatingBackward) {
-          section = (
-            <Fragment>
-              <HelperOverview
+          let card = (
+            <HelperOverview
+              goBack={this.goBack}
+              goForward={this.goForward}
+              position="left"
+            />
+          );
+          if (role === Role.owner) {
+            card = (
+              <OwnerOverview
                 goBack={this.goBack}
                 goForward={this.goForward}
                 position="left"
               />
-              <HelperLoginMethod
+            );
+          }
+          section = (
+            <Fragment>
+              {card}
+              (
+              <SecureLoginMethod
+                role={role}
                 goBack={this.goBack}
                 goForward={this.goForward}
               />
+              )
             </Fragment>
           );
         } else {
           section = (
-            <HelperLoginMethod
+            <SecureLoginMethod
+              role={role}
               goBack={this.goBack}
               goForward={this.goForward}
             />
@@ -435,7 +536,8 @@ export default class HelperRegister extends Component<
         if (isAnimatingForward) {
           section = (
             <Fragment>
-              <HelperLoginMethod
+              <SecureLoginMethod
+                role={role}
                 goBack={this.goBack}
                 goForward={this.goForward}
               />
@@ -451,7 +553,8 @@ export default class HelperRegister extends Component<
         } else if (isAnimatingBackward) {
           section = (
             <Fragment>
-              <HelperLoginMethod
+              <SecureLoginMethod
+                role={role}
                 goBack={this.goBack}
                 goForward={this.goForward}
                 position="left"
