@@ -797,17 +797,21 @@ class UpdateDocumentModal extends Component<
       <Fragment>
         {!referencedAccount && (
           <div
-            onClick={() =>
-              this.setState({
-                showConfirmDeleteSection: !showConfirmDeleteSection,
-              })
-            }
             className={classNames({
               'upload-doc-delete-container': true,
               active: showConfirmDeleteSection,
             })}
           >
-            <DeleteSvg2 className="delete-svg" />
+            <div
+              className="delete-nav-container"
+              onClick={() =>
+                this.setState({
+                  showConfirmDeleteSection: !showConfirmDeleteSection,
+                })
+              }
+            >
+              <DeleteSvg2 className="delete-svg" />
+            </div>
             {showConfirmDeleteSection && this.renderConfirmDelete()}
           </div>
         )}
