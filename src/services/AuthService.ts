@@ -25,12 +25,17 @@ class AuthService {
     sessionStorage.setItem(this.REFRESH_TOKEN, refreshToken);
   }
 
-  static logOut() {
+  static logOut(isSecure = false) {
     sessionStorage.removeItem(this.ACCESS_TOKEN);
     sessionStorage.removeItem(this.REFRESH_TOKEN);
     // redirect to auth server
-    window.location.replace(location.origin + location.pathname + location.hash);
-    window.location.reload();
+    if(isSecure) {
+      const l = location.origin + location.pathname + '#/secure-login';
+      window.location.replace(l);
+    } else {
+      window.location.replace(location.origin + location.pathname + location.hash);
+      window.location.reload();
+    }
   }
 
   static deleteOwnerAccount() {

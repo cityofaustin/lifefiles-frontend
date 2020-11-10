@@ -5,6 +5,8 @@ import { handleIOSBrowser } from '../../../util/browser-util';
 import { animateIn, getSectionClassName } from '../../../util/animation-util';
 import Role from '../../../models/Role';
 import { Button } from 'reactstrap';
+import { ReactComponent as OwnerPasswordOptionSvg } from '../../../img/owner-password-option.svg';
+import { ReactComponent as OwnerKeyOptionSvg } from '../../../img/owner-key-option.svg';
 
 interface SecureLoginMethodProps {
   role: Role;
@@ -53,7 +55,70 @@ export default class SecureLoginMethod extends Component<
                 </div>
               </div>
               {role === Role.owner && (
-                <Fragment />
+                <div className="owner-login-option-container">
+                  {!selectedOption && (
+                    <p>
+                      Please select the login method that works best for you.
+                    </p>
+                  )}
+                  <div className="owner-login-options">
+                    <div
+                      className={
+                        selectedOption === LoginOption.Password ? 'active' : ''
+                      }
+                      onClick={() =>
+                        this.setState({
+                          selectedOption: LoginOption.Password,
+                        })
+                      }
+                    >
+                      <OwnerPasswordOptionSvg />
+                    </div>
+                    <div
+                      className={
+                        selectedOption === LoginOption.PrivateKey ? 'active' : ''
+                      }
+                      onClick={() =>
+                        this.setState({
+                          selectedOption: LoginOption.PrivateKey,
+                        })
+                      }
+                    >
+                      <OwnerKeyOptionSvg />
+                    </div>
+                  </div>
+                  {selectedOption === LoginOption.Password && (
+                    <div className="owner-option-excerpt">
+                      <p>
+                        Your password is uniquely linked to a private key and
+                        once set, it cannot be changed.
+                      </p>
+                      <p>
+                        For security reasons,{' '}
+                        <strong>if you forget your password</strong> you will{' '}
+                        <span className="danger">
+                          permanently loose access to your account.
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  {selectedOption === LoginOption.PrivateKey && (
+                    <div className="owner-option-excerpt">
+                      <p>
+                        A private key is a string of unique characters you can
+                        use to encrypt and notarize documents.
+                      </p>
+                      <p>
+                        For security reasons, we{' '}
+                        <strong>do not store your private key.</strong> If you
+                        loose your private key, you will{' '}
+                        <span className="danger">
+                          permanently loose access to your account.
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
               {role === Role.helper && (
                 <div className="login-options">

@@ -147,8 +147,8 @@ class APIService {
     return responseJson;
   }
 
-  static async registerHelper(request: HelperRegisterRequest) {
-    const path = '/helper-accounts';
+  static async registerSecure(request: HelperRegisterRequest) {
+    const path = '/secure-accounts';
     const input = `${API_ENDPOINT}${path}`;
     const headers = {
       // Authorization: `Bearer ${AuthService.getAccessToken()}`,
@@ -162,13 +162,16 @@ class APIService {
       lastname = '-';
     }
 
-    formdata.append('img', request.file, request.file.name);
     formdata.append('email', request.account.email);
     formdata.append('password', request.account.password);
     formdata.append('username', request.account.username);
     formdata.append('firstname', request.account.firstname);
     formdata.append('lastname', lastname);
+    formdata.append('role', request.account.role);
 
+    if(request.file) {
+      formdata.append('img', request.file, request.file.name);
+    }
     if (request.account.publicEncryptionKey) {
       formdata.append(
         'publicEncryptionKey',

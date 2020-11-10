@@ -14,7 +14,8 @@ import CryptoUtil from '../../../util/CryptoUtil';
 import delay from '../../../util/delay';
 import { handleIOSBrowser } from '../../../util/browser-util';
 import { animateIn, getSectionClassName } from '../../../util/animation-util';
-export interface HelperLoginSetupState {
+import Role from '../../../models/Role';
+export interface SecureLoginSetupState {
   password: string;
   confirmPassword: string;
   errorMessage: string;
@@ -23,22 +24,23 @@ export interface HelperLoginSetupState {
   isToastOpen: boolean;
   toastBody: string;
 }
-interface HelperLoginSetupProps {
+interface SecureLoginSetupProps {
+  role: Role;
   password: string;
   goBack: () => void;
-  goForward: (prevCardState: HelperLoginSetupState) => void;
+  goForward: (prevCardState: SecureLoginSetupState) => void;
   selectedOption: LoginOption;
   position?: string;
 }
-export default class HelperLoginSetup extends Component<
-  HelperLoginSetupProps,
-  HelperLoginSetupState
+export default class SecureLoginSetup extends Component<
+  SecureLoginSetupProps,
+  SecureLoginSetupState
 > {
   static defaultProps = {
     password: '',
     selectedOption: LoginOption.Password,
   };
-  constructor(props: Readonly<HelperLoginSetupProps>) {
+  constructor(props: Readonly<SecureLoginSetupProps>) {
     super(props);
     const { password } = { ...props };
     this.state = {
@@ -111,13 +113,20 @@ export default class HelperLoginSetup extends Component<
             </div>
           </div>
           <div className="bottom">
-            <input
-              style={{ width: '210px', marginTop: '27px' }}
-              type="button"
-              value="Set Password"
+            <Button
+              color="primary"
+              style={{
+                width: '210px',
+                marginTop: '27px',
+                fontSize: '25px',
+                height: '50px',
+                borderRadius: '9px',
+              }}
               disabled={!password || !confirmPassword}
               onClick={this.goForward}
-            />
+            >
+              Set Password
+            </Button>
           </div>
         </div>
       </div>
@@ -138,13 +147,19 @@ export default class HelperLoginSetup extends Component<
           </div>
           <PrivateKeyOverviewSvg />
           <div className="bottom">
-            <input
-              style={{ width: '210px', marginTop: '27px' }}
-              type="button"
-              value="Continue"
-              // disabled={true}
+            <Button
+              color="primary"
+              style={{
+                width: '210px',
+                marginTop: '27px',
+                fontSize: '25px',
+                height: '50px',
+                borderRadius: '9px',
+              }}
               onClick={() => this.setState({ isOverview: false })}
-            />
+            >
+              Continue
+            </Button>
           </div>
         </div>
       </div>
@@ -236,13 +251,20 @@ export default class HelperLoginSetup extends Component<
           </div>
           {isDisplayMakeSure && <KeyMakeSureSvg />}
           <div className="bottom">
-            <input
-              style={{ width: '210px', marginTop: '27px' }}
-              type="button"
-              value="Set Private Key"
+            <Button
+              color="primary"
+              style={{
+                width: '210px',
+                marginTop: '27px',
+                fontSize: '25px',
+                height: '50px',
+                borderRadius: '9px',
+              }}
               disabled={password.length < 64}
               onClick={() => this.goForward()}
-            />
+            >
+              Set Private Key
+            </Button>
           </div>
         </div>
       </div>
@@ -250,7 +272,7 @@ export default class HelperLoginSetup extends Component<
   }
   render() {
     const { isOverview } = { ...this.state };
-    const { goBack, selectedOption } = { ...this.props };
+    const { goBack, selectedOption, role } = { ...this.props };
     return (
       <div
         ref="section"
@@ -268,7 +290,10 @@ export default class HelperLoginSetup extends Component<
           {selectedOption === LoginOption.PrivateKey &&
             !isOverview &&
             this.renderPrivateKeySetup()}
-          <GoBackSvg color="#4BA9D9" goBack={goBack} />
+          <GoBackSvg
+            color={role === Role.owner ? '#2362C7' : '#4BA9D9'}
+            goBack={goBack}
+          />
         </div>
       </div>
     );

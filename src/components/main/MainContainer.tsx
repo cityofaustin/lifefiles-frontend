@@ -1070,6 +1070,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             <div className="main-section">
               {isAccount && <Redirect push to="**/account" />}
               <Switch>
+                <Route path="/secure-login">
+                  <Redirect to="/" />
+                </Route>
                 <Route exact path="/helper-login">
                   <Redirect to="/helper-login/clients" />
                 </Route>

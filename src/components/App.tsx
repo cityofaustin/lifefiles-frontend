@@ -81,7 +81,7 @@ class App extends Component<{}, AppState> {
         theme = account?.role;
         document.body.classList.remove('theme-helper', 'theme-owner');
         document.body.classList.add(`theme-${theme}`);
-        await this.handleEncryptionKey(account?.role);
+        await this.handleEncryptionKey(account?.role, account.isSecure);
       } catch (err) {
         console.error(err.message);
       }
@@ -116,7 +116,7 @@ class App extends Component<{}, AppState> {
     window.sessionStorage.setItem('bring-your-own-key', key);
   };
 
-  handleEncryptionKey = async (role) => {
+  handleEncryptionKey = async (role, isSecure = false) => {
     let cookieValue;
 
     try {
@@ -139,7 +139,7 @@ class App extends Component<{}, AppState> {
       // If the user did not provider their own key we will provide one
       let encryptionKeyResponse: EncryptionKeyResponse;
       if (role === 'owner') {
-        encryptionKeyResponse = await AccountService.getEncryptionKey();
+        encryptionKeyResponse = await AccountService.getEncryptionKey(isSecure);
       } else {
         encryptionKeyResponse = await AccountService.getHelperEncryptionKey();
       }
@@ -172,7 +172,7 @@ class App extends Component<{}, AppState> {
 
       AuthService.logIn(account?.token, '');
 
-      await this.handleEncryptionKey(account?.role);
+      await this.handleEncryptionKey(account?.role, account.isSecure);
       const myAccountResponse = await AccountService.getMyAccount();
       ({ account, coreFeatures, viewFeatures } = { ...myAccountResponse });
     } catch (err) {
@@ -189,7 +189,8 @@ class App extends Component<{}, AppState> {
   };
 
   handleLogout = () => {
-    AuthService.logOut();
+    const {account} = {...this.state};
+    AuthService.logOut(account?.isSecure);
     window.sessionStorage.removeItem('bring-your-own-key');
     this.setState({ account: undefined });
   };

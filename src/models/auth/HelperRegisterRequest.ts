@@ -1,3 +1,4 @@
+import Role from '../Role';
 
 export default interface HelperRegisterRequest {
   account: HelperAccountRequest;
@@ -13,4 +14,5 @@ export interface HelperAccountRequest {
   publicEncryptionKey?: string;
   notaryId?: string;
   notaryState?: string;
+  role: Role;
 }

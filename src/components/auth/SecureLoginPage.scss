@@ -356,6 +356,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            svg {
+              path[data-name="Rectangle 1360"] {
+                @include themify($themes) {
+                  fill: themed("colorPrimary");
+                }
+              }
+            }
             .form-control1 {
               width: min-content;
               label {

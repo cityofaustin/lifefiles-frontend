@@ -7,7 +7,7 @@ import HelperProfile, { HelperProfileState } from './HelperProfile';
 import HelperOverview from './HelperOverview';
 import OwnerOverview from './OwnerOverview';
 import SecureLoginMethod, { SecureLoginMethodState } from './SecureLoginMethod';
-import HelperLoginSetup, { HelperLoginSetupState } from './HelperLoginSetup';
+import SecureLoginSetup, { SecureLoginSetupState } from './SecureLoginSetup';
 import NotarySetup, { NotarySetupState } from './NotarySetup';
 import { LoginOption } from '../../svg/HelperLoginOption';
 import CryptoUtil from '../../../util/CryptoUtil';
@@ -51,7 +51,7 @@ export default class SecureRegister extends Component<
     email: '',
     fullname: '',
     step: 0,
-    // step: 6,
+    // step: 3,
     previewURL: '',
     // selectedOption: undefined as any,
     selectedOption: LoginOption.PrivateKey as any,
@@ -64,6 +64,7 @@ export default class SecureRegister extends Component<
   };
 
   handleRegister = async () => {
+    const { role } = {...this.props};
     const {
       email,
       fullname,
@@ -91,6 +92,7 @@ export default class SecureRegister extends Component<
       lastname,
       notaryId,
       notaryState,
+      role
     };
     const secureAccountbody: HelperAccountRequest = {
       email,
@@ -101,6 +103,7 @@ export default class SecureRegister extends Component<
       notaryId,
       notaryState,
       publicEncryptionKey: '',
+      role
     };
     if (selectedOption === LoginOption.PrivateKey) {
       window.sessionStorage.setItem('bring-your-own-key', password);
@@ -113,12 +116,12 @@ export default class SecureRegister extends Component<
     try {
       let registerResponse;
       if (selectedOption === LoginOption.PrivateKey) {
-        registerResponse = await AccountService.registerHelperAccount({
+        registerResponse = await AccountService.registerSecureAccount({
           account: secureAccountbody,
           file: file!,
         });
       } else {
-        registerResponse = await AccountService.registerHelperAccount({
+        registerResponse = await AccountService.registerSecureAccount({
           account: accountBody,
           file: file!,
         });
@@ -223,7 +226,7 @@ export default class SecureRegister extends Component<
           .selectedOption!;
         break;
       case 4:
-        password = (prevCardState as HelperLoginSetupState).password;
+        password = (prevCardState as SecureLoginSetupState).password;
         break;
       case 5:
         if (prevCardState) {
@@ -237,7 +240,7 @@ export default class SecureRegister extends Component<
     const elObj = this.getElObj();
     elObj.helper[step]!.style.transform = 'translateX(-360px)';
     elObj.helper[step]!.style.opacity = '0';
-    if (step === 0 && role === Role.owner) {
+    if ((step === 0 || step === 4) && role === Role.owner) {
       step += 2;
     } else {
       step++;
@@ -541,7 +544,8 @@ export default class SecureRegister extends Component<
                 goBack={this.goBack}
                 goForward={this.goForward}
               />
-              <HelperLoginSetup
+              <SecureLoginSetup
+                role={role}
                 password={password}
                 selectedOption={selectedOption}
                 goBack={this.goBack}
@@ -559,7 +563,8 @@ export default class SecureRegister extends Component<
                 goForward={this.goForward}
                 position="left"
               />
-              <HelperLoginSetup
+              <SecureLoginSetup
+                role={role}
                 password={password}
                 selectedOption={selectedOption}
                 goBack={this.goBack}
@@ -569,7 +574,8 @@ export default class SecureRegister extends Component<
           );
         } else {
           section = (
-            <HelperLoginSetup
+            <SecureLoginSetup
+              role={role}
               password={password}
               selectedOption={selectedOption}
               goBack={this.goBack}
@@ -582,7 +588,8 @@ export default class SecureRegister extends Component<
         if (isAnimatingForward) {
           section = (
             <Fragment>
-              <HelperLoginSetup
+              <SecureLoginSetup
+                role={role}
                 password={password}
                 selectedOption={selectedOption}
                 goBack={this.goBack}
@@ -600,7 +607,8 @@ export default class SecureRegister extends Component<
         } else if (isAnimatingBackward) {
           section = (
             <Fragment>
-              <HelperLoginSetup
+              <SecureLoginSetup
+                role={role}
                 password={password}
                 selectedOption={selectedOption}
                 goBack={this.goBack}
@@ -628,14 +636,28 @@ export default class SecureRegister extends Component<
         break;
       case 6:
         if (isAnimatingForward) {
-          section = (
-            <Fragment>
-              <NotarySetup
-                notaryId={notaryId}
-                notaryState={notaryState}
+          let prevCard = (
+            <NotarySetup
+              notaryId={notaryId}
+              notaryState={notaryState}
+              goBack={this.goBack}
+              goForward={this.goForward}
+            />
+          );
+          if (role === Role.owner) {
+            prevCard = (
+              <SecureLoginSetup
+                role={role}
+                password={password}
+                selectedOption={selectedOption}
                 goBack={this.goBack}
                 goForward={this.goForward}
               />
+            );
+          }
+          section = (
+            <Fragment>
+              {prevCard}
               <RegisterAndLogin appSettings={appSettings} position="right" />
             </Fragment>
           );

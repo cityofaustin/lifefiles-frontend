@@ -26,6 +26,7 @@ interface Account {
   isNotDisplayPhoto?: boolean;
   isNotDisplayName?: boolean;
   isNotDisplayPhone?: boolean;
+  isSecure?: boolean;
 }
 
 export default Account;

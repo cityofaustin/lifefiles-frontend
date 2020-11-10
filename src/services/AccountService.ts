@@ -64,9 +64,9 @@ class AccountService extends AgentService {
     }
   }
 
-  static async registerHelperAccount(request: HelperRegisterRequest) {
+  static async registerSecureAccount(request: HelperRegisterRequest) {
     // return await super.post(`/helper-accounts`, request);
-    return await super.registerHelper(request);
+    return await super.registerSecure(request);
   }
 
   static async secureLoginHelperAccount(request) {
@@ -108,8 +108,12 @@ class AccountService extends AgentService {
     return super.getAPIEndpoint() + `/image/${filename}`;
   }
 
-  static async getEncryptionKey() {
-    return super.getWithEndpoint(AUTH_API, '/get-encryption-key');
+  static async getEncryptionKey(isSecure = false) {
+    if (isSecure) {
+      return super.get('/get-encryption-key');
+    } else {
+      return super.getWithEndpoint(AUTH_API, '/get-encryption-key');
+    }
   }
 
   static async getHelperEncryptionKey() {
