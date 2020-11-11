@@ -172,25 +172,52 @@
 
 .expiration-date-section {
   display: flex;
-  flex-direction: row;
-  margin-top: 96px;
+  flex-direction: column;
   justify-content: space-evenly;
-  .image-container {
-    width: 35%;
+  @include media-breakpoint-up(lg) {
+    margin-top: 96px;
+    flex-direction: row;
+  }
+  .image-container-sm {
     display: flex;
+    width: 100%;
+    margin-bottom: 24px;
     justify-content: center;
+    @include media-breakpoint-up(lg) {
+      display: none;
+      margin-bottom: 0;
+    }
+    img {
+      // width: -moz-available; /* WebKit-based browsers will ignore this. */
+      // width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
+      // width: fill-available;
+      height: 200px;
+      object-fit: contain;
+    }
+  }
+  .image-container {
+    display: none;
+    justify-content: center;
+    @include media-breakpoint-up(lg) {
+      width: 35%;
+      display: flex;
+    }
     img {
       width: 100%;
       width: -moz-available; /* WebKit-based browsers will ignore this. */
       width: -webkit-fill-available; /* Mozilla-based browsers will ignore this. */
       width: fill-available;
+      height: 200px;
       object-fit: contain;
     }
   }
   .expiration-date-container {
-    width: 55%;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    @include media-breakpoint-up(lg) {
+      width: 55%;
+    }
     .expiration-toggle {
       display: flex;
       flex-direction: column;
@@ -206,7 +233,10 @@
       margin: 40px 0 14px 0;
       display: flex;
       flex-direction: column;
-      // align-items: flex-start;
+      align-items: center;
+      @include media-breakpoint-up(lg) {
+        align-items: flex-start;
+      }
       .label {
         font-size: 20px;
         font-weight: 500;

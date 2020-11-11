@@ -562,6 +562,9 @@ class AddDocumentModal extends Component<
     let { validUntilDate } = { ...this.state };
     return (
       <section className="expiration-date-section">
+        <div className="image-container-sm">
+          <img src={previewURL} alt="" />
+        </div>
         <div className="image-container">
           <img src={previewURL} alt="" />
         </div>
