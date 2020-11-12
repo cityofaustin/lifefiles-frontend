@@ -270,9 +270,10 @@ class APIService {
     documentType: string,
     fromAccountId: string,
     toAccountId: string,
-    permissions: ShareRequestPermissions
+    permissions: ShareRequestPermissions,
+    replaceId
   ) {
-    const path = '/share-requests';
+    const path = replaceId ? `/share-requests/${replaceId}/replace` : '/share-requests';
     const input = `${API_ENDPOINT}${path}`;
     const headers = {
       Authorization: `Bearer ${AuthService.getAccessToken()}`,

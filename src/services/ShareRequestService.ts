@@ -52,7 +52,27 @@ class ShareRequestService extends AgentService {
       documentType,
       fromAccountId,
       toAccountId,
-      permissions
+      permissions,
+      undefined
+    );
+  }
+
+  static async replaceShareRequestFile(file: File | undefined,
+    thumbnailFile: File | undefined,
+    documentType: string,
+    fromAccountId: string,
+    toAccountId: string,
+    permissions: ShareRequestPermissions,
+    ShareRequestId: string
+  ): Promise<ShareRequest> {
+    return await super.postShareRequestFile(
+      file,
+      thumbnailFile,
+      documentType,
+      fromAccountId,
+      toAccountId,
+      permissions,
+      ShareRequestId
     );
   }
 }

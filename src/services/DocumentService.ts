@@ -53,6 +53,10 @@ class DocumentService extends AgentService {
     );
   }
 
+  static async getByShareRequest(shareRequestId) {
+    return await super.get(`/share-requests/${shareRequestId}${PATH}`);
+  }
+
   static async updateDocument(
     request: UpdateDocumentRequest
   ): Promise<Document> {

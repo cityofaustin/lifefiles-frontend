@@ -10,6 +10,7 @@
     .dropzone-form {
       display: flex;
       flex: 1;
+      cursor: pointer;
       .upload-sm {
         background-color: white;
         border: dashed 2px $warm-grey;
@@ -47,6 +48,7 @@
     .dropzone-form {
       display: flex;
       flex: 1;
+      cursor: pointer;
       .upload-sm {
         display: none;
       }
@@ -94,6 +96,7 @@
     .dropzone-form {
       display: flex;
       flex: 1;
+      cursor: pointer;
       .upload-sm {
         display: none;
       }
@@ -139,6 +142,7 @@
     .dropzone-form {
       display: flex;
       flex: 1;
+      cursor: pointer;
       .upload-sm {
         display: none;
       }

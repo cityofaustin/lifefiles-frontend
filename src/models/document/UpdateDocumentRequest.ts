@@ -1,3 +1,5 @@
+import Account from '../Account';
+
 interface UpdateDocumentRequest {
   id: string;
   img?: File;
@@ -5,6 +7,8 @@ interface UpdateDocumentRequest {
   validUntilDate?: Date;
   claimed?: boolean;
   base64Image?: string;
+  shareRequestId?: string;
+  referencedAccount?: Account;
 }
 
 export default UpdateDocumentRequest;

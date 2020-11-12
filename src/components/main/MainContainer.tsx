@@ -49,6 +49,7 @@ import ProfileImage from '../common/ProfileImage';
 import MySettings from './MySettings';
 import NotaryPdfTestPage from '../NotaryPdfTestPage';
 import documentSelected from '../../test-data/document';
+import FileUtil from '../../util/FileUtil';
 
 interface MainContainerState {
   documentTypes: DocumentType[];
@@ -63,6 +64,7 @@ interface MainContainerState {
   isLoading: boolean;
   documentQuery: string;
   accounts: Account[];
+  helperAccounts?: Account[];
   helperContacts: HelperContact[];
   searchedHelperContacts: HelperContact[];
   activeTab: string;
@@ -120,7 +122,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   async componentDidMount() {
     const { account } = { ...this.props };
     const { sortAsc, clientShares } = { ...this.state };
-    let { documentTypes, accounts, helperContacts } = { ...this.state };
+    let { documentTypes, accounts, helperContacts, helperAccounts } = {
+      ...this.state,
+    };
     const documents: Document[] = account.documents;
     this.setState({ isLoading: true });
     try {
@@ -132,6 +136,13 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               accountItem.role === Role.owner &&
               accountItem.id !== account.id
             ) {
+              return accountItem;
+            }
+          }
+        );
+        helperAccounts = (await AccountService.getAccounts()).filter(
+          (accountItem) => {
+            if (accountItem.role === Role.helper) {
               return accountItem;
             }
           }
@@ -167,6 +178,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       searchedDocuments: this.sortDocuments(documents, sortAsc),
       isLoading: false,
       accounts,
+      helperAccounts,
       helperContacts,
       searchedHelperContacts: this.sortHelperContacts(
         helperContacts,
@@ -458,36 +470,66 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     request: UpdateDocumentRequest
   ) => {
     const { account } = { ...this.props };
-    let { documents, accounts } = { ...this.state };
-    const { documentQuery } = { ...this.state };
+    let { documents } = { ...this.state };
+    const { documentQuery, accounts, helperAccounts } = { ...this.state };
     this.setState({ isLoading: true });
 
     let updatedDoc;
     try {
+      // also !request.id
+      if (request.referencedAccount) {
+        // then helper is updating
+        const response = await DocumentService.getByShareRequest(
+          request.shareRequestId
+        );
+        request.id = response.document._id;
+        const {
+          newZippedFile,
+          newZippedThumbnailFile,
+        } = await FileUtil.dataURLToEncryptedFiles(
+          request.base64Image!,
+          request.referencedAccount.didPublicEncryptionKey!
+        );
+        request.img = newZippedFile;
+        request.thumbnail = newZippedThumbnailFile;
+      }
       updatedDoc = await DocumentService.updateDocument(request);
-      // FIXME: get API call to return updatedAt
-      updatedDoc.updatedAt = new Date();
-      documents = documents.map((doc) =>
-        doc.type === updatedDoc.type ? updatedDoc : doc
-      );
+      if (!request.referencedAccount) {
+        updatedDoc.updatedAt = new Date();
+        documents = documents.map((doc) =>
+          doc.type === updatedDoc.type ? updatedDoc : doc
+        );
+      }
     } catch (err) {
       console.error('failed to upload file');
     }
 
-    const matchedShareRequests = account.shareRequests.filter(
-      (shareRequest) => {
-        return shareRequest.documentType === updatedDoc.type;
-      }
-    );
+    let matchedShareRequests = account.shareRequests.filter((shareRequest) => {
+      return shareRequest.documentType === updatedDoc.type;
+    });
+    if (request.referencedAccount) {
+      matchedShareRequests = request.referencedAccount.shareRequests.filter(
+        (shareRequest) => {
+          return shareRequest.documentType === updatedDoc.type;
+        }
+      );
+    }
 
     // remove existing share requests
     try {
-      for (let i = 0; i < matchedShareRequests.length; i++) {
-        await ShareRequestService.deleteShareRequest(
-          matchedShareRequests[i]!._id!
-        );
-        // remove share requests from UI
-        this.removeShareRequest(matchedShareRequests[i]);
+      for (const matchedShareRequest of matchedShareRequests) {
+        if (!request.referencedAccount) {
+          await ShareRequestService.deleteShareRequest(
+            matchedShareRequest!._id!
+          );
+          // remove share requests from UI
+          this.removeShareRequest(matchedShareRequest);
+        } else {
+          this.removeShareRequest(
+            matchedShareRequest,
+            request.referencedAccount!.id
+          );
+        }
       }
     } catch (err) {
       console.error(err.message);
@@ -495,60 +537,76 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
 
     // create new share requests
     try {
-      for (let i = 0; i < matchedShareRequests.length; i++) {
-        let selectedContact;
-
-        for (let j = 0; j < accounts.length; j++) {
-          if (accounts[j].id == matchedShareRequests[i].shareWithAccountId!) {
-            selectedContact = accounts[j];
-            break;
-          }
+      for (const matchedShareRequest of matchedShareRequests) {
+        let selectedContact = accounts.find(
+          (account1) => account1.id === matchedShareRequest.shareWithAccountId!
+        );
+        if (request.referencedAccount) {
+          selectedContact = helperAccounts!.find(
+            (account1) =>
+              account1.id === matchedShareRequest.shareWithAccountId!
+          );
         }
 
-        // START FILE ENCYRPTION
-        const encryptionPublicKey = selectedContact.didPublicEncryptionKey!;
-        const file: File = StringUtil.dataURLtoFile(
-          request.base64Image!,
-          'original'
-        );
-        const base64Thumbnail = await StringUtil.fileContentsToThumbnail(file);
-        const encryptedString = await CryptoUtil.getEncryptedByPublicString(
-          encryptionPublicKey!,
-          request.base64Image!
-        );
-        const encryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(
-          encryptionPublicKey!,
-          base64Thumbnail
-        );
-        const zipped: Blob = await ZipUtil.zip(encryptedString);
-        const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
-        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
-          type: 'application/zip',
-          lastModified: Date.now(),
-        });
-        const newZippedThumbnailFile = new File(
-          [zippedThumbnail],
-          'encrypted-image-thumbnail.zip',
-          {
-            type: 'application/zip',
-            lastModified: Date.now(),
-          }
-        );
-        // END FILE ENCYRPTION
-        const newShareRequest = await ShareRequestService.addShareRequestFile(
+        const {
           newZippedFile,
           newZippedThumbnailFile,
-          updatedDoc?.type!,
-          account.id,
-          matchedShareRequests[i].shareWithAccountId!,
-          {
-            canView: matchedShareRequests[i].canView,
-            canReplace: matchedShareRequests[i].canReplace,
-            canDownload: matchedShareRequests[i].canDownload,
-          }
+        } = await FileUtil.dataURLToEncryptedFiles(
+          request.base64Image!,
+          selectedContact!.didPublicEncryptionKey!
         );
-        // add share request to UI
-        this.addShareRequest(newShareRequest);
+        let newShareRequest;
+        if (!request.referencedAccount) {
+          newShareRequest = await ShareRequestService.addShareRequestFile(
+            newZippedFile,
+            newZippedThumbnailFile,
+            updatedDoc?.type!,
+            account.id,
+            matchedShareRequest.shareWithAccountId!,
+            {
+              canView: matchedShareRequest.canView,
+              canReplace: matchedShareRequest.canReplace,
+              canDownload: matchedShareRequest.canDownload,
+            }
+          );
+          // add share request to UI
+          this.addShareRequest(newShareRequest);
+        } else {
+          newShareRequest = await ShareRequestService.replaceShareRequestFile(
+            newZippedFile,
+            newZippedThumbnailFile,
+            updatedDoc?.type!,
+            request.referencedAccount.id,
+            matchedShareRequest.shareWithAccountId!,
+            {
+              canView: matchedShareRequest.canView,
+              canReplace: matchedShareRequest.canReplace,
+              canDownload: matchedShareRequest.canDownload,
+            },
+            matchedShareRequest._id!
+          );
+          if (account.id === newShareRequest.shareWithAccountId) {
+            documents = documents.map((doc) =>
+              doc.type === newShareRequest.documentType
+                ? {
+                    type: newShareRequest.documentType,
+                    url: newShareRequest.approved
+                      ? newShareRequest.documentUrl
+                      : '',
+                    thumbnailUrl: newShareRequest.documentThumbnailUrl
+                      ? newShareRequest.documentThumbnailUrl
+                      : '',
+                    sharedWithAccountIds: [newShareRequest.shareWithAccountId],
+                    validUntilDate: newShareRequest.validUntilDate,
+                    vcJwt: newShareRequest.vcJwt,
+                    vpDocumentDidAddress: newShareRequest.vpDocumentDidAddress,
+                    shareRequestId: newShareRequest._id,
+                  }
+                : doc
+            );
+          }
+          this.addShareRequest(newShareRequest, request.referencedAccount.id);
+        }
       }
     } catch (err) {
       console.error(err.message);
@@ -603,20 +661,44 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     });
   };
 
-  addShareRequest = (request: ShareRequest) => {
+  addShareRequest = (
+    request: ShareRequest,
+    fromAccountId: string | undefined = undefined
+  ) => {
     const { updateAccountShareRequests, account } = { ...this.props };
+    const { clientShares } = { ...this.state };
     const { shareRequests } = { ...account };
-    shareRequests.push(request);
-    updateAccountShareRequests(shareRequests);
+    if (account.role === Role.helper) {
+      const clientShare = clientShares.get(fromAccountId!);
+      clientShare!.push(request);
+      clientShares.set(fromAccountId!, clientShare!);
+    } else {
+      shareRequests.push(request);
+      updateAccountShareRequests(shareRequests);
+    }
+    this.setState({ clientShares });
   };
 
-  removeShareRequest = (request: ShareRequest) => {
+  removeShareRequest = (
+    request: ShareRequest,
+    fromAccountId: string | undefined = undefined
+  ) => {
     const { updateAccountShareRequests, account } = { ...this.props };
+    const { clientShares } = { ...this.state };
     let { shareRequests } = { ...account };
-    shareRequests = shareRequests.filter(
-      (shareRequest) => shareRequest._id !== request._id
-    );
-    updateAccountShareRequests(shareRequests);
+    if (account.role === Role.helper) {
+      const clientShare = clientShares.get(fromAccountId!);
+      clientShares.set(
+        fromAccountId!,
+        clientShare!.filter((sr) => sr._id !== request._id)
+      );
+    } else {
+      shareRequests = shareRequests.filter(
+        (shareRequest) => shareRequest._id !== request._id
+      );
+      updateAccountShareRequests(shareRequests);
+    }
+    this.setState({ clientShares });
   };
 
   setActiveTab = (tab: string) => {
@@ -645,6 +727,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             validUntilDate: shareRequest.validUntilDate,
             vcJwt: shareRequest.vcJwt,
             vpDocumentDidAddress: shareRequest.vpDocumentDidAddress,
+            shareRequestId: shareRequest._id,
           };
         });
       const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(
@@ -726,11 +809,16 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     };
     const { account } = { ...this.props };
     const { id } = props.match.params;
-    let referencedAccount;
+    let referencedAccount: Account | undefined;
     if (id) {
-      referencedAccount = accounts.filter(
+      referencedAccount = accounts.find(
         (accountItem) => accountItem.id === id
-      )[0];
+      )!;
+      if (referencedAccount) {
+        referencedAccount.shareRequests = clientShares.get(
+          referencedAccount.id
+        )!;
+      }
     }
     let shareRequests: ShareRequest[] = account.shareRequests.filter(
       (sharedRequest) => {

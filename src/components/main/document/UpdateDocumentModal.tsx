@@ -308,16 +308,18 @@ class UpdateDocumentModal extends Component<
 
   handleUpdateDocument = () => {
     const { newFile, newThumbnailFile, updatedBase64Image } = { ...this.state };
-    const { handleUpdateDocumentAndUpdateShareRequests, document } = {
+    const { handleUpdateDocumentAndUpdateShareRequests, document, referencedAccount } = {
       ...this.props,
     };
-
+    // document doesn't have id
     handleUpdateDocumentAndUpdateShareRequests({
-      id: document!._id!,
+      id: document!._id !== undefined ? document!._id! : document!.id!,
       img: newFile,
       thumbnail: newThumbnailFile,
       validUntilDate: undefined, // FIXME: add expired at form somewhere
       base64Image: updatedBase64Image!,
+      shareRequestId: (document as any).shareRequestId,
+      referencedAccount
     });
     // clear state
     this.setState({
