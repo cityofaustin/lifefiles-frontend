@@ -122,7 +122,7 @@ export default class SecureLoginSetup extends Component<
                 height: '50px',
                 borderRadius: '9px',
               }}
-              disabled={!password || !confirmPassword}
+              disabled={!password || !confirmPassword || password !== confirmPassword}
               onClick={this.goForward}
             >
               Set Password
