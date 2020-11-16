@@ -8,10 +8,12 @@ import { ReactComponent as UploadSvg } from '../../img/upload-drop.svg';
 import StringUtil from '../../util/StringUtil';
 import CryptoUtil from '../../util/CryptoUtil';
 import ZipUtil from '../../util/ZipUtil';
-import { files } from 'jszip';
+// import { files } from 'jszip';
+import ProgressIndicator from './ProgressIndicator';
 
 interface FileUploaderState {
   files: File[];
+  isLoading: boolean;
 }
 
 export enum FileUploaderThemeEnum {
@@ -37,6 +39,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
 
     this.state = {
       files: [],
+      isLoading: false,
     };
   }
 
@@ -50,6 +53,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
     const { setFile, setUpdatedBase64Image, privateEncryptionKey } = {
       ...this.props,
     };
+    this.setState({ isLoading: true });
     acceptedFiles = acceptedFiles.map((file) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file),
@@ -98,7 +102,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
       });
       setFile(oneFile, thumbnailFile, (oneFile as any).preview);
     }
-    this.setState({ files: acceptedFiles });
+    this.setState({ files: acceptedFiles, isLoading: false });
   };
 
   renderFiles(files: File[]) {
@@ -171,17 +175,21 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
   }
 
   render() {
-    const { files } = { ...this.state };
+    const { files, isLoading } = { ...this.state };
 
     return (
-      <Dropzone onDrop={this.handleOnDrop}>
-        {({ getRootProps, getInputProps }) => (
-          <section className="dropzone-container">
-            {files.length <= 0 && this.renderForm(getRootProps, getInputProps)}
-            {files.length > 0 && this.renderFiles(files)}
-          </section>
-        )}
-      </Dropzone>
+      <Fragment>
+        {isLoading && <ProgressIndicator isFullscreen />}
+        <Dropzone onDrop={this.handleOnDrop}>
+          {({ getRootProps, getInputProps }) => (
+            <section className="dropzone-container">
+              {files.length <= 0 &&
+                this.renderForm(getRootProps, getInputProps)}
+              {files.length > 0 && this.renderFiles(files)}
+            </section>
+          )}
+        </Dropzone>
+      </Fragment>
     );
   }
 }
