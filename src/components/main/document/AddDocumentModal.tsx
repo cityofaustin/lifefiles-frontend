@@ -127,6 +127,8 @@ interface AddDocumentModalState {
   custodianAcceptsDigitalSignature: boolean;
   width: number;
   county: string;
+  ownerName: string;
+  helperName: string;
 }
 
 class AddDocumentModal extends Component<
@@ -136,7 +138,7 @@ class AddDocumentModal extends Component<
   minDate: Date;
   constructor(props: Readonly<AddDocumentModalProps>) {
     super(props);
-
+    const { myAccount, referencedAccount } = { ...props };
     this.minDate = new Date();
     this.minDate.setDate(new Date().getDate() + 1);
     this.state = {
@@ -170,6 +172,14 @@ class AddDocumentModal extends Component<
       custodianAcceptsDigitalSignature: false,
       width: 0,
       county: '',
+      ownerName: AccountImpl.getFullName(
+        referencedAccount?.firstName,
+        referencedAccount?.lastName
+      ),
+      helperName: AccountImpl.getFullName(
+        myAccount?.firstName,
+        myAccount?.lastName
+      ),
     };
   }
 
@@ -362,6 +372,8 @@ class AddDocumentModal extends Component<
       notarySealBase64,
       notaryId,
       county,
+      helperName,
+      ownerName
     } = { ...this.state };
     const { newThumbnailFile } = { ...this.state };
     const {
@@ -399,8 +411,8 @@ class AddDocumentModal extends Component<
         base64String,
         notarySealBase64,
         documentType,
-        AccountImpl.displayName(referencedAccount),
-        AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
+        ownerName,
+        helperName,
         county,
         this.isRecordable()
       );
@@ -465,23 +477,25 @@ class AddDocumentModal extends Component<
   };
 
   isNotarizeDisabled = () => {
-    // TODO: do file check pem check return error if they are in a bad format, e.g. wrong file for seal, incorrect pem format.
-    const { notaryId, notarySealBase64, publicPem, errorMessage } = {
+    const {
+      notaryId,
+      notarySealBase64,
+      publicPem,
+      errorMessage,
+      helperName,
+      ownerName,
+      county,
+    } = {
       ...this.state,
     };
     let isDisabled = false;
-    if (notaryId.length <= 0) {
-      isDisabled = true;
-    }
-    if (notarySealBase64.length <= 0) {
-      isDisabled = true;
-    }
-    if (publicPem.length <= 0) {
-      isDisabled = true;
-    }
-    if (errorMessage && errorMessage.length > 0) {
-      isDisabled = true;
-    }
+    isDisabled = notaryId.length <= 0 ? true : isDisabled;
+    isDisabled = notarySealBase64.length <= 0 ? true : isDisabled;
+    isDisabled = publicPem.length <= 0 ? true : isDisabled;
+    isDisabled = errorMessage && errorMessage.length > 0 ? true : isDisabled;
+    isDisabled = helperName.length <= 0 ? true : isDisabled;
+    isDisabled = ownerName.length <= 0 ? true : isDisabled;
+    isDisabled = county.length <= 0 ? true : isDisabled;
     return isDisabled;
   };
 
@@ -657,6 +671,7 @@ class AddDocumentModal extends Component<
       custodianIsTrueDocument,
       custodianAcceptsDigitalSignature,
       previewURL,
+      ownerName
     } = { ...this.state };
     const { referencedAccount } = { ...this.props };
     return (
@@ -730,7 +745,7 @@ class AddDocumentModal extends Component<
               </div>
             </div>
             <div className="digital-sig">
-              {AccountImpl.displayName(referencedAccount)}
+              {ownerName}
             </div>
             <div className="continue-exerpt">Check the boxes to continue</div>
           </Col>
@@ -758,6 +773,7 @@ class AddDocumentModal extends Component<
       isTrueDocument,
       acceptsDigitalSignature,
       previewURL,
+      helperName
     } = { ...this.state };
     const { myAccount } = { ...this.props };
     return (
@@ -843,7 +859,7 @@ class AddDocumentModal extends Component<
               </div>
             </div>
             <div className="digital-sig">
-              {AccountImpl.getFullName(myAccount.firstName, myAccount.lastName)}
+              {helperName}
             </div>
             <div className="continue-exerpt">Check the boxes to continue</div>
           </Col>
@@ -853,7 +869,14 @@ class AddDocumentModal extends Component<
   }
 
   renderNotarizeSection() {
-    const { previewURL, notaryId, errorMessage, county } = {
+    const {
+      previewURL,
+      notaryId,
+      errorMessage,
+      county,
+      helperName,
+      ownerName,
+    } = {
       ...this.state,
     };
 
@@ -937,6 +960,17 @@ class AddDocumentModal extends Component<
             </div>
           </Col>
           <Col sm={12} xl={6}>
+            <div className="owner-container">
+              <Label for="notaryId">Document Custodian</Label>
+              <Input
+                type="text"
+                name="ownerName"
+                id="ownerName"
+                value={ownerName}
+                onChange={(e) => this.setState({ ownerName: e.target.value })}
+                placeholder="Document Custodian..."
+              />
+            </div>
             <div className="notary-container">
               <div className="notary-form">
                 <div className="notary-info">NOTARY INFORMATION</div>
@@ -945,6 +979,17 @@ class AddDocumentModal extends Component<
                 )}
                 <div className="form-line">
                   <div className="input-section">
+                    <Label for="notaryId">Notary Name</Label>
+                    <Input
+                      type="text"
+                      name="helperName"
+                      id="helperName"
+                      value={helperName}
+                      onChange={(e) =>
+                        this.setState({ helperName: e.target.value })
+                      }
+                      placeholder="Notary Name..."
+                    />
                     <Label for="notaryId">Notary ID</Label>
                     <Input
                       type="text"

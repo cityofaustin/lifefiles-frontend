@@ -372,6 +372,15 @@
       object-fit: contain;
     }
   }
+  .owner-container {
+    margin-top: 20px;
+    label {
+      font-size: 20px;
+      font-weight: 500;
+      color: #747474;
+      opacity: 0.71;
+    }
+  }
   .notary-container {
     // width: 55%;
     display: flex;
