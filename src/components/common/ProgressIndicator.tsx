@@ -28,7 +28,10 @@ class ProgressIndicator extends Component<ProgressIndicatorProps> {
       <Fragment>
         {isFullscreen &&
           <div className="progress-fullscreen">
-            {this.renderCircularProgressIndicator()}
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              {this.renderCircularProgressIndicator()}
+              <div>Loading Please do not reload this page</div>
+            </div>
           </div>
         }
         {!isFullscreen && this.renderCircularProgressIndicator()}
