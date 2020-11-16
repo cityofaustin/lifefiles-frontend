@@ -22,7 +22,7 @@ describe('Account', () => {
       role: Role.owner, shareRequests: [], token: '', username: '', lastName: 'owner'
     };
     expect(AccountImpl.getFullName(account1.firstName, account1.lastName)).toBe('sally owner');
-    expect(AccountImpl.getFullName(account2.firstName, account2.lastName)).toBe('-');
+    expect(AccountImpl.getFullName(account2.firstName, account2.lastName)).toBe('');
     expect(AccountImpl.getFullName(account3.firstName, account3.lastName)).toBe('sally');
     expect(AccountImpl.getFullName(account4.firstName, account4.lastName)).toBe('owner');
   });
