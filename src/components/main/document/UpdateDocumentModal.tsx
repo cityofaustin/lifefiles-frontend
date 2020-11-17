@@ -847,7 +847,7 @@ class UpdateDocumentModal extends Component<
               {shareRequests.find((sr) => !sr.approved) && (
                 <div
                   style={{
-                    left: '-8px',
+                    right: '0',
                     top: '-12px',
                     position: 'absolute',
                   }}
