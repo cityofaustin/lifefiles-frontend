@@ -206,7 +206,7 @@ class ShareDocWithContainer extends Component<
                 />
                 <div className="contact-detail-share-doc-sm">
                   <div className="prompt">Share {document!.type}?</div>
-                  {this.renderPermissions(ToggleSizeEnum.XS)}
+                  {this.renderPermissions(ToggleSizeEnum.SM)}
                 </div>
               </div>
               <div className="contact-detail-info">

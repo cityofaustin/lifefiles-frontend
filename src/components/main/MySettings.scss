@@ -249,10 +249,10 @@
             }
             .confirm-excerpt {
               margin-top: 5px;
-              font-size: 13px;
+              font-size: 15px;
               text-align: center;
               line-height: 1.23;
-              padding: 0 40px;
+              padding: 0 28px;
             }
           }
           .delete-btn-col {
@@ -395,14 +395,14 @@
               width: 100%;
               display: flex;
               justify-content: space-between;
-              font-size: 13px;
+              font-size: 15px;
               .preview-attr {
                 font-weight: 500;
                 color: $dark-blue-grey;
               }
               .preview-val {
                 color: $greyish-brown-78;
-                @include truncate(174px);
+                @include truncate(150px);
               }
             }
             .shared {
@@ -412,7 +412,7 @@
               align-items: center;
               .shared-title {
                 text-transform: uppercase;
-                font-size: 13px;
+                font-size: 15px;
                 font-weight: bold;
                 color: $silver;
               }
