@@ -1,11 +1,11 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import './Toggle.scss';
 
 export enum ToggleSizeEnum {
   XS = 'xs',
   SM = 'sm',
   MD = 'md',
-  LG = 'lg'
+  LG = 'lg',
 }
 
 interface ToggleProps {
@@ -17,21 +17,36 @@ interface ToggleProps {
 }
 
 class Toggle extends Component<ToggleProps> {
-
   static defaultProps = {
     value: false,
     size: ToggleSizeEnum.MD,
-    onToggle: () => {}
+    onToggle: () => {},
   };
 
   render() {
-    const {value, onToggle, size} = {...this.props};
+    const { value, onToggle, size } = { ...this.props };
     return (
       <label className={'switch ' + size}>
-        <input type="checkbox" checked={value} onChange={onToggle} />
-        <span className="slider"/>
-        <span className="yes" />
-        <span className="no" />
+        <input type="checkbox" checked={value} readOnly />
+        <span className="slider" />
+        <span
+          className="yes"
+          onClick={() => {
+            if (!value) {
+              onToggle();
+            }
+            return;
+          }}
+        />
+        <span
+          className="no"
+          onClick={() => {
+            if (value) {
+              return onToggle();
+            }
+            return;
+          }}
+        />
       </label>
     );
   }

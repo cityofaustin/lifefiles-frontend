@@ -5,7 +5,6 @@
   display: inline-block;
 
   margin-bottom: 0;
-  cursor: pointer;
   &.xs {
     $width: 46px;
     $height: 15px;
@@ -16,9 +15,9 @@
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2);
-        -ms-transform: translateX($width / 2);
-        transform: translateX($width / 2);
+        -webkit-transform: translateX($width / 2 - 2);
+        -ms-transform: translateX($width / 2 - 2);
+        transform: translateX($width / 2 - 2);
       }
     }
     .slider {
@@ -44,13 +43,13 @@
     $fontSize: 12px;
     $top: 3.4px;
     $side: 9.5px;
-    width: $width;
+    width: $width - 2;
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2);
-        -ms-transform: translateX($width / 2);
-        transform: translateX($width / 2);
+        -webkit-transform: translateX($width / 2 - 2);
+        -ms-transform: translateX($width / 2 - 2);
+        transform: translateX($width / 2 - 2);
       }
     }
     .slider {
@@ -80,9 +79,9 @@
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2);
-        -ms-transform: translateX($width / 2);
-        transform: translateX($width / 2);
+        -webkit-transform: translateX($width / 2 - 2);
+        -ms-transform: translateX($width / 2 - 2);
+        transform: translateX($width / 2 - 2);
       }
     }
     .slider {
@@ -112,9 +111,9 @@
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2);
-        -ms-transform: translateX($width / 2);
-        transform: translateX($width / 2);
+        -webkit-transform: translateX($width / 2 - 2);
+        -ms-transform: translateX($width / 2 - 2);
+        transform: translateX($width / 2 - 2);
       }
     }
     .slider {
@@ -148,6 +147,12 @@
       }
       &.no {
         color: #afafaf;
+        cursor: pointer;
+      }
+    }
+    &:not(:checked) ~ span {
+      &.yes {
+        cursor: pointer;
       }
     }
   }
@@ -159,6 +164,8 @@
     left: 0;
     right: 0;
     bottom: 0;
+    border: 1px solid #afafaf;
+
     @include themify($themes) {
       background: linear-gradient(90deg, themed('colorPrimary') 50%, #d95868 50%);
     }
