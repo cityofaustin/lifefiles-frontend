@@ -378,17 +378,17 @@
                   color: #484848;
                 }
 
-                @include media-breakpoint-up(md) {
-                  margin: 0;
-                  flex-direction: row;
-                  background-image: linear-gradient(to right, #9a9a9a 50%, rgba(255, 255, 255, 0) 0%);
-                  background-position: bottom;
-                  background-size: 16px 1px;
-                  background-repeat: repeat-x;
-                  &:last-child {
-                    background: none;
-                  }
-                }
+                // @include media-breakpoint-up(md) {
+                //   margin: 0;
+                //   flex-direction: row;
+                //   background-image: linear-gradient(to right, #9a9a9a 50%, rgba(255, 255, 255, 0) 0%);
+                //   background-position: bottom;
+                //   background-size: 16px 1px;
+                //   background-repeat: repeat-x;
+                //   &:last-child {
+                //     background: none;
+                //   }
+                // }
                 @include media-breakpoint-up(lg) {
                   font-size: 30px;
                   .attr {
