@@ -1265,6 +1265,7 @@ class UpdateDocumentModal extends Component<
           setFile={this.setFile}
           setUpdatedBase64Image={this.setUpdatedBase64Image}
           privateEncryptionKey={this.props.privateEncryptionKey}
+          showUpdateMessage
         />
       </div>
     );

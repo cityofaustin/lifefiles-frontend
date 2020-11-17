@@ -221,6 +221,24 @@
     }
   }
 
+  .upload-excerpt {
+    font-weight: 500;
+    color: #0e232c;
+    opacity: 0.3;
+    text-align: center;
+    margin: 0 28px;
+    position: absolute;
+    bottom: 18px;
+    font-size: 16px;
+    @include media-breakpoint-up(lg) {
+      margin: 0 50px;
+      font-size: 20px;
+    }
+    @include media-breakpoint-up(xl) {
+      margin: 0 100px;
+    }
+  }
+
   .upload-profile {
     display: flex;
     // margin-top: -22px;

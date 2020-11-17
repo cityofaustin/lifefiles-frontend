@@ -27,6 +27,7 @@ interface FileUploaderProps {
   documentType?: string;
   privateEncryptionKey?: string;
   theme: FileUploaderThemeEnum;
+  showUpdateMessage?: boolean;
 }
 
 class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
@@ -148,7 +149,7 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
   }
 
   renderForm(getRootProps: any, getInputProps: any) {
-    const { theme } = { ...this.props };
+    const { theme, showUpdateMessage } = { ...this.props };
     return (
       <div {...getRootProps()} className="dropzone-form">
         <input {...getInputProps()} />
@@ -162,6 +163,13 @@ class FileUploader extends Component<FileUploaderProps, FileUploaderState> {
                 Upload your file by dropping it here...
               </div>
               <UploadSvg />
+              {showUpdateMessage && (
+                <div className="upload-excerpt">
+                  Note: All your share settings will be saved and contacts
+                  you've shared this document with will still have access after
+                  replacing it.
+                </div>
+              )}
             </div>
           </Fragment>
         )}
