@@ -47,20 +47,20 @@ export default class SecureLoginMethod extends Component<
             Document {role}
           </div>
           <div className="subtitle">Choose your login method</div>
-          <div className="card owner1">
+          <div className="card owner1" style={{ height: '468px' }}>
             <div className="card-body">
               <div className="card-body-section" style={{ marginTop: 0 }}>
                 <div className="helper-login" style={{ margin: '0 -2px' }}>
-                  What method of login do you need?
+                  How would you like to login?
                 </div>
               </div>
-              {role === Role.owner && (
+              {/* {role === Role.owner && ( */}
                 <div className="owner-login-option-container">
-                  {!selectedOption && (
-                    <p>
-                      Please select the login method that works best for you.
-                    </p>
-                  )}
+                  <p style={{ minHeight: '18px' }}>
+                    {!selectedOption
+                      ? 'Please select the login method that works best for you.'
+                      : ''}
+                  </p>
                   <div className="owner-login-options">
                     <div
                       className={
@@ -76,7 +76,9 @@ export default class SecureLoginMethod extends Component<
                     </div>
                     <div
                       className={
-                        selectedOption === LoginOption.PrivateKey ? 'active' : ''
+                        selectedOption === LoginOption.PrivateKey
+                          ? 'active'
+                          : ''
                       }
                       onClick={() =>
                         this.setState({
@@ -119,8 +121,8 @@ export default class SecureLoginMethod extends Component<
                     </div>
                   )}
                 </div>
-              )}
-              {role === Role.helper && (
+              {/* )} */}
+              {/* {role === Role.helper && (
                 <div className="login-options">
                   <div
                     onClick={() =>
@@ -143,7 +145,7 @@ export default class SecureLoginMethod extends Component<
                     />
                   </div>
                 </div>
-              )}
+              )} */}
               <div className="bottom">
                 <Button
                   color="primary"
