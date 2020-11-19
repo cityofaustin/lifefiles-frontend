@@ -158,6 +158,11 @@
     height: 64px;
     font-size: 26.6px;
   }
+  &.xs {
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+  }
   object-fit: contain;
   display: flex;
   align-items: center;

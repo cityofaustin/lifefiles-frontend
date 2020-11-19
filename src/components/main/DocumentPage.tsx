@@ -112,7 +112,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     return searchedHelperContacts
       .filter((h: HelperContact) => {
         const matchedShareRequest = shareRequests.find((shareRequest) => {
-          const matchedHelperAccount = accounts.find(a => a.username === h.helperAccount.username);
+          const matchedHelperAccount = accounts.find(
+            (a) => a.username === h.helperAccount.username
+          );
           return (
             matchedHelperAccount &&
             shareRequest.shareWithAccountId === matchedHelperAccount.id &&
@@ -167,7 +169,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
     let isAllowed = true;
     if (myAccount.role === Role.helper) {
       try {
-        if(document.type) {
+        if (document.type) {
           const shareRequest = shareRequests.find(
             (sr) => sr.documentType === document?.type
           );
@@ -225,7 +227,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       shareRequests,
       privateEncryptionKey,
       myAccount,
-      accounts
+      accounts,
     } = { ...this.props };
     return (
       <Fragment>
@@ -328,7 +330,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       myAccount,
       privateEncryptionKey,
       referencedAccount,
-      accounts
+      accounts,
     } = { ...this.props };
     return (
       <div>
@@ -379,7 +381,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 ],
                 document.uploadedBy
               );
-              const matchedAccount = AccountImpl.getAccountByIdAndList(
+              const uploadedByAccount = AccountImpl.getAccountByIdAndList(
                 [
                   myAccount,
                   ...searchedHelperContacts.map((s) => s.helperAccount),
@@ -415,9 +417,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                           </div>
                         )}
                       {!this.isAllowedShareRequestPermission(
-                          ShareRequestPermission.CAN_VIEW,
-                          document
-                        ) && <NotSharedDoc />}
+                        ShareRequestPermission.CAN_VIEW,
+                        document
+                      ) && <NotSharedDoc />}
                       <div className="doc-info">
                         <div className="doc-type">{document.type}</div>
                         <div className="doc-upd">
@@ -479,12 +481,10 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                         </div>
                       )}
                       {!accountProfileURL && (
-                        <div className="account-circle">
-                          {matchedAccount &&
-                            StringUtil.getFirstUppercase(
-                              matchedAccount!.username
-                            )}
-                        </div>
+                        <ProfileImage
+                          size={ProfileImageSizeEnum.XS}
+                          account={uploadedByAccount!}
+                        />
                       )}
                       <div>
                         {document.updatedAt &&
@@ -547,7 +547,7 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       removeShareRequest,
       privateEncryptionKey,
       accounts,
-      removeHelperContact
+      removeHelperContact,
     } = { ...this.props };
     return (
       <Fragment>

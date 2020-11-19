@@ -67,8 +67,10 @@ class AccountImpl implements Account {
 
   public static getProfileURLByIdAndList(accounts: Account[], accountId: any) {
     const account = this.getAccountByIdAndList(accounts, accountId);
-    if (account) {
+    if (account && account.profileImageUrl) {
       return AccountService.getProfileURL(account.profileImageUrl!);
+    } else {
+      return undefined;
     }
   }
 

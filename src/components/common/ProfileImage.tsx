@@ -10,6 +10,7 @@ interface ProfileImageProps {
 }
 
 export enum ProfileImageSizeEnum {
+  XS='xs',
   SMALL='sm',
   MEDIUM='md',
   LARGE='lg'
