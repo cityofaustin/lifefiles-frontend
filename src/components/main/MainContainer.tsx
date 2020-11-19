@@ -198,6 +198,20 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     this.setState({ helperContacts });
   };
 
+  unshareAllWithHelperContact = async (helperAccount: Account) => {
+    const { updateAccountShareRequests, account } = { ...this.props };
+    const { helperContacts } = { ...this.state };
+    let { shareRequests } = { ...account };
+    shareRequests = shareRequests.filter(
+      (shareRequest) => shareRequest.shareWithAccountId !== helperAccount.id
+    );
+    const helperContactMatch = helperContacts.find(
+      (hc) => hc.helperAccount.username === helperAccount.username
+    );
+    await HelperContactService.unshareAllWithHelper(helperContactMatch!._id);
+    updateAccountShareRequests(shareRequests);
+  };
+
   removeHelperContact = async (account: Account) => {
     let { helperContacts } = { ...this.state };
     const { sortAsc } = { ...this.state };
@@ -1059,6 +1073,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     }
     return (
       <DocumentPage
+        unshareAllWithHelperContact={this.unshareAllWithHelperContact}
         removeHelperContact={this.removeHelperContact}
         sortAsc={sortAsc}
         toggleSort={this.toggleSort}

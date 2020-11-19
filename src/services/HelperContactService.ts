@@ -16,6 +16,10 @@ export default class HelperContactService extends ApiService {
     return await super.post(this.path, helperContactReq);
   }
 
+  static async unshareAllWithHelper(id: string) {
+    return await super.delete(`${this.path}/${id}/share-requests`);
+  }
+
   static async deleteHelperContact(id: string) {
     return await super.delete(`${this.path}/${id}`);
   }

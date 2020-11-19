@@ -64,6 +64,7 @@ class ClientPage extends Component<ClientPageProps, {}> {
                       className="network-container"
                     >
                       <AccountSummary
+                        unshareAllWithHelperContact={()=>{}}
                         removeHelperContact={()=>{}}
                         isNotary
                         account={account}

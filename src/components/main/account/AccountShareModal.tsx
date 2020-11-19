@@ -1,5 +1,14 @@
-import React, { Component, Fragment } from 'react';
-import { Button, Modal, ModalBody, ModalHeader, TabPane } from 'reactstrap';
+import React, { ChangeEvent, Component, Fragment } from 'react';
+import {
+  Button,
+  FormGroup,
+  Input,
+  Label,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  TabPane,
+} from 'reactstrap';
 import { ReactComponent as ContactSvg } from '../../../img/contact.svg';
 import { ReactComponent as CrossSvg } from '../../../img/cross3.svg';
 import AccountImpl from '../../../models/AccountImpl';
@@ -20,7 +29,7 @@ import ShareRequestService, {
 } from '../../../services/ShareRequestService';
 import ShareRequest from '../../../models/ShareRequest';
 import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
-import StringUtil from '../../../util/StringUtil';
+// import StringUtil from '../../../util/StringUtil';
 import CryptoUtil from '../../../util/CryptoUtil';
 import ZipUtil from '../../../util/ZipUtil';
 import ShareRequestPermissionSvg from '../../svg/ShareRequestPermissionSvg';
@@ -38,6 +47,7 @@ interface AccountShareModalProps {
   removeShareRequest: (request: ShareRequest) => void;
   privateEncryptionKey: string;
   removeHelperContact: (account: Account) => void;
+  unshareAllWithHelperContact: (account: Account) => void;
 }
 
 // NOTE: temporarily until get share api hooked up.
@@ -45,6 +55,9 @@ interface AccountShareModalState {
   docShare: DocShare;
   isLoading: boolean;
   showDeleteContactModal: boolean;
+  showUnshareAllModal: boolean;
+  unshareConfirmInput: string;
+  hasConfirmedUnshare: boolean;
 }
 
 interface DocShare {
@@ -62,6 +75,9 @@ class AccountShareModal extends Component<
       isLoading: false,
       showDeleteContactModal: false,
       // showDeleteContactModal: true,
+      showUnshareAllModal: false,
+      unshareConfirmInput: '',
+      hasConfirmedUnshare: false,
     };
   }
 
@@ -192,11 +208,33 @@ class AccountShareModal extends Component<
     this.setState({ isLoading: false });
   };
 
+  handleUnshareAllWithContact = () => {
+    const { toggleModal, unshareAllWithHelperContact, account } = {
+      ...this.props,
+    };
+    this.setState({
+      showUnshareAllModal: false,
+      hasConfirmedUnshare: false,
+      unshareConfirmInput: '',
+    });
+    toggleModal();
+    unshareAllWithHelperContact(account);
+  };
+
   handleDeleteContact = () => {
-    const {toggleModal, removeHelperContact, account} = {...this.props};
-    this.setState({showDeleteContactModal: false});
+    const { toggleModal, removeHelperContact, account } = { ...this.props };
+    this.setState({ showDeleteContactModal: false });
     toggleModal();
     removeHelperContact(account);
+  };
+
+  handleUnshareConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    let hasConfirmedUnshare = false;
+    if (value === 'UNSHARE') {
+      hasConfirmedUnshare = true;
+    }
+    this.setState({ unshareConfirmInput: value, hasConfirmedUnshare });
   };
 
   renderPermissions(sd: Document, size: ToggleSizeEnum, sr?: ShareRequest) {
@@ -274,8 +312,83 @@ class AccountShareModal extends Component<
     );
   }
 
+  renderUnshareAllModal() {
+    const { shareRequests } = { ...this.props };
+    const { showUnshareAllModal, unshareConfirmInput, hasConfirmedUnshare } = {
+      ...this.state,
+    };
+    const closeBtn = (
+      <div
+        className="modal-close"
+        onClick={() => this.setState({ showUnshareAllModal: false })}
+      >
+        <CrossSvg />
+      </div>
+    );
+    return (
+      <Modal
+        isOpen={showUnshareAllModal}
+        toggle={() => this.setState({ showUnshareAllModal: false })}
+        backdrop={'static'}
+        size={'lg'}
+        className="delete-contact-modal"
+      >
+        <ModalHeader
+          toggle={() => this.setState({ showUnshareAllModal: false })}
+          close={closeBtn}
+        />
+        <ModalBody className="delete-contact-body">
+          <div className="delete-title">Are you sure?</div>
+          <div className="doc-shared-container">
+            <DocShared numberOfShares={shareRequests.length} />
+            <div className="doc-share">Documents Shared</div>
+          </div>
+          <div className="excerpt">
+            Doing so will&nbsp;
+            <strong>
+              unshare this contact's access to all your documents.
+            </strong>
+            &nbsp;You will have to manually share each file again if you change
+            your mind.
+          </div>
+          <FormGroup>
+            <Label
+              for="documentDelete"
+              style={{ fontSize: '25px', fontWeight: 500, lineHeight: 1.2 }}
+            >
+              Type UNSHARE to confirm
+            </Label>
+            <Input
+              type="text"
+              name="documentDelete"
+              value={unshareConfirmInput}
+              onChange={this.handleUnshareConfirmChange}
+              placeholder=""
+              autoComplete="off"
+            />
+            <span className="delete-info" style={{ lineHeight: 1.27 }}>
+              Please enter the text exactly as displayed to confirm
+            </span>
+          </FormGroup>
+          <div className="delete-final">
+            <Button
+              className="unshare-btn"
+              color="danger"
+              outline
+              onClick={this.handleUnshareAllWithContact}
+              disabled={!hasConfirmedUnshare}
+            >
+              Unshare
+            </Button>
+          </div>
+        </ModalBody>
+      </Modal>
+    );
+  }
+
   renderDeleteContactModal() {
     const { showDeleteContactModal } = { ...this.state };
+    const { shareRequests } = { ...this.props };
     const closeBtn = (
       <div
         className="modal-close"
@@ -310,17 +423,29 @@ class AccountShareModal extends Component<
             this contact
           </div>
           <div className="doc-shared-container">
-            <DocShared numberOfShares={4} />
+            <DocShared numberOfShares={shareRequests.length} />
             <div className="doc-share">Documents Shared</div>
           </div>
-          <Button className="unshare-btn" color="danger" outline disabled>
+          <Button
+            className="unshare-btn"
+            color="danger"
+            outline
+            onClick={() =>
+              this.setState({
+                showDeleteContactModal: false,
+                showUnshareAllModal: true,
+              })
+            }
+          >
             Unshare
           </Button>
           <div className="excerpt">
             Or, if you're sure, tap the button below to permanently remove this
             contact.
           </div>
-          <Button color="danger" onClick={this.handleDeleteContact}>Delete</Button>
+          <Button color="danger" onClick={this.handleDeleteContact}>
+            Delete
+          </Button>
         </ModalBody>
       </Modal>
     );
@@ -361,6 +486,7 @@ class AccountShareModal extends Component<
           </ModalHeader>
           <ModalBody className="account-share-container">
             {this.renderDeleteContactModal()}
+            {this.renderUnshareAllModal()}
             <div className="account-share">
               <div className="left-pane">
                 <img
@@ -370,7 +496,9 @@ class AccountShareModal extends Component<
                 />
                 <div
                   className="delete-contact-container"
-                  onClick={() => this.setState({showDeleteContactModal: true})}
+                  onClick={() =>
+                    this.setState({ showDeleteContactModal: true })
+                  }
                 >
                   <DeleteContactBtn />
                 </div>
@@ -400,6 +528,15 @@ class AccountShareModal extends Component<
                 </div>
                 <div className="permissions">
                   <div className="permissions-title">Permissions</div>
+                  <div className="permissions-excerpt">
+                    What can this contact help me with?
+                  </div>
+                  <div
+                    className="unshare-all"
+                    onClick={() => this.setState({ showUnshareAllModal: true })}
+                  >
+                    UNSHARE ALL FILES
+                  </div>
                 </div>
               </div>
               <div className="right-pane">
@@ -436,6 +573,12 @@ class AccountShareModal extends Component<
                     );
                   })}
                 </div>
+              </div>
+              <div
+                className="unshare-all-sm"
+                onClick={() => this.setState({ showUnshareAllModal: true })}
+              >
+                UNSHARE ALL FILES
               </div>
             </div>
           </ModalBody>
