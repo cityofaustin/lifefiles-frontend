@@ -232,6 +232,27 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     });
   };
 
+  updateHelperContactPermissions = async (hc: HelperContact) => {
+    let { helperContacts } = { ...this.state };
+    const { sortAsc } = { ...this.state };
+    helperContacts = helperContacts.map(hcItem => {
+      if(hcItem._id === hc._id) {
+        hcItem.canAddNewDocuments = hc.canAddNewDocuments;
+        hcItem.isSocialAttestationEnabled = hc.isSocialAttestationEnabled;
+      }
+      return hcItem;
+    });
+    await HelperContactService.updateHelperContact(hc);
+    this.setState({
+      helperContacts,
+      searchedHelperContacts: this.sortHelperContacts(
+        helperContacts,
+        sortAsc,
+        Role.helper
+      ),
+    });
+  };
+
   handleSearch = (query: string) => {
     const { documents, helperContacts, sortAsc } = { ...this.state };
     const { account } = { ...this.props };
@@ -1073,6 +1094,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     }
     return (
       <DocumentPage
+        updateHelperContactPermissions={this.updateHelperContactPermissions}
         unshareAllWithHelperContact={this.unshareAllWithHelperContact}
         removeHelperContact={this.removeHelperContact}
         sortAsc={sortAsc}

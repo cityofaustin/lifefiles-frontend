@@ -70,6 +70,7 @@ interface DocumentPageProps {
   viewFeatures: string[];
   removeHelperContact: (account: Account) => void;
   unshareAllWithHelperContact: (account: Account) => void;
+  updateHelperContactPermissions: (hc: HelperContact) => void;
 }
 
 interface MainPageState {
@@ -549,7 +550,8 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
       privateEncryptionKey,
       accounts,
       removeHelperContact,
-      unshareAllWithHelperContact
+      unshareAllWithHelperContact,
+      updateHelperContactPermissions
     } = { ...this.props };
     return (
       <Fragment>
@@ -594,7 +596,9 @@ class DocumentPage extends Component<DocumentPageProps, MainPageState> {
                 className="network-container"
               >
                 <AccountSummary
-                unshareAllWithHelperContact={unshareAllWithHelperContact}
+                  updateHelperContactPermissions={updateHelperContactPermissions}
+                  helperContact={s}
+                  unshareAllWithHelperContact={unshareAllWithHelperContact}
                   removeHelperContact={removeHelperContact}
                   account={account!}
                   shareRequests={matchedShareRequests}

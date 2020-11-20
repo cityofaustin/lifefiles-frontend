@@ -1,3 +1,4 @@
+import HelperContact from '../models/HelperContact';
 import ApiService from './APIService';
 
 export interface HelperContactRequest {
@@ -14,6 +15,10 @@ export default class HelperContactService extends ApiService {
 
   static async addHelperContact(helperContactReq: HelperContactRequest) {
     return await super.post(this.path, helperContactReq);
+  }
+
+  static async updateHelperContact(hc: HelperContact) {
+    return await super.put(`${this.path}/${hc._id}`, hc);
   }
 
   static async unshareAllWithHelper(id: string) {

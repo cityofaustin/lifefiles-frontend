@@ -11,6 +11,7 @@ import AccountShareModal from './AccountShareModal';
 import Document from '../../../models/document/Document';
 import { Redirect } from 'react-router-dom';
 import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
+import HelperContact from '../../../models/HelperContact';
 
 interface AccountSummaryProps {
   account: Account;
@@ -24,6 +25,8 @@ interface AccountSummaryProps {
   handleClientSelected: (clientSelected: Account) => void;
   removeHelperContact: (account: Account) => void;
   unshareAllWithHelperContact: (account: Account) => void;
+  helperContact?: HelperContact;
+  updateHelperContactPermissions?: (hc: HelperContact) => void;
 }
 
 interface AccountSummaryState {
@@ -70,7 +73,9 @@ class AccountSummary extends Component<
       privateEncryptionKey,
       isNotary,
       removeHelperContact,
-      unshareAllWithHelperContact
+      unshareAllWithHelperContact,
+      helperContact,
+      updateHelperContactPermissions
     } = { ...this.props };
     const { showAccountShareModal, goToClientDocuments } = { ...this.state };
     const numberOfShares = shareRequests ? shareRequests.filter(sr => sr.approved).length : 0;
@@ -80,6 +85,8 @@ class AccountSummary extends Component<
           <Redirect push to={`clients/${account.id}/documents`} />
         )}
         <AccountShareModal
+          updateHelperContactPermissions={updateHelperContactPermissions!}
+          helperContact={helperContact!}
           unshareAllWithHelperContact={unshareAllWithHelperContact}
           removeHelperContact={removeHelperContact}
           showModal={showAccountShareModal}

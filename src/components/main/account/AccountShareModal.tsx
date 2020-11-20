@@ -35,6 +35,9 @@ import ZipUtil from '../../../util/ZipUtil';
 import ShareRequestPermissionSvg from '../../svg/ShareRequestPermissionSvg';
 import ProgressIndicator from '../../common/ProgressIndicator';
 import DocShared from '../document/DocShared';
+import { ReactComponent as AddDocumentSvg } from '../../../img/add-doc.svg';
+import { ReactComponent as LoginSvg } from '../../../img/login2.svg';
+import HelperContact from '../../../models/HelperContact';
 
 interface AccountShareModalProps {
   showModal: boolean;
@@ -48,6 +51,8 @@ interface AccountShareModalProps {
   privateEncryptionKey: string;
   removeHelperContact: (account: Account) => void;
   unshareAllWithHelperContact: (account: Account) => void;
+  helperContact: HelperContact;
+  updateHelperContactPermissions: (helperContact: HelperContact) => void;
 }
 
 // NOTE: temporarily until get share api hooked up.
@@ -459,6 +464,8 @@ class AccountShareModal extends Component<
       searchedDocuments,
       privateEncryptionKey,
       shareRequests,
+      helperContact,
+      updateHelperContactPermissions
     } = { ...this.props };
     const { isLoading } = { ...this.state };
     // width="34.135" height="33.052"
@@ -530,6 +537,32 @@ class AccountShareModal extends Component<
                   <div className="permissions-title">Permissions</div>
                   <div className="permissions-excerpt">
                     What can this contact help me with?
+                  </div>
+                  <div className="permission-item">
+                    <LoginSvg />
+                    <div className="item-title">Help me login</div>
+                    <Toggle
+                      value={helperContact.isSocialAttestationEnabled}
+                      onToggle={() => {
+                        const hc = this.props.helperContact;
+                        hc.isSocialAttestationEnabled = !hc.isSocialAttestationEnabled;
+                        updateHelperContactPermissions(hc);
+                      }}
+                      size={ToggleSizeEnum.MD}
+                    />
+                  </div>
+                  <div className="permission-item">
+                    <AddDocumentSvg />
+                    <div className="item-title">Add new documents</div>
+                    <Toggle
+                      value={helperContact.canAddNewDocuments}
+                      onToggle={() => {
+                        const hc = this.props.helperContact;
+                        hc.canAddNewDocuments = !hc.canAddNewDocuments;
+                        updateHelperContactPermissions(hc);
+                      }}
+                      size={ToggleSizeEnum.MD}
+                    />
                   </div>
                   <div
                     className="unshare-all"

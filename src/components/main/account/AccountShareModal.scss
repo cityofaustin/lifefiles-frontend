@@ -147,6 +147,25 @@
             line-height: 1.19;
             color: $dark-blue-grey;
           }
+          .permission-item {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-around;
+            padding: 0px 8px;
+            @include media-breakpoint-up(xl) {
+              padding: 0 35px;
+            }
+            .item-title {
+              font-size: 20px;
+              font-weight: 500;
+              line-height: 1.2;
+              color: #484848;
+              width: 120px;
+              text-align: center;
+            }
+          }
           .permissions-prompt {
             @include media-breakpoint-down(sm) {
               padding: 5px 0 25px 0;
