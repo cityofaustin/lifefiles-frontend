@@ -1,3 +1,5 @@
+@import "../../variables.scss";
+
 .admin-content {
   // margin-left: 107px;
   width: 100%;
@@ -24,7 +26,9 @@
     svg.add {
       width: 36px;
       height: 36px;
-      fill: #bb86fc;
+      @include themify($themes) {
+        fill: themed("colorSecondary");
+      }
       cursor: pointer;
     }
   }
@@ -41,7 +45,9 @@
     svg {
       width: 36px;
       height: 36px;
-      fill: #bb86fc;
+      @include themify($themes) {
+        fill: themed("colorSecondary");
+      }
       cursor: pointer;
     }
   }

@@ -30,7 +30,7 @@ class ProgressIndicator extends Component<ProgressIndicatorProps> {
           <div className="progress-fullscreen">
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
               {this.renderCircularProgressIndicator()}
-              <div>Loading Please do not reload this page</div>
+              <div style={{marginTop: '1em', fontWeight: 500}}>Loading Please do not reload this page</div>
             </div>
           </div>
         }

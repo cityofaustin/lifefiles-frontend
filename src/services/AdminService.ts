@@ -6,6 +6,10 @@ class AdminService extends AgentService {
     return await super.saveAppSettings(title, logoImage);
   }
 
+  static async saveAdminAccount(email, password) {
+    return await super.put('/admin/email-password', {email, password});
+  }
+
   static async getAppSettings() {
     return await super.get('/admin/app-settings');
   }

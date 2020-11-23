@@ -94,7 +94,8 @@ body {
 
 // bootstrap button
 
-.btn {
+.theme-owner .btn,
+.theme-helper .btn {
   font-size: 30px;
   font-weight: 500;
   border-radius: 17px;
@@ -106,12 +107,41 @@ body {
 }
 
 .btn-primary {
-  background-color: #2362c7;
-  border-color: #2362c7;
+  // background-color: #2362c7;
+  // border-color: #2362c7;
   @include themify($themes) {
     background-color: themed("colorPrimary");
     border-color: themed("colorPrimary");
     color: themed("buttonTextColor");
+  }
+}
+
+.theme-admin {
+  .btn {
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .btn-primary {
+    &:enabled:hover {
+      background-color: lighten($color: #bb86fc, $amount: 10);
+      border-color: lighten($color: #bb86fc, $amount: 10);
+    }
+  }
+
+  .btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(darken($color: #bb86fc, $amount: 10), 1) !important;
+  }
+  .btn-primary:not(:disabled):not(.disabled):active:focus,
+  .btn-primary:not(:disabled):not(.disabled).active:focus,
+  .show > .btn-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(darken($color: #bb86fc, $amount: 10), 1) !important;
+  }
+  .btn-primary:not(:disabled):not(.disabled):active,
+  .btn-primary:not(:disabled):not(.disabled).active,
+  .show > .btn-primary.dropdown-toggle {
+    color: #000;
+    background-color: lighten($color: #bb86fc, $amount: 10);
+    border-color: lighten($color: #bb86fc, $amount: 10);
   }
 }
 
@@ -216,7 +246,8 @@ body {
 
 // bootstrap form control
 
-.form-control {
+.theme-owner.form-control,
+.theme-helper.form-control {
   @include media-breakpoint-down(sm) {
     font-size: 18px;
   }
@@ -325,7 +356,6 @@ body {
 
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
-
   background-color: inherit;
   border-color: transparent;
   @include themify($themes) {
@@ -409,4 +439,19 @@ input[type="submit"] {
 
 .button {
   border: none;
+}
+
+// admin
+
+.theme-admin {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    border: 1px solid #505050;
+    &,
+    &:focus {
+      background-color: #121212;
+    }
+    color: #dfdfdf;
+  }
 }

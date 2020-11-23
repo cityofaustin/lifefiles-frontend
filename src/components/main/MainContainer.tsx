@@ -86,6 +86,7 @@ interface MainContainerProps {
   coreFeatures: string[];
   viewFeatures: string[];
   setMyAccount: (account: Account) => void;
+  handleSaveAdminAccount: (email: string, password: string) => Promise<void>;
 }
 
 class MainContainer extends Component<MainContainerProps, MainContainerState> {
@@ -1016,11 +1017,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   }
 
   renderAdminPage() {
-    const { account, privateEncryptionKey, appSettings, saveAppSettings } = {
+    const { account, handleSaveAdminAccount, appSettings, saveAppSettings } = {
       ...this.props,
     };
     return (
       <AdminPage
+        handleSaveAdminAccount={handleSaveAdminAccount}
         goBack={this.goBack}
         account={account}
         appSettings={appSettings}

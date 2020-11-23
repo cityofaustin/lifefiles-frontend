@@ -12,7 +12,16 @@ import { ReactComponent as AddSvg } from '../../../img/add.svg';
 import { ReactComponent as SaveSvg } from '../../../img/save.svg';
 
 import { AgGridReact } from 'ag-grid-react';
-import { Alert } from 'reactstrap';
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Row,
+} from 'reactstrap';
 import {
   GridApi,
   ColumnApi,
@@ -49,9 +58,13 @@ interface AdminPageProps {
   appSettings: AppSetting[];
   saveAppSettings: (title: string, logo?: File) => Promise<void>;
   goBack: () => void;
+  handleSaveAdminAccount: (email: string, password: string) => Promise<void>;
 }
 
 interface AdminPageState {
+  email: string;
+  password: string;
+  confirmPassword: string;
   adminPublicKey: string;
   adminPrivateKey: string;
   ethBalance: string;
@@ -100,6 +113,9 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       ? props.appSettings.find((a) => a.settingName === SettingNameEnum.LOGO)!
       : { settingName: SettingNameEnum.LOGO, settingValue: '' };
     this.state = {
+      email: props.account.email,
+      password: '',
+      confirmPassword: '',
       adminPublicKey: '',
       adminPrivateKey: '',
       ethBalance: '',
@@ -219,13 +235,13 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         .filter((accountType) => accountType.role !== 'admin')
         .map((accountType) => ({ ...accountType, action: '' }));
 
-      let accountsColumnDefs = this.state.accountsColumnDefs;
+      const accountsColumnDefs = this.state.accountsColumnDefs;
 
-      let toAdd = {
+      const toAdd = {
         headerName: 'Account Type',
         field: 'accountType',
         cellRenderer: 'accountTypeCellRenderer',
-        cellRendererParams: { accountTypes: accountTypes },
+        cellRendererParams: { accountTypes },
         cellEditorParams: {
           cellRenderer: 'accountTypeCellRenderer',
         },
@@ -251,23 +267,23 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           (documentType) => ({ ...documentType, action: '' })
         ),
         accounts: adminResponse.account.adminInfo.accounts
-          .filter((account) => account.username !== 'admin')
-          .map((account) => ({
-            ...account,
+          .filter((account1) => account1.username !== 'admin')
+          .map((account1) => ({
+            ...account1,
             action: '',
           })),
 
         viewFeatures: adminResponse.account.adminInfo.viewFeatures,
         coreFeatures: adminResponse.account.adminInfo.coreFeatures,
         // NOTE: leaving out admin for now until further decisions made.
-        accountTypes: accountTypes,
+        accountTypes,
       });
 
       const adminPublicKey =
         adminResponse.account.adminInfo.adminCryptoKey.publicKey;
 
       this.setState({
-        adminPublicKey: adminPublicKey,
+        adminPublicKey,
       });
       this.setState({
         adminPrivateKey:
@@ -297,7 +313,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   };
 
   onPrivateKeyChanged = (privKey) => {
-    if (privKey.target.value != undefined && privKey.target.value !== '') {
+    if (privKey.target.value !== undefined && privKey.target.value !== '') {
       this.setState({ adminPrivateKey: privKey.target.value });
     }
   };
@@ -431,16 +447,16 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
 
     if (params.value === 'save') {
       const baseAccount = { ...params.data };
-      const reqObjectSub = {};
-      reqObjectSub['username'] = baseAccount.username;
-      reqObjectSub['email'] = baseAccount.email;
-      reqObjectSub['firstname'] = baseAccount.firstName;
-      reqObjectSub['lastname'] = baseAccount.lastName;
+      const reqObjectSub: any = {};
+      reqObjectSub.username = baseAccount.username;
+      reqObjectSub.email = baseAccount.email;
+      reqObjectSub.firstname = baseAccount.firstName;
+      reqObjectSub.lastname = baseAccount.lastName;
       // reqObjectSub['canAddOtherAccounts'] = baseAccount.canAddOtherAccounts;
 
       // TODO: Change to be dynamic based off selection!
-      reqObjectSub['accounttype'] = baseAccount.accountType;
-      reqObjectSub['password'] = baseAccount.email;
+      reqObjectSub.accounttype = baseAccount.accountType;
+      reqObjectSub.password = baseAccount.email;
 
       // delete reqObject.action;
       const reqObject = { account: reqObjectSub };
@@ -711,13 +727,21 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     return accountTypeCoreFeatures;
   };
 
+  handleSaveAdminAccount = async (e) => {
+    e.preventDefault();
+    const { email, password } = { ...this.state };
+    const { handleSaveAdminAccount } = { ...this.props };
+    await handleSaveAdminAccount(email, password);
+    alert('Successfully saved settings.');
+  };
+
   renderAppSettings() {
     const { logoSetting, titleSetting, logoFile } = { ...this.state };
     const { saveAppSettings } = { ...this.props };
     return (
-      <Fragment>
+      <div style={{ marginBottom: '3em' }}>
         <h2>App Settings</h2>
-        <h3>Logo</h3>
+        <p>Logo</p>
         {logoSetting.settingValue.length > 0 && (
           <div>
             <img
@@ -726,19 +750,21 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
               src={AccountService.getProfileURL(logoSetting.settingValue)}
               alt="Profile"
             />
-            <br />
-            <input
-              type="button"
-              value="Change Logo"
-              onClick={() => {
-                this.setState({
-                  logoSetting: {
-                    settingName: SettingNameEnum.LOGO,
-                    settingValue: '',
-                  },
-                });
-              }}
-            />
+            <div style={{ marginTop: '1em' }}>
+              <Button
+                color="primary"
+                onClick={() => {
+                  this.setState({
+                    logoSetting: {
+                      settingName: SettingNameEnum.LOGO,
+                      settingValue: '',
+                    },
+                  });
+                }}
+              >
+                Change Logo
+              </Button>
+            </div>
           </div>
         )}
         {logoSetting.settingValue.length < 1 && (
@@ -748,35 +774,43 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             }}
           />
         )}
-        <h3>Title</h3>
-        <input
-          type="text"
-          value={titleSetting.settingValue}
-          onChange={(e) => {
-            const settingValue = e.target.value;
-            this.setState({
-              titleSetting: {
-                settingName: SettingNameEnum.TITLE,
-                settingValue,
-              },
-            });
-          }}
-        />
-        <br />
-        <br />
-        <input
-          type="button"
-          value="Save App Settings"
+        {/* <h3>Title</h3> */}
+        <Row form style={{ marginTop: '1em' }}>
+          <Col md={4}>
+            <FormGroup>
+              <Label for="title">Title</Label>
+              <Input
+                name="title"
+                type="text"
+                value={titleSetting.settingValue}
+                onChange={(e) => {
+                  const settingValue = e.target.value;
+                  this.setState({
+                    titleSetting: {
+                      settingName: SettingNameEnum.TITLE,
+                      settingValue,
+                    },
+                  });
+                }}
+              />
+            </FormGroup>
+          </Col>
+        </Row>
+        <Button
+          color="primary"
           onClick={() => saveAppSettings(titleSetting.settingValue, logoFile)}
-        />
-        <br />
-        <br />
-      </Fragment>
+        >
+          Save App Settings
+        </Button>
+      </div>
     );
   }
 
   render() {
     const {
+      email,
+      password,
+      confirmPassword,
       accounts,
       accountsColumnDefs,
       documentTypes,
@@ -816,6 +850,66 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       <div className="admin-content" style={{ marginTop: '20px' }}>
         <h1>Admin Page</h1>
         {this.renderAppSettings()}
+        <h2>Super Admin Account</h2>
+        <Form
+          onSubmit={this.handleSaveAdminAccount}
+          style={{ margin: '1em 0 3em 0' }}
+        >
+          <Row form>
+            <Col md={6} lg={4}>
+              <FormGroup>
+                <Label for="email">Email</Label>
+                <Input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => this.setState({ email: e.target.value })}
+                  placeholder="Email"
+                />
+              </FormGroup>
+            </Col>
+            <Col md={6} lg={4}>
+              <FormGroup>
+                <Label for="password">Password</Label>
+                <Input
+                  type="password"
+                  name="password"
+                  id="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => this.setState({ password: e.target.value })}
+                />
+              </FormGroup>
+            </Col>
+            <Col md={6} lg={4}>
+              <FormGroup>
+                <Label for="password">Confirm Password</Label>
+                <Input
+                  type="password"
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  placeholder="Password"
+                  value={confirmPassword}
+                  onChange={(e) =>
+                    this.setState({ confirmPassword: e.target.value })
+                  }
+                />
+              </FormGroup>
+            </Col>
+          </Row>
+          <Button
+            color="primary"
+            disabled={
+              email.length < 1 ||
+              password.length < 1 ||
+              confirmPassword.length < 1 ||
+              password !== confirmPassword
+            }
+          >
+            Save Account
+          </Button>
+        </Form>
         <h2>Accounts</h2>
         <Alert color="success" isOpen={accountSavedSuccess}>
           Successfully Saved Account!
@@ -1161,16 +1255,27 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
 
         <p>Public Key:</p>
         <p>{this.state.adminPublicKey}</p>
-        <QRCode value={this.state.adminPublicKey} size="256" />
+        <QRCode value={this.state.adminPublicKey} size={256} />
         <p>^ Send any amount of ETH or RSK to this address to fund account.</p>
         <br />
 
-        <p>Private Key:</p>
-        <input
-          onChange={this.onPrivateKeyChanged}
-          value={this.state.adminPrivateKey}
-        ></input>
-        <button onClick={this.updatePrivateKeyClicked}>Update</button>
+        {/* <Row form> */}
+        {/* <Col md={4}> */}
+        <FormGroup>
+          <Label for="exampleZip">Private Key</Label>
+          <Input
+            type="text"
+            name="adminPrivateKey"
+            id="adminPrivateKey"
+            value={this.state.adminPrivateKey}
+            onChange={this.onPrivateKeyChanged}
+          />
+        </FormGroup>
+        {/* </Col> */}
+        {/* </Row> */}
+        <Button color="primary" onClick={this.updatePrivateKeyClicked}>
+          Update
+        </Button>
       </div>
     );
   }

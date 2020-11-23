@@ -220,6 +220,13 @@ class App extends Component<{}, AppState> {
     alert('Successfully saved settings.');
   };
 
+  handleSaveAdminAccount = async (email: string, password: string) => {
+    const { account } = {...this.state};
+    await AdminService.saveAdminAccount(email, password);
+    account!.email = email;
+    this.setState({account});
+  };
+
   render() {
     const {
       account,
@@ -291,6 +298,7 @@ class App extends Component<{}, AppState> {
               )}
               {account && (
                 <MainContainer
+                  handleSaveAdminAccount={this.handleSaveAdminAccount}
                   appSettings={appSettings}
                   saveAppSettings={this.saveAppSettings}
                   account={account}

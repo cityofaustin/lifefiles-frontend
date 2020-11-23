@@ -1,6 +1,31 @@
 @import "~bootstrap/scss/bootstrap";
 @import "../variables.scss";
 
+.theme-admin .dropzone-container {
+  .upload {
+    background-color: #121212 !important;
+    .caption {
+      color: #dfdfdf !important;
+    }
+    svg {
+      text {
+        fill: #dfdfdf;
+      }
+      rect {
+        fill: #bb86fc;
+      }
+      g[data-name="Group 1035"] {
+        text {
+          fill: #000;
+        }
+        path {
+          fill: #000;
+        }
+      }
+    }
+  }
+}
+
 .dropzone-container {
   display: flex;
   justify-content: center;
