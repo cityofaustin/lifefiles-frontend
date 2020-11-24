@@ -75,32 +75,37 @@ class AccountSummary extends Component<
       removeHelperContact,
       unshareAllWithHelperContact,
       helperContact,
-      updateHelperContactPermissions
+      updateHelperContactPermissions,
     } = { ...this.props };
     const { showAccountShareModal, goToClientDocuments } = { ...this.state };
-    const numberOfShares = shareRequests ? shareRequests.filter(sr => sr.approved).length : 0;
+    const numberOfShares = shareRequests
+      ? shareRequests.filter((sr) => sr.approved).length
+      : 0;
     return (
       <div className="network-item" onClick={this.handleAccountSummaryClick}>
         {goToClientDocuments && (
           <Redirect push to={`clients/${account.id}/documents`} />
         )}
-        <AccountShareModal
-          updateHelperContactPermissions={updateHelperContactPermissions!}
-          helperContact={helperContact!}
-          unshareAllWithHelperContact={unshareAllWithHelperContact}
-          removeHelperContact={removeHelperContact}
-          showModal={showAccountShareModal}
-          toggleModal={() =>
-            this.setState({ showAccountShareModal: !showAccountShareModal })
-          }
-          account={account}
-          searchedDocuments={searchedDocuments}
-          myAccount={myAccount}
-          shareRequests={shareRequests}
-          addShareRequest={addShareRequest}
-          removeShareRequest={removeShareRequest}
-          privateEncryptionKey={privateEncryptionKey}
-        />
+        {/* Helper does not see this and helper contact is not defined */}
+        {helperContact && (
+          <AccountShareModal
+            updateHelperContactPermissions={updateHelperContactPermissions!}
+            helperContact={helperContact!}
+            unshareAllWithHelperContact={unshareAllWithHelperContact}
+            removeHelperContact={removeHelperContact}
+            showModal={showAccountShareModal}
+            toggleModal={() =>
+              this.setState({ showAccountShareModal: !showAccountShareModal })
+            }
+            account={account}
+            searchedDocuments={searchedDocuments}
+            myAccount={myAccount}
+            shareRequests={shareRequests}
+            addShareRequest={addShareRequest}
+            removeShareRequest={removeShareRequest}
+            privateEncryptionKey={privateEncryptionKey}
+          />
+        )}
         <div className="img-container">
           {account.profileImageUrl && (
             <ImageWithStatus
@@ -108,7 +113,9 @@ class AccountSummary extends Component<
               imageUrl={AccountService.getProfileURL(account.profileImageUrl!)}
             />
           )}
-          {!account.profileImageUrl && <ProfileImage account={account} size={ProfileImageSizeEnum.LARGE} />}
+          {!account.profileImageUrl && (
+            <ProfileImage account={account} size={ProfileImageSizeEnum.LARGE} />
+          )}
           <div className="docs-shared-sm">
             <DocShared isNotary={isNotary} numberOfShares={numberOfShares} />
           </div>
