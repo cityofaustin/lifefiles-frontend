@@ -39,12 +39,13 @@ import { ReactComponent as AddDocumentSvg } from '../../../img/add-doc.svg';
 import { ReactComponent as LoginSvg } from '../../../img/login2.svg';
 import HelperContact from '../../../models/HelperContact';
 import Accordion from '../../common/Accordion';
+import SearchInput from '../../common/SearchInput';
 
 interface AccountShareModalProps {
   showModal: boolean;
   toggleModal: () => void;
   account: Account;
-  searchedDocuments: Document[];
+  documents: Document[];
   myAccount: Account;
   shareRequests: ShareRequest[];
   addShareRequest: (request: ShareRequest) => void;
@@ -64,6 +65,8 @@ interface AccountShareModalState {
   showUnshareAllModal: boolean;
   unshareConfirmInput: string;
   hasConfirmedUnshare: boolean;
+  searchedDocuments: Document[];
+  documentQuery: string;
 }
 
 interface DocShare {
@@ -84,8 +87,27 @@ class AccountShareModal extends Component<
       showUnshareAllModal: false,
       unshareConfirmInput: '',
       hasConfirmedUnshare: false,
+      searchedDocuments: props.documents,
+      documentQuery: '',
     };
   }
+
+  handleSearch = (query: string) => {
+    const { documents } = { ...this.props };
+    let searchedDocuments = documents.filter((document) => {
+      return (
+        document.type &&
+        document.type.toLowerCase().indexOf(query.toLowerCase()) !== -1
+      );
+    });
+    if (query.length === 0) {
+      searchedDocuments = documents;
+    }
+    this.setState({
+      searchedDocuments,
+      documentQuery: query,
+    });
+  };
 
   handleShareDocWithContact = async (
     document: Document,
@@ -462,12 +484,13 @@ class AccountShareModal extends Component<
       toggleModal,
       showModal,
       account,
-      searchedDocuments,
+      documents,
       privateEncryptionKey,
       shareRequests,
       helperContact,
       updateHelperContactPermissions,
     } = { ...this.props };
+    const { searchedDocuments } = { ...this.state };
     const { isLoading } = { ...this.state };
     // width="34.135" height="33.052"
     const closeBtn = (
@@ -607,6 +630,7 @@ class AccountShareModal extends Component<
                 </div>
               </div>
               <div className="right-pane">
+                <SearchInput handleSearch={this.handleSearch} autoSearch hideButton />
                 <div className="share-title">Shared Documents</div>
                 <div className="document-grid">
                   {searchedDocuments.map((searchedDocument, idx) => {

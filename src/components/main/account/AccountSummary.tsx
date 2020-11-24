@@ -98,7 +98,7 @@ class AccountSummary extends Component<
               this.setState({ showAccountShareModal: !showAccountShareModal })
             }
             account={account}
-            searchedDocuments={searchedDocuments}
+            documents={searchedDocuments}
             myAccount={myAccount}
             shareRequests={shareRequests}
             addShareRequest={addShareRequest}

@@ -52,8 +52,11 @@
     }
   }
   .account-share-container {
-    @include media-breakpoint-down(sm) {
+    @include media-breakpoint-down(xs) {
       padding: 0;
+    }
+    @include media-breakpoint-up(sm) {
+      padding: 1rem;
     }
     .account-share {
       @include media-breakpoint-up(lg) {
@@ -277,6 +280,20 @@
         }
       }
       .right-pane {
+        .search-container {
+          margin: 25px 0 0 0;
+          @include media-breakpoint-up(lg) {
+            margin: 0 0 13px 0;
+          }
+        }
+        .search-container-sm {
+          margin: 0 28px;
+          padding: 25px 0 10px 0;
+          @include media-breakpoint-up(sm) {
+            margin: 25px 44px 0 44px;
+            padding: 0;
+          }
+        }
         @include media-breakpoint-down(xs) {
           background-color: white;
         }
