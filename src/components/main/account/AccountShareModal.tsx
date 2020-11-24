@@ -38,6 +38,7 @@ import DocShared from '../document/DocShared';
 import { ReactComponent as AddDocumentSvg } from '../../../img/add-doc.svg';
 import { ReactComponent as LoginSvg } from '../../../img/login2.svg';
 import HelperContact from '../../../models/HelperContact';
+import Accordion from '../../common/Accordion';
 
 interface AccountShareModalProps {
   showModal: boolean;
@@ -465,7 +466,7 @@ class AccountShareModal extends Component<
       privateEncryptionKey,
       shareRequests,
       helperContact,
-      updateHelperContactPermissions
+      updateHelperContactPermissions,
     } = { ...this.props };
     const { isLoading } = { ...this.state };
     // width="34.135" height="33.052"
@@ -533,6 +534,39 @@ class AccountShareModal extends Component<
                     <div className="item-value">{account.email}</div>
                   </div>
                 </div>
+                <Accordion id="permissions" title="Permissions">
+                  <Fragment>
+                    <div className="permissions-excerpt">
+                      What can this contact help me with?
+                    </div>
+                    <div className="permission-item">
+                      <LoginSvg />
+                      <div className="item-title">Help me login</div>
+                      <Toggle
+                        value={helperContact.isSocialAttestationEnabled}
+                        onToggle={() => {
+                          const hc = this.props.helperContact;
+                          hc.isSocialAttestationEnabled = !hc.isSocialAttestationEnabled;
+                          updateHelperContactPermissions(hc);
+                        }}
+                        size={ToggleSizeEnum.MD}
+                      />
+                    </div>
+                    <div className="permission-item">
+                      <AddDocumentSvg />
+                      <div className="item-title">Add new documents</div>
+                      <Toggle
+                        value={helperContact.canAddNewDocuments}
+                        onToggle={() => {
+                          const hc = this.props.helperContact;
+                          hc.canAddNewDocuments = !hc.canAddNewDocuments;
+                          updateHelperContactPermissions(hc);
+                        }}
+                        size={ToggleSizeEnum.MD}
+                      />
+                    </div>
+                  </Fragment>
+                </Accordion>
                 <div className="permissions">
                   <div className="permissions-title">Permissions</div>
                   <div className="permissions-excerpt">

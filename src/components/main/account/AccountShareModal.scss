@@ -121,14 +121,74 @@
             }
           }
         }
-        .permissions {
-          @include media-breakpoint-down(sm) {
-            padding: 10px 14px;
+        .accordion {
+          .accordion-label {
+            background: #f6f6f6;
+            color: $dark-blue-grey;
+            height: 50px;
+            align-items: center;
+            padding: 0 14px;
+            .left-header {
+              margin-top: 0;
+            }
+            svg {
+              g {
+                stroke: $dark-blue-grey;
+              }
+            }
           }
+          .accordion-content {
+            background-color: #f6f6f6;
+          }
+          @include media-breakpoint-up(sm) {
+            display: none;
+          }
+          .permissions-title {
+            width: 100%;
+            font-size: 25px;
+            font-weight: bold;
+          }
+          .permissions-excerpt {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.5;
+            line-height: 1.19;
+            color: $dark-blue-grey;
+          }
+          .permission-item {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-around;
+            padding: 0px 8px;
+            .item-title {
+              font-size: 20px;
+              font-weight: 500;
+              line-height: 1.2;
+              color: #484848;
+              width: 120px;
+              text-align: center;
+            }
+          }
+          .permissions-prompt {
+            padding: 5px 0 25px 0;
+            font-size: 16px;
+            opacity: 0.5;
+            font-weight: 500;
+          }
+        }
+        .permissions {
           display: flex;
           flex-direction: column;
           align-items: center;
           color: #0e232c;
+          @include media-breakpoint-down(xs) {
+            display: none;
+          }
+          @include media-breakpoint-down(sm) {
+            padding: 10px 14px;
+          }
           .permissions-title {
             @include media-breakpoint-up(sm) {
               padding: 8px 35.5px 0 35.5px;
@@ -217,6 +277,9 @@
         }
       }
       .right-pane {
+        @include media-breakpoint-down(xs) {
+          background-color: white;
+        }
         @include media-breakpoint-up(lg) {
           width: 626px;
         }
