@@ -5,12 +5,6 @@ import UrlUtil from '../../util/UrlUtil';
 
 export default class OauthFlow extends Component {
   async componentDidMount() {
-    if (process.env.AUTH_API === undefined) {
-      const response = await AccountService.getOauthEndpoint();
-      AccountService.setAuthApi(response.url);
-    } else {
-      AccountService.setAuthApi(process.env.AUTH_API);
-    }
     const code = UrlUtil.getQueryVariable('code');
 
     if (code) {

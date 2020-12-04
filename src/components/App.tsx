@@ -44,7 +44,7 @@ class App extends Component<{}, AppState> {
       appSettings: [],
       logoFile: undefined,
       account: undefined,
-      isLoading: false,
+      isLoading: true,
       theme: Role.owner,
       coreFeatures: [],
       viewFeatures: [],
@@ -55,7 +55,6 @@ class App extends Component<{}, AppState> {
     let { appSettings, account, theme, coreFeatures, viewFeatures } = {
       ...this.state,
     };
-    this.setState({ isLoading: true });
 
     setTimeout(() => {
       document.getElementById('splash')!.style.animation = 'fadeout 1s';
@@ -71,6 +70,12 @@ class App extends Component<{}, AppState> {
       }
     } else {
       ApiService.setApiEndpoint(process.env.MYPASS_API);
+    }
+    if (process.env.AUTH_API === undefined) {
+      const response = await AccountService.getOauthEndpoint();
+      AccountService.setAuthApi(response.url);
+    } else {
+      AccountService.setAuthApi(process.env.AUTH_API);
     }
 
     if (AuthService.isLoggedIn()) {
