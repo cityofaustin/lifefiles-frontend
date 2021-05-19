@@ -51,13 +51,13 @@ jobs:
       - run: cp .env.prod .env
       - run: ls -a
       - run: npm run deploy
-      - slack/status:
-          webhook: ${SLACK_WEBHOOK}
-          success_message: >
-            mypass frontend has deployed!
-          failure_message: >
-            mypass frontend deploy has failed!
-          only_for_branches: main
+      # - slack/status:
+      #     webhook: ${SLACK_WEBHOOK}
+      #     success_message: >
+      #       mypass frontend has deployed!
+      #     failure_message: >
+      #       mypass frontend deploy has failed!
+      #     only_for_branches: main
 
 workflows:
   version: 2.0
@@ -67,9 +67,17 @@ workflows:
       - deploy-staging:
           requires:
             - build-and-test
+          filters:
+            branches:
+              only:
+                - staging
       - chrome_version:
           requires:
             - deploy-staging
+          filters:
+            branches:
+              only:
+                - staging
   build:
     jobs:
       - test:

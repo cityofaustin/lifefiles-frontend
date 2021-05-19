@@ -32,6 +32,7 @@ interface SecureRegisterState {
   selectedOption?: LoginOption;
   password: string;
   errorMessage: string;
+  duplicateEmail: boolean;
   notaryId: string;
   notaryState: string;
 }
@@ -40,6 +41,7 @@ interface SecureRegisterProps {
   appSettings: AppSetting[];
   handleLogin: (loginResponse: any) => Promise<void>;
   goBack: () => void;
+  goToLogin: () => void;
 }
 export default class SecureRegister extends Component<
   SecureRegisterProps,
@@ -61,10 +63,11 @@ export default class SecureRegister extends Component<
     notaryState: '',
     file: undefined,
     thumbnailFile: undefined,
+    duplicateEmail: false
   };
 
   handleRegister = async () => {
-    const { role } = {...this.props};
+    const { role, appSettings } = { ...this.props };
     const {
       email,
       fullname,
@@ -76,7 +79,7 @@ export default class SecureRegister extends Component<
     } = { ...this.state };
     // const { fullname, previewURL } = { ...this.state };
     // notary things
-    let { errorMessage } = { ...this.state };
+    let { errorMessage, duplicateEmail } = { ...this.state };
     const username = this.state.email.split('@')[0];
     const firstname =
       fullname.split(' ').length > 0 ? fullname.split(' ')[0] : fullname;
@@ -92,7 +95,7 @@ export default class SecureRegister extends Component<
       lastname,
       notaryId,
       notaryState,
-      role
+      role,
     };
     const secureAccountbody: HelperAccountRequest = {
       email,
@@ -103,7 +106,7 @@ export default class SecureRegister extends Component<
       notaryId,
       notaryState,
       publicEncryptionKey: '',
-      role
+      role,
     };
     if (selectedOption === LoginOption.PrivateKey) {
       window.sessionStorage.setItem('bring-your-own-key', password);
@@ -157,12 +160,22 @@ export default class SecureRegister extends Component<
           errorMessage += `${err.response.msg.errors[k].path} ${err.response.msg.errors[k].message}`;
           idx++;
         }
+        if (errorMessage.includes('email is already taken')) {
+          const titleSetting = appSettings.find(
+            (a) => a.settingName === 'title'
+          );
+          const title = titleSetting ? titleSetting.settingValue : undefined;
+          errorMessage = `The email address is already being used ${
+            title ? ` on ${title}` : ''
+          }, please click on "Go Back" or`;
+          duplicateEmail = true;
+        }
       } else {
         errorMessage =
           'Oops, something went wrong. Please try again in a few minutes.';
       }
     }
-    this.setState({ errorMessage, step: 0 }, async () => {
+    this.setState({ errorMessage, duplicateEmail, step: 0 }, async () => {
       await delay(ANIMATION_TIMEOUT);
       const elObj = this.getElObj();
       elObj.wave.style.transition = 'none';
@@ -284,7 +297,7 @@ export default class SecureRegister extends Component<
   }
 
   render() {
-    const { role } = { ...this.props };
+    const { role, goToLogin } = { ...this.props };
     const {
       email,
       fullname,
@@ -298,6 +311,7 @@ export default class SecureRegister extends Component<
       notaryState,
       isAnimatingForward,
       isAnimatingBackward,
+      duplicateEmail,
     } = {
       ...this.state,
     };
@@ -309,10 +323,12 @@ export default class SecureRegister extends Component<
           <EmailCard
             role={role}
             errorMessage={errorMessage}
+            duplicateEmail={duplicateEmail}
             email={email}
             fullname={fullname}
             goBack={this.goBack}
             goForward={this.goForward}
+            goToLogin={goToLogin}
           />
         );
         break;
@@ -323,10 +339,12 @@ export default class SecureRegister extends Component<
               <EmailCard
                 role={role}
                 errorMessage={errorMessage}
+                duplicateEmail={duplicateEmail}
                 email={email}
                 fullname={fullname}
                 goBack={this.goBack}
                 goForward={this.goForward}
+                goToLogin={goToLogin}
               />
               <HelperProfile
                 email={email}
@@ -346,10 +364,12 @@ export default class SecureRegister extends Component<
                 role={role}
                 position="left"
                 errorMessage={errorMessage}
+                duplicateEmail={duplicateEmail}
                 email={email}
                 fullname={fullname}
                 goBack={this.goBack}
                 goForward={this.goForward}
+                goToLogin={goToLogin}
               />
               <HelperProfile
                 email={email}
@@ -398,10 +418,12 @@ export default class SecureRegister extends Component<
               <EmailCard
                 role={role}
                 errorMessage={errorMessage}
+                duplicateEmail={duplicateEmail}
                 email={email}
                 fullname={fullname}
                 goBack={this.goBack}
                 goForward={this.goForward}
+                goToLogin={goToLogin}
               />
             );
             card = (
@@ -438,11 +460,13 @@ export default class SecureRegister extends Component<
               <EmailCard
                 role={role}
                 errorMessage={errorMessage}
+                duplicateEmail={duplicateEmail}
                 email={email}
                 fullname={fullname}
                 goBack={this.goBack}
                 goForward={this.goForward}
                 position="left"
+                goToLogin={goToLogin}
               />
             );
             prevCard = (

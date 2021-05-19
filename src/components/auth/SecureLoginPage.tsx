@@ -167,6 +167,14 @@ class SecureLoginPage extends Component<SecureLoginProps> {
     this.setState({ secureAccount });
   };
 
+  goToLogin = () => {
+    this.setState({
+      isRegistering: false,
+      passwordSelected: true,
+      privateKeySelected: false,
+    });
+  };
+
   renderOriginalLogin() {
     const { email, password, errorMessage, secureAccount } = { ...this.state };
     let placeholderText = 'Password';
@@ -239,13 +247,20 @@ class SecureLoginPage extends Component<SecureLoginProps> {
       <section className="container">
         <div ref="section" id="section-1-owner" className="section">
           <div className="section-contents">
-            <div className="title1" style={{ textTransform: 'capitalize' }}>Document {role}</div>
+            <div className="title1" style={{ textTransform: 'capitalize' }}>
+              Document {role}
+            </div>
             <div className="subtitle">Help us find your account</div>
             <div className="card owner1">
               <div className="card-body">
                 <div className="card-body-section" style={{ marginTop: 0 }}>
                   <LoginSvg />
-                  <div className="helper-login" style={{textTransform: 'capitalize'}}>{role} Login</div>
+                  <div
+                    className="helper-login"
+                    style={{ textTransform: 'capitalize' }}
+                  >
+                    {role} Login
+                  </div>
                   <div className="helper-excerpt" style={{ padding: '0 10px' }}>
                     Advanced users that registered their account with a private
                     key may use it to login
@@ -325,13 +340,20 @@ class SecureLoginPage extends Component<SecureLoginProps> {
       <section className="container">
         <div ref="section" id="section-1-owner" className="section">
           <div className="section-contents">
-            <div className="title1" style={{ textTransform: 'capitalize' }}>Document {role}</div>
+            <div className="title1" style={{ textTransform: 'capitalize' }}>
+              Document {role}
+            </div>
             <div className="subtitle">Help us find your account</div>
             <div className="card owner1">
               <div className="card-body">
                 <div className="card-body-section" style={{ marginTop: 0 }}>
                   <LoginSvg />
-                  <div className="helper-login" style={{textTransform: 'capitalize'}}>{role} Login</div>
+                  <div
+                    className="helper-login"
+                    style={{ textTransform: 'capitalize' }}
+                  >
+                    {role} Login
+                  </div>
                   <div className="helper-excerpt">
                     Please enter your credentials below...
                   </div>
@@ -494,6 +516,7 @@ class SecureLoginPage extends Component<SecureLoginProps> {
             appSettings={appSettings}
             handleLogin={this.props.handleLogin}
             goBack={() => this.setState({ isRegistering: false })}
+            goToLogin={this.goToLogin}
           />
         )}
       </main>

@@ -18,6 +18,8 @@ interface EmailCardProps {
   goForward: (prevCardState: EmailCardState) => void;
   errorMessage: string;
   position?: string;
+  duplicateEmail: boolean;
+  goToLogin: () => void;
 }
 export default class EmailCard extends Component<
   EmailCardProps,
@@ -34,7 +36,10 @@ export default class EmailCard extends Component<
   }
   render() {
     const { email, fullname } = { ...this.state };
-    const { goBack, goForward, errorMessage, role } = { ...this.props };
+    const { goBack, goForward, errorMessage, role, duplicateEmail, goToLogin } =
+      {
+        ...this.props,
+      };
     return (
       <div
         ref="section"
@@ -42,7 +47,9 @@ export default class EmailCard extends Component<
         className={getSectionClassName(this.props.position)}
       >
         <div className="section-contents">
-          <div className="title1" style={{ textTransform: 'capitalize' }}>Document {role}</div>
+          <div className="title1" style={{ textTransform: 'capitalize' }}>
+            Document {role}
+          </div>
           <div className="subtitle">Ok, let's pick a username</div>
           <div className="card owner1">
             <div className="card-body">
@@ -71,7 +78,14 @@ export default class EmailCard extends Component<
                 )}
               </div>
               <div className="card-body-section1">
-                {errorMessage && <div className="error">{errorMessage}</div>}
+                {errorMessage && (
+                  <>
+                    <div className="error">{errorMessage}</div>
+                    <span className="login-link" onClick={() => goToLogin()}>
+                      login here
+                    </span>
+                  </>
+                )}
                 <div className="form-control1">
                   <label>Full Name</label>
                   <input
@@ -93,6 +107,7 @@ export default class EmailCard extends Component<
                     </div>
                   </div>
                   <input
+                    className={duplicateEmail ? 'error' : ''}
                     name="email"
                     type="text"
                     value={email}
