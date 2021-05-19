@@ -15,9 +15,20 @@
   .error {
     padding: 0 10px;
     line-height: 1.2em;
-    margin-bottom: 8px;
-    font-size: 12px;
-    text-align: center;
+    // margin-bottom: 8px;
+    font-size: 15px;
+    color: #8E3C3C;
+    // text-align: center;
+  }
+  input.error {
+    border: 1px solid #8E3C3C !important;
+  }
+  .login-link {
+    color: #4AB2DE;
+    cursor: pointer;
+    font-size: 15px;
+    width: 100%;
+    padding-left: 10px;
   }
   input[type="button"] {
     font-size: 25px;
