@@ -80,8 +80,12 @@ export default class EmailCard extends Component<
               <div className="card-body-section1">
                 {errorMessage && (
                   <>
-                    <div className="error">{errorMessage}</div>
-                    <span className="login-link" onClick={() => goToLogin()}>
+                    <div className="error" style={{ paddingTop: '8px' }}>{errorMessage}</div>
+                    <span
+                      className="login-link"
+                      style={{ paddingBottom: '8px' }}
+                      onClick={() => goToLogin()}
+                    >
                       login here
                     </span>
                   </>
