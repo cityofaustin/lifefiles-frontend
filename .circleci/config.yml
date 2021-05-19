@@ -43,7 +43,8 @@ jobs:
       - run: npm install
       - run: npm test
       - run: sudo apt-get update && sudo apt-get install -y python-dev
-      - run: sudo curl -O https://bootstrap.pypa.io/get-pip.py
+      # - run: sudo curl -O https://bootstrap.pypa.io/get-pip.py
+      - run: sudo curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py
       - run: sudo python get-pip.py
       - run: sudo pip install awscli --upgrade
       - run: aws --version
