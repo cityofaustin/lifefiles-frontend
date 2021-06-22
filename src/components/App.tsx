@@ -195,7 +195,11 @@ class App extends Component<{}, AppState> {
 
   handleLogout = () => {
     const {account} = {...this.state};
-    AuthService.logOut(account?.isSecure);
+    if (account && account.role === Role.helper) {
+      AuthService.logOut();
+    } else {
+      AuthService.logOut(account?.isSecure);
+    }
     window.sessionStorage.removeItem('bring-your-own-key');
     this.setState({ account: undefined });
   };
