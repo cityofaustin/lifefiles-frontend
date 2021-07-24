@@ -22,7 +22,7 @@ export default class OauthFlow extends Component {
     const state = '';
     const authApi = AccountService.getAuthApi();
     window.location.replace(
-      `${authApi}/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
+      `${authApi}/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
     );
   }
 

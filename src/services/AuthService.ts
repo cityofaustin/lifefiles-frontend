@@ -47,7 +47,7 @@ class AuthService {
     sessionStorage.removeItem(this.REFRESH_TOKEN);
     window.location.replace(
       AccountService.getAuthApi() +
-        `/unregister?access_token=${jwt}&client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
+        `/unregister?access_token=${jwt}&client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
     );
   }
 }

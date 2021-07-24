@@ -204,7 +204,7 @@ export default class MySettings extends Component<
             const jwt = AuthService.getAccessToken();
             window.location.replace(
               AccountService.getAuthApi() +
-                `/settings?access_token=${jwt}&client_id=${process.env.CLIENT_ID}&response_type=code&redirect_url=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
+                `/settings?access_token=${jwt}&client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
             );
           }}
         >
