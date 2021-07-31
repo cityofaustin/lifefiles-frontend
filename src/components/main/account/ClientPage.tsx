@@ -5,6 +5,8 @@ import Account from '../../../models/Account';
 import Document from '../../../models/document/Document';
 import ShareRequest from '../../../models/ShareRequest';
 import AccountSummary from './AccountSummary';
+import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
+
 import './ClientPage.scss';
 
 interface ClientPageProps {
@@ -20,37 +22,64 @@ interface ClientPageProps {
   privateEncryptionKey: string;
   clientShares: Map<string, ShareRequest[]>;
   handleClientSelected: (clientSelected: Account) => void;
+  isLoading: boolean;
 }
 
 class ClientPage extends Component<ClientPageProps, {}> {
   constructor(props: Readonly<ClientPageProps>) {
     super(props);
     this.state = {
-      accountSelected: undefined
+      accountSelected: undefined,
     };
   }
 
   render() {
-    const { searchedDocuments, clientShares, handleClientSelected,
-      otherOwnerAccounts, myAccount, addShareRequest, removeShareRequest, privateEncryptionKey } = { ...this.props };
+    const {
+      searchedDocuments,
+      clientShares,
+      handleClientSelected,
+      otherOwnerAccounts,
+      myAccount,
+      addShareRequest,
+      removeShareRequest,
+      privateEncryptionKey,
+      isLoading,
+    } = { ...this.props };
     return (
       <div className="main-content">
         <Fragment>
           <div className="big-title">My Clients</div>
           <div className="other-owner-list">
-            {otherOwnerAccounts.length < 1 && (
-              <div>No clients found.</div>
-            )}
             <Fragment>
               <Row className="network-row">
-                {otherOwnerAccounts.length <= 0 && (
-                  <div className="no-network">There are no clients.</div>
+                {!isLoading && otherOwnerAccounts.length <= 0 && (
+                  <div className="no-network">
+                    <StampSvg />
+                    <div>
+                      Welcome {myAccount.firstName}! You have succesfully
+                      on-boarded to LifeFiles! Currently, you are not connected
+                      to Owners in LifeFiles.
+                    </div>
+                    <div className="title2">
+                      How do I add Owners to my client list?
+                    </div>
+                    <div>
+                      Ask Owners to add you to their network list to start
+                      sharing documents with you. If you are not in their
+                      network you can't see them in your client list to help
+                      them.
+                    </div>
+                    <div>
+                      We are doing this to give the choice to Owners to decide
+                      with whom they can share documents.
+                    </div>
+                  </div>
                 )}
                 {otherOwnerAccounts.map((account) => {
                   let shareRequests: ShareRequest[] = [];
                   if (clientShares.get(account.id) !== undefined) {
                     shareRequests = clientShares.get(account.id)!;
-                    shareRequests = shareRequests.filter(shareRequest => {
+                    shareRequests = shareRequests.filter((shareRequest) => {
                       return shareRequest.shareWithAccountId === myAccount.id;
                     });
                   }
@@ -64,8 +93,8 @@ class ClientPage extends Component<ClientPageProps, {}> {
                       className="network-container"
                     >
                       <AccountSummary
-                        unshareAllWithHelperContact={()=>{}}
-                        removeHelperContact={()=>{}}
+                        unshareAllWithHelperContact={() => {}}
+                        removeHelperContact={() => {}}
                         isNotary
                         account={account}
                         shareRequests={shareRequests}

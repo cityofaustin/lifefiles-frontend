@@ -105,7 +105,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       // showModal: true,
       isAccountMenuOpen: false,
       isSmallMenuOpen: false,
-      isLoading: false,
+      isLoading: true,
       documentQuery: '',
       accounts: [],
       helperContacts: [],
@@ -127,7 +127,6 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       ...this.state,
     };
     const documents: Document[] = account.documents;
-    this.setState({ isLoading: true });
     try {
       documentTypes = (await DocumentTypeService.get()).documentTypes;
       if (account.role === Role.helper) {
@@ -236,8 +235,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
   updateHelperContactPermissions = async (hc: HelperContact) => {
     let { helperContacts } = { ...this.state };
     const { sortAsc } = { ...this.state };
-    helperContacts = helperContacts.map(hcItem => {
-      if(hcItem._id === hc._id) {
+    helperContacts = helperContacts.map((hcItem) => {
+      if (hcItem._id === hc._id) {
         hcItem.canAddNewDocuments = hc.canAddNewDocuments;
         hcItem.isSocialAttestationEnabled = hc.isSocialAttestationEnabled;
       }
@@ -417,10 +416,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               referencedAccount.didPublicEncryptionKey!,
               originalBase64
             );
-            const ownerEncryptedThumbnail = await CryptoUtil.getEncryptedByPublicString(
-              referencedAccount.didPublicEncryptionKey!,
-              thumbnailBase64
-            );
+            const ownerEncryptedThumbnail =
+              await CryptoUtil.getEncryptedByPublicString(
+                referencedAccount.didPublicEncryptionKey!,
+                thumbnailBase64
+              );
             const ownerZipped: Blob = await ZipUtil.zip(ownerEncrypted);
             const ownerZippedThumbnail: Blob = await ZipUtil.zip(
               ownerEncryptedThumbnail
@@ -519,13 +519,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           request.shareRequestId
         );
         request.id = response.document._id;
-        const {
-          newZippedFile,
-          newZippedThumbnailFile,
-        } = await FileUtil.dataURLToEncryptedFiles(
-          request.base64Image!,
-          request.referencedAccount.didPublicEncryptionKey!
-        );
+        const { newZippedFile, newZippedThumbnailFile } =
+          await FileUtil.dataURLToEncryptedFiles(
+            request.base64Image!,
+            request.referencedAccount.didPublicEncryptionKey!
+          );
         request.img = newZippedFile;
         request.thumbnail = newZippedThumbnailFile;
       }
@@ -584,13 +582,11 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
           );
         }
 
-        const {
-          newZippedFile,
-          newZippedThumbnailFile,
-        } = await FileUtil.dataURLToEncryptedFiles(
-          request.base64Image!,
-          selectedContact!.didPublicEncryptionKey!
-        );
+        const { newZippedFile, newZippedThumbnailFile } =
+          await FileUtil.dataURLToEncryptedFiles(
+            request.base64Image!,
+            selectedContact!.didPublicEncryptionKey!
+          );
         let newShareRequest;
         if (!request.referencedAccount) {
           newShareRequest = await ShareRequestService.addShareRequestFile(
@@ -766,9 +762,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             shareRequestId: shareRequest._id,
           };
         });
-      const docTypes: string[] = await DocumentTypeService.getDocumentTypesAccountHas(
-        otherOwnerAccount.id
-      );
+      const docTypes: string[] =
+        await DocumentTypeService.getDocumentTypesAccountHas(
+          otherOwnerAccount.id
+        );
       const notSharedDocuments: Document[] = docTypes
         .filter((docType) => {
           return !sharedDocuments.some(
@@ -1038,6 +1035,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       clientShares,
       searchedHelperContacts,
       accounts,
+      isLoading
     } = {
       ...this.state,
     };
@@ -1062,6 +1060,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         privateEncryptionKey={privateEncryptionKey!}
         clientShares={clientShares}
         handleClientSelected={this.handleClientSelected}
+        isLoading={isLoading}
       />
     );
   }
