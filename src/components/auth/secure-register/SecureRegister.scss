@@ -1,214 +1,267 @@
 @import "../../variables.scss";
-.helper-register {
-  .section-center {
-    transition-property: transform, opacity;
-    transition-duration: 1.5s;
-    transition-timing-function: ease-out;
-    transform: translateX(0px);
-    will-change: transform;
-    opacity: 1;
-  }
-  .section-right {
-    transition-property: transform, opacity;
-    transition-duration: 1.5s;
-    transition-timing-function: ease-out;
-    transform: translateX(360px);
-    will-change: transform, opacity;
-    opacity: 0;
-  }
-  .section-left {
-    transition-property: transform, opacity;
-    transition-duration: 1.5s;
-    transition-timing-function: ease-out;
-    transform: translateX(-360px);
-    will-change: transform, opacity;
-    opacity: 0;
-  }
-  .section {
-    .section-contents {
-      .no-card {
-        min-height: 400px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-evenly;
-        margin-top: 100px;
-        svg {
-          path[data-name="Union 69"] {
-            @include themify($themes) {
-              fill: themed("colorPrimary");
-            }
-          }
-        }
-        .account-title {
-          font-size: 33px;
-          font-weight: bold;
-          @include themify($themes) {
-            color: themed("colorPrimary");
-          }
-        }
-        .helper-excerpt {
-          line-height: 1.2em;
-          text-align: center;
-          margin-top: 8px;
-          font-size: 13px;
-          color: #484848;
-          opacity: 0.77;
-        }
+#helper-login {
+  .helper-register {
+    .section-center {
+      transition-property: transform, opacity;
+      transition-duration: 1.5s;
+      transition-timing-function: ease-out;
+      transform: translateX(0px);
+      will-change: transform;
+      opacity: 1;
+    }
+    .section-right {
+      transition-property: transform, opacity;
+      transition-duration: 1.5s;
+      transition-timing-function: ease-out;
+      transform: translateX(360px);
+      will-change: transform, opacity;
+      opacity: 0;
+    }
+    .section-left {
+      transition-property: transform, opacity;
+      transition-duration: 1.5s;
+      transition-timing-function: ease-out;
+      transform: translateX(-360px);
+      will-change: transform, opacity;
+      opacity: 0;
+    }
+    .section {
+      .section-contents {
         .rotate {
           animation: rotation 1.5s infinite linear;
         }
-      }
-      .card {
-        min-height: 454px;
-        .toast-center {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-        }
-        .card-body {
+        .no-card {
+          min-height: 400px;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          .card-body-section {
-            .helper-login {
+          align-items: center;
+          justify-content: space-evenly;
+          margin-top: 100px;
+          svg {
+            path[data-name="Union 69"] {
+              @include themify($themes) {
+                fill: themed("colorPrimary");
+              }
+            }
+          }
+          .account-title {
+            font-size: 33px;
+            font-weight: bold;
+            @include themify($themes) {
+              color: themed("colorPrimary");
+            }
+            &.ver2 {
               text-align: center;
+              line-height: 33px;
+            }
+          }
+          .helper-excerpt {
+            line-height: 1.2em;
+            text-align: center;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #484848;
+            opacity: 0.77;
+          }
+        }
+        .card {
+          min-height: 454px;
+          .toast-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+          }
+          .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            .card-body-section {
+              .helper-login {
+                text-align: center;
+              }
+              svg {
+                g[data-name="Group 1861"] {
+                  // password svg
+                  @include themify($themes) {
+                    fill: themed("colorPrimary");
+                  }
+                }
+                g[data-name="Group 2528"],
+                g[data-name="Group 2490"] {
+                  // private key
+                  path {
+                    @include themify($themes) {
+                      fill: themed("colorPrimary");
+                    }
+                  }
+                }
+                rect[data-name="Rectangle 1358"] {
+                  @include themify($themes) {
+                    fill: themed("colorSecondary");
+                  }
+                }
+              }
+            }
+            &.secure-register {
+              .card-body-section {
+                margin-top: 0;
+                .helper-login {
+                  margin: 0 -12px 13px -12px;
+                  font-size: 21px;
+                }
+              }
+              .card-body-section1 {
+                margin-top: 23px;
+                align-items: start;
+                label {
+                  font-size: 14px;
+                }
+                .form-control1 {
+                  width: 100%;
+                  .form-control2 {
+                    input {
+                      width: 100%;
+                      .error {
+                        outline-color: #ba4a5c;
+                      }
+                    }
+                    div.error {
+                      padding-top: 8px;
+                      color: #ba4a5c;
+                    }
+                  }
+                }
+                .form-control-double {
+                  width: 100%;
+                  .form-control2 {
+                    width: 100%;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    label {
+                      max-width: 100px;
+                      font-size: 14px;
+                      line-height: 18px;
+                    }
+                  }
+                }
+                .skip-excerpt {
+                  color: #4eaad5;
+                }
+              }
             }
             svg {
-              g[data-name="Group 1861"] {
-                // password svg
+              g[data-name="Group 2492"] {
+                // private key text
                 @include themify($themes) {
                   fill: themed("colorPrimary");
                 }
               }
-              g[data-name="Group 2528"],
-              g[data-name="Group 2490"] {
-                // private key
+              g[data-name="question"],
+              g[data-name="Group 2497"],
+              g[data-name="Group 2496"] {
                 path {
                   @include themify($themes) {
                     fill: themed("colorPrimary");
                   }
                 }
               }
-              rect[data-name="Rectangle 1358"] {
-                @include themify($themes) {
-                  fill: themed("colorSecondary");
-                }
-              }
             }
-          }
-          svg {
-            g[data-name="Group 2492"] {
-              // private key text
-              @include themify($themes) {
-                fill: themed("colorPrimary");
-              }
-            }
-            g[data-name="question"],
-            g[data-name="Group 2497"],
-            g[data-name="Group 2496"] {
-              path {
-                @include themify($themes) {
-                  fill: themed("colorPrimary");
-                }
-              }
-            }
-          }
-          .comment {
-            margin-top: 10px;
-            padding: 0 10px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #cecece;
-            line-height: 1.2em;
-            text-align: center;
-          }
-          .profile-img {
-            margin-top: 12px;
-            border-radius: 50%;
-            border: 1px solid #707070;
-          }
-          .login-options {
-            svg {
-              cursor: pointer;
+            .comment {
               margin-top: 10px;
-            }
-          }
-          .owner-login-option-container {
-            flex: 1;
-            margin-top: 20px;
-            p {
-              font-size: 14px;
+              padding: 0 10px;
+              font-size: 13px;
+              font-weight: 600;
+              color: #cecece;
+              line-height: 1.2em;
               text-align: center;
-              color: #707070;
-              line-height: 18px;
-              .danger {
-                color: #d95868;
-              }
             }
-            .owner-login-options {
-              display: flex;
-              justify-content: space-evenly;
+            .profile-img {
+              margin-top: 12px;
+              border-radius: 50%;
+              border: 1px solid #707070;
+            }
+            .login-options {
               svg {
                 cursor: pointer;
-                text {
-                  @include themify($themes) {
-                    fill: themed(colorSecondary);
-                  }
-                }
-                g[data-name="Rectangle 1107"] {
-                  @include themify($themes) {
-                    stroke: themed(colorSecondary);
-                  }
-                }
-                g[data-name="Group 2414"] {
-                  @include themify($themes) {
-                    fill: themed(colorSecondary);
-                  }
-                }
-                path[data-name="Path 1345"] {
-                  @include themify($themes) {
-                    fill: themed(colorSecondary);
-                  }
+                margin-top: 10px;
+              }
+            }
+            .owner-login-option-container {
+              flex: 1;
+              margin-top: 20px;
+              p {
+                font-size: 14px;
+                text-align: center;
+                color: #707070;
+                line-height: 18px;
+                .danger {
+                  color: #d95868;
                 }
               }
-              .active {
+              .owner-login-options {
+                display: flex;
+                justify-content: space-evenly;
                 svg {
-                  g[data-name="Rectangle 1107"] {
-                    rect {
-                      @include themify($themes) {
-                        fill: themed(colorSecondary);
-                      }
+                  cursor: pointer;
+                  text {
+                    @include themify($themes) {
+                      fill: themed(colorSecondary);
                     }
                   }
-                  text {
-                    fill: #fff;
+                  g[data-name="Rectangle 1107"] {
+                    @include themify($themes) {
+                      stroke: themed(colorSecondary);
+                    }
                   }
-                  g {
-                    fill: #fff;
-                  }
-                  path {
-                    fill: #fff;
+                  g[data-name="Group 2414"] {
+                    @include themify($themes) {
+                      fill: themed(colorSecondary);
+                    }
                   }
                   path[data-name="Path 1345"] {
                     @include themify($themes) {
+                      fill: themed(colorSecondary);
+                    }
+                  }
+                }
+                .active {
+                  svg {
+                    g[data-name="Rectangle 1107"] {
+                      rect {
+                        @include themify($themes) {
+                          fill: themed(colorSecondary);
+                        }
+                      }
+                    }
+                    text {
                       fill: #fff;
+                    }
+                    g {
+                      fill: #fff;
+                    }
+                    path {
+                      fill: #fff;
+                    }
+                    path[data-name="Path 1345"] {
+                      @include themify($themes) {
+                        fill: #fff;
+                      }
                     }
                   }
                 }
               }
-            }
-            .owner-option-excerpt {
-              margin-top: 20px;
+              .owner-option-excerpt {
+                margin-top: 20px;
+              }
             }
           }
         }
-      }
-      .setup-nav {
-        display: flex;
-        justify-content: space-between;
-        div {
-          cursor: pointer;
+        .setup-nav {
+          display: flex;
+          justify-content: space-between;
+          div {
+            cursor: pointer;
+          }
         }
       }
     }

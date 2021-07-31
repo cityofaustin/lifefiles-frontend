@@ -17,14 +17,14 @@
     line-height: 1.2em;
     // margin-bottom: 8px;
     font-size: 15px;
-    color: #8E3C3C;
+    color: #8e3c3c;
     // text-align: center;
   }
   input.error {
-    border: 1px solid #8E3C3C !important;
+    border: 1px solid #8e3c3c !important;
   }
   .login-link {
-    color: #4AB2DE;
+    color: #4ab2de;
     cursor: pointer;
     font-size: 15px;
     width: 100%;
@@ -47,7 +47,7 @@
     line-height: 35px;
     border-radius: 8px;
     border: solid 1px rgba(112, 112, 112, 0.27);
-    background-color: #e8f0fe;
+    background-color: #e9f4f9;
     padding-left: 14px;
     font-size: 15px;
     color: rgba(72, 72, 72, 0.77);
@@ -58,7 +58,7 @@
     line-height: 35px;
     border-radius: 8px;
     border: solid 1px rgba(112, 112, 112, 0.27);
-    background-color: #e8f0fe;
+    background-color: #e9f4f9;
     padding-left: 14px;
     font-size: 30px;
     color: rgba(72, 72, 72, 0.77);
@@ -401,12 +401,12 @@
                   svg {
                     path {
                       @include themify($themes) {
-                        fill: themed('colorSecondary');
+                        fill: themed("colorSecondary");
                       }
                     }
                     rect {
                       @include themify($themes) {
-                        fill: themed('colorSecondary');
+                        fill: themed("colorSecondary");
                       }
                     }
                   }
@@ -543,8 +543,8 @@
         width: 540px;
       }
 
-      box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14),
-        0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+        0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
 
       .card-body {
         @include media-breakpoint-up(sm) {

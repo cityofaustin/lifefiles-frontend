@@ -60,7 +60,7 @@ export default class SecureRegister extends Component<
     password: '',
     errorMessage: '',
     notaryId: '',
-    notaryState: '',
+    notaryState: 'TX',
     file: undefined,
     thumbnailFile: undefined,
     duplicateEmail: false

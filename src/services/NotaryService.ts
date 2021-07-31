@@ -71,6 +71,10 @@ class NotaryService extends AgentService {
     let json = { vpJwt: vpJwt, network: network };
     return super.post('/anchor-vp-to-blockchain', json);
   }
+
+  static queryNotary(request: { id: string }) {
+    return super.post('/notary/query', request);
+  }
 }
 
 export default NotaryService;
