@@ -1,8 +1,8 @@
 # Lifefiles-frontend
 
-This is a react front end application for the mypass digital identity project.
+This is a react front end application for the lifefiles digital identity project.
 
-It uses https://github.com/cityofaustin/mypass as the backend end application.
+It uses https://github.com/cityofaustin/lifefiles-project as the backend end application.
 
 ## Dev local setup
 
