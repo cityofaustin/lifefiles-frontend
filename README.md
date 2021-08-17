@@ -1,4 +1,4 @@
-# lifefiles-frontend
+# Lifefiles-frontend
 
 This is a react front end application for the mypass digital identity project.
 
