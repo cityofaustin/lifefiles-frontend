@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import { Fragment, useEffect, useState } from "react";
 import {
   Col,
   Dropdown,
@@ -6,74 +6,51 @@ import {
   DropdownMenu,
   DropdownToggle,
   Row,
-} from 'reactstrap';
-import './MainContainer.scss';
-import AccountPage from './account/AccountPage';
-import BringYourKeyPage from './account/BringYourKeyPage';
-import CheckoutPage from './account/CheckoutPage';
-import AdminPage from './account/AdminPage';
-import SearchInput from '../common/SearchInput';
-import Account from '../../models/Account';
-import Document from '../../models/document/Document';
-import StringUtil from '../../util/StringUtil';
-import DocumentService from '../../services/DocumentService';
-import ProgressIndicator from '../common/ProgressIndicator';
-import Folder from '../common/Folder';
-import DocumentType from '../../models/DocumentType';
-import DocumentTypeService from '../../services/DocumentTypeService';
-import AddDocumentModal from './document/AddDocumentModal';
-import UpdateDocumentModal from './document/UpdateDocumentModal';
-import AccountService from '../../services/AccountService';
-import HelperContactService from '../../services/HelperContactService';
-import DocumentPage from './DocumentPage';
-import ClientPage from './account/ClientPage';
-import ShareRequest from '../../models/ShareRequest';
-import UpdateDocumentRequest from '../../models/document/UpdateDocumentRequest';
-import AccountImpl from '../../models/AccountImpl';
-import { ReactComponent as LogoSm } from '../../img/logo-sm.svg';
-import Sidebar from '../layout/Sidebar';
-import ShareRequestService from '../../services/ShareRequestService';
+} from "reactstrap";
+import "./MainContainer.scss";
+import AccountPage from "./account/AccountPage";
+import BringYourKeyPage from "./account/BringYourKeyPage";
+import CheckoutPage from "./account/CheckoutPage";
+import AdminPage from "./account/AdminPage";
+import SearchInput from "../common/SearchInput";
+import Account from "../../models/Account";
+import Document from "../../models/document/Document";
+import StringUtil from "../../util/StringUtil";
+import DocumentService from "../../services/DocumentService";
+import ProgressIndicator from "../common/ProgressIndicator";
+import Folder from "../common/Folder";
+import DocumentType from "../../models/DocumentType";
+import DocumentTypeService from "../../services/DocumentTypeService";
+import AddDocumentModal from "./document/AddDocumentModal";
+import UpdateDocumentModal from "./document/UpdateDocumentModal";
+import AccountService from "../../services/AccountService";
+import HelperContactService from "../../services/HelperContactService";
+import DocumentPage from "./DocumentPage";
+import ClientPage from "./account/ClientPage";
+import ShareRequest from "../../models/ShareRequest";
+import UpdateDocumentRequest from "../../models/document/UpdateDocumentRequest";
+import AccountImpl from "../../models/AccountImpl";
+import { ReactComponent as LogoSm } from "../../img/logo-sm.svg";
+import Sidebar from "../layout/Sidebar";
+import ShareRequestService from "../../services/ShareRequestService";
 import {
   HashRouter as Router,
-  Switch,
   Route,
   Link,
-  Redirect,
-} from 'react-router-dom';
-import ZipUtil from '../../util/ZipUtil';
-import CryptoUtil from '../../util/CryptoUtil';
-import AppSetting, { SettingNameEnum } from '../../models/AppSetting';
-import HelperContact from '../../models/HelperContact';
-import Role from '../../models/Role';
-import ProfileImage from '../common/ProfileImage';
-import MySettings from './MySettings';
-import NotaryPdfTestPage from '../NotaryPdfTestPage';
-import documentSelected from '../../test-data/document';
-import FileUtil from '../../util/FileUtil';
-
-interface MainContainerState {
-  documentTypes: DocumentType[];
-  documents: Document[];
-  searchedDocuments: Document[];
-  documentSelected?: Document;
-  isAccount: boolean;
-  sortAsc: boolean;
-  showModal: boolean;
-  isAccountMenuOpen: boolean;
-  isSmallMenuOpen: boolean;
-  isLoading: boolean;
-  documentQuery: string;
-  accounts: Account[];
-  helperAccounts?: Account[];
-  helperContacts: HelperContact[];
-  searchedHelperContacts: HelperContact[];
-  activeTab: string;
-  activeDocumentTab: string;
-  sidebarOpen?: boolean;
-  clientShares: Map<string, ShareRequest[]>;
-  isMySettingsOpen: boolean;
-  clientIdSelected?: string;
-}
+  Routes,
+  Navigate,
+  useParams,
+} from "react-router-dom";
+import ZipUtil from "../../util/ZipUtil";
+import CryptoUtil from "../../util/CryptoUtil";
+import AppSetting, { SettingNameEnum } from "../../models/AppSetting";
+import HelperContact from "../../models/HelperContact";
+import Role from "../../models/Role";
+import ProfileImage from "../common/ProfileImage";
+import MySettings from "./MySettings";
+import NotaryPdfTestPage from "../NotaryPdfTestPage";
+// import documentSelected from "../../test-data/document";
+import FileUtil from "../../util/FileUtil";
 
 interface MainContainerProps {
   appSettings: AppSetting[];
@@ -89,119 +66,131 @@ interface MainContainerProps {
   handleSaveAdminAccount: (email: string, password: string) => Promise<void>;
 }
 
-class MainContainer extends Component<MainContainerProps, MainContainerState> {
-  constructor(props: Readonly<MainContainerProps>) {
-    super(props);
+const MainContainer = (props: MainContainerProps) => {
+  const { id: paramId } = useParams();
+  const {
+    appSettings,
+    saveAppSettings,
+    account,
+    handleLogout,
+    updateAccountShareRequests,
+    privateEncryptionKey,
+    setBringYourOwnEncryptionKey,
+    coreFeatures,
+    viewFeatures,
+    setMyAccount,
+    handleSaveAdminAccount,
+  } = props;
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [searchedDocuments, setSearchedDocuments] = useState<Document[]>([]);
+  const [documentSelected, setDocumentsSelected] = useState<
+    Document | undefined
+  >(undefined);
+  const [isAccount, setIsAccount] = useState<boolean>(false);
+  const [sortAsc, setSortAsc] = useState<boolean>(true);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState<boolean>(false);
+  const [isSmallMenuOpen, setIsSmallMenuOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [documentQuery, setDocumentQuery] = useState<string>("");
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [helperAccounts, setHelperAccounts] = useState<Account[]>([]);
+  const [helperContacts, setHelperContacts] = useState<HelperContact[]>([]);
+  const [searchedHelperContacts, setSearchedHelperContacts] = useState<
+    HelperContact[]
+  >([]);
+  const [activeTab, setActiveTab] = useState<string>("1");
+  const [activeDocumentTab, setActiveDocumentTab] = useState<string>("1");
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [clientShares, setClientShares] = useState<Map<string, ShareRequest[]>>(
+    new Map()
+  );
+  const [isMySettingsOpen, setIsMySettingsOpen] = useState<boolean>(false);
+  const [clientIdSelected, setClientIdSelected] = useState<string>();
 
-    this.state = {
-      documentTypes: [],
-      documents: [],
-      searchedDocuments: [],
-      documentSelected: undefined,
-      // documentSelected,
-      isAccount: false,
-      sortAsc: true,
-      showModal: false,
-      // showModal: true,
-      isAccountMenuOpen: false,
-      isSmallMenuOpen: false,
-      isLoading: true,
-      documentQuery: '',
-      accounts: [],
-      helperContacts: [],
-      searchedHelperContacts: [],
-      activeTab: '1',
-      // activeTab: '2',
-      activeDocumentTab: '1',
-      sidebarOpen: false,
-      clientShares: new Map<string, ShareRequest[]>(),
-      isMySettingsOpen: false,
-      // isMySettingsOpen: true,
-    };
-  }
-
-  async componentDidMount() {
-    const { account } = { ...this.props };
-    const { sortAsc, clientShares } = { ...this.state };
-    let { documentTypes, accounts, helperContacts, helperAccounts } = {
-      ...this.state,
-    };
-    const documents: Document[] = account.documents;
-    try {
-      documentTypes = (await DocumentTypeService.get()).documentTypes;
-      if (account.role === Role.helper) {
-        accounts = (await AccountService.getAccounts()).filter(
-          (accountItem) => {
-            if (
-              accountItem.role === Role.owner &&
-              accountItem.id !== account.id
-            ) {
-              return accountItem;
+  useEffect(() => {
+    (async () => {
+      let newDocumentTypes = documentTypes;
+      let newAccounts = accounts;
+      let newHelperAccounts = helperAccounts;
+      let newClientShares = clientShares;
+      let newHelperContacts = helperContacts;
+      try {
+        newDocumentTypes = (await DocumentTypeService.get()).documentTypes;
+        if (account.role === Role.helper) {
+          newAccounts = (await AccountService.getAccounts()).filter(
+            (accountItem) => {
+              if (
+                accountItem.role === Role.owner &&
+                accountItem.id !== account.id
+              ) {
+                return accountItem;
+              } else {
+                return false;
+              }
             }
-          }
-        );
-        helperAccounts = (await AccountService.getAccounts()).filter(
-          (accountItem) => {
-            if (accountItem.role === Role.helper) {
-              return accountItem;
+          ) as any;
+          newHelperAccounts = (await AccountService.getAccounts()).filter(
+            (accountItem) => {
+              if (accountItem.role === Role.helper) {
+                return accountItem;
+              } else {
+                return false;
+              }
             }
+          ) as any;
+          for (const otherOwnerAccount of newAccounts as any) {
+            const shareRequests = await ShareRequestService.get(
+              otherOwnerAccount.id
+            );
+            newClientShares.set(otherOwnerAccount.id, shareRequests);
           }
-        );
-        for (const otherOwnerAccount of accounts) {
-          const shareRequests = await ShareRequestService.get(
-            otherOwnerAccount.id
-          );
-          clientShares.set(otherOwnerAccount.id, shareRequests);
+        } else {
+          newAccounts = (await AccountService.getAccounts()).filter(
+            (accountItem) => {
+              if (
+                accountItem.role === Role.helper &&
+                accountItem.id !== account.id
+              ) {
+                return accountItem;
+              } else {
+                return false;
+              }
+            }
+          ) as any;
         }
-      } else {
-        accounts = (await AccountService.getAccounts()).filter(
-          (accountItem) => {
-            if (
-              accountItem.role === Role.helper &&
-              accountItem.id !== account.id
-            ) {
-              return accountItem;
-            }
-          }
-        );
+
+        newHelperContacts = await HelperContactService.getHelperContacts();
+        // NOTE: since not paging yet, preventing from getting too big for layout
+        // accounts = accounts.length > 8 ? accounts.slice(0, 8) : accounts;
+      } catch (err) {
+        console.error("failed to fetch main data");
       }
+      setDocuments(account.documents);
+      setDocumentTypes(newDocumentTypes);
+      setSearchedDocuments(sortDocuments(account.documents, sortAsc));
+      setIsLoading(false);
+      setAccounts(newAccounts);
+      setHelperAccounts(newHelperAccounts);
+      setHelperContacts(newHelperContacts);
+      setSearchedHelperContacts(
+        sortHelperContacts(newHelperContacts, sortAsc, account.role)
+      );
+      setClientShares(newClientShares);
+    })();
+  }, []);
 
-      helperContacts = await HelperContactService.getHelperContacts();
-      // NOTE: since not paging yet, preventing from getting too big for layout
-      // accounts = accounts.length > 8 ? accounts.slice(0, 8) : accounts;
-    } catch (err) {
-      console.error('failed to fetch main data');
-    }
-    this.setState({
-      documentTypes,
-      documents,
-      searchedDocuments: this.sortDocuments(documents, sortAsc),
-      isLoading: false,
-      accounts,
-      helperAccounts,
-      helperContacts,
-      searchedHelperContacts: this.sortHelperContacts(
-        helperContacts,
-        sortAsc,
-        account.role
-      ),
-      clientShares,
-    });
-  }
-
-  addHelperContact = async (helperContactReq) => {
-    const { helperContacts } = { ...this.state };
+  const addHelperContact = async (helperContactReq) => {
     const newHelperContact = await HelperContactService.addHelperContact(
       helperContactReq
     );
-    helperContacts.push(newHelperContact);
-    this.setState({ helperContacts });
+    setHelperContacts([newHelperContact, ...helperContacts]);
+    setSearchedHelperContacts([newHelperContact, ...helperContacts]);
   };
 
-  unshareAllWithHelperContact = async (helperAccount: Account) => {
-    const { updateAccountShareRequests, account } = { ...this.props };
-    const { helperContacts } = { ...this.state };
-    let { shareRequests } = { ...account };
+  const unshareAllWithHelperContact = async (helperAccount: Account) => {
+    let { shareRequests } = account;
     shareRequests = shareRequests.filter(
       (shareRequest) => shareRequest.shareWithAccountId !== helperAccount.id
     );
@@ -212,30 +201,22 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     updateAccountShareRequests(shareRequests);
   };
 
-  removeHelperContact = async (account: Account) => {
-    let { helperContacts } = { ...this.state };
-    const { sortAsc } = { ...this.state };
+  const removeHelperContact = async (account: Account) => {
     const helperContactMatch = helperContacts.find(
       (hc) => hc.helperAccount.username === account.username
     );
-    helperContacts = helperContacts.filter(
+    const newHelperContacts = helperContacts.filter(
       (hc) => hc.helperAccount.username !== account.username
     );
     await HelperContactService.deleteHelperContact(helperContactMatch!._id);
-    this.setState({
-      helperContacts,
-      searchedHelperContacts: this.sortHelperContacts(
-        helperContacts,
-        sortAsc,
-        account.role
-      ),
-    });
+    setHelperContacts(newHelperContacts);
+    setSearchedHelperContacts(
+      sortHelperContacts(newHelperContacts, sortAsc, account.role)
+    );
   };
 
-  updateHelperContactPermissions = async (hc: HelperContact) => {
-    let { helperContacts } = { ...this.state };
-    const { sortAsc } = { ...this.state };
-    helperContacts = helperContacts.map((hcItem) => {
+  const updateHelperContactPermissions = async (hc: HelperContact) => {
+    const newHelperContacts = helperContacts.map((hcItem) => {
       if (hcItem._id === hc._id) {
         hcItem.canAddNewDocuments = hc.canAddNewDocuments;
         hcItem.isSocialAttestationEnabled = hc.isSocialAttestationEnabled;
@@ -243,26 +224,20 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       return hcItem;
     });
     await HelperContactService.updateHelperContact(hc);
-    this.setState({
-      helperContacts,
-      searchedHelperContacts: this.sortHelperContacts(
-        helperContacts,
-        sortAsc,
-        Role.helper
-      ),
-    });
+    setHelperContacts(newHelperContacts);
+    setSearchedHelperContacts(
+      sortHelperContacts(newHelperContacts, sortAsc, Role.helper)
+    );
   };
 
-  handleSearch = (query: string) => {
-    const { documents, helperContacts, sortAsc } = { ...this.state };
-    const { account } = { ...this.props };
-    let searchedDocuments = documents.filter((document) => {
+  const handleSearch = (query: string) => {
+    let newSearchedDocuments = documents.filter((document) => {
       return (
         document.type &&
         document.type.toLowerCase().indexOf(query.toLowerCase()) !== -1
       );
     });
-    let searchedHelperContacts = helperContacts.filter((helperContact) => {
+    let newSearchedHelperContacts = helperContacts.filter((helperContact) => {
       const a =
         account.role === Role.owner
           ? helperContact.helperAccount
@@ -279,42 +254,38 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       );
     });
     if (query.length === 0) {
-      searchedDocuments = documents;
-      searchedHelperContacts = helperContacts;
+      newSearchedDocuments = documents;
+      newSearchedHelperContacts = helperContacts;
     }
-    searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
-    searchedHelperContacts = this.sortHelperContacts(
+    newSearchedDocuments = sortDocuments(searchedDocuments, sortAsc);
+    newSearchedHelperContacts = sortHelperContacts(
       searchedHelperContacts,
       sortAsc,
       account.role
     );
-    this.setState({
-      searchedDocuments,
-      searchedHelperContacts,
-      documentQuery: query,
-    });
+    setSearchedDocuments(newSearchedDocuments);
+    setSearchedHelperContacts(newSearchedHelperContacts);
+    setDocumentQuery(query);
   };
 
-  setSidebarOpen = (b: boolean) => {
-    this.setState({ sidebarOpen: b });
-  };
+  useEffect(() => {
+    handleSearch(documentQuery);
+  }, [documents, documentQuery, handleSearch]);
 
-  toggleSort = () => {
-    let { sortAsc, searchedDocuments, searchedHelperContacts } = {
-      ...this.state,
-    };
-    const { account } = { ...this.props };
-    sortAsc = !sortAsc;
-    searchedDocuments = this.sortDocuments(searchedDocuments, sortAsc);
-    searchedHelperContacts = this.sortHelperContacts(
+  const toggleSort = () => {
+    const newSortAsc = !sortAsc;
+    const newSearchedDocuments = sortDocuments(searchedDocuments, newSortAsc);
+    const newSearchedHelperContacts = sortHelperContacts(
       searchedHelperContacts,
-      sortAsc,
+      newSortAsc,
       account.role
     );
-    this.setState({ sortAsc, searchedDocuments, searchedHelperContacts });
+    setSortAsc(newSortAsc);
+    setSearchedDocuments(newSearchedDocuments);
+    setSearchedHelperContacts(newSearchedHelperContacts);
   };
 
-  sortDocuments(documents: Document[], sortAsc: boolean) {
+  const sortDocuments = (documents: Document[], sortAsc: boolean) => {
     return documents.sort((docA: Document, docB: Document) => {
       if (docA.type < docB.type) {
         return sortAsc ? -1 : 1;
@@ -324,75 +295,68 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       }
       return 0;
     });
-  }
+  };
 
-  sortHelperContacts(accounts: HelperContact[], sortAsc: boolean, role) {
-    return accounts.sort((a1: HelperContact, b1: HelperContact) => {
+  const sortHelperContacts = (
+    accounts1: HelperContact[],
+    sortAsc1: boolean,
+    role
+  ) => {
+    return accounts1.sort((a1: HelperContact, b1: HelperContact) => {
       const a = role === Role.owner ? a1.helperAccount : a1.ownerAccount;
       const b = role === Role.owner ? b1.helperAccount : b1.ownerAccount;
       if (a.firstName! < b.firstName!) {
-        return sortAsc ? -1 : 1;
+        return sortAsc1 ? -1 : 1;
       }
       if (a.firstName! > b.firstName!) {
-        return sortAsc ? 1 : -1;
+        return sortAsc1 ? 1 : -1;
       }
       return 0;
     });
-  }
-
-  handleSelectDocument = (document?: Document, goToClaim?: boolean) => {
-    this.setState({
-      documentSelected: document,
-      activeDocumentTab: goToClaim ? '3' : '1',
-    });
   };
 
-  goToAccount = () => {
-    this.setState({
-      documentSelected: undefined,
-      isAccount: true,
-      activeDocumentTab: '1',
-    });
+  const handleSelectDocument = (document?: Document, goToClaim?: boolean) => {
+    setDocumentsSelected(document);
+    setActiveDocumentTab(goToClaim ? "3" : "1");
   };
 
-  goBack = () => {
-    this.setState({
-      documentSelected: undefined,
-      isAccount: false,
-      activeDocumentTab: '1',
-    });
+  const goToAccount = () => {
+    setDocumentsSelected(undefined);
+    setIsAccount(true);
+    setActiveDocumentTab("1");
   };
 
-  handleAddNew = () => {
-    this.toggleModal();
+  const goBack = () => {
+    setDocumentsSelected(undefined);
+    setIsAccount(false);
+    setActiveDocumentTab("1");
   };
 
-  toggleModal = () => {
-    const { showModal } = { ...this.state };
-    this.setState({ showModal: !showModal });
+  const handleAddNew = () => {
+    toggleModal();
   };
 
-  toggleAccountMenu = () => {
-    const { isAccountMenuOpen } = { ...this.state };
-    this.setState({ isAccountMenuOpen: !isAccountMenuOpen });
+  const toggleModal = () => {
+    setShowModal(!showModal);
   };
 
-  toggleSmallMenu = () => {
-    const { isSmallMenuOpen } = { ...this.state };
-    this.setState({ isSmallMenuOpen: !isSmallMenuOpen });
+  const toggleAccountMenu = () => {
+    setIsAccountMenuOpen(!isAccountMenuOpen);
   };
 
-  handleAddNewDocument = async (
+  const toggleSmallMenu = () => {
+    setIsSmallMenuOpen(!isSmallMenuOpen);
+  };
+
+  const handleAddNewDocument = async (
     newFile: File,
     newThumbnailFile: File,
     documentTypeSelected: string,
     referencedAccount?: Account,
     validUntilDate?: Date
   ): Promise<Document> => {
-    const { documents, searchedDocuments, documentQuery } = { ...this.state };
-    const { account, privateEncryptionKey } = { ...this.props };
-    this.setState({ isLoading: true });
-
+    const newDocuments = [...documents];
+    setIsLoading(true);
     let newDocument;
     try {
       if (newFile) {
@@ -425,14 +389,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             const ownerZippedThumbnail: Blob = await ZipUtil.zip(
               ownerEncryptedThumbnail
             );
-            const ownerFile = new File([ownerZipped], 'encrypted-image.zip', {
-              type: 'application/zip',
+            const ownerFile = new File([ownerZipped], "encrypted-image.zip", {
+              type: "application/zip",
               lastModified: Date.now(),
             });
             const ownerThumbnail = new File(
               [ownerZippedThumbnail],
-              'encrypted-image-thumbnail.zip',
-              { type: 'application/zip', lastModified: Date.now() }
+              "encrypted-image-thumbnail.zip",
+              { type: "application/zip", lastModified: Date.now() }
             );
             const response = await DocumentService.uploadDocumentOnBehalfOfUser(
               caseWorkerFile,
@@ -443,10 +407,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               referencedAccount.id,
               validUntilDate
             );
-            this.handleClientSelected(referencedAccount);
+            handleClientSelected(referencedAccount);
             newDocument = response.document;
             // newDocument._id = newDocument.id;
-            // documents.push(newDocument);
           } else {
             const response = await DocumentService.addDocument(
               newFile,
@@ -459,58 +422,46 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             // NOTE: The uploaded by account object is nice but switching to account id to make consistent with the /my-account api call
             newDocument.uploadedBy = newDocument.uploadedBy.id;
             newDocument._id = newDocument.id;
-            documents.push(newDocument);
           }
         } catch (err) {
           console.error(err.message);
         }
       }
     } catch (err) {
-      console.error('failed to upload file');
+      console.error("failed to upload file");
     }
-    this.setState({ documents, searchedDocuments, isLoading: false }, () => {
-      this.handleSearch(documentQuery);
-    });
+    setDocuments((docs) => [newDocument, ...docs]);
+    setSearchedDocuments((docs) => [newDocument, ...docs]);
+    setIsLoading(false);
     return newDocument as any;
   };
 
-  handleUpdateDocument = async (request: UpdateDocumentRequest) => {
-    let { documents } = { ...this.state };
-    const { documentQuery } = { ...this.state };
-    this.setState({ isLoading: true });
+  const handleUpdateDocument = async (request: UpdateDocumentRequest) => {
+    setIsLoading(true);
+    let newDocuments = [...documents];
     try {
       const updatedDoc = await DocumentService.updateDocument(request);
       // FIXME: get API call to return updatedAt
       updatedDoc.updatedAt = new Date();
-      documents = documents.map((doc) =>
+      newDocuments = documents.map((doc) =>
         doc.type === updatedDoc.type ? updatedDoc : doc
       );
     } catch (err) {
-      console.error('failed to upload file');
+      console.error("failed to upload file");
     }
-    this.setState(
-      {
-        documents,
-        showModal: false,
-        isLoading: false,
-        documentSelected: undefined,
-        activeDocumentTab: '1',
-      },
-      () => {
-        this.handleSearch(documentQuery);
-      }
-    );
+    setDocuments(newDocuments);
+    setShowModal(false);
+    setIsLoading(false);
+    setDocumentsSelected(undefined);
+    setActiveDocumentTab("1");
   };
 
-  handleUpdateDocumentAndUpdateShareRequests = async (
+  const handleUpdateDocumentAndUpdateShareRequests = async (
     request: UpdateDocumentRequest
   ) => {
-    const { account } = { ...this.props };
-    let { documents } = { ...this.state };
-    const { documentQuery, accounts, helperAccounts } = { ...this.state };
-    this.setState({ isLoading: true });
-
+    setIsLoading(true);
     let updatedDoc;
+    let newDocuments = [...documents];
     try {
       // also !request.id
       if (request.referencedAccount) {
@@ -530,12 +481,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       updatedDoc = await DocumentService.updateDocument(request);
       if (!request.referencedAccount) {
         updatedDoc.updatedAt = new Date();
-        documents = documents.map((doc) =>
+        newDocuments = newDocuments.map((doc) =>
           doc.type === updatedDoc.type ? updatedDoc : doc
         );
       }
     } catch (err) {
-      console.error('failed to upload file');
+      console.error("failed to upload file");
     }
 
     let matchedShareRequests = account.shareRequests.filter((shareRequest) => {
@@ -557,9 +508,9 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             matchedShareRequest!._id!
           );
           // remove share requests from UI
-          this.removeShareRequest(matchedShareRequest);
+          removeShareRequest(matchedShareRequest);
         } else {
-          this.removeShareRequest(
+          removeShareRequest(
             matchedShareRequest,
             request.referencedAccount!.id
           );
@@ -602,7 +553,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             }
           );
           // add share request to UI
-          this.addShareRequest(newShareRequest);
+          addShareRequest(newShareRequest);
         } else {
           newShareRequest = await ShareRequestService.replaceShareRequestFile(
             newZippedFile,
@@ -618,16 +569,16 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
             matchedShareRequest._id!
           );
           if (account.id === newShareRequest.shareWithAccountId) {
-            documents = documents.map((doc) =>
+            newDocuments = newDocuments.map((doc) =>
               doc.type === newShareRequest.documentType
                 ? {
                     type: newShareRequest.documentType,
                     url: newShareRequest.approved
                       ? newShareRequest.documentUrl
-                      : '',
+                      : "",
                     thumbnailUrl: newShareRequest.documentThumbnailUrl
                       ? newShareRequest.documentThumbnailUrl
-                      : '',
+                      : "",
                     sharedWithAccountIds: [newShareRequest.shareWithAccountId],
                     validUntilDate: newShareRequest.validUntilDate,
                     vcJwt: newShareRequest.vcJwt,
@@ -637,42 +588,33 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 : doc
             );
           }
-          this.addShareRequest(newShareRequest, request.referencedAccount.id);
+          addShareRequest(newShareRequest, request.referencedAccount.id);
         }
       }
     } catch (err) {
       console.error(err.message);
     }
-
-    this.setState(
-      {
-        documents,
-        showModal: false,
-        isLoading: false,
-        documentSelected: undefined,
-        activeDocumentTab: '1',
-      },
-      () => {
-        this.handleSearch(documentQuery);
-      }
-    );
+    setDocuments(newDocuments);
+    setShowModal(false);
+    setIsLoading(false);
+    setDocumentsSelected(undefined);
+    setActiveDocumentTab("1");
   };
 
-  handleDeleteDocument = async (document: Document) => {
-    const { account } = { ...this.props };
-    let { documents, searchedDocuments } = { ...this.state };
-    this.setState({ isLoading: true });
-
+  const handleDeleteDocument = async (document: Document) => {
+    setIsLoading(true);
+    let newSearchedDocuments = [...searchedDocuments];
+    let newDocuments = [...documents];
     try {
       await DocumentService.deleteDocument(document.url);
     } catch (err) {
-      console.error('failed to remove image');
+      console.error("failed to remove image");
     }
 
-    searchedDocuments = searchedDocuments.filter((searchedDocument) => {
+    newSearchedDocuments = newSearchedDocuments.filter((searchedDocument) => {
       return (searchedDocument as Document).url !== document.url;
     });
-    documents = documents.filter((documentItem) => {
+    newDocuments = newDocuments.filter((documentItem) => {
       return (documentItem as Document).url !== document.url;
     });
     // also remove share requests
@@ -682,24 +624,20 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       }
     );
     matchedShareRequests.forEach((matchedShareRequest) =>
-      this.removeShareRequest(matchedShareRequest)
+      removeShareRequest(matchedShareRequest)
     );
-    this.setState({
-      documents,
-      searchedDocuments,
-      isLoading: false,
-      documentSelected: undefined,
-      activeDocumentTab: '1',
-    });
+    setDocuments(newDocuments);
+    setSearchedDocuments(newSearchedDocuments);
+    setIsLoading(false);
+    setDocumentsSelected(undefined);
+    setActiveDocumentTab("1");
   };
 
-  addShareRequest = (
+  const addShareRequest = (
     request: ShareRequest,
     fromAccountId: string | undefined = undefined
   ) => {
-    const { updateAccountShareRequests, account } = { ...this.props };
-    const { clientShares } = { ...this.state };
-    const { shareRequests } = { ...account };
+    const { shareRequests } = account;
     if (account.role === Role.helper) {
       const clientShare = clientShares.get(fromAccountId!);
       clientShare!.push(request);
@@ -708,16 +646,14 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       shareRequests.push(request);
       updateAccountShareRequests(shareRequests);
     }
-    this.setState({ clientShares });
+    setClientShares(clientShares);
   };
 
-  removeShareRequest = (
+  const removeShareRequest = (
     request: ShareRequest,
     fromAccountId: string | undefined = undefined
   ) => {
-    const { updateAccountShareRequests, account } = { ...this.props };
-    const { clientShares } = { ...this.state };
-    let { shareRequests } = { ...account };
+    let { shareRequests } = account;
     if (account.role === Role.helper) {
       const clientShare = clientShares.get(fromAccountId!);
       clientShares.set(
@@ -730,18 +666,12 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       );
       updateAccountShareRequests(shareRequests);
     }
-    this.setState({ clientShares });
+    setClientShares(clientShares);
   };
 
-  setActiveTab = (tab: string) => {
-    this.setState({ activeTab: tab });
-  };
-
-  handleClientSelected = async (otherOwnerAccount: Account) => {
-    const { searchedDocuments, documentQuery } = { ...this.state };
-    let { documents } = { ...this.state };
-    const { account } = { ...this.props };
-    this.setState({ isLoading: true });
+  const handleClientSelected = async (otherOwnerAccount: Account) => {
+    setIsLoading(true);
+    let newDocuments = [...documents];
     try {
       const shareRequests = await ShareRequestService.get(otherOwnerAccount.id);
       const sharedDocuments: Document[] = shareRequests
@@ -751,10 +681,10 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         .map((shareRequest: any) => {
           return {
             type: shareRequest.documentType,
-            url: shareRequest.approved ? shareRequest.documentUrl : '',
+            url: shareRequest.approved ? shareRequest.documentUrl : "",
             thumbnailUrl: shareRequest.documentThumbnailUrl
               ? shareRequest.documentThumbnailUrl
-              : '',
+              : "",
             sharedWithAccountIds: [shareRequest.shareWithAccountId],
             validUntilDate: shareRequest.validUntilDate,
             vcJwt: shareRequest.vcJwt,
@@ -775,13 +705,13 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         .map((docType) => {
           return {
             type: docType,
-            url: '',
-            thumbnailUrl: '',
+            url: "",
+            thumbnailUrl: "",
             sharedWithAccountIds: [],
             // validUntilDate: shareRequest.validUntilDate
           };
         });
-      documents = [
+      newDocuments = [
         ...account.documents,
         ...sharedDocuments,
         ...notSharedDocuments,
@@ -789,63 +719,39 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     } catch (err) {
       console.error(err.message);
     }
-    this.setState(
-      {
-        documents,
-        searchedDocuments,
-        isLoading: false,
-        clientIdSelected: otherOwnerAccount.id,
-      },
-      () => {
-        this.handleSearch(documentQuery);
-      }
-    );
+    setDocuments(newDocuments);
+    setIsLoading(false);
+    setClientIdSelected(otherOwnerAccount.id);
   };
 
-  renderAddDocumentModal(props) {
-    const { showModal, documentTypes, documents, accounts } = { ...this.state };
-    const { privateEncryptionKey, account } = { ...this.props };
-    const { id } = props.match.params;
+  const renderAddDocumentModal = () => {
     let referencedAccount;
-    if (id) {
-      referencedAccount = accounts.filter(
-        (accountItem) => accountItem.id === id
-      )[0];
+    if (paramId) {
+      referencedAccount = accounts.find(
+        (accountItem) => accountItem.id === paramId
+      );
     }
     return (
       <AddDocumentModal
         myAccount={account}
         showModal={showModal}
-        toggleModal={this.toggleModal}
+        toggleModal={toggleModal}
         documentTypes={documentTypes}
         documents={documents}
-        handleAddNewDocument={this.handleAddNewDocument}
+        handleAddNewDocument={handleAddNewDocument}
         privateEncryptionKey={privateEncryptionKey}
         referencedAccount={referencedAccount}
         // used to put in the pdf over the original image.
-        handleUpdateDocument={this.handleUpdateDocument}
+        handleUpdateDocument={handleUpdateDocument}
       />
     );
-  }
+  };
 
-  renderUpdateDocumentModal(props) {
-    const {
-      documentSelected,
-      activeDocumentTab,
-      accounts,
-      helperContacts,
-      documentTypes,
-      clientShares,
-      clientIdSelected,
-    } = {
-      ...this.state,
-    };
-    const { account } = { ...this.props };
-    const { id } = props.match.params;
+  const renderUpdateDocumentModal = () => {
     let referencedAccount: Account | undefined;
-    if (id) {
+    if (paramId) {
       referencedAccount = accounts.find(
-        (accountItem) => accountItem.id === id
+        (accountItem) => accountItem.id === paramId
       )!;
       if (referencedAccount) {
         referencedAccount.shareRequests = clientShares.get(
@@ -857,6 +763,8 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       (sharedRequest) => {
         if (sharedRequest.documentType === documentSelected?.type) {
           return sharedRequest;
+        } else {
+          return false;
         }
       }
     );
@@ -876,55 +784,52 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
       <UpdateDocumentModal
         accounts={contactAccounts}
         showModal={!!documentSelected}
-        toggleModal={() =>
-          this.setState({ documentSelected: undefined, activeDocumentTab: '1' })
-        }
+        toggleModal={() => {
+          setDocumentsSelected(undefined);
+          setActiveDocumentTab("1");
+        }}
         documentTypes={documentTypes}
         document={documentSelected}
         shareRequests={shareRequests}
-        handleUpdateDocument={this.handleUpdateDocument}
+        handleUpdateDocument={handleUpdateDocument}
         handleUpdateDocumentAndUpdateShareRequests={
-          this.handleUpdateDocumentAndUpdateShareRequests
+          handleUpdateDocumentAndUpdateShareRequests
         }
-        handleDeleteDocument={this.handleDeleteDocument}
-        addShareRequest={this.addShareRequest}
-        removeShareRequest={this.removeShareRequest}
+        handleDeleteDocument={handleDeleteDocument}
+        addShareRequest={addShareRequest}
+        removeShareRequest={removeShareRequest}
         myAccount={account}
-        privateEncryptionKey={this.props.privateEncryptionKey}
+        privateEncryptionKey={props.privateEncryptionKey}
         referencedAccount={referencedAccount}
-        handleClientSelected={this.handleClientSelected}
+        handleClientSelected={handleClientSelected}
         activeTab={activeDocumentTab}
       />
     );
-  }
+  };
 
-  renderTopBarSmall() {
-    const { account } = { ...this.props };
-    const { isSmallMenuOpen } = { ...this.state };
+  const renderTopBarSmall = () => {
     return (
       <div id="main-top-bar-sm">
-        <LogoSm onClick={() => this.setSidebarOpen(true)} />
-        {account.role !== 'admin' && (
-          <SearchInput handleSearch={this.handleSearch} autoSearch />
+        <LogoSm onClick={() => setSidebarOpen(true)} />
+        {account.role !== "admin" && (
+          <SearchInput handleSearch={handleSearch} autoSearch />
         )}
       </div>
     );
-  }
+  };
 
-  renderTopBar(adminLogin) {
-    const { account, handleLogout, appSettings } = { ...this.props };
-    const { isAccountMenuOpen } = { ...this.state };
+  const renderTopBar = (adminLogin) => {
     const logoSetting = appSettings.find(
       (a) => a.settingName === SettingNameEnum.LOGO
     );
     return (
       <div>
         <div id="main-top-bar">
-          <div id="main-logo" onClick={() => this.setActiveTab('1')}>
-            <Link to={account.role === 'helper' ? '/clients' : '/documents'}>
+          <div id="main-logo" onClick={() => setActiveTab("1")}>
+            <Link to={account.role === "helper" ? "/clients" : "/documents"}>
               {logoSetting && (
                 <img
-                  style={{ height: '130px' }}
+                  style={{ height: "130px" }}
                   // className="shared-with-image-single"
                   src={AccountService.getImageURL(logoSetting.settingValue)}
                   alt="Profile"
@@ -933,18 +838,15 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               {!logoSetting && <Folder />}
             </Link>
           </div>
-          {account.role !== 'admin' && adminLogin !== true && (
+          {account.role !== "admin" && adminLogin !== true && (
             <Row id="main-search">
-              <Col style={{ display: 'flex' }}>
-                <SearchInput handleSearch={this.handleSearch} autoSearch />
+              <Col style={{ display: "flex" }}>
+                <SearchInput handleSearch={handleSearch} autoSearch />
               </Col>
             </Row>
           )}
           <div id="main-profile">
-            <Dropdown
-              isOpen={isAccountMenuOpen}
-              toggle={this.toggleAccountMenu}
-            >
+            <Dropdown isOpen={isAccountMenuOpen} toggle={toggleAccountMenu}>
               <DropdownToggle
                 tag="div"
                 data-toggle="dropdown"
@@ -952,7 +854,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
               >
                 <ProfileImage account={account} />
               </DropdownToggle>
-              <DropdownMenu right>
+              <DropdownMenu end>
                 <DropdownItem>
                   {account.role === Role.helper && (
                     <Link to="/helper-login/account">My Account</Link>
@@ -964,7 +866,7 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
                 <DropdownItem>
                   <div
                     onClick={() => {
-                      this.setState({ isMySettingsOpen: true });
+                      setIsMySettingsOpen(true);
                     }}
                   >
                     My Settings
@@ -977,69 +879,48 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
         </div>
       </div>
     );
-  }
+  };
 
-  renderAccount() {
-    const { account } = { ...this.props };
-    // const { isAccount } = { ...this.state };
-
+  const renderAccount = () => {
     // if (isAccount) {
-    return <AccountPage goBack={this.goBack} account={account} />;
+    return <AccountPage goBack={goBack} account={account} />;
     // }
     // return <Fragment />;
-  }
+  };
 
-  renderBringYourKeyPage() {
-    const { account } = { ...this.props };
-
+  const renderBringYourKeyPage = () => {
     return (
       <BringYourKeyPage
-        goBack={this.goBack}
+        goBack={goBack}
         account={account}
-        setBringYourOwnEncryptionKey={this.props.setBringYourOwnEncryptionKey}
+        setBringYourOwnEncryptionKey={props.setBringYourOwnEncryptionKey}
       />
     );
-  }
+  };
 
-  renderCheckoutPage() {
-    const { account, privateEncryptionKey } = { ...this.props };
-
+  const renderCheckoutPage = () => {
     return (
       <CheckoutPage
         privateEncryptionKey={privateEncryptionKey}
-        goBack={this.goBack}
+        goBack={goBack}
         account={account}
       />
     );
-  }
+  };
 
-  renderAdminPage() {
-    const { account, handleSaveAdminAccount, appSettings, saveAppSettings } = {
-      ...this.props,
-    };
+  const renderAdminPage = () => {
     return (
       <AdminPage
         handleSaveAdminAccount={handleSaveAdminAccount}
-        goBack={this.goBack}
+        goBack={goBack}
         account={account}
         appSettings={appSettings}
         saveAppSettings={saveAppSettings}
       />
     );
-  }
+  };
 
-  renderMyClients() {
-    const {
-      searchedDocuments,
-      sortAsc,
-      clientShares,
-      searchedHelperContacts,
-      accounts,
-      isLoading
-    } = {
-      ...this.state,
-    };
-    const { account, privateEncryptionKey } = { ...this.props };
+  const renderMyClients = () => {
     const contactAccounts = searchedHelperContacts.map((hc) => {
       const item = hc.ownerAccount;
       item.id = accounts.find((a) => a.email === item.email)!.id;
@@ -1049,42 +930,28 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     return (
       <ClientPage
         otherOwnerAccounts={contactAccounts}
-        handleAddNew={this.handleAddNew}
-        handleSelectDocument={this.handleSelectDocument}
+        handleAddNew={handleAddNew}
+        handleSelectDocument={handleSelectDocument}
         searchedDocuments={searchedDocuments}
         sortAsc={sortAsc}
-        toggleSort={this.toggleSort}
+        toggleSort={toggleSort}
         myAccount={account}
-        addShareRequest={this.addShareRequest}
-        removeShareRequest={this.removeShareRequest}
+        addShareRequest={addShareRequest}
+        removeShareRequest={removeShareRequest}
         privateEncryptionKey={privateEncryptionKey!}
         clientShares={clientShares}
-        handleClientSelected={this.handleClientSelected}
+        handleClientSelected={handleClientSelected}
         isLoading={isLoading}
       />
     );
-  }
+  };
 
-  renderDocumentPage(props) {
-    const {
-      searchedDocuments,
-      sortAsc,
-      helperContacts,
-      searchedHelperContacts,
-      activeTab,
-      accounts,
-      clientShares,
-      clientIdSelected,
-    } = { ...this.state };
-    const { account, privateEncryptionKey, coreFeatures, viewFeatures } = {
-      ...this.props,
-    };
-    const { id } = props.match.params;
+  const renderDocumentPage = () => {
     let referencedAccount;
     let sharedRequests = account.shareRequests;
-    if (id) {
+    if (paramId) {
       referencedAccount = accounts.filter(
-        (accountItem) => accountItem.id === id
+        (accountItem) => accountItem.id === paramId
       )[0];
       const selectedClientShares = clientShares.get(clientIdSelected!);
       sharedRequests = selectedClientShares
@@ -1095,209 +962,205 @@ class MainContainer extends Component<MainContainerProps, MainContainerState> {
     }
     return (
       <DocumentPage
-        updateHelperContactPermissions={this.updateHelperContactPermissions}
-        unshareAllWithHelperContact={this.unshareAllWithHelperContact}
-        removeHelperContact={this.removeHelperContact}
+        updateHelperContactPermissions={updateHelperContactPermissions}
+        unshareAllWithHelperContact={unshareAllWithHelperContact}
+        removeHelperContact={removeHelperContact}
         sortAsc={sortAsc}
-        toggleSort={this.toggleSort}
-        handleAddNew={this.handleAddNew}
+        toggleSort={toggleSort}
+        handleAddNew={handleAddNew}
         searchedDocuments={searchedDocuments}
-        handleSelectDocument={this.handleSelectDocument}
-        addHelperContact={this.addHelperContact}
+        handleSelectDocument={handleSelectDocument}
+        addHelperContact={addHelperContact}
         helperContacts={helperContacts}
         searchedHelperContacts={searchedHelperContacts}
         accounts={accounts}
         shareRequests={sharedRequests}
         activeTab={activeTab}
-        setActiveTab={this.setActiveTab}
+        setActiveTab={setActiveTab}
         myAccount={account}
-        addShareRequest={this.addShareRequest}
-        removeShareRequest={this.removeShareRequest}
+        addShareRequest={addShareRequest}
+        removeShareRequest={removeShareRequest}
         privateEncryptionKey={privateEncryptionKey}
         referencedAccount={referencedAccount}
-        handleClientSelected={this.handleClientSelected}
+        handleClientSelected={handleClientSelected}
         coreFeatures={coreFeatures}
         viewFeatures={viewFeatures}
       />
     );
+  };
+
+  let adminLogin = false;
+
+  if (
+    (window.location.href.indexOf("admin-login") > -1 &&
+      account.canAddOtherAccounts) ||
+    account.role === Role.admin
+  ) {
+    adminLogin = true;
   }
 
-  render() {
-    const {
-      account,
-      handleLogout,
-      appSettings,
-      privateEncryptionKey,
-      setMyAccount,
-    } = {
-      ...this.props,
-    };
-    const {
-      isLoading,
-      isAccount,
-      sidebarOpen,
-      isMySettingsOpen,
-      helperContacts,
-    } = {
-      ...this.state,
-    };
-
-    let adminLogin = false;
-
-    if (
-      (window.location.href.indexOf('admin-login') > -1 &&
-        account.canAddOtherAccounts) ||
-      account.role === Role.admin
-    ) {
-      adminLogin = true;
-    }
-
-    if (adminLogin) {
-      return (
-        <Router hashType="slash">
-          <div id="main-container">
-            {this.renderTopBar(false)}
-            <div className="main-section">{this.renderAdminPage()}</div>
-          </div>
-        </Router>
-      );
-    }
-
+  if (adminLogin) {
     return (
-      <Router
-        hashType="slash"
-        // history={history}
-      >
-        {isLoading && <ProgressIndicator isFullscreen />}
+      <Router>
         <div id="main-container">
-          {privateEncryptionKey && (
-            <MySettings
-              isOpen={isMySettingsOpen}
-              setOpen={(isOpen) => this.setState({ isMySettingsOpen: isOpen })}
-              privateEncryptionKey={privateEncryptionKey}
-              account={account}
-              setMyAccount={setMyAccount}
-              helperContacts={helperContacts}
-            />
-          )}
-          <Sidebar
-            appSettings={appSettings}
-            account={account}
-            handleLogout={handleLogout}
-            goToAccount={this.goToAccount}
-            isOpen={!!sidebarOpen}
-            setOpen={this.setSidebarOpen}
-            goToMySettings={() => this.setState({ isMySettingsOpen: true })}
-          />
-          {this.renderTopBar(false)}
-          {this.renderTopBarSmall()}
-          <div className="main-page">
-            {account.role !== Role.admin && <div className="main-side" />}
-            <div className="main-section">
-              {isAccount && <Redirect push to="**/account" />}
-              <Switch>
-                <Route path="/secure-login">
-                  <Redirect to="/" />
-                </Route>
-                <Route exact path="/helper-login">
-                  <Redirect to="/helper-login/clients" />
-                </Route>
-                <Route exact path="/">
-                  {account.role === Role.helper && (
-                    <Redirect to="/helper-login/clients" />
-                  )}
-                  {account.role === Role.owner && <Redirect to="/documents" />}
-                  {account.role === Role.admin && (
-                    <Redirect to="/admin-login" />
-                  )}
-                </Route>
-                <Route exact path="**/account">
-                  {this.renderAccount()}
-                </Route>
-                <Route
-                  exact
-                  path="/documents"
-                  render={(props) => {
-                    return (
-                      <Fragment>
-                        {account.role === Role.helper && (
-                          <Redirect push to="/helper-login/clients" />
-                        )}
-                        {account.role === Role.admin && (
-                          <Redirect push to="/admin" />
-                        )}
-                        {this.renderAddDocumentModal(props)}
-                        {this.renderUpdateDocumentModal(props)}
-                        {this.renderDocumentPage(props)}
-                      </Fragment>
-                    );
-                  }}
-                />
-                <Route exact path="/helper-login/clients">
-                  {account.role === Role.owner && (
-                    <Redirect push to="/documents" />
-                  )}
-                  {account.role === Role.admin && <Redirect push to="/admin" />}
-                  {account.role === Role.helper && this.renderMyClients()}
-                </Route>
-                <Route
-                  exact
-                  path="/helper-login/clients/:id/documents"
-                  render={(props) => {
-                    return (
-                      <Fragment>
-                        {account.role === Role.owner && (
-                          <Redirect push to="/documents" />
-                        )}
-                        {account.role === Role.admin && (
-                          <Redirect push to="/admin" />
-                        )}
-                        {this.renderAddDocumentModal(props)}
-                        {this.renderUpdateDocumentModal(props)}
-                        {this.renderDocumentPage(props)}
-                      </Fragment>
-                    );
-                  }}
-                />
-                <Route exact path="/admin">
-                  {account.role === Role.owner && (
-                    <Redirect push to="/documents" />
-                  )}
-                  {account.role === Role.helper && (
-                    <Redirect push to="/helper-login/clients" />
-                  )}
-                  {this.renderAdminPage()}
-                </Route>
-                <Route exact path="/admin">
-                  {account.role === Role.owner && (
-                    <Redirect push to="/documents" />
-                  )}
-                  {account.role === Role.helper && (
-                    <Redirect push to="/helper-login/clients" />
-                  )}
-                  {this.renderAdminPage()}
-                </Route>
-                <Route exact path="/bring-your-key">
-                  {this.renderBringYourKeyPage()}
-                </Route>
-                {/* Dev links for testing */}
-                {process.env.NODE_ENV === 'development' && (
-                  <Fragment>
-                    <Route exact path="/checkout">
-                      {this.renderCheckoutPage()}
-                    </Route>
-                    <Route exact path="/notary-pdf-test">
-                      <NotaryPdfTestPage />
-                    </Route>
-                  </Fragment>
-                )}
-              </Switch>
-            </div>
-          </div>
+          {renderTopBar(false)}
+          <div className="main-section">{renderAdminPage()}</div>
         </div>
       </Router>
     );
   }
-}
+
+  return (
+    <Router
+    // history={history}
+    >
+      {isLoading && <ProgressIndicator isFullscreen />}
+      <div id="main-container">
+        {privateEncryptionKey && (
+          <MySettings
+            isOpen={isMySettingsOpen}
+            setOpen={(isOpen) => setIsMySettingsOpen(isOpen)}
+            privateEncryptionKey={privateEncryptionKey}
+            account={account}
+            setMyAccount={setMyAccount}
+            helperContacts={helperContacts}
+          />
+        )}
+        <Sidebar
+          appSettings={appSettings}
+          account={account}
+          handleLogout={handleLogout}
+          goToAccount={goToAccount}
+          isOpen={!!sidebarOpen}
+          setOpen={setSidebarOpen}
+          goToMySettings={() => setIsMySettingsOpen(true)}
+        />
+        {renderTopBar(false)}
+        {renderTopBarSmall()}
+        <div className="main-page">
+          {account.role !== Role.admin && <div className="main-side" />}
+          <div className="main-section">
+            {isAccount && <Navigate replace to="**/account" />}
+            <Routes>
+              <Route
+                path="/secure-login"
+                element={<Navigate replace to="/" />}
+              />
+              <Route
+                path="/helper-login"
+                element={<Navigate replace to="/helper-login/clients" />}
+              />
+              <Route
+                path="/"
+                element={
+                  <>
+                    {account.role === Role.helper && (
+                      <Navigate replace to="/helper-login/clients" />
+                    )}
+                    {account.role === Role.owner && (
+                      <Navigate replace to="/documents" />
+                    )}
+                    {account.role === Role.admin && (
+                      <Navigate replace to="/admin-login" />
+                    )}
+                  </>
+                }
+              />
+              <Route path="/account" element={renderAccount()} />
+              <Route
+                path="/documents"
+                element={
+                  <Fragment>
+                    {account.role === Role.helper && (
+                      <Navigate replace to="/helper-login/clients" />
+                    )}
+                    {account.role === Role.admin && (
+                      <Navigate replace to="/admin" />
+                    )}
+                    {renderAddDocumentModal()}
+                    {renderUpdateDocumentModal()}
+                    {renderDocumentPage()}
+                  </Fragment>
+                }
+              />
+              <Route
+                path="/helper-login/clients"
+                element={
+                  <>
+                    {account.role === Role.owner && (
+                      <Navigate replace to="/documents" />
+                    )}
+                    {account.role === Role.admin && (
+                      <Navigate replace to="/admin" />
+                    )}
+                    {account.role === Role.helper && renderMyClients()}
+                  </>
+                }
+              />
+              <Route
+                path="/helper-login/clients/:id/documents"
+                element={
+                  <>
+                    {account.role === Role.owner && (
+                      <Navigate replace to="/documents" />
+                    )}
+                    {account.role === Role.admin && (
+                      <Navigate replace to="/admin" />
+                    )}
+                    {renderAddDocumentModal()}
+                    {renderUpdateDocumentModal()}
+                    {renderDocumentPage()}
+                  </>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <>
+                    {account.role === Role.owner && (
+                      <Navigate replace to="/documents" />
+                    )}
+                    {account.role === Role.helper && (
+                      <Navigate replace to="/helper-login/clients" />
+                    )}
+                    {renderAdminPage()}
+                  </>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <>
+                    {account.role === Role.owner && (
+                      <Navigate replace to="/documents" />
+                    )}
+                    {account.role === Role.helper && (
+                      <Navigate replace to="/helper-login/clients" />
+                    )}
+                    {renderAdminPage()}
+                  </>
+                }
+              />
+              <Route
+                path="/bring-your-key"
+                element={renderBringYourKeyPage()}
+              />
+              {/* Dev links for testing */}
+              {process.env.NODE_ENV === "development" && (
+                <>
+                  <Route path="/checkout" element={renderCheckoutPage()} />
+                  <Route
+                    path="/notary-pdf-test"
+                    element={<NotaryPdfTestPage />}
+                  />
+                </>
+              )}
+            </Routes>
+          </div>
+        </div>
+      </div>
+    </Router>
+  );
+};
 
 export default MainContainer;

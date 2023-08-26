@@ -38,7 +38,7 @@ export default class PdfUtil {
       unit: 'px', // "mm", "cm", "m", "in" or "px"
       format: 'a4',
       lineHeight,
-    });
+    } as any);
     doc.setProperties({ title: 'Notarized Document' });
     // adding some padding to the variable fields
     county = StringUtil.stringPaddedCenter(county, 14 - county.length);
@@ -166,7 +166,7 @@ export default class PdfUtil {
       unit: 'px', // "mm", "cm", "m", "in" or "px"
       format: 'a4',
       lineHeight,
-    });
+    } as any);
     doc.setProperties({ title: 'Notarized Document' });
     const max = 20;
     // adding some padding to the variable fields

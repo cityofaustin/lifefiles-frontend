@@ -688,6 +688,7 @@ export default class SecureRegister extends Component<
         } else {
           section = <RegisterAndLogin appSettings={appSettings} />;
         }
+        break;
       default:
         break;
     }

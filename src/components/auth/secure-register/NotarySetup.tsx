@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import GoBackSvg from '../../svg/GoBackSvg';
 import { ReactComponent as SkipSvg } from '../../../img/skip.svg';
 import MSelect from '../../common/MSelect';
-import { OptionTypeBase } from 'react-select';
 import UsStates, { UsState } from '../../../models/UsStates';
 import { handleIOSBrowser } from '../../../util/browser-util';
 import { animateIn, getSectionClassName } from '../../../util/animation-util';
@@ -133,7 +132,7 @@ export default class NotarySetup extends Component<
     const { notaryId, notaryState, hasNotarySeal, notaryIdError } = {
       ...this.state,
     };
-    let options: OptionTypeBase[] = [];
+    let options: any[] = [];
     const usStates = new UsStates();
     options = usStates.states.map((usState: UsState) => {
       return {
@@ -196,7 +195,7 @@ export default class NotarySetup extends Component<
                           label: 'No',
                         },
                       ]}
-                      onChange={(option: OptionTypeBase) =>
+                      onChange={(option: any) =>
                         this.setState({ hasNotarySeal: option.value })
                       }
                       isSearchable={false}
@@ -213,7 +212,7 @@ export default class NotarySetup extends Component<
                     <MSelect
                       value={{ value: notaryState, label: notaryState }}
                       options={options}
-                      onChange={(option: OptionTypeBase) =>
+                      onChange={(option: any) =>
                         this.setState({ notaryState: option.value })
                       }
                       isSearchable={false}

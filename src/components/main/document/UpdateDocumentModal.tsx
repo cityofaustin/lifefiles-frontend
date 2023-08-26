@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import React, { ChangeEvent, Component, Fragment } from "react";
 import {
   Button,
   Col,
@@ -15,68 +15,69 @@ import {
   Row,
   TabContent,
   TabPane,
-} from 'reactstrap';
-import classNames from 'classnames';
-import Document from '../../../models/document/Document';
-import './UpdateDocumentModal.scss';
-import DocumentService from '../../../services/DocumentService';
-import { ReactComponent as DeleteSvg } from '../../../img/delete.svg';
-import { ReactComponent as DeleteSvg2 } from '../../../img/delete-unbound.svg';
-import { ReactComponent as EditDocSvg } from '../../../img/edit-doc.svg';
-import { ReactComponent as EditDocSmSvg } from '../../../img/edit-doc-sm.svg';
-import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
-import { ReactComponent as CrossSmSvg } from '../../../img/cross2-sm.svg';
-import FileUploader from '../../common/FileUploader';
+} from "reactstrap";
+import classNames from "classnames";
+import Document from "../../../models/document/Document";
+import "./UpdateDocumentModal.scss";
+import DocumentService from "../../../services/DocumentService";
+import { ReactComponent as DeleteSvg } from "../../../img/delete.svg";
+import { ReactComponent as DeleteSvg2 } from "../../../img/delete-unbound.svg";
+import { ReactComponent as EditDocSvg } from "../../../img/edit-doc.svg";
+import { ReactComponent as EditDocSmSvg } from "../../../img/edit-doc-sm.svg";
+import { ReactComponent as CrossSvg } from "../../../img/cross2.svg";
+import { ReactComponent as CrossSmSvg } from "../../../img/cross2-sm.svg";
+import FileUploader from "../../common/FileUploader";
 // import { ReactComponent as DownloadBtnSvg } from '../../../img/download-btn.svg';
-import { ReactComponent as DownloadSvg } from '../../../img/download2.svg';
-import { ReactComponent as PrintSvg } from '../../../img/print2.svg';
+import { ReactComponent as DownloadSvg } from "../../../img/download2.svg";
+import { ReactComponent as PrintSvg } from "../../../img/print2.svg";
 // import { ReactComponent as ZoomBtnSvg } from '../../../img/zoom-btn.svg';
-import { ReactComponent as ZoomSvg } from '../../../img/zoom.svg';
-import { ReactComponent as ZoomBtnSmSvg } from '../../../img/zoom-btn-sm.svg';
-import { ReactComponent as NotSharedDoc } from '../../../img/not-shared-doc.svg';
-import Lightbox from 'react-image-lightbox';
-import Account from '../../../models/Account';
-import AccountImpl from '../../../models/AccountImpl';
-import { format, isThisISOWeek } from 'date-fns';
-import MSelect from '../../common/MSelect';
+import { ReactComponent as ZoomSvg } from "../../../img/zoom.svg";
+import { ReactComponent as ZoomBtnSmSvg } from "../../../img/zoom-btn-sm.svg";
+import { ReactComponent as NotSharedDoc } from "../../../img/not-shared-doc.svg";
+// import Lightbox from 'react-image-lightbox';
+import Account from "../../../models/Account";
+import AccountImpl from "../../../models/AccountImpl";
+import { format, isThisISOWeek } from "date-fns";
+import MSelect from "../../common/MSelect";
 import ShareRequest, {
   ShareRequestPermission,
-} from '../../../models/ShareRequest';
+} from "../../../models/ShareRequest";
 import ShareRequestService, {
   ShareRequestPermissions,
-} from '../../../services/ShareRequestService';
-import UpdateDocumentRequest from '../../../models/document/UpdateDocumentRequest';
-import ShareDocWithContainer from './ShareDocWithContainer';
-import StringUtil from '../../../util/StringUtil';
-import ZipUtil from '../../../util/ZipUtil';
-import CryptoUtil from '../../../util/CryptoUtil';
-import NotaryUtil from '../../../util/NotaryUtil';
-import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
-import AccountService from '../../../services/AccountService';
-import NotaryService from '../../../services/NotaryService';
-import FileBase64 from 'react-file-base64';
-import DatePicker from 'react-datepicker';
-import { OptionTypeBase } from 'react-select';
-import ImageUtil from '../../../util/ImageUtil';
-import PdfPreview from '../../common/PdfPreview';
-import ProgressIndicator from '../../common/ProgressIndicator';
-import APIService from '../../../services/APIService';
+} from "../../../services/ShareRequestService";
+import UpdateDocumentRequest from "../../../models/document/UpdateDocumentRequest";
+import ShareDocWithContainer from "./ShareDocWithContainer";
+import StringUtil from "../../../util/StringUtil";
+import ZipUtil from "../../../util/ZipUtil";
+import CryptoUtil from "../../../util/CryptoUtil";
+import NotaryUtil from "../../../util/NotaryUtil";
+import ImageWithStatus, { ImageViewTypes } from "../../common/ImageWithStatus";
+import AccountService from "../../../services/AccountService";
+import NotaryService from "../../../services/NotaryService";
+import FileBase64 from "react-file-base64";
+import DatePicker from "react-datepicker";
+// import { OptionTypeBase } from "react-select";
+import ImageUtil from "../../../util/ImageUtil";
+import PdfPreview from "../../common/PdfPreview";
+import ProgressIndicator from "../../common/ProgressIndicator";
+import APIService from "../../../services/APIService";
 
-import rskapi from 'rskapi';
-import Web3 from 'web3';
-import QRCode from 'qrcode.react';
-import Badge from '../../common/Badge';
-import { ReactComponent as StampSvg } from '../../../img/stamp.svg';
-import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
-import DocumentType from '../../../models/DocumentType';
-import Role from '../../../models/Role';
-import SharedWith from './SharedWith';
+import rskapi from "rskapi";
+import Web3 from "web3";
+import QRCode from "qrcode.react";
+import Badge from "../../common/Badge";
+import { ReactComponent as StampSvg } from "../../../img/stamp.svg";
+import ProfileImage, { ProfileImageSizeEnum } from "../../common/ProfileImage";
+import DocumentType from "../../../models/DocumentType";
+import Role from "../../../models/Role";
+import SharedWith from "./SharedWith";
+import { Lightbox } from "yet-another-react-lightbox";
 
 const CONTRACT_DEFAULT_GAS = 300000;
-const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
+const rskClient = rskapi.client("https://public-node.rsk.co:443"); // rsk mainnet public node
 const web3 = new Web3(
   new Web3.providers.HttpProvider(
-    'https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08'
+    "https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08"
   )
 );
 
@@ -142,7 +143,7 @@ class UpdateDocumentModal extends Component<
   UpdateDocumentModalProps,
   UpdateDocumentModalState
 > {
-  previewPadding = '0 30px';
+  previewPadding = "0 30px";
 
   constructor(props: Readonly<UpdateDocumentModalProps>) {
     super(props);
@@ -150,14 +151,14 @@ class UpdateDocumentModal extends Component<
     this.state = {
       rskGasPrice: 1000000000,
       ethGasPrice: 1000000000,
-      adminPublicKey: '',
+      adminPublicKey: "",
       currentBtcPrice: 0,
       currentEthPrice: 0,
-      networkSelect: 's3',
+      networkSelect: "s3",
       activeTab: props.activeTab,
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: '',
+      deleteConfirmInput: "",
       isZoomed: false,
       showConfirmShare: false,
       base64Image: undefined,
@@ -165,11 +166,11 @@ class UpdateDocumentModal extends Component<
       base64Pdf: undefined,
       docType: undefined,
       pendingAccess: false,
-      notaryId: '',
-      notarySealBase64: '',
-      privatePem: '',
-      publicPem: '',
-      notarizationType: '',
+      notaryId: "",
+      notarySealBase64: "",
+      privatePem: "",
+      publicPem: "",
+      notarizationType: "",
       validUntilDate: new Date(),
       vc: undefined,
       vp: undefined,
@@ -183,7 +184,7 @@ class UpdateDocumentModal extends Component<
 
   componentDidMount() {
     this.updateWindowDimensions();
-    window.addEventListener('resize', this.updateWindowDimensions);
+    window.addEventListener("resize", this.updateWindowDimensions);
     this.setImage();
   }
 
@@ -194,7 +195,7 @@ class UpdateDocumentModal extends Component<
     if (prevProps.document !== this.props.document) {
       this.setImage();
       if (
-        this.props.myAccount.role === 'owner' &&
+        this.props.myAccount.role === "owner" &&
         this.props.document?.vcJwt!
       ) {
         this.getNotarizationInfo();
@@ -203,7 +204,7 @@ class UpdateDocumentModal extends Component<
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.updateWindowDimensions);
+    window.removeEventListener("resize", this.updateWindowDimensions);
   }
 
   updateWindowDimensions = () => {
@@ -214,16 +215,16 @@ class UpdateDocumentModal extends Component<
     if (this.state.gotNotarizationInfo == false) {
       this.setState({ gotNotarizationInfo: true });
 
-      if (this.state.adminPublicKey === '') {
+      if (this.state.adminPublicKey === "") {
         const rskGasPrice = await rskClient.host().getGasPrice();
         const ethGasPrice = web3.utils.toWei(
-          '' + (await NotaryService.getEthGasPrice()) / 10,
-          'gwei'
+          "" + (await NotaryService.getEthGasPrice()) / 10,
+          "gwei"
         );
 
         const adminPublicKeyResponse = await NotaryService.getAdminPublicKey();
-        const currentBtcPrice = await NotaryService.getCoinPrice('bitcoin');
-        const currentEthPrice = await NotaryService.getCoinPrice('ethereum');
+        const currentBtcPrice = await NotaryService.getCoinPrice("bitcoin");
+        const currentEthPrice = await NotaryService.getCoinPrice("ethereum");
 
         this.setState({ ethGasPrice: parseInt(ethGasPrice) });
         this.setState({ rskGasPrice });
@@ -232,7 +233,7 @@ class UpdateDocumentModal extends Component<
           adminPublicKeyResponse == undefined ||
           adminPublicKeyResponse == null
         ) {
-          this.setState({ adminPublicKey: '-' });
+          this.setState({ adminPublicKey: "-" });
         } else {
           this.setState({
             adminPublicKey: adminPublicKeyResponse.adminPublicKey,
@@ -272,7 +273,7 @@ class UpdateDocumentModal extends Component<
           this.props.privateEncryptionKey,
           encryptedString
         );
-        if (base64.startsWith('data:application/pdf')) {
+        if (base64.startsWith("data:application/pdf")) {
           base64Pdf = base64;
         } else {
           base64Image = base64;
@@ -288,10 +289,10 @@ class UpdateDocumentModal extends Component<
     // clear state
     const { toggleModal } = { ...this.props };
     this.setState({
-      activeTab: '1',
+      activeTab: "1",
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: '',
+      deleteConfirmInput: "",
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -308,7 +309,11 @@ class UpdateDocumentModal extends Component<
 
   handleUpdateDocument = () => {
     const { newFile, newThumbnailFile, updatedBase64Image } = { ...this.state };
-    const { handleUpdateDocumentAndUpdateShareRequests, document, referencedAccount } = {
+    const {
+      handleUpdateDocumentAndUpdateShareRequests,
+      document,
+      referencedAccount,
+    } = {
       ...this.props,
     };
     // document doesn't have id
@@ -319,14 +324,14 @@ class UpdateDocumentModal extends Component<
       validUntilDate: undefined, // FIXME: add expired at form somewhere
       base64Image: updatedBase64Image!,
       shareRequestId: (document as any).shareRequestId,
-      referencedAccount
+      referencedAccount,
     });
     // clear state
     this.setState({
-      activeTab: '1',
+      activeTab: "1",
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: '',
+      deleteConfirmInput: "",
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -341,7 +346,7 @@ class UpdateDocumentModal extends Component<
       try {
         await this.handleOwnerAcceptNotarization();
       } catch (err) {
-        console.error('Failed to add vp');
+        console.error("Failed to add vp");
       }
     }
     try {
@@ -353,14 +358,14 @@ class UpdateDocumentModal extends Component<
         claimed: true,
       });
     } catch (err) {
-      console.error('Failed to update document');
+      console.error("Failed to update document");
     }
     // clear state
     this.setState({
-      activeTab: '1',
+      activeTab: "1",
       showConfirmDeleteSection: false,
       hasConfirmedDelete: false,
-      deleteConfirmInput: '',
+      deleteConfirmInput: "",
       isZoomed: false,
       selectedContact: undefined,
       showConfirmShare: false,
@@ -369,7 +374,7 @@ class UpdateDocumentModal extends Component<
     });
   };
 
-  handleNotarizationTypeChange = (documentTypeOption: OptionTypeBase) => {
+  handleNotarizationTypeChange = (documentTypeOption: any) => {
     const notarizationType = documentTypeOption.value;
     this.setState({ notarizationType });
   };
@@ -389,7 +394,7 @@ class UpdateDocumentModal extends Component<
     e.preventDefault();
     const reader = new FileReader();
     reader.onload = async (ev) => {
-      let privatePem = '' as any;
+      let privatePem = "" as any;
       privatePem = ev?.target?.result;
       const publicPem = NotaryUtil.getPublicKeyFromPrivateKey(privatePem);
       this.setState({ privatePem });
@@ -411,7 +416,7 @@ class UpdateDocumentModal extends Component<
     const document = { ...this.props.document! };
     document.vpJwt = vpJwt;
     NotaryService.updateDocumentVP(
-      (document.belongsTo as unknown) as string,
+      document.belongsTo as unknown as string,
       document.type,
       document.vpJwt
     );
@@ -434,25 +439,25 @@ class UpdateDocumentModal extends Component<
     const { document, referencedAccount, myAccount } = { ...this.props };
 
     const notarizedDoc = await NotaryUtil.createNotarizedDocument(
-      'certifiedCopy',
+      "certifiedCopy",
       // this.state.notarizationType,
       this.state.validUntilDate,
       parseInt(this.state.notaryId, 10),
       this.props.myAccount.didAddress,
       this.props.privateEncryptionKey === undefined
-        ? ''
+        ? ""
         : this.props.privateEncryptionKey,
       this.state.publicPem,
       this.state.privatePem,
       this.props.referencedAccount?.didAddress === undefined
-        ? ''
+        ? ""
         : this.props.referencedAccount?.didAddress,
-      this.state.base64Image === undefined ? '' : this.state.base64Image,
+      this.state.base64Image === undefined ? "" : this.state.base64Image,
       this.state.notarySealBase64,
       document?.type!,
       AccountImpl.displayName(referencedAccount),
       AccountImpl.getFullName(myAccount.firstName, myAccount.lastName),
-      'Travis',
+      "Travis",
       this.isRecordable()
     );
 
@@ -491,15 +496,15 @@ class UpdateDocumentModal extends Component<
         );
         const zipped: Blob = await ZipUtil.zip(encryptedString);
         const zippedThumbnail: Blob = await ZipUtil.zip(encryptedThumbnail);
-        const newZippedFile = new File([zipped], 'encrypted-image.zip', {
-          type: 'application/zip',
+        const newZippedFile = new File([zipped], "encrypted-image.zip", {
+          type: "application/zip",
           lastModified: Date.now(),
         });
         const newZippedThumbnailFile = new File(
           [zippedThumbnail],
-          'encrypted-image-thumbnail.zip',
+          "encrypted-image-thumbnail.zip",
           {
-            type: 'application/zip',
+            type: "application/zip",
             lastModified: Date.now(),
           }
         );
@@ -507,12 +512,13 @@ class UpdateDocumentModal extends Component<
           this.getDocumentSharedWithContact(selectedContact) &&
           this.getDocumentSharedWithContact(selectedContact)?.approved === false
         ) {
-          const approvedShareRequest = await ShareRequestService.approveShareRequestFile(
-            newZippedFile,
-            newZippedThumbnailFile,
-            this.getDocumentSharedWithContact(selectedContact)!._id!,
-            permissions
-          );
+          const approvedShareRequest =
+            await ShareRequestService.approveShareRequestFile(
+              newZippedFile,
+              newZippedThumbnailFile,
+              this.getDocumentSharedWithContact(selectedContact)!._id!,
+              permissions
+            );
           // update the existing shareRequest with this approved one.
           removeShareRequest(
             this.getDocumentSharedWithContact(selectedContact)!
@@ -605,10 +611,10 @@ class UpdateDocumentModal extends Component<
     try {
       await handleDeleteDocument(document);
       this.setState({
-        activeTab: '1',
+        activeTab: "1",
         showConfirmDeleteSection: false,
         hasConfirmedDelete: false,
-        deleteConfirmInput: '',
+        deleteConfirmInput: "",
         isZoomed: false,
         selectedContact: undefined,
         showConfirmShare: false,
@@ -622,7 +628,7 @@ class UpdateDocumentModal extends Component<
   handleDeleteConfirmChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     let hasConfirmedDelete = false;
-    if (value === 'DELETE') {
+    if (value === "DELETE") {
       hasConfirmedDelete = true;
     }
     this.setState({ deleteConfirmInput: value, hasConfirmedDelete });
@@ -637,7 +643,7 @@ class UpdateDocumentModal extends Component<
   };
 
   printImg(url: string) {
-    const win = window.open('');
+    const win = window.open("");
     win?.document.write(
       '<img src="' + url + '" onload="window.print();window.close()" />'
     );
@@ -645,7 +651,7 @@ class UpdateDocumentModal extends Component<
   }
 
   openPdfWindow(url: string) {
-    const win = window.open('');
+    const win = window.open("");
     win?.document.write(
       '<embed type="application/pdf" src="' +
         url +
@@ -702,7 +708,7 @@ class UpdateDocumentModal extends Component<
         );
         isAllowed = shareRequest ? shareRequest[srp] : true;
       } catch (err) {
-        console.error('Unabled to get share request');
+        console.error("Unabled to get share request");
       }
     }
     return isAllowed;
@@ -721,11 +727,17 @@ class UpdateDocumentModal extends Component<
                 <div className="attr">File</div>
                 <div className="value">{document.type}</div>
                 <div className="attr">Upload Date</div>
-                <div className="value">{document.updatedAt || '-'}</div>
+                <div className="value">
+                  {document.updatedAt?.toString() || "-"}
+                </div>
                 <div className="attr">Upload By</div>
-                <div className="value">{document.uploadedBy || '-'}</div>
+                <div className="value">
+                  {document.uploadedBy?.toString() || "-"}
+                </div>
                 <div className="attr">Valid Until</div>
-                <div className="value">{document.validUntilDate || '-'}</div>
+                <div className="value">
+                  {document.validUntilDate?.toString() || "-"}
+                </div>
               </div>
             </div>
             <div className="request-access">
@@ -737,8 +749,8 @@ class UpdateDocumentModal extends Component<
                 }
               >
                 {pendingAccess || document.sharedWithAccountIds.length > 0
-                  ? 'Access Pending'
-                  : 'Request Access'}
+                  ? "Access Pending"
+                  : "Request Access"}
               </button>
             </div>
           </div>
@@ -752,9 +764,9 @@ class UpdateDocumentModal extends Component<
     return (
       <Fragment>
         {referencedAccount && (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
             {!referencedAccount.profileImageUrl && (
-              <div style={{ marginRight: '28.3px' }}>
+              <div style={{ marginRight: "28.3px" }}>
                 <ProfileImage
                   account={referencedAccount}
                   size={ProfileImageSizeEnum.SMALL}
@@ -776,7 +788,7 @@ class UpdateDocumentModal extends Component<
                   referencedAccount.lastName
                 )}
               {!AccountImpl.hasNameSet(referencedAccount) &&
-                referencedAccount.username}{' '}
+                referencedAccount.username}{" "}
               - {document?.type}
             </span>
           </div>
@@ -800,7 +812,7 @@ class UpdateDocumentModal extends Component<
         {!referencedAccount && (
           <div
             className={classNames({
-              'upload-doc-delete-container': true,
+              "upload-doc-delete-container": true,
               active: showConfirmDeleteSection,
             })}
           >
@@ -820,9 +832,9 @@ class UpdateDocumentModal extends Component<
         <Nav tabs>
           <NavItem>
             <NavLink
-              className={classNames({ active: activeTab === '1' })}
+              className={classNames({ active: activeTab === "1" })}
               onClick={() => {
-                this.toggleTab('1');
+                this.toggleTab("1");
               }}
             >
               Preview
@@ -833,9 +845,9 @@ class UpdateDocumentModal extends Component<
           ) && (
             <NavItem>
               <NavLink
-                className={classNames({ active: activeTab === '2' })}
+                className={classNames({ active: activeTab === "2" })}
                 onClick={() => {
-                  this.toggleTab('2');
+                  this.toggleTab("2");
                 }}
               >
                 Replace
@@ -843,22 +855,22 @@ class UpdateDocumentModal extends Component<
             </NavItem>
           )}
           {!referencedAccount && (
-            <NavItem style={{ position: 'relative' }}>
+            <NavItem style={{ position: "relative" }}>
               {shareRequests.find((sr) => !sr.approved) && (
                 <div
                   style={{
-                    right: '0',
-                    top: '-12px',
-                    position: 'absolute',
+                    right: "0",
+                    top: "-12px",
+                    position: "absolute",
                   }}
                 >
                   <Badge />
                 </div>
               )}
               <NavLink
-                className={classNames({ active: activeTab === '3' })}
+                className={classNames({ active: activeTab === "3" })}
                 onClick={() => {
-                  this.toggleTab('3');
+                  this.toggleTab("3");
                 }}
               >
                 Share
@@ -1088,7 +1100,7 @@ class UpdateDocumentModal extends Component<
 
   renderPreviewInfo() {
     const { document, accounts, myAccount } = { ...this.props };
-    let uploadedBy = 'N/A';
+    let uploadedBy = "N/A";
     if (document) {
       const uploadedByAccount = AccountImpl.getAccountByIdAndList(
         [...accounts, myAccount],
@@ -1111,16 +1123,16 @@ class UpdateDocumentModal extends Component<
             <div className="attr">Update date</div>
             <div className="attr-value">
               {document?.updatedAt &&
-                format(new Date(document?.updatedAt), 'MM/dd/yyyy')}
-              {!document?.updatedAt && '-'}
+                format(new Date(document?.updatedAt), "MM/dd/yyyy")}
+              {!document?.updatedAt && "-"}
             </div>
           </div>
           <div className="preview-info-item">
             <div className="attr">Expiration Date</div>
             <div className="attr-value">
               {document?.validUntilDate &&
-                format(new Date(document?.validUntilDate), 'MM/dd/yyyy')}
-              {!document?.validUntilDate && '-'}
+                format(new Date(document?.validUntilDate), "MM/dd/yyyy")}
+              {!document?.validUntilDate && "-"}
             </div>
           </div>
           <div className="preview-info-item">
@@ -1134,7 +1146,7 @@ class UpdateDocumentModal extends Component<
 
   renderPreviewInfoSmall() {
     const { document, accounts, myAccount } = { ...this.props };
-    let uploadedBy = 'N/A';
+    let uploadedBy = "N/A";
     if (document) {
       const uploadedByAccount = AccountImpl.getAccountByIdAndList(
         [...accounts, myAccount],
@@ -1155,8 +1167,8 @@ class UpdateDocumentModal extends Component<
           <div className="attr">Update date</div>
           <div className="attr-value">
             {document?.updatedAt &&
-              format(new Date(document?.updatedAt), 'MM/dd/yyyy')}
-            {!document?.updatedAt && '-'}
+              format(new Date(document?.updatedAt), "MM/dd/yyyy")}
+            {!document?.updatedAt && "-"}
           </div>
         </div>
         <div className="preview-info-item">
@@ -1167,8 +1179,8 @@ class UpdateDocumentModal extends Component<
           <div className="attr">Valid Until</div>
           <div className="attr-value">
             {document?.validUntilDate &&
-              format(new Date(document?.validUntilDate), 'MM/dd/yyyy')}
-            {!document?.validUntilDate && '-'}
+              format(new Date(document?.validUntilDate), "MM/dd/yyyy")}
+            {!document?.validUntilDate && "-"}
           </div>
         </div>
       </div>
@@ -1177,11 +1189,8 @@ class UpdateDocumentModal extends Component<
 
   renderDeleteSmall() {
     const { document, accounts, shareRequests } = { ...this.props };
-    const {
-      showConfirmDeleteSection,
-      hasConfirmedDelete,
-      deleteConfirmInput,
-    } = { ...this.state };
+    const { showConfirmDeleteSection, hasConfirmedDelete, deleteConfirmInput } =
+      { ...this.state };
     return (
       <div className="delete-sm">
         <button
@@ -1203,11 +1212,11 @@ class UpdateDocumentModal extends Component<
             </p>
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: '18px',
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: "18px",
               }}
             >
               <div className="share-with-container">
@@ -1262,7 +1271,7 @@ class UpdateDocumentModal extends Component<
     return (
       <div className="update-doc-tab-spacing">
         <FileUploader
-          setFile={this.setFile}
+          setFile={this.setFile as any}
           setUpdatedBase64Image={this.setUpdatedBase64Image}
           privateEncryptionKey={this.props.privateEncryptionKey}
           showUpdateMessage
@@ -1314,7 +1323,7 @@ class UpdateDocumentModal extends Component<
                 {/* TODO: expiration date */}
               </div>
             </div>
-            {this.props.myAccount.role === 'owner' &&
+            {this.props.myAccount.role === "owner" &&
               this.props.document?.vcJwt! &&
               this.renderNotarize()}
             <div className="buttons">
@@ -1339,21 +1348,21 @@ class UpdateDocumentModal extends Component<
   }
 
   renderNotarize = () => {
-    const options: OptionTypeBase[] = [];
+    const options: any[] = [];
     // this.getNotarizationInfo();
     options.push({
-      value: 'certifiedCopy',
-      label: 'Certified Copy',
+      value: "certifiedCopy",
+      label: "Certified Copy",
       isDisabled: false,
     });
 
     // if (this.props.myAccount.role === 'owner') {
     let fundNetworkSection;
 
-    if (this.state.networkSelect === 'rsk') {
+    if (this.state.networkSelect === "rsk") {
       const rskTotalCostToSend = web3.utils.fromWei(
-        '' + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
-        'ether'
+        "" + this.state.rskGasPrice * CONTRACT_DEFAULT_GAS,
+        "ether"
       );
 
       const dollarAmount =
@@ -1363,9 +1372,9 @@ class UpdateDocumentModal extends Component<
 
       fundNetworkSection = (
         <div>
-          {' '}
+          {" "}
           <Label
-            style={{ paddingRight: '30px' }}
+            style={{ paddingRight: "30px" }}
             for="network"
             className="other-prompt"
           >
@@ -1374,14 +1383,14 @@ class UpdateDocumentModal extends Component<
           <p>
             {rskTotalCostToSend} RSK (${dollarAmount})
           </p>
-          <QRCode value={this.state.adminPublicKey} size="256" />
+          <QRCode value={this.state.adminPublicKey} size={256} />
           <p>{this.state.adminPublicKey}</p>
         </div>
       );
-    } else if (this.state.networkSelect === 'eth') {
+    } else if (this.state.networkSelect === "eth") {
       const ethTotalCostToSend = web3.utils.fromWei(
-        '' + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
-        'ether'
+        "" + this.state.ethGasPrice * CONTRACT_DEFAULT_GAS,
+        "ether"
       );
 
       const dollarAmount =
@@ -1391,9 +1400,9 @@ class UpdateDocumentModal extends Component<
 
       fundNetworkSection = (
         <div>
-          {' '}
+          {" "}
           <Label
-            style={{ paddingRight: '30px' }}
+            style={{ paddingRight: "30px" }}
             for="network"
             className="other-prompt"
           >
@@ -1402,20 +1411,20 @@ class UpdateDocumentModal extends Component<
           <p>
             {ethTotalCostToSend} ETH (${dollarAmount})
           </p>
-          <QRCode value={this.state.adminPublicKey} size="256" />
+          <QRCode value={this.state.adminPublicKey} size={256} />
           <p>{this.state.adminPublicKey}</p>
         </div>
       );
     }
 
     return (
-      <div style={{ marginTop: '20px' }}>
+      <div style={{ marginTop: "20px" }}>
         {/* <h4>Verifiable Credential</h4> */}
         {/* <pre className="vc-display">{this.props.document?.vcJwt}</pre> */}
         {/* <pre className="vc-display">{this.state.approvedVpUrl}</pre> */}
 
         <Label
-          style={{ paddingRight: '30px' }}
+          style={{ paddingRight: "30px" }}
           for="network"
           className="other-prompt"
         >
@@ -1430,7 +1439,7 @@ class UpdateDocumentModal extends Component<
           <option value="s3">Amazon S3</option>
         </select>
 
-        {this.state.networkSelect === 's3' ? '' : fundNetworkSection}
+        {this.state.networkSelect === "s3" ? "" : fundNetworkSection}
       </div>
     );
   };
@@ -1443,7 +1452,7 @@ class UpdateDocumentModal extends Component<
         <pre className="vc-display">{this.props.document?.vcJwt}</pre>
         {doc && (
           <div className="pdf-display">
-            <PdfPreview fileURL={doc.output('datauristring')} />
+            <PdfPreview fileURL={doc.output("datauristring")} />
             <Button
               className="margin-wide"
               color="primary"
@@ -1489,12 +1498,12 @@ class UpdateDocumentModal extends Component<
               </p>
               <div
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginTop: '8px',
-                  marginBottom: '24px',
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: "8px",
+                  marginBottom: "24px",
                 }}
               >
                 <div className="share-with-container">
@@ -1552,7 +1561,7 @@ class UpdateDocumentModal extends Component<
     return (
       <Modal
         toggle={this.toggleConfirmShare}
-        size={'lg'}
+        size={"lg"}
         isOpen={showConfirmShare}
       >
         <ModalBody>
@@ -1561,7 +1570,7 @@ class UpdateDocumentModal extends Component<
               <div className="confirm-share-prompt">
                 You're about to share
                 <br />
-                {document?.type?.toUpperCase()} with{' '}
+                {document?.type?.toUpperCase()} with{" "}
                 {AccountImpl.getFullName(
                   selectedContact?.firstName,
                   selectedContact?.lastName
@@ -1620,11 +1629,18 @@ class UpdateDocumentModal extends Component<
           </TabPane>
         </TabContent>
         {isZoomed && (
-          <Lightbox
-            // reactModalStyle={{zIndex: '1060'}}
-            mainSrc={base64Image!}
-            onCloseRequest={() => this.setState({ isZoomed: false })}
-          />
+          <>
+            <Lightbox
+              open
+              close={() => this.setState({ isZoomed: false })}
+              slides={[{ src: base64Image! }]}
+            />
+            {/* <Lightbox
+              // reactModalStyle={{zIndex: '1060'}}
+              mainSrc={base64Image!}
+              onCloseRequest={() => this.setState({ isZoomed: false })}
+            /> */}
+          </>
         )}
         {this.renderConfirmShareModal()}
       </Fragment>
@@ -1646,8 +1662,8 @@ class UpdateDocumentModal extends Component<
         <Modal
           isOpen={showModal}
           toggle={this.toggleModal}
-          backdrop={'static'}
-          size={'xl'}
+          backdrop={"static"}
+          size={"xl"}
           className="update-doc-modal"
         >
           <ModalHeader toggle={this.toggleModal} close={closeBtn}>
@@ -1657,7 +1673,7 @@ class UpdateDocumentModal extends Component<
             {document && document.url.length <= 0 && this.renderNotShared()}
             {document && document.url.length > 0 && this.renderUpdateDocument()}
           </ModalBody>
-          {activeTab === '2' && (
+          {activeTab === "2" && (
             <ModalFooter className="modal-footer-center">
               <Button
                 color="primary"

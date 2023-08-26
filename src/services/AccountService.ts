@@ -28,7 +28,7 @@ class AccountService extends AgentService {
   static async getToken(code) {
     const params = {
       code,
-      client_id: process.env.CLIENT_ID,
+      client_id: process.env.REACT_APP_CLIENT_ID,
       grant_type: 'authorization_code',
       redirect_uri: `${location.origin}${location.pathname}`,
       // redirect_uri: location.origin,

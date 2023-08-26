@@ -19,7 +19,7 @@ import { ReactComponent as CrossSvg } from '../../../img/cross2.svg';
 import { ReactComponent as CrossSmSvg } from '../../../img/cross2-sm.svg';
 import { ReactComponent as NewDocSvg } from '../../../img/new-doc-2.svg';
 import { ReactComponent as NewDocSmSvg } from '../../../img/new-doc-sm.svg';
-import { OptionTypeBase } from 'react-select';
+// import { OptionTypeBase } from 'react-select';
 import './AddDocumentModal.scss';
 import AccountImpl from '../../../models/AccountImpl';
 import Account from '../../../models/Account';
@@ -106,7 +106,7 @@ interface AddDocumentModalState {
   newThumbnailFile?: File;
   isOther: boolean;
   errorMessage?: string;
-  documentTypeOption?: OptionTypeBase;
+  documentTypeOption?: any;
   addDocumentStep: AddDocumentStep;
   previewURL?: string;
   hasValidUntilDate: boolean;
@@ -241,7 +241,7 @@ class AddDocumentModal extends Component<
     this.setState({ newFile, newThumbnailFile, previewURL });
   };
 
-  handleDocumentType = (documentTypeOption: OptionTypeBase) => {
+  handleDocumentType = (documentTypeOption: any) => {
     const isOther = documentTypeOption.value === 'Other';
     const documentType =
       documentTypeOption.value === 'Other' ? '' : documentTypeOption.value;
@@ -505,7 +505,7 @@ class AddDocumentModal extends Component<
       ...this.state,
     };
 
-    const options: OptionTypeBase[] = documentTypes.map((documentTypeItem) => ({
+    const options: any[] = documentTypes.map((documentTypeItem) => ({
       value: documentTypeItem.name,
       label: documentTypeItem.name,
       isDisabled: DocumentTypeService.findDocumentTypeMatchInDocuments(
@@ -563,7 +563,7 @@ class AddDocumentModal extends Component<
     return (
       <section>
         <FileUploader
-          setFile={this.setFile}
+          setFile={this.setFile as any}
           documentType={documentType}
           privateEncryptionKey={this.props.privateEncryptionKey}
         />

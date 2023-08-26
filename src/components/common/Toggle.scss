@@ -15,9 +15,9 @@
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2 - 2);
-        -ms-transform: translateX($width / 2 - 2);
-        transform: translateX($width / 2 - 2);
+        -webkit-transform: translateX(calc($width / 2 - 2px));
+        -ms-transform: translateX(calc($width / 2 - 2px));
+        transform: translateX(calc($width / 2 - 2px));
       }
     }
     .slider {
@@ -47,9 +47,9 @@
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2 - 2);
-        -ms-transform: translateX($width / 2 - 2);
-        transform: translateX($width / 2 - 2);
+        -webkit-transform: translateX(calc($width / 2 - 2px));
+        -ms-transform: translateX(calc($width / 2 - 2px));
+        transform: translateX(calc($width / 2 - 2px));
       }
     }
     .slider {
@@ -79,15 +79,15 @@
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2 - 2);
-        -ms-transform: translateX($width / 2 - 2);
-        transform: translateX($width / 2 - 2);
+        -webkit-transform: translateX(calc($width / 2 - 2px));
+        -ms-transform: translateX(calc($width / 2 - 2px));
+        transform: translateX(calc($width / 2 - 2px));
       }
     }
     .slider {
       &:before {
         height: $height;
-        width: $width / 2;
+        width: calc($width / 2);
       }
     }
     .yes {
@@ -111,15 +111,15 @@
     height: $height;
     input {
       &:checked + .slider:before {
-        -webkit-transform: translateX($width / 2 - 2);
-        -ms-transform: translateX($width / 2 - 2);
-        transform: translateX($width / 2 - 2);
+        -webkit-transform: translateX(calc($width / 2 - 2px));
+        -ms-transform: translateX(calc($width / 2 - 2px));
+        transform: translateX(calc($width / 2 - 2px));
       }
     }
     .slider {
       &:before {
         height: $height;
-        width: $width / 2;
+        width: calc($width / 2);
       }
     }
     .yes {
