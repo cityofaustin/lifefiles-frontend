@@ -1,6 +1,6 @@
 import EthCrypto, { Encrypted } from 'eth-crypto';
 
-const USE_ENCRYPTION = process.env.USE_ENCRYPTION;
+const USE_ENCRYPTION = process.env.REACT_APP_USE_ENCRYPTION;
 
 class CryptoUtil {
   static getPublicKeyByPrivateKey(

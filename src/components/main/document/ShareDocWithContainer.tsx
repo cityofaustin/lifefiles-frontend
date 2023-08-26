@@ -359,7 +359,7 @@ class ShareDocWithContainer extends Component<
               <div className="share-for-form-group">
                 <label>Share for...</label>
                 <div className="duration">
-                  <Select />
+                  {/* <Select /> */}
                 </div>
               </div>
               <div className="date-container">

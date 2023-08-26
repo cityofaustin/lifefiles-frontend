@@ -6,7 +6,7 @@ export default function (
   return Promise.race([
     fetch(input, init),
     new Promise<Response>((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), timeout)
-    )
+      setTimeout(() => reject(new Error("timeout")), timeout)
+    ),
   ]);
 }

@@ -87,7 +87,7 @@ class StringUtil {
         'JPEG', // is the compressFormat of the new image
         75, // is the quality of the new image NOTE: can't compress since PNG
         0, // is the rotatoion of the new image
-        (data) => {
+        (data: any) => {
           resolve(data);
         }, // is the callBack function of the new image URI
         outputType // is the output type of the new image base64 or blob.

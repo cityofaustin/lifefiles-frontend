@@ -1,17 +1,17 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment } from "react";
 
-import AdminDocumentType from '../../admin/AdminDocumentType';
-import AdminService from '../../../services/AdminService';
-import './AdminPage.scss';
-import CheckboxCellRenderer from '../../common/CheckboxCellRenderer';
-import CheckboxNameCellRenderer from '../../common/CheckboxNameCellRenderer';
-import RoleCellRenderer from '../../common/RoleCellRenderer';
-import AccountTypeCellRenderer from '../../common/AccountTypeCellRenderer';
-import ActionsCellRenderer from '../../common/ActionsCellRenderer';
-import { ReactComponent as AddSvg } from '../../../img/add.svg';
-import { ReactComponent as SaveSvg } from '../../../img/save.svg';
+import AdminDocumentType from "../../admin/AdminDocumentType";
+import AdminService from "../../../services/AdminService";
+import "./AdminPage.scss";
+import CheckboxCellRenderer from "../../common/CheckboxCellRenderer";
+import CheckboxNameCellRenderer from "../../common/CheckboxNameCellRenderer";
+import RoleCellRenderer from "../../common/RoleCellRenderer";
+import AccountTypeCellRenderer from "../../common/AccountTypeCellRenderer";
+import ActionsCellRenderer from "../../common/ActionsCellRenderer";
+import { ReactComponent as AddSvg } from "../../../img/add.svg";
+import { ReactComponent as SaveSvg } from "../../../img/save.svg";
 
-import { AgGridReact } from 'ag-grid-react';
+import { AgGridReact } from "ag-grid-react";
 import {
   Alert,
   Button,
@@ -21,37 +21,37 @@ import {
   Input,
   Label,
   Row,
-} from 'reactstrap';
+} from "reactstrap";
 import {
   GridApi,
   ColumnApi,
   GridOptions,
   CellValueChangedEvent,
   ColDef,
-} from 'ag-grid-community';
+} from "ag-grid-community";
 
-import QRCode from 'qrcode.react';
-import Web3 from 'web3';
-import rskapi from 'rskapi';
+import QRCode from "qrcode.react";
+import Web3 from "web3";
+import rskapi from "rskapi";
 
-import Account from '../../../models/Account';
-import AccountType from '../../../models/admin/AccountType';
-import CoreFeature from '../../../models/admin/CoreFeature';
-import ViewFeature from '../../../models/admin/ViewFeature';
-import DocumentType from '../../../models/DocumentType';
-import RoleType from '../../../models/admin/RoleType';
-import Role from '../../../models/Role';
-import FileUploader from '../../common/FileUploader';
-import AppSetting, { SettingNameEnum } from '../../../models/AppSetting';
-import AccountService from '../../../services/AccountService';
+import Account from "../../../models/Account";
+import AccountType from "../../../models/admin/AccountType";
+import CoreFeature from "../../../models/admin/CoreFeature";
+import ViewFeature from "../../../models/admin/ViewFeature";
+import DocumentType from "../../../models/DocumentType";
+import RoleType from "../../../models/admin/RoleType";
+import Role from "../../../models/Role";
+import FileUploader from "../../common/FileUploader";
+import AppSetting, { SettingNameEnum } from "../../../models/AppSetting";
+import AccountService from "../../../services/AccountService";
 
 const web3 = new Web3(
   new Web3.providers.HttpProvider(
-    'https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08'
+    "https://mainnet.infura.io/v3/f89f8f95ce6c4199849037177b155d08"
   )
 );
 
-const rskClient = rskapi.client('https://public-node.rsk.co:443'); // rsk mainnet public node
+const rskClient = rskapi.client("https://public-node.rsk.co:443"); // rsk mainnet public node
 
 interface AdminPageProps {
   account: Account;
@@ -93,12 +93,12 @@ interface AdminPageState {
 }
 
 class AdminPage extends Component<AdminPageProps, AdminPageState> {
-  documentTypesGridApi: GridApi;
-  documentTypesGridColumnApi: ColumnApi;
-  accountsGridApi: GridApi;
-  accountsGridColumnApi: ColumnApi;
-  accountTypesGridApi: GridApi;
-  accountTypesGridColumnApi: ColumnApi;
+  documentTypesGridApi: GridApi = new GridApi();
+  documentTypesGridColumnApi: ColumnApi = new ColumnApi();
+  accountsGridApi: GridApi = new GridApi();
+  accountsGridColumnApi: ColumnApi = new ColumnApi();
+  accountTypesGridApi: GridApi = new GridApi();
+  accountTypesGridColumnApi: ColumnApi = new ColumnApi();
 
   constructor(props: Readonly<AdminPageProps>) {
     super(props);
@@ -106,20 +106,20 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       (a) => a.settingName === SettingNameEnum.TITLE
     )
       ? props.appSettings.find((a) => a.settingName === SettingNameEnum.TITLE)!
-      : { settingName: SettingNameEnum.TITLE, settingValue: '' };
+      : { settingName: SettingNameEnum.TITLE, settingValue: "" };
     const logoSetting = props.appSettings.find(
       (a) => a.settingName === SettingNameEnum.LOGO
     )
       ? props.appSettings.find((a) => a.settingName === SettingNameEnum.LOGO)!
-      : { settingName: SettingNameEnum.LOGO, settingValue: '' };
+      : { settingName: SettingNameEnum.LOGO, settingValue: "" };
     this.state = {
       email: props.account.email,
-      password: '',
-      confirmPassword: '',
-      adminPublicKey: '',
-      adminPrivateKey: '',
-      ethBalance: '',
-      rskBalance: '',
+      password: "",
+      confirmPassword: "",
+      adminPublicKey: "",
+      adminPrivateKey: "",
+      ethBalance: "",
+      rskBalance: "",
       logoFile: undefined,
       titleSetting,
       logoSetting,
@@ -129,87 +129,87 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       coreFeatures: [],
       accountTypes: [],
       documentTypesColumnDefs: [
-        { headerName: 'Name', field: 'name', filter: true, editable: true },
+        { headerName: "Name", field: "name", filter: true, editable: true },
         {
-          headerName: 'Two Sided',
-          field: 'isTwoSided',
-          cellRenderer: 'checkboxCellRenderer',
+          headerName: "Two Sided",
+          field: "isTwoSided",
+          cellRenderer: "checkboxCellRenderer",
         },
         {
-          headerName: 'Expiration Date',
-          field: 'hasExpirationDate',
-          cellRenderer: 'checkboxCellRenderer',
+          headerName: "Expiration Date",
+          field: "hasExpirationDate",
+          cellRenderer: "checkboxCellRenderer",
         },
         {
-          headerName: 'Protected',
-          field: 'isProtectedDoc',
-          cellRenderer: 'checkboxCellRenderer',
+          headerName: "Protected",
+          field: "isProtectedDoc",
+          cellRenderer: "checkboxCellRenderer",
         },
         {
-          headerName: 'Recordable',
-          field: 'isRecordableDoc',
-          cellRenderer: 'checkboxCellRenderer',
+          headerName: "Recordable",
+          field: "isRecordableDoc",
+          cellRenderer: "checkboxCellRenderer",
         },
         {
-          headerName: 'Actions',
-          field: 'action',
+          headerName: "Actions",
+          field: "action",
           sortable: false,
-          cellRenderer: 'actionsCellRenderer',
+          cellRenderer: "actionsCellRenderer",
         },
       ],
 
       accountsColumnDefs: [
         {
-          headerName: 'Username',
-          field: 'username',
+          headerName: "Username",
+          field: "username",
           filter: true,
           editable: true,
         },
         {
-          headerName: 'First Name',
-          field: 'firstName',
+          headerName: "First Name",
+          field: "firstName",
           filter: true,
           editable: true,
         },
         {
-          headerName: 'Last Name',
-          field: 'lastName',
+          headerName: "Last Name",
+          field: "lastName",
           filter: true,
           editable: true,
         },
         {
-          headerName: 'Email',
-          field: 'email',
+          headerName: "Email",
+          field: "email",
           filter: true,
           editable: true,
         },
         {
-          headerName: 'Actions',
-          field: 'action',
+          headerName: "Actions",
+          field: "action",
           sortable: false,
-          cellRenderer: 'actionsCellRenderer',
+          cellRenderer: "actionsCellRenderer",
         },
       ],
 
       accountTypesColumnDefs: [
-        { headerName: 'Title', field: 'accountTypeName', editable: true },
+        { headerName: "Title", field: "accountTypeName", editable: true },
         {
-          field: 'role',
-          cellRenderer: 'roleCellRenderer',
+          field: "role",
+          cellRenderer: "roleCellRenderer",
           // cellEditor: 'agRichSelectCellEditor',
           cellEditorParams: {
-            values: ['owner', 'helper'],
-            cellRenderer: 'roleCellRenderer',
+            values: ["owner", "helper"],
+            cellRenderer: "roleCellRenderer",
           },
           editable: true,
         },
         // NOTE: took out for now
         // { headerName: 'Admin Level', field: 'adminLevel' },
         {
-          headerName: 'Actions',
-          field: 'action',
+          headerName: "Actions",
+          field: "action",
           sortable: false,
-          cellRenderer: 'actionsCellRenderer',
+          cellRenderer: "actionsCellRenderer",
         },
       ],
       documentTypeSavedSuccess: false,
@@ -228,22 +228,22 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   async componentDidMount() {
     const { account } = { ...this.props };
 
-    if (account.role === 'admin') {
+    if (account.role === "admin") {
       const adminResponse = await AdminService.getAdminInfo();
 
       const accountTypes = adminResponse.account.adminInfo.accountTypes
-        .filter((accountType) => accountType.role !== 'admin')
-        .map((accountType) => ({ ...accountType, action: '' }));
+        .filter((accountType) => accountType.role !== "admin")
+        .map((accountType) => ({ ...accountType, action: "" }));
 
       const accountsColumnDefs = this.state.accountsColumnDefs;
 
       const toAdd = {
-        headerName: 'Account Type',
-        field: 'accountType',
-        cellRenderer: 'accountTypeCellRenderer',
+        headerName: "Account Type",
+        field: "accountType",
+        cellRenderer: "accountTypeCellRenderer",
         cellRendererParams: { accountTypes },
         cellEditorParams: {
-          cellRenderer: 'accountTypeCellRenderer',
+          cellRenderer: "accountTypeCellRenderer",
         },
         editable: true,
       };
@@ -264,13 +264,13 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       this.setState({ accountsColumnDefs });
       this.setState({
         documentTypes: adminResponse.account.adminInfo.documentTypes.map(
-          (documentType) => ({ ...documentType, action: '' })
+          (documentType) => ({ ...documentType, action: "" })
         ),
         accounts: adminResponse.account.adminInfo.accounts
-          .filter((account1) => account1.username !== 'admin')
+          .filter((account1) => account1.username !== "admin")
           .map((account1) => ({
             ...account1,
-            action: '',
+            action: "",
           })),
 
         viewFeatures: adminResponse.account.adminInfo.viewFeatures,
@@ -280,20 +280,22 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       });
 
       const adminPublicKey =
-        adminResponse.account.adminInfo.adminCryptoKey.publicKey;
+        adminResponse.account.adminInfo.adminCryptoKey?.publicKey || "";
 
       this.setState({
         adminPublicKey,
       });
+      const adminPrivateKey =
+        adminResponse.account.adminInfo.adminCryptoKey?.privateKey || "";
       this.setState({
-        adminPrivateKey:
-          adminResponse.account.adminInfo.adminCryptoKey.privateKey,
+        adminPrivateKey,
       });
-
-      const ethBalance = await web3.eth.getBalance(adminPublicKey);
-      const rskBalance = await rskClient.balance(adminPublicKey);
-      this.setState({ ethBalance });
-      this.setState({ rskBalance });
+      if (adminPublicKey.length) {
+        const ethBalance = await web3.eth.getBalance(adminPublicKey);
+        const rskBalance = await rskClient.balance(adminPublicKey);
+        this.setState({ ethBalance: ethBalance.toString() });
+        this.setState({ rskBalance });
+      }
     }
   }
 
@@ -313,7 +315,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   };
 
   onPrivateKeyChanged = (privKey) => {
-    if (privKey.target.value !== undefined && privKey.target.value !== '') {
+    if (privKey.target.value !== undefined && privKey.target.value !== "") {
       this.setState({ adminPrivateKey: privKey.target.value });
     }
   };
@@ -326,7 +328,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     let { accountTypes, accountTypeDeletedSuccess, accountTypeSavedSuccess } = {
       ...this.state,
     };
-    if (params.value === 'save') {
+    if (params.value === "save") {
       const reqObject = { ...params.data };
       delete reqObject.action;
       if (params.data._id) {
@@ -342,7 +344,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       }
       accountTypeSavedSuccess = true;
     }
-    if (params.value === 'delete') {
+    if (params.value === "delete") {
       let deleteId;
       accountTypes = accountTypes.filter((accountType, index) => {
         if (index === params.rowIndex && accountType._id) {
@@ -445,7 +447,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       ...this.state,
     };
 
-    if (params.value === 'save') {
+    if (params.value === "save") {
       const baseAccount = { ...params.data };
       const reqObjectSub: any = {};
       reqObjectSub.username = baseAccount.username;
@@ -461,7 +463,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       // delete reqObject.action;
       const reqObject = { account: reqObjectSub };
 
-      if (params.data.id !== '-') {
+      if (params.data.id !== "-") {
         await AdminService.updateAccount(params.data.id, reqObject);
       } else {
         const newAccount = await AdminService.addAccount(reqObject);
@@ -473,7 +475,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       }
       accountSavedSuccess = true;
     }
-    if (params.value === 'delete') {
+    if (params.value === "delete") {
       let deleteId;
       accounts = accounts.filter((account, index) => {
         if (index === params.rowIndex && account.id) {
@@ -507,7 +509,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       documentTypeDeletedSuccess,
       documentTypeSavedSuccess,
     } = { ...this.state };
-    if (params.value === 'save') {
+    if (params.value === "save") {
       const reqObject = { ...params.data };
       delete reqObject.action;
       if (params.data._id) {
@@ -523,7 +525,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       }
       documentTypeSavedSuccess = true;
     }
-    if (params.value === 'delete') {
+    if (params.value === "delete") {
       try {
         let deleteId;
         // FIXME: Warning: unstable_flushDiscreteUpdates: Cannot flush updates when React is already rendering.
@@ -539,7 +541,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         }
         documentTypeDeletedSuccess = true;
       } catch (err) {
-        console.error('failed to delete document type');
+        console.error("failed to delete document type");
       }
     }
     this.setState(
@@ -560,12 +562,12 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   handleAddDocumentType = () => {
     const { documentTypes } = { ...this.state };
     documentTypes.push({
-      name: '',
+      name: "",
       isTwoSided: false,
       hasExpirationDate: false,
       isProtectedDoc: false,
       isRecordableDoc: false,
-      action: '',
+      action: "",
     });
     this.setState({ documentTypes }, () => {
       this.documentTypesGridApi.setRowData(documentTypes);
@@ -577,24 +579,24 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
   handleAddAccount = () => {
     const { accounts } = { ...this.state };
     accounts.push({
-      username: 'Username',
-      id: '-',
-      email: 'email@email.com',
-      accountType: 'Limited Owner',
+      username: "Username",
+      id: "-",
+      email: "email@email.com",
+      accountType: "Limited Owner",
       role: Role.owner,
-      didAddress: '-',
-      didPublicEncryptionKey: '-',
-      token: '-',
+      didAddress: "-",
+      didPublicEncryptionKey: "-",
+      token: "-",
       documents: [],
       shareRequests: [],
-      profileImageUrl: 'default-profile-image.png',
-      phoneNumber: 'Phone',
-      organization: 'Org',
-      firstName: 'First Name',
-      lastName: 'Last Name',
+      profileImageUrl: "default-profile-image.png",
+      phoneNumber: "Phone",
+      organization: "Org",
+      firstName: "First Name",
+      lastName: "Last Name",
       // canAddOtherAccounts: false,
-      adminInfo: '-',
-      action: '',
+      adminInfo: "-",
+      action: "",
     });
     this.setState({ accounts }, () => {
       this.accountsGridApi.setRowData(accounts);
@@ -612,7 +614,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       coreFeatures: [],
       role: RoleType.HELPER,
       viewFeatures: [],
-      action: '',
+      action: "",
     });
     this.setState({ accountTypes }, () => {
       this.accountTypesGridApi.setRowData(accountTypes);
@@ -678,8 +680,8 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       // [{admin: 'true - gridView', cityAdministrator: 'true - gridView'}, ...]
       const accountTypeViewFeature = {};
       for (const accountType of accountTypes) {
-        accountTypeViewFeature[accountType.accountTypeName] = '';
-        const checkLabelItem = { isChecked: false, label: '' };
+        accountTypeViewFeature[accountType.accountTypeName] = "";
+        const checkLabelItem = { isChecked: false, label: "" };
         if (
           accountType.viewFeatures.find(
             (accountViewFeature) =>
@@ -691,9 +693,8 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           checkLabelItem.isChecked = false;
         }
         checkLabelItem.label = viewFeature.featureDisplay;
-        accountTypeViewFeature[accountType.accountTypeName] = JSON.stringify(
-          checkLabelItem
-        );
+        accountTypeViewFeature[accountType.accountTypeName] =
+          JSON.stringify(checkLabelItem);
       }
       accountTypeViewFeatures.push(accountTypeViewFeature);
     }
@@ -705,8 +706,8 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     for (const coreFeature of coreFeatures) {
       const accountTypeCoreFeature = {};
       for (const accountType of accountTypes) {
-        accountTypeCoreFeature[accountType.accountTypeName] = '';
-        const checkLabelItem = { isChecked: false, label: '' };
+        accountTypeCoreFeature[accountType.accountTypeName] = "";
+        const checkLabelItem = { isChecked: false, label: "" };
         if (
           accountType.coreFeatures.find(
             (accountCoreFeature) =>
@@ -718,9 +719,8 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           checkLabelItem.isChecked = false;
         }
         checkLabelItem.label = coreFeature.featureDisplay;
-        accountTypeCoreFeature[accountType.accountTypeName] = JSON.stringify(
-          checkLabelItem
-        );
+        accountTypeCoreFeature[accountType.accountTypeName] =
+          JSON.stringify(checkLabelItem);
       }
       accountTypeCoreFeatures.push(accountTypeCoreFeature);
     }
@@ -732,32 +732,32 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
     const { email, password } = { ...this.state };
     const { handleSaveAdminAccount } = { ...this.props };
     await handleSaveAdminAccount(email, password);
-    alert('Successfully saved settings.');
+    alert("Successfully saved settings.");
   };
 
   renderAppSettings() {
     const { logoSetting, titleSetting, logoFile } = { ...this.state };
     const { saveAppSettings } = { ...this.props };
     return (
-      <div style={{ marginBottom: '3em' }}>
+      <div style={{ marginBottom: "3em" }}>
         <h2>App Settings</h2>
         <p>Logo</p>
         {logoSetting.settingValue.length > 0 && (
           <div>
             <img
-              style={{ height: '200px' }}
+              style={{ height: "200px" }}
               // className="shared-with-image-single"
               src={AccountService.getProfileURL(logoSetting.settingValue)}
               alt="Profile"
             />
-            <div style={{ marginTop: '1em' }}>
+            <div style={{ marginTop: "1em" }}>
               <Button
                 color="primary"
                 onClick={() => {
                   this.setState({
                     logoSetting: {
                       settingName: SettingNameEnum.LOGO,
-                      settingValue: '',
+                      settingValue: "",
                     },
                   });
                 }}
@@ -775,7 +775,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           />
         )}
         {/* <h3>Title</h3> */}
-        <Row form style={{ marginTop: '1em' }}>
+        <Row form style={{ marginTop: "1em" }}>
           <Col md={4}>
             <FormGroup>
               <Label for="title">Title</Label>
@@ -839,21 +839,21 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
       viewFeatures
     );
     const accountTypeCoreFeaturesOwner = this.getAccountTypesCoreFeatures(
-      accountTypes.filter((accountType) => accountType.role === 'owner'),
-      coreFeatures.filter((coreFeature) => coreFeature.featureRole === 'owner')
+      accountTypes.filter((accountType) => accountType.role === "owner"),
+      coreFeatures.filter((coreFeature) => coreFeature.featureRole === "owner")
     );
     const accountTypeCoreFeaturesHelper = this.getAccountTypesCoreFeatures(
-      accountTypes.filter((accountType) => accountType.role === 'helper'),
-      coreFeatures.filter((coreFeature) => coreFeature.featureRole === 'helper')
+      accountTypes.filter((accountType) => accountType.role === "helper"),
+      coreFeatures.filter((coreFeature) => coreFeature.featureRole === "helper")
     );
     return (
-      <div className="admin-content" style={{ marginTop: '20px' }}>
+      <div className="admin-content" style={{ marginTop: "20px" }}>
         <h1>Admin Page</h1>
         {this.renderAppSettings()}
         <h2>Super Admin Account</h2>
         <Form
           onSubmit={this.handleSaveAdminAccount}
-          style={{ margin: '1em 0 3em 0' }}
+          style={{ margin: "1em 0 3em 0" }}
         >
           <Row form>
             <Col md={6} lg={4}>
@@ -924,14 +924,14 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           className="ag-theme-alpine-dark"
           style={{
             height:
-              accounts.length > 0 ? `${accounts.length * 42 + 51}px` : '300px',
-            width: '100%',
+              accounts.length > 0 ? `${accounts.length * 42 + 51}px` : "300px",
+            width: "100%",
           }}
         >
           <AgGridReact
             columnDefs={accountsColumnDefs}
             rowData={accounts}
-            frameworkComponents={{
+            components={{
               actionsCellRenderer: ActionsCellRenderer,
               accountTypeCellRenderer: AccountTypeCellRenderer,
               roleCellRenderer: RoleCellRenderer,
@@ -967,14 +967,14 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             height:
               documentTypes.length > 0
                 ? `${documentTypes.length * 42 + 51}px`
-                : '300px',
-            width: '100%',
+                : "300px",
+            width: "100%",
           }}
         >
           <AgGridReact
             columnDefs={documentTypesColumnDefs}
             rowData={documentTypes}
-            frameworkComponents={{
+            components={{
               checkboxCellRenderer: CheckboxCellRenderer,
               actionsCellRenderer: ActionsCellRenderer,
             }}
@@ -999,7 +999,7 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         <Alert color="danger" isOpen={accountTypeDeletedSuccess}>
           Successfully Deleted Account Type!
         </Alert>
-        <div className="add-container" style={{ width: '650px' }}>
+        <div className="add-container" style={{ width: "650px" }}>
           <AddSvg className="add" onClick={this.handleAddAccountType} />
         </div>
         <div
@@ -1008,14 +1008,14 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             height:
               accountTypes.length > 0
                 ? `${accountTypes.length * 42 + 51}px`
-                : '300px',
-            width: '650px',
+                : "300px",
+            width: "650px",
           }}
         >
           <AgGridReact
             columnDefs={accountTypesColumnDefs}
             rowData={accountTypes}
-            frameworkComponents={{
+            components={{
               actionsCellRenderer: ActionsCellRenderer,
               roleCellRenderer: RoleCellRenderer,
             }}
@@ -1050,22 +1050,22 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             height:
               viewFeatures.length > 0
                 ? `${viewFeatures.length * 42 + 51}px`
-                : '300px',
-            width: '100%',
+                : "300px",
+            width: "100%",
           }}
         >
           <AgGridReact
             columnDefs={accountTypes
-              .filter((accountType) => accountType.role === 'owner')
+              .filter((accountType) => accountType.role === "owner")
               .map((accountType) => {
                 return {
                   headerName: accountType.accountTypeName,
                   field: accountType.accountTypeName,
-                  cellRenderer: 'checkboxNameCellRenderer',
+                  cellRenderer: "checkboxNameCellRenderer",
                 };
               })}
             rowData={accountTypeViewFeatures}
-            frameworkComponents={{
+            components={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
             }}
             defaultColDef={{
@@ -1096,22 +1096,22 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
             height:
               viewFeatures.length > 0
                 ? `${viewFeatures.length * 42 + 51}px`
-                : '300px',
-            width: '100%',
+                : "300px",
+            width: "100%",
           }}
         >
           <AgGridReact
             columnDefs={accountTypes
-              .filter((accountType) => accountType.role === 'helper')
+              .filter((accountType) => accountType.role === "helper")
               .map((accountType) => {
                 return {
                   headerName: accountType.accountTypeName,
                   field: accountType.accountTypeName,
-                  cellRenderer: 'checkboxNameCellRenderer',
+                  cellRenderer: "checkboxNameCellRenderer",
                 };
               })}
             rowData={accountTypeViewFeatures}
-            frameworkComponents={{
+            components={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
             }}
             defaultColDef={{
@@ -1143,31 +1143,31 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           style={{
             height:
               coreFeatures.filter(
-                (coreFeature) => coreFeature.featureRole === 'owner'
+                (coreFeature) => coreFeature.featureRole === "owner"
               ).length > 0
                 ? `${
                     coreFeatures.filter(
-                      (coreFeature) => coreFeature.featureRole === 'owner'
+                      (coreFeature) => coreFeature.featureRole === "owner"
                     ).length *
                       42 +
                     51
                   }px`
-                : '300px',
-            width: '100%',
+                : "300px",
+            width: "100%",
           }}
         >
           <AgGridReact
             columnDefs={accountTypes
-              .filter((accountType) => accountType.role === 'owner')
+              .filter((accountType) => accountType.role === "owner")
               .map((accountType) => {
                 return {
                   headerName: accountType.accountTypeName,
                   field: accountType.accountTypeName,
-                  cellRenderer: 'checkboxNameCellRenderer',
+                  cellRenderer: "checkboxNameCellRenderer",
                 };
               })}
             rowData={accountTypeCoreFeaturesOwner}
-            frameworkComponents={{
+            components={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
             }}
             defaultColDef={{
@@ -1197,31 +1197,31 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
           style={{
             height:
               coreFeatures.filter(
-                (coreFeature) => coreFeature.featureRole === 'helper'
+                (coreFeature) => coreFeature.featureRole === "helper"
               ).length > 0
                 ? `${
                     coreFeatures.filter(
-                      (coreFeature) => coreFeature.featureRole === 'helper'
+                      (coreFeature) => coreFeature.featureRole === "helper"
                     ).length *
                       42 +
                     51
                   }px`
-                : '300px',
-            width: '100%',
+                : "300px",
+            width: "100%",
           }}
         >
           <AgGridReact
             columnDefs={accountTypes
-              .filter((accountType) => accountType.role === 'helper')
+              .filter((accountType) => accountType.role === "helper")
               .map((accountType) => {
                 return {
                   headerName: accountType.accountTypeName,
                   field: accountType.accountTypeName,
-                  cellRenderer: 'checkboxNameCellRenderer',
+                  cellRenderer: "checkboxNameCellRenderer",
                 };
               })}
             rowData={accountTypeCoreFeaturesHelper}
-            frameworkComponents={{
+            components={{
               checkboxNameCellRenderer: CheckboxNameCellRenderer,
             }}
             defaultColDef={{
@@ -1241,13 +1241,13 @@ class AdminPage extends Component<AdminPageProps, AdminPageState> {
         <h3>Wallet</h3>
 
         <p>
-          Current Ethereum (ETH) Blockchain Balance:{' '}
-          {web3.utils.fromWei(this.state.ethBalance, 'ether')} ETH{' '}
+          Current Ethereum (ETH) Blockchain Balance:{" "}
+          {web3.utils.fromWei(this.state.ethBalance, "ether")} ETH{" "}
         </p>
         <p></p>
         <p>
-          Current Rootstock (RSK) Blockchain Balance:{' '}
-          {web3.utils.fromWei(this.state.rskBalance, 'ether')} RSK
+          Current Rootstock (RSK) Blockchain Balance:{" "}
+          {web3.utils.fromWei(this.state.rskBalance, "ether")} RSK
         </p>
         <p></p>
 

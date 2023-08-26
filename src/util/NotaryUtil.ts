@@ -1,14 +1,14 @@
 import md5 from 'md5';
-import jsPDF from 'jspdf';
-import EthrDID from 'ethr-did';
+// import jsPDF from 'jspdf';
+import { EthrDID } from 'ethr-did';
 import NotaryService from '../services/NotaryService';
 import NodeRSA from 'node-rsa';
-import DidJWTVC from 'did-jwt-vc';
+import * as DidJWTVC from 'did-jwt-vc';
 import PDFUtil from './PdfUtil';
-import ImageUtil, { ImageType, ImageDetail } from './ImageUtil';
+import ImageUtil, { ImageDetail } from './ImageUtil';
 
-const createVerifiableCredential = DidJWTVC.createVerifiableCredential;
-const createPresentation = DidJWTVC.createPresentation;
+const createVerifiableCredential = DidJWTVC.createVerifiableCredentialJwt;
+const createPresentation = DidJWTVC.createVerifiablePresentationJwt;
 
 class NotaryUtil {
   // To be called by the notary
@@ -114,7 +114,7 @@ class NotaryUtil {
     const issuerEthrDid = new EthrDID({
       address: issuerAddress,
       privateKey: issuerPrivateKey,
-    });
+    } as any);
 
     const ownerDID = 'did:ethr:' + ownerAddress;
     const issuerDID = 'did:ethr:' + issuerAddress;
@@ -156,7 +156,7 @@ class NotaryUtil {
       },
     };
 
-    const vcJwt = await createVerifiableCredential(vcPayload, issuerEthrDid);
+    const vcJwt = await createVerifiableCredential(vcPayload, issuerEthrDid as any);
     return vcJwt;
   }
 
@@ -191,7 +191,7 @@ class NotaryUtil {
     const did = new EthrDID({
       address,
       privateKey,
-    });
+    } as any);
 
     const vpPayload = {
       vp: {
@@ -202,7 +202,7 @@ class NotaryUtil {
       },
     };
 
-    const vpJwt = await createPresentation(vpPayload, did);
+    const vpJwt = await createPresentation(vpPayload, did as any);
     return vpJwt;
   }
 

@@ -313,7 +313,7 @@ class SecureLoginPage extends Component<SecureLoginProps> {
                       borderRadius: '9px',
                     }}
                     disabled={password.length < 1}
-                    onClick={this.handleLogin}
+                    onClick={this.handleLogin as any}
                   >
                     Login
                   </Button>
@@ -415,7 +415,7 @@ class SecureLoginPage extends Component<SecureLoginProps> {
                       borderRadius: '9px',
                     }}
                     disabled={password.length < 1 || email.length < 1}
-                    onClick={this.handleLogin}
+                    onClick={this.handleLogin as any}
                   >
                     Login
                   </Button>

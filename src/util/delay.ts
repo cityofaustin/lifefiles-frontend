@@ -1,6 +1,6 @@
 
 export default async (timeout) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     try {
       setTimeout(() => {
         resolve();

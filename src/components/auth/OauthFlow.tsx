@@ -1,11 +1,11 @@
-import React, { Component, Fragment } from 'react';
-import AccountService from '../../services/AccountService';
-import AuthService from '../../services/AuthService';
-import UrlUtil from '../../util/UrlUtil';
+import React, { Component, Fragment } from "react";
+import AccountService from "../../services/AccountService";
+import AuthService from "../../services/AuthService";
+import UrlUtil from "../../util/UrlUtil";
 
 export default class OauthFlow extends Component {
   async componentDidMount() {
-    const code = UrlUtil.getQueryVariable('code');
+    const code = UrlUtil.getQueryVariable("code");
 
     if (code) {
       // they are in the process of logging in, need to exchange auth code for access token
@@ -18,12 +18,11 @@ export default class OauthFlow extends Component {
       return;
     }
 
-    const scope = '';
-    const state = '';
+    const scope = "";
+    const state = "";
     const authApi = AccountService.getAuthApi();
-    window.location.replace(
-      `${authApi}/?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${location.origin}${location.pathname}&scope=${scope}&state=${state}`
-    );
+    const authRedirect = `${authApi}/?client_id=${process.env.REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${location.origin}${location.pathname}&scope=${scope}&state=${state}`;
+    window.location.replace(authRedirect);
   }
 
   render() {

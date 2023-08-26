@@ -20,7 +20,7 @@ export default class ImageUtil {
       };
       img.onerror = reject;
       img.src = imageBase64;
-    });
+    }) as any;
     let imageType;
     if (imageBase64.split(';')[0] === 'data:image/png') {
       imageType = ImageType.PNG;

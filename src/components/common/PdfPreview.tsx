@@ -1,4 +1,4 @@
-import { Document, Page, pdfjs, PDFDownloadLink } from 'react-pdf';
+import { Document, Page, pdfjs } from 'react-pdf';
 import React, { Component } from 'react';
 import './PdfPreview.scss';
 import ProgressIndicator from './ProgressIndicator';
@@ -52,7 +52,7 @@ class PdfPreview extends Component<PdfPreviewProps, PdfPreviewState> {
         <Document
           error={(<div>Failed to load PDF file.</div>)}
           loading={(<ProgressIndicator />)}
-          title=""
+          // title=""
           file={fileURL}
           onLoadSuccess={this.onDocumentLoadSuccess}
         >

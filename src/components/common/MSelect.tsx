@@ -1,10 +1,10 @@
 import React, { Component, ReactNode } from 'react';
-import Select, { OptionTypeBase } from 'react-select';
+import Select from 'react-select';
 
 interface SelectProps {
   value?: any;
-  options: OptionTypeBase[];
-  onChange: (documentTypeOption: OptionTypeBase) => void;
+  options: any[];
+  onChange: (documentTypeOption: any) => void;
   isSearchable?: boolean;
   placeholder?: ReactNode;
   isSmall?: boolean;

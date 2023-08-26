@@ -1,61 +1,61 @@
-import Account from './Account';
-import Role from './Role';
-import ShareRequest from './ShareRequest';
-import Document from './document/Document';
-import AccountService from '../services/AccountService';
+import Account from "./Account";
+import Role from "./Role";
+import ShareRequest from "./ShareRequest";
+import Document from "./document/Document";
+import AccountService from "../services/AccountService";
 
 class AccountImpl implements Account {
-  firstName: string;
-  lastName: string;
-  id: string;
-  didAddress: string;
-  documents: Document[];
-  email: string;
-  role: Role;
-  shareRequests: ShareRequest[];
-  token: string;
-  username: string;
+  firstName: string = "";
+  lastName: string = "";
+  id: string = "";
+  didAddress: string = "";
+  documents: Document[] = [];
+  email: string = "";
+  role: Role = Role.owner;
+  shareRequests: ShareRequest[] = [];
+  token: string = "";
+  username: string = "";
 
   public static getFullName(firstName?: string, lastName?: string) {
-    firstName = (firstName && firstName !== '-') ? firstName : '';
-    lastName = (lastName && lastName !== '-') ? lastName : '';
+    firstName = firstName && firstName !== "-" ? firstName : "";
+    lastName = lastName && lastName !== "-" ? lastName : "";
     if (firstName.length > 0 && lastName.length <= 0) {
       return firstName;
     }
     if (lastName.length > 0 && firstName.length <= 0) {
       return lastName;
     }
-    return (firstName + lastName).length > 0 ? `${firstName} ${lastName}` : '';
+    return (firstName + lastName).length > 0 ? `${firstName} ${lastName}` : "";
   }
 
   public static getFirstNameByFull(fullname) {
     if (fullname.length > 0) {
-      const names = fullname.split(' ');
+      const names = fullname.split(" ");
       if (names.length > 0) {
         return names[0];
       }
     }
-    return '';
+    return "";
   }
 
   public static getLastNameByFull(fullname) {
     if (fullname.length > 0) {
-      const names = fullname.split(' ');
+      const names = fullname.split(" ");
       if (names.length > 1) {
         return names[names.length - 1];
       }
     }
-    return '';
+    return "";
   }
 
   public static hasNameSet(account) {
     return (
       account.firstName &&
       account.firstName.length > 0 &&
-      account.firstName !== '-' &&
+      account.firstName !== "-" &&
       account.lastName &&
       account.lastName.length > 0 &&
-      account.lastName !== '-'
+      account.lastName !== "-"
     );
   }
 

@@ -1,17 +1,17 @@
-import React, { Component, Fragment } from 'react';
-import Account from '../../../models/Account';
-import './AccountSummary.scss';
-import AccountImpl from '../../../models/AccountImpl';
-import { roleDisplayMap } from '../../../models/Role';
-import AccountService from '../../../services/AccountService';
-import ImageWithStatus, { ImageViewTypes } from '../../common/ImageWithStatus';
-import DocShared from '../document/DocShared';
-import ShareRequest from '../../../models/ShareRequest';
-import AccountShareModal from './AccountShareModal';
-import Document from '../../../models/document/Document';
-import { Redirect } from 'react-router-dom';
-import ProfileImage, { ProfileImageSizeEnum } from '../../common/ProfileImage';
-import HelperContact from '../../../models/HelperContact';
+import React, { Component, Fragment } from "react";
+import Account from "../../../models/Account";
+import "./AccountSummary.scss";
+import AccountImpl from "../../../models/AccountImpl";
+import { roleDisplayMap } from "../../../models/Role";
+import AccountService from "../../../services/AccountService";
+import ImageWithStatus, { ImageViewTypes } from "../../common/ImageWithStatus";
+import DocShared from "../document/DocShared";
+import ShareRequest from "../../../models/ShareRequest";
+import AccountShareModal from "./AccountShareModal";
+import Document from "../../../models/document/Document";
+import { Navigate } from "react-router-dom";
+import ProfileImage, { ProfileImageSizeEnum } from "../../common/ProfileImage";
+import HelperContact from "../../../models/HelperContact";
 
 interface AccountSummaryProps {
   account: Account;
@@ -84,7 +84,7 @@ class AccountSummary extends Component<
     return (
       <div className="network-item" onClick={this.handleAccountSummaryClick}>
         {goToClientDocuments && (
-          <Redirect push to={`clients/${account.id}/documents`} />
+          <Navigate replace to={`${account.id}/documents`} />
         )}
         {/* Helper does not see this and helper contact is not defined */}
         {helperContact && (
@@ -130,7 +130,7 @@ class AccountSummary extends Component<
             <Fragment>
               <div className="info-item">
                 <div className="item-attr">Organization</div>
-                <div className="item-value">{account?.organization || '-'}</div>
+                <div className="item-value">{account?.organization || "-"}</div>
               </div>
               <div className="info-item">
                 <div className="item-attr">Role</div>
@@ -140,7 +140,7 @@ class AccountSummary extends Component<
           )}
           <div className="info-item">
             <div className="item-attr">Phone</div>
-            <div className="item-value">{account?.phoneNumber || '-'}</div>
+            <div className="item-value">{account?.phoneNumber || "-"}</div>
           </div>
           <div className="info-item">
             <div className="item-attr">E-mail</div>

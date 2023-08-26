@@ -6,12 +6,13 @@
 //@import '~@material/menu/mdc-menu';
 @import "./components/variables";
 @import "fonts";
-@import "~react-image-lightbox/style.css";
+// @import "~react-image-lightbox/style.css";
+@import "~yet-another-react-lightbox/styles.css";
 @import "~bootstrap/scss/bootstrap";
 @import "~react-multi-carousel/lib/styles.css";
 @import "~react-datepicker/src/stylesheets/datepicker";
-@import "~ag-grid-community/src/styles/ag-grid";
-@import "~ag-grid-community/src/styles/ag-theme-alpine-dark/sass/ag-theme-alpine-dark";
+@import "~ag-grid-community/styles/ag-grid";
+@import "~ag-grid-community/styles/ag-theme-alpine";
 
 html {
   height: 100%;
